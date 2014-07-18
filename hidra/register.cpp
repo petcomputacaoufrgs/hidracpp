@@ -2,6 +2,7 @@
 
 Register::Register()
 {
+    value = 0;
 }
 int Register::getValue() const
 {
