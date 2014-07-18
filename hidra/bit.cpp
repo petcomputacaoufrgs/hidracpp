@@ -2,7 +2,7 @@
 
 Bit::Bit()
 {
-    value = false;
+    this->value = false;
 }
 
 bool Bit::getValue() const
@@ -12,6 +12,6 @@ bool Bit::getValue() const
 
 void Bit::setValue(bool value)
 {
-    value = value;
+    this->value = value;
 }
 

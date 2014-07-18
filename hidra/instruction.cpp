@@ -10,7 +10,7 @@ QString Instruction::getMnemonic() const
 
 void Instruction::setMnemonic(const QString &value)
 {
-    mnemonic = value;
+    this->mnemonic = value;
 }
 int Instruction::getValue() const
 {
@@ -19,7 +19,7 @@ int Instruction::getValue() const
 
 void Instruction::setValue(int value)
 {
-    value = value;
+    this->value = value;
 }
 int Instruction::getNumberOfArguments() const
 {
@@ -28,7 +28,7 @@ int Instruction::getNumberOfArguments() const
 
 void Instruction::setNumberOfArguments(int value)
 {
-    numberOfArguments = value;
+    this->numberOfArguments = value;
 }
 
 

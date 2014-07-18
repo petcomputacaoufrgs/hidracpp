@@ -5,6 +5,7 @@ class Byte
 {
 public:
     Byte();
+    Byte(unsigned char);
 
     unsigned char getValue() const;
     void setValue(unsigned char value);

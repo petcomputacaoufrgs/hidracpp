@@ -22,9 +22,9 @@ public:
     virtual void assemble(QString filename);
 
 protected:
-    QVector<Register*> *registers;
+    QVector<Register*> registers;
     Register* PC;
-    QVector<Byte*> *memory;
+    QVector<Byte*> memory;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
 
