@@ -1,3 +1,10 @@
+# Qt Files
+
+*.user
+*moc_*.cpp
+*ui_*.h
+*Makefile*
+
 # Compiled Object files
 *.slo
 *.lo
