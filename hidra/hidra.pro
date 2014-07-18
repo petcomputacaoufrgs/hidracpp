@@ -13,8 +13,18 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        hidragui.cpp
+        hidragui.cpp \
+    machine.cpp \
+    bit.cpp \
+    register.cpp \
+    byte.cpp \
+    instruction.cpp
 
-HEADERS  += hidragui.h
+HEADERS  += hidragui.h \
+    machine.h \
+    bit.h \
+    register.h \
+    byte.h \
+    instruction.h
 
 FORMS    += hidragui.ui
