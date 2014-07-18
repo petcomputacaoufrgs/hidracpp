@@ -2,6 +2,7 @@
 
 Byte::Byte()
 {
+    value = 0;
 }
 unsigned char Byte::getValue() const
 {
