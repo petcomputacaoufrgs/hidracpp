@@ -2,10 +2,29 @@
 
 NeanderMachine::NeanderMachine()
 {
-    registers = new QVector<Register*>(2);
-    registers->operator [](0) = new Register();
-    registers->operator [](1) = new Register();
-    PC = registers->at(1);
+    registers = QVector<Register*>(2);
+    QVector<Register*>::iterator i;
+    for(i = registers.begin(); i != registers.end(); i++) {
+        *i = new Register();
+    }
+    PC = registers[1];
+
+    memory = QVector<Byte*>(256);
+    QVector<Byte*>::iterator j;
+    for(j = memory.begin(); j != memory.end(); j++) {
+        *j = new Byte();
+    }
+}
+
+void NeanderMachine::printStatusDebug()
+{
+    std::cout << "PC: " << PC->getValue() << std::endl;
+    int j;
+    QVector<Byte*>::iterator i;
+    for(j = 0, i = memory.begin(); i != memory.end(); i++, j=j+1) {
+        (*i)->setValue(j);
+        std::cout << j << ": " << (int)(*i)->getValue() << std::endl;
+    }
 }
 
 void Machine::load(QString filename) {
