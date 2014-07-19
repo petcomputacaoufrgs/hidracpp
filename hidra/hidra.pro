@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     bit.cpp \
     register.cpp \
     byte.cpp \
-    instruction.cpp
+    instruction.cpp \
+    ahmesmachine.cpp
 
 HEADERS  += hidragui.h \
     machine.h \
     bit.h \
     register.h \
     byte.h \
-    instruction.h
+    instruction.h \
+    ahmesmachine.h
 
 FORMS    += hidragui.ui
