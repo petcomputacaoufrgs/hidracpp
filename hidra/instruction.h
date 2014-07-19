@@ -18,15 +18,6 @@ public:
     int getNumberOfArguments() const;
     void setNumberOfArguments(int value);
 
-    QString getMnemonic() const;
-    void setMnemonic(const QString &value);
-
-    int getValue() const;
-    void setValue(int value);
-
-    int getNumberOfArguments() const;
-    void setNumberOfArguments(int value);
-
 private:
     QString mnemonic;
     int value;

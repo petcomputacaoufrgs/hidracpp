@@ -34,18 +34,18 @@ void Machine::load(QString filename) {
 
 }
 
-void Machine::save(QString filename){
+//void Machine::save(QString filename){
 
-}
+//}
 
-void Machine::step() {
+//void Machine::step() {
 
-}
+//}
 
-void Machine::run() {
+//void Machine::run() {
 
-}
+//}
 
-void Machine::assemble(QString filename) {
+//void Machine::assemble(QString filename) {
 
-}
+//}

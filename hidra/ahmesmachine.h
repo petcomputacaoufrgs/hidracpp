@@ -7,7 +7,7 @@ class AhmesMachine : public Machine
 {
 public:
     AhmesMachine();
-
+    using Machine::load;
 };
 
 #endif // AHMESMACHINE_H
