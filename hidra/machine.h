@@ -14,19 +14,22 @@ class Machine : public QObject
 public:
     explicit Machine(QObject *parent = 0);
 
-    virtual void load(QString filename) = 0;
-    virtual void save(QString filename) = 0;
+    virtual void load(QString filename);
+    virtual void save(QString filename);
 
-    virtual void step() = 0;
-    virtual void run() = 0;
-    virtual void assemble(QString filename) = 0;
+    virtual void step();
+    virtual void run();
+    virtual void assemble(QString filename);
 
-private:
-    QVector<Register*> *registers;
+    virtual const Instruction* getInstructionFromValue(int);
+
+protected:
+    QVector<Register*> registers;
     Register* PC;
-    QVector<Byte*> *memory;
+    QVector<Byte*> memory;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
+
 
 signals:
 

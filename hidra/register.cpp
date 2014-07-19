@@ -2,6 +2,7 @@
 
 Register::Register()
 {
+    this->value = 0;
 }
 int Register::getValue() const
 {
@@ -10,7 +11,7 @@ int Register::getValue() const
 
 void Register::setValue(int value)
 {
-    value = value;
+    this->value = value;
 }
 int Register::getNumOfBits() const
 {
@@ -19,7 +20,7 @@ int Register::getNumOfBits() const
 
 void Register::setNumOfBits(int value)
 {
-    numOfBits = value;
+    this->numOfBits = value;
 }
 
 
