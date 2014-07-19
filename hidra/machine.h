@@ -21,12 +21,15 @@ public:
     virtual void run();
     virtual void assemble(QString filename);
 
+    virtual const Instruction* getInstructionFromValue(int);
+
 protected:
     QVector<Register*> registers;
     Register* PC;
     QVector<Byte*> memory;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
+
 
 signals:
 
