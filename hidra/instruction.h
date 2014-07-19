@@ -7,6 +7,7 @@ class Instruction
 {
 public:
     Instruction();
+    Instruction(QString, int, int);
 
     QString getMnemonic() const;
     void setMnemonic(const QString &value);
