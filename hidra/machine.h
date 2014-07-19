@@ -28,6 +28,8 @@ protected:
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
 
+    const Instruction* getInstructionFromValue(int);
+
 signals:
 
 public slots:

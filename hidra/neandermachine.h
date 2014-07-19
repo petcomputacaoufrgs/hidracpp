@@ -12,7 +12,7 @@ public:
     void printStatusDebug();
 
 private:
-    Register* acumulator;
+    Register* AC;
 };
 
 #endif // NEANDERMACHINE_H
