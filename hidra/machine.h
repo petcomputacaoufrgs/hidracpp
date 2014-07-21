@@ -22,6 +22,10 @@ public:
     virtual void assemble(QString filename) = 0;
 
     virtual const Instruction* getInstructionFromValue(int) = 0;
+    virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
+
+    bool getRunning() const;
+    void setRunning(bool value);
 
 protected:
     QVector<Register*> registers;
@@ -29,6 +33,7 @@ protected:
     QVector<Byte*> memory;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
+    bool running;
 
 
 signals:

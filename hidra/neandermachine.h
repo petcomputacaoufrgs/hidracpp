@@ -19,6 +19,7 @@ public:
     virtual void assemble(QString filename);
 
     virtual const Instruction* getInstructionFromValue(int);
+    virtual const Instruction* getInstructionFromMnemonic(QString);
 
 private:
     Register* AC;
