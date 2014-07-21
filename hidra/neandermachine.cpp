@@ -17,6 +17,8 @@ NeanderMachine::NeanderMachine()
     for(k = 0, j = memory.begin(); j != memory.end();k++, j++) {
         *j = new Byte();
     }
+
+    //test code
     memory[0]->setValue(32);
     memory[1]->setValue(128);
     memory[2]->setValue(48);
@@ -28,6 +30,7 @@ NeanderMachine::NeanderMachine()
     memory[129]->setValue(8);
     memory[130]->setValue(2);
 
+    // initialize instructions
     instructions = QVector<Instruction*>(11);
     instructions[0]  = new Instruction("nop",   0, 0);
     instructions[1]  = new Instruction("sta",  16, 1);
@@ -43,6 +46,10 @@ NeanderMachine::NeanderMachine()
 
 }
 
+/**
+ * @brief NeanderMachine::printStatusDebug
+ * debug function to see a status of the machine on the terminal, without gui implementations
+ */
 void NeanderMachine::printStatusDebug()
 {
     std::cout << "PC: " << PC->getValue() << std::endl;
@@ -118,6 +125,8 @@ void NeanderMachine::step() {
             PC->setValue(operand->getValue());
         }
         break;
+    case 0xF0:
+        this->running = false;
     default:
         break;
     }
@@ -125,7 +134,9 @@ void NeanderMachine::step() {
 }
 
 void NeanderMachine::run() {
-
+    while (this->running) {
+        this->step();
+    }
 }
 
 void NeanderMachine::assemble(QString filename) {
@@ -136,6 +147,15 @@ const Instruction* NeanderMachine::getInstructionFromValue(int desiredInstructio
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getValue() == (desiredInstruction & 0xF0)) {
+            return (*i);
+        }
+    }
+    return NULL;
+}
+const Instruction* NeanderMachine::getInstructionFromMnemonic(QString desiredInstruction) {
+    QVector<Instruction*>::iterator i;
+    for( i = instructions.begin(); i != instructions.end(); i++) {
+        if((*i)->getMnemonic() == desiredInstruction) {
             return (*i);
         }
     }
