@@ -3,6 +3,13 @@
 Instruction::Instruction()
 {
 }
+
+Instruction::Instruction(QString mnemonic, int value, int arguments)
+{
+    this->mnemonic = mnemonic;
+    this->value = value;
+    this->numberOfArguments = arguments;
+}
 QString Instruction::getMnemonic() const
 {
     return mnemonic;
@@ -30,6 +37,3 @@ void Instruction::setNumberOfArguments(int value)
 {
     this->numberOfArguments = value;
 }
-
-
-
