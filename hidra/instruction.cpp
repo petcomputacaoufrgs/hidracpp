@@ -37,6 +37,3 @@ void Instruction::setNumberOfArguments(int value)
 {
     this->numberOfArguments = value;
 }
-
-
-

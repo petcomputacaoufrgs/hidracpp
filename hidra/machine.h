@@ -14,14 +14,20 @@ class Machine : public QObject
 public:
     explicit Machine(QObject *parent = 0);
 
-    virtual void load(QString filename);
-    virtual void save(QString filename);
+    virtual void printStatusDebug() = 0;
 
-    virtual void step();
-    virtual void run();
-    virtual void assemble(QString filename);
+    virtual void load(QString filename) = 0;
+    virtual void save(QString filename) = 0;
 
-    virtual const Instruction* getInstructionFromValue(int);
+    virtual void step() = 0;
+    virtual void run() = 0;
+    virtual void assemble(QString filename) = 0;
+
+    virtual const Instruction* getInstructionFromValue(int) = 0;
+    virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
+
+    bool getRunning() const;
+    void setRunning(bool value);
 
 protected:
     QVector<Register*> registers;
@@ -29,6 +35,7 @@ protected:
     QVector<Byte*> memory;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
+    bool running;
 
 
 signals:
@@ -36,5 +43,6 @@ signals:
 public slots:
 
 };
+
 
 #endif // MACHINE_H
