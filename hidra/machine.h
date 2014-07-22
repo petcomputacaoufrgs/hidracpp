@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QStringList>
 #include "bit.h"
 #include "byte.h"
 #include "register.h"
