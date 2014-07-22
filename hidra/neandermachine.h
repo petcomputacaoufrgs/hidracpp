@@ -9,7 +9,7 @@ class NeanderMachine : public Machine
 public:
     NeanderMachine();
 
-    void printStatusDebug();
+    virtual void printStatusDebug();
 
     virtual void load(QString filename);
     virtual void save(QString filename);

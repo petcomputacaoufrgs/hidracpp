@@ -7,17 +7,9 @@ HidraGui::HidraGui(QWidget *parent) :
 {
     ui->setupUi(this);
     Machine *maquina = new NeanderMachine();
-    //maquina->printStatusDebug();
-    maquina->step();
-    //maquina->printStatusDebug();
-    maquina->step();
-    //maquina->printStatusDebug();
-    maquina->step();
-    //maquina->printStatusDebug();
-    maquina->step();
-    //maquina->printStatusDebug();
-    maquina->step();
-    //maquina->printStatusDebug();
+    maquina->printStatusDebug();
+    maquina->run();
+    maquina->printStatusDebug();
 }
 
 HidraGui::~HidraGui()
