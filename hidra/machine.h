@@ -25,6 +25,7 @@ public:
 
     virtual const Instruction* getInstructionFromValue(int) = 0;
     virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
+    virtual const bool validateInstructions(QStringList) = 0;
 
     bool getRunning() const;
     void setRunning(bool value);
