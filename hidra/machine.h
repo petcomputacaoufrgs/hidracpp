@@ -14,6 +14,8 @@ class Machine : public QObject
 public:
     explicit Machine(QObject *parent = 0);
 
+    virtual void printStatusDebug() = 0;
+
     virtual void load(QString filename) = 0;
     virtual void save(QString filename) = 0;
 

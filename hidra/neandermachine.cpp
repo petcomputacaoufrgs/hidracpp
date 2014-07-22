@@ -127,6 +127,7 @@ void NeanderMachine::step() {
         break;
     case 0xF0:
         this->running = false;
+        break;
     default:
         break;
     }
@@ -134,12 +135,22 @@ void NeanderMachine::step() {
 }
 
 void NeanderMachine::run() {
+    this->running = true;
     while (this->running) {
         this->step();
     }
 }
 
 void NeanderMachine::assemble(QString filename) {
+    NeanderMachine *outputMachine = new NeanderMachine();
+
+
+    QString outputFilename = filename.section('.', 0) + ".mem";
+    outputMachine->save(outputFilename);
+}
+
+bool NeanderMachine::validateInstructions(QStringList instructionList)
+{
 
 }
 
