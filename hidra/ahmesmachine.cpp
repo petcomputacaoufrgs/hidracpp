@@ -18,6 +18,8 @@ AhmesMachine::AhmesMachine()
         *j = new Byte();
     }
 
+    // 0 - n; 1 - z; 2 - v; 3 - c; 4 - b;
+    flags = QVector<Bit*>(5, false);
 
     //test code
     memory[0]->setValue(32);
@@ -124,16 +126,59 @@ void AhmesMachine::step() {
         case 0x60:
             AC->setValue(AC->getValue() ^ 0xFF);
             break;
+        case 0x70:
+            AC->setValue(AC->getValue() - memory[operand->getValue()]->getValue());
+            break;
         case 0x80:
             PC->setValue(operand->getValue());
             break;
         case 0x90:
-            if(flags[0]) {
+            if(this->flags[0]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0x94:
+            if(!this->flags[0]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0x98:
+            if(this->flags[2]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0x9C:
+            if(!this->flags[2]) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xA0:
-            if(flags[1]) {
+            if(this->flags[1]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0xA4:
+            if(!this->flags[1]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0xB0:
+            if(this->flags[3]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0xB4:
+            if(!this->flags[3]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0xB8:
+            if(this->flags[4]) {
+                PC->setValue(operand->getValue());
+            }
+            break;
+        case 0xBC:
+            if(!this->flags[4]) {
                 PC->setValue(operand->getValue());
             }
             break;
@@ -146,9 +191,17 @@ void AhmesMachine::step() {
 }
 
 void AhmesMachine::run() {
+    this->running = true;
     while (this->running) {
         this->step();
     }
+}
+
+// Returne true if the two bytes has the same sign. false if don't
+bool AhmesMachine::hasSameSign(Byte n1, Byte n2)
+{
+    if ((n1->getValue() >= 128 && n2->getValue() >= 128) || (n1->getValue() <= 127 && n2->getValue() <= 127)) return true;
+    else return false;
 }
 
 void AhmesMachine::assemble(QString filename) {
