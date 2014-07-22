@@ -3,33 +3,27 @@
 AhmesMachine::AhmesMachine()
 {
     registers = QVector<Register*>(2);
-    QVector<Register*>::iterator i;
-    for(i = registers.begin(); i != registers.end(); i++) {
-        *i = new Register();
-    }
+    for (int k = 0; k < registers.size(); k++) registers[k] = new Register();
+
     PC = registers[1];
     AC = registers[0];
     AC->setValue(0);
 
     memory = QVector<Byte*>(256);
-    QVector<Byte*>::iterator j;
-    int k;
-    for(k = 0, j = memory.begin(); j != memory.end();k++, j++) {
-        *j = new Byte();
-    }
+    for (int k = 0; k < memory.size(); k++) memory[k] = new Byte(0);
 
     // 0 - n; 1 - z; 2 - v; 3 - c; 4 - b;
-    flags = QVector<Bit*>(5, false);
+    flags = QVector<Bit*>(5, 0);
 
     //test code
     memory[0]->setValue(32);
     memory[1]->setValue(128);
-    memory[2]->setValue(48);
-    memory[3]->setValue(129);
-    memory[4]->setValue(16);
-    memory[5]->setValue(130);
-    memory[6]->setValue(240);
-    memory[128]->setValue(4);
+    memory[2]->setValue(225);
+//    memory[3]->setValue(129);
+//    memory[4]->setValue(16);
+//    memory[5]->setValue(130);
+    memory[3]->setValue(240);
+    memory[128]->setValue(1);
     memory[129]->setValue(8);
     memory[130]->setValue(2);
 
@@ -105,7 +99,9 @@ void AhmesMachine::step() {
         PC->setValue(PC->getValue() + 1);
         operand = memory[PC->getValue()];
     }
-    switch (actualInstruction->getValue() & 0xF0) {
+
+    std::cout << "\n-----> " << actualInstruction->getValue() << "\n";
+    switch (actualInstruction->getValue()) {
         case 0:
             break;
         case 0x10:
@@ -182,6 +178,18 @@ void AhmesMachine::step() {
                 PC->setValue(operand->getValue());
             }
             break;
+        case 0xE0:
+            shr();
+            break;
+        case 0xE1:
+            shl();
+            break;
+        case 0xE2:
+            ror();
+            break;
+        case 0xE3:
+            rol();
+            break;
         case 0xF0:
             this->running = false;
         default:
@@ -192,34 +200,63 @@ void AhmesMachine::step() {
 
 void AhmesMachine::run() {
     this->running = true;
-    while (this->running) {
+    while (this->running && this->PC->getValue() <= 255) {
         this->step();
+        if (isNegative(AC->getValue())) this->flags[0]->setValue(1);
+    }
+    std::cout << "\n ----> AC: " << AC->getValue() << "\n";
+}
+
+void AhmesMachine::updateFlags(char operand)
+{
+    int result = (int) operand + AC->getValue();
+    if (this->flags[0])
+    {
+        if (!isNegative(result))
+        {
+            this->flags[0]->setValue(0);
+            this->flags[3]->setValue(1);
+        }
+    }
+    else
+    {
+        if (isNegative(result))
+        {
+            this->flags[0]->setValue(1);
+            this->flags[2]->setValue(1);
+        }
     }
 }
 
-// Returne true if the two bytes has the same sign. false if don't
-void AhmesMachine::updateFlags(char operand)
-{
-    int temp = (int) operand + AC->getValue();
-    if (isNegative(AC->getValue())) this->flags[0] = true; // negative
-
-}
-
 bool AhmesMachine::isNegative(char value) {
-    if ((value & 0x80) == 1) return true;
-    else return false;
+    if ((value & 0x80) == 1) return 1;
+    else return 0;
 }
 
-unsigned ror(unsigned x, int L, int N)
+void AhmesMachine::ror()
 {
-    unsigned lsbs = x & ((1 << L) - 1);
-    return (x >> L) | (lsbs << (N-L));
+    bool hbite = 0;
+    if ((AC->getValue() & 0x1) == 1) hbite = 1;
+    AC->setValue(AC->getValue() >> 1);
+    if (hbite) AC->setValue(AC->getValue() | 0x80);
 }
 
-unsigned rol(unsigned x, int L, int N)
+void AhmesMachine::rol()
 {
-    unsigned lsbs = x & ((1 >> L) - 1);
-    return (x << L) | (lsbs >> (N-L));
+    bool hbite = 0;
+    if ((AC->getValue() & 0x80) == 1) hbite = 1;
+    AC->setValue(AC->getValue() << 1);
+    if (hbite) AC->setValue(AC->getValue() | 0x1);
+}
+
+void AhmesMachine::shr()
+{
+    AC->setValue(AC->getValue() >> 1);
+}
+
+void AhmesMachine::shl()
+{
+    AC->setValue(AC->getValue() << 1);
 }
 
 void AhmesMachine::assemble(QString filename) {
@@ -229,7 +266,7 @@ void AhmesMachine::assemble(QString filename) {
 const Instruction* AhmesMachine::getInstructionFromValue(int desiredInstruction) {
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getValue() == (desiredInstruction & 0xF0)) {
+        if((*i)->getValue() == desiredInstruction) {
             return (*i);
         }
     }

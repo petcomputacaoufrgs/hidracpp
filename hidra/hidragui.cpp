@@ -8,7 +8,7 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->setupUi(this);
     Machine *maquina = new AhmesMachine();
     maquina->run();
-    maquina->printStatusDebug();
+   // maquina->printStatusDebug();
 }
 
 HidraGui::~HidraGui()

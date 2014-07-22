@@ -21,9 +21,15 @@ public:
     virtual const Instruction* getInstructionFromValue(int);
     virtual const Instruction* getInstructionFromMnemonic(QString);
 
-    bool hasSameSign(Byte n1, Byte n2);
-
 private:
+    bool hasSameSign(Byte n1, Byte n2);
+    void updateFlags(char operand);
+    bool isNegative(char value);
+    void ror();
+    void rol();
+    void shl();
+    void shr();
+
     Register *AC;
 };
 
