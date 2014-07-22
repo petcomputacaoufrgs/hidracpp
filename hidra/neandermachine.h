@@ -20,9 +20,11 @@ public:
 
     virtual const Instruction* getInstructionFromValue(int);
     virtual const Instruction* getInstructionFromMnemonic(QString);
+    virtual const bool validateInstructions(QStringList);
 
 private:
     Register* AC;
+    static const int MEM_SIZE = 256;
 };
 
 #endif // NEANDERMACHINE_H

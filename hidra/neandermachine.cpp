@@ -11,7 +11,7 @@ NeanderMachine::NeanderMachine()
     AC = registers[0];
     AC->setValue(77);
 
-    memory = QVector<Byte*>(256);
+    memory = QVector<Byte*>(MEM_SIZE);
     QVector<Byte*>::iterator j;
     int k;
     for(k = 0, j = memory.begin(); j != memory.end();k++, j++) {
@@ -132,6 +132,9 @@ void NeanderMachine::step() {
         break;
     }
     PC->setValue(PC->getValue() + 1);
+    if(PC->getValue() ==  MEM_SIZE) {
+        this->running = false;
+    }
 }
 
 void NeanderMachine::run() {
