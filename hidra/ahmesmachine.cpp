@@ -198,10 +198,28 @@ void AhmesMachine::run() {
 }
 
 // Returne true if the two bytes has the same sign. false if don't
-bool AhmesMachine::hasSameSign(Byte n1, Byte n2)
+void AhmesMachine::updateFlags(char operand)
 {
-    if ((n1->getValue() >= 128 && n2->getValue() >= 128) || (n1->getValue() <= 127 && n2->getValue() <= 127)) return true;
+    int temp = (int) operand + AC->getValue();
+    if (isNegative(AC->getValue())) this->flags[0] = true; // negative
+
+}
+
+bool AhmesMachine::isNegative(char value) {
+    if ((value & 0x80) == 1) return true;
     else return false;
+}
+
+unsigned ror(unsigned x, int L, int N)
+{
+    unsigned lsbs = x & ((1 << L) - 1);
+    return (x >> L) | (lsbs << (N-L));
+}
+
+unsigned rol(unsigned x, int L, int N)
+{
+    unsigned lsbs = x & ((1 >> L) - 1);
+    return (x << L) | (lsbs >> (N-L));
 }
 
 void AhmesMachine::assemble(QString filename) {
