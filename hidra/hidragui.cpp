@@ -10,6 +10,7 @@ HidraGui::HidraGui(QWidget *parent) :
     maquina->printStatusDebug();
     maquina->run();
     maquina->printStatusDebug();
+    maquina->assemble("../hidra/ndr_test.ndr");
 }
 
 HidraGui::~HidraGui()
