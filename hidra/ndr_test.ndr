@@ -1,0 +1,6 @@
+lda 128
+ADD 129	;;isso é um add
+sTA   130
+; comentario randomico
+
+HLT

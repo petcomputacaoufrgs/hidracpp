@@ -9,12 +9,19 @@ NeanderMachine::NeanderMachine()
     }
     PC = registers[1];
     AC = registers[0];
-    AC->setValue(77);
+
+    flags = QVector<Bit*>(2);
+    QVector<Bit*>::iterator k;
+    for(k = flags.begin(); k != flags.end();k++) {
+        *k = new Bit();
+    }
+    N = flags[0];
+    Z = flags[1];
+    Z->setValue(true);
 
     memory = QVector<Byte*>(MEM_SIZE);
     QVector<Byte*>::iterator j;
-    int k;
-    for(k = 0, j = memory.begin(); j != memory.end();k++, j++) {
+    for(j = memory.begin(); j != memory.end();j++) {
         *j = new Byte();
     }
 
@@ -54,6 +61,8 @@ void NeanderMachine::printStatusDebug()
 {
     std::cout << "PC: " << PC->getValue() << std::endl;
     std::cout << "AC: " << AC->getValue() << std::endl;
+    std::cout << "N: "  << (N->getValue()? "1" : "0") << "\t";
+    std::cout << "Z: "  << (Z->getValue()? "1" : "0") << std::endl;
     int j;
     QVector<Byte*>::iterator i;
     for(j = 0, i = memory.begin(); i != memory.end(); i++, j=j+1) {
@@ -69,11 +78,6 @@ void NeanderMachine::printStatusDebug()
             std::cout << j << ": " << (int)(*i)->getValue() << std::endl;
         }
     }
-
-    QVector<Instruction*>::iterator i2;
-    for(j = 0, i2 = instructions.begin(); i2 != instructions.end(); i2++, j=j+1) {
-        std::cout << j << ": " << (*i2)->getMnemonic().toStdString() << " " << (*i2)->getValue() <<  std::endl;
-    }
 }
 
 void NeanderMachine::load(QString filename) {
@@ -87,9 +91,9 @@ void NeanderMachine::save(QString filename){
 void NeanderMachine::step() {
     const Instruction* actualInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
-    if(actualInstruction->getNumberOfArguments() == 1) {
-        PC->setValue(PC->getValue() + 1);
-        operand = memory[PC->getValue()];
+    if(actualInstruction->getNumberOfArguments() == 1) {    //se a instrucao tiver no end 255 vai dar bug, mas como
+        PC->setValue(PC->getValue() + 1);                   //o objetivo eh utilizar o montador, ele soh faz isso editando
+        operand = memory[PC->getValue()];                   //o binario diretamente, portanto, deixei propositalmente :p
     }
     switch (actualInstruction->getValue() & 0xF0) {
     case 0:
@@ -99,29 +103,39 @@ void NeanderMachine::step() {
         break;
     case 0x20:
         AC->setValue(memory[operand->getValue()]->getValue());
+        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(AC->getValue() == 0);
         break;
     case 0x30:
-        AC->setValue(AC->getValue() + memory[operand->getValue()]->getValue());
+        AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & MAX_VALUE);
+        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(AC->getValue() == 0);
         break;
     case 0x40:
         AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
+        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(AC->getValue() == 0);
         break;
     case 0x50:
         AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
+        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(AC->getValue() == 0);
         break;
     case 0x60:
         AC->setValue(AC->getValue() ^ 0xFF);
+        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(AC->getValue() == 0);
         break;
     case 0x80:
         PC->setValue(operand->getValue());
         break;
-    case 0x90:
-        if(flags[0]) {
+    case 0x90:  //JN
+        if(N->getValue()) {
             PC->setValue(operand->getValue());
         }
         break;
-    case 0xA0:
-        if(flags[1]) {
+    case 0xA0:  //JZ
+        if(Z->getValue()) {
             PC->setValue(operand->getValue());
         }
         break;
@@ -132,7 +146,7 @@ void NeanderMachine::step() {
         break;
     }
     PC->setValue(PC->getValue() + 1);
-    if(PC->getValue() ==  MEM_SIZE) {
+    if(PC->getValue() >=  MEM_SIZE) {
         this->running = false;
     }
 }
@@ -147,7 +161,10 @@ void NeanderMachine::run() {
 void NeanderMachine::assemble(QString filename) {
     NeanderMachine *outputMachine = new NeanderMachine();
 
-
+    QFile sourceFile(filename);
+    sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QString source = sourceFile.readAll();
+    std::cout << source.toStdString() << std::endl;
     QString outputFilename = filename.section('.', 0) + ".mem";
     outputMachine->save(outputFilename);
 }
