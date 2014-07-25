@@ -160,7 +160,7 @@ void NeanderMachine::run() {
 
 void NeanderMachine::assemble(QString filename) {
     NeanderMachine *outputMachine = new NeanderMachine();
-
+    QHash<QString, int> labelsMap;
     QFile sourceFile(filename);
     sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString source = sourceFile.readAll();
@@ -176,14 +176,57 @@ void NeanderMachine::assemble(QString filename) {
         std::cout << tmp.toStdString() << std::endl;
     }
     std::cout << "2=========" << std::endl;
-    //tipo aqui tenho que tratar os DB, DW, DAB, DAW e etc
     int pc = 0;
     QVector<Byte *> memory = outputMachine->getMemory();
     for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+        QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+         std::cout << line.join(" ").toStdString() << std::endl;
+        Instruction *atual;
+        if (line.at(0).contains(QRegExp("(.*:)"))) {
+            QString key = line.first();
+            key.chop(1);
+            labelsMap.insert(key, pc);
+        } else if(line.at(0) == "org") {
+            pc = line.at(1).toInt();
+        } else if(line.at(0) == "db") {
+            pc++;
+        } else if(line.at(0) == "dw") {
+            pc += 2;
+        } else if(line.at(0) == "dab") {
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dabValue = line.at(1).split("(");
+                dabValue.last().chop(1);
+                pc += dabValue.first().toInt();
+            }
+        } else if(line.at(0) == "daw") {
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dawValue = line.at(1).split("(");
+                dawValue.last().chop(1);
+                pc += dawValue.first().toInt() * 2;
+            }
+        } else {
+            atual = getInstructionFromMnemonic(line.at(0));
+            pc += 1 + atual->getNumberOfArguments();
+        }
+    }
+    foreach(QString key, labelsMap.keys()) {
+        std::cout << key.toStdString() << ": " << labelsMap.value(key) << std::endl;
+    }
+    foreach(QString key, labelsMap.keys()) {
+        sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
+    }
+    foreach (QString tmp, sourceLines) {
+        std::cout << tmp.toStdString() << std::endl;
+    }
+    std::cout << "3=========" << std::endl;
+    pc = 0;
+    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
         Instruction *atual;
 
-        QStringList line = (*i).split(" ");
-        if(line.at(0) == "org") {
+        QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+        if (line.at(0).contains(QRegExp("(.*:)"))) {
+            //skip
+        } else if(line.at(0) == "org") {
             pc = line.at(1).toInt();
         } else if(line.at(0) == "db") {
             memory[pc++]->setValue((unsigned char)line.last().toInt());

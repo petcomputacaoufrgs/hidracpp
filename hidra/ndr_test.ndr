@@ -1,16 +1,21 @@
-lda 128
+lda setentaesete
 ADD 129	;;isso é um  add
 sTA   130  
+jmp label
+not
+or 135
 ; comentario randomico
 
 
-
+label:
 HLT
 
 org 128
+setentaesete:
 db 77
 db 88
 db 111
+label2:
 dab 10(33)
 DB 99
 dw 65535
