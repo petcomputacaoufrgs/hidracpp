@@ -184,6 +184,7 @@ void NeanderMachine::assemble(QString filename) {
         Instruction *atual;
         if (line.at(0).contains(QRegExp("(.*:)"))) {
             QString key = line.first();
+            (*i).replace(key, "");
             key.chop(1);
             labelsMap.insert(key, pc);
         } else if(line.at(0) == "org") {
@@ -209,6 +210,7 @@ void NeanderMachine::assemble(QString filename) {
             pc += 1 + atual->getNumberOfArguments();
         }
     }
+    sourceLines.removeAll("");  //remove as linhas em branco
     foreach(QString key, labelsMap.keys()) {
         std::cout << key.toStdString() << ": " << labelsMap.value(key) << std::endl;
     }
@@ -224,6 +226,7 @@ void NeanderMachine::assemble(QString filename) {
         Instruction *atual;
 
         QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+        std::cout << line.join(" ").toStdString() << std::endl;
         if (line.at(0).contains(QRegExp("(.*:)"))) {
             //skip
         } else if(line.at(0) == "org") {
