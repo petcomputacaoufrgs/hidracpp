@@ -192,9 +192,23 @@ void NeanderMachine::assemble(QString filename) {
             memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
             memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
         } else if(line.at(0) == "dab") {
-
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dabValue = line.at(1).split("(");
+                dabValue.last().chop(1);
+                for(int i = 0; i < dabValue.first().toInt(); i++) {
+                    memory[pc++]->setValue((unsigned char) dabValue.last().toInt());
+                }
+            }
         } else if(line.at(0) == "daw") {
-
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dabValue = line.at(1).split("(");
+                dabValue.last().chop(1);
+                for(int i = 0; i < dabValue.first().toInt(); i++) {
+                    int word = dabValue.last().toInt();
+                    memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8));
+                    memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
+                }
+            }
         } else {
             atual = getInstructionFromMnemonic(line.at(0));
             line.replace(0, QString::number(atual->getValue()));
