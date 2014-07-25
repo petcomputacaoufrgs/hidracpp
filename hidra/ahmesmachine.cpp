@@ -12,18 +12,26 @@ AhmesMachine::AhmesMachine()
     memory = QVector<Byte*>(256);
     for (int k = 0; k < memory.size(); k++) memory[k] = new Byte(0);
 
-    // 0 - n; 1 - z; 2 - v; 3 - c; 4 - b;
-    flags = QVector<Bit*>(5, 0);
+    flags = QVector<Bit*>(5);
+    for (int k = 0; k < flags.size(); k++) flags[k] = new Bit();
+
+    N = flags[0];
+    Z = flags[1];
+    V = flags[2];
+    C = flags[3];
+    B = flags[4];
+
+   // std::cout << "\n----->>>> " << N->getValue();
 
     //test code
     memory[0]->setValue(32);
     memory[1]->setValue(128);
-    memory[2]->setValue(225);
-//    memory[3]->setValue(129);
+    memory[2]->setValue(227);
+    memory[3]->setValue(227);
 //    memory[4]->setValue(16);
 //    memory[5]->setValue(130);
     memory[3]->setValue(240);
-    memory[128]->setValue(1);
+    memory[128]->setValue(128);
     memory[129]->setValue(8);
     memory[130]->setValue(2);
 
@@ -129,52 +137,52 @@ void AhmesMachine::step() {
             PC->setValue(operand->getValue());
             break;
         case 0x90:
-            if(this->flags[0]) {
+            if(N) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0x94:
-            if(!this->flags[0]) {
+            if(!N) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0x98:
-            if(this->flags[2]) {
+            if(V) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0x9C:
-            if(!this->flags[2]) {
+            if(!V) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xA0:
-            if(this->flags[1]) {
+            if(Z) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xA4:
-            if(!this->flags[1]) {
+            if(!Z) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xB0:
-            if(this->flags[3]) {
+            if(C) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xB4:
-            if(!this->flags[3]) {
+            if(!C) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xB8:
-            if(this->flags[4]) {
+            if(B) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xBC:
-            if(!this->flags[4]) {
+            if(!B) {
                 PC->setValue(operand->getValue());
             }
             break;
@@ -202,34 +210,36 @@ void AhmesMachine::run() {
     this->running = true;
     while (this->running && this->PC->getValue() <= 255) {
         this->step();
-        if (isNegative(AC->getValue())) this->flags[0]->setValue(1);
+        if (isNegative(AC->getValue())) N->setValue(1);
+        //std::cout << "\n ----> C: " << C->getValue() << "\n";
     }
     std::cout << "\n ----> AC: " << AC->getValue() << "\n";
+    std::cout << "\n ----> C: " << C->getValue() << "\n";
 }
 
 void AhmesMachine::updateFlags(char operand)
 {
     int result = (int) operand + AC->getValue();
-    if (this->flags[0])
+    if (N)
     {
         if (!isNegative(result))
         {
-            this->flags[0]->setValue(0);
-            this->flags[3]->setValue(1);
+            N->setValue(0);
+            C->setValue(1);
         }
     }
     else
     {
         if (isNegative(result))
         {
-            this->flags[0]->setValue(1);
-            this->flags[2]->setValue(1);
+            N->setValue(1);
+            V->setValue(1);
         }
     }
 }
 
 bool AhmesMachine::isNegative(char value) {
-    if ((value & 0x80) == 1) return 1;
+    if ((value & 0x80) == 0x80) return 1;
     else return 0;
 }
 
@@ -237,16 +247,21 @@ void AhmesMachine::ror()
 {
     bool hbite = 0;
     if ((AC->getValue() & 0x1) == 1) hbite = 1;
-    AC->setValue(AC->getValue() >> 1);
-    if (hbite) AC->setValue(AC->getValue() | 0x80);
+    AC->setValue((AC->getValue() >> 1) & 0xFF);
+    if (C->getValue()) AC->setValue(AC->getValue() | 0x80);
+    if (hbite) C->setValue(1);
+    else C->setValue(0);
 }
 
 void AhmesMachine::rol()
 {
     bool hbite = 0;
-    if ((AC->getValue() & 0x80) == 1) hbite = 1;
-    AC->setValue(AC->getValue() << 1);
-    if (hbite) AC->setValue(AC->getValue() | 0x1);
+    if ((AC->getValue() & 0x80) == 0x80) hbite = 1;
+    AC->setValue((AC->getValue() << 1) & 0xFF);
+    if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
+    if (hbite) C->setValue(1);
+    else C->setValue(0);
+    std::cout << "\n ----> C: " << C->getValue() << "\n";
 }
 
 void AhmesMachine::shr()
