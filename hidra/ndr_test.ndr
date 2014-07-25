@@ -1,0 +1,17 @@
+lda 128
+ADD 129	;;isso é um  add
+sTA   130  
+; comentario randomico
+
+
+
+HLT
+
+org 128
+db 77
+db 88
+db 111
+dab 10(33)
+DB 99
+dw 65535
+daw 10(1000)

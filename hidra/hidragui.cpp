@@ -6,8 +6,11 @@ HidraGui::HidraGui(QWidget *parent) :
     ui(new Ui::HidraGui)
 {
     ui->setupUi(this);
-    NeanderMachine *maquina = new NeanderMachine();
+    Machine *maquina = new NeanderMachine();
     maquina->printStatusDebug();
+    maquina->run();
+    maquina->printStatusDebug();
+    maquina->assemble("../hidra/ndr_test.ndr");
 }
 
 HidraGui::~HidraGui()
