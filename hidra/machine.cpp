@@ -14,3 +14,13 @@ void Machine::setRunning(bool value)
 {
     running = value;
 }
+
+QVector<Byte *> Machine::getMemory() const
+{
+    return memory;
+}
+
+void Machine::setMemory(const QVector<Byte *> &value)
+{
+    memory = value;
+}

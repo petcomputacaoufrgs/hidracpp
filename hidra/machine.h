@@ -31,12 +31,15 @@ public:
     bool getRunning() const;
     void setRunning(bool value);
 
+    QVector<Byte *> getMemory() const;
+    void setMemory(const QVector<Byte *> &value);
+
 protected:
-    QVector<Register*> registers;
+    QVector<Register *> registers;
     Register* PC;
-    QVector<Byte*> memory;
-    QVector<Bit*> flags;
-    QVector<Instruction*> instructions;
+    QVector<Byte *> memory;
+    QVector<Bit *> flags;
+    QVector<Instruction *> instructions;
     bool running;
 
 

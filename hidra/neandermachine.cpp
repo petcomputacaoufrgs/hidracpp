@@ -26,13 +26,13 @@ NeanderMachine::NeanderMachine()
     }
 
     //test code
-    memory[0]->setValue(32);
-    memory[1]->setValue(128);
-    memory[2]->setValue(48);
-    memory[3]->setValue(129);
-    memory[4]->setValue(16);
-    memory[5]->setValue(130);
-    memory[6]->setValue(240);
+//    memory[0]->setValue(32);
+//    memory[1]->setValue(128);
+//    memory[2]->setValue(48);
+//    memory[3]->setValue(129);
+//    memory[4]->setValue(16);
+//    memory[5]->setValue(130);
+//    memory[6]->setValue(240);
     memory[128]->setValue(4);
     memory[129]->setValue(8);
     memory[130]->setValue(2);
@@ -164,17 +164,62 @@ void NeanderMachine::assemble(QString filename) {
     QFile sourceFile(filename);
     sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString source = sourceFile.readAll();
-    std::cout << source.toStdString() << std::endl;
-    QString outputFilename = filename.section('.', 0) + ".mem";
+    QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
+    QStringList::iterator i;
+    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+        (*i) = (*i).split(';').at(0).toLower().simplified();    //elimina os comentarios do codigo
+    }
+    sourceLines.removeAll("");  //remove as linhas em branco
+
+    std::cout << "1=========" << std::endl;
+    foreach (QString tmp, sourceLines) {
+        std::cout << tmp.toStdString() << std::endl;
+    }
+    std::cout << "2=========" << std::endl;
+    //tipo aqui tenho que tratar os DB, DW, DAB, DAW e etc
+    int pc = 0;
+    QVector<Byte *> memory = outputMachine->getMemory();
+    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+        Instruction *atual;
+
+        QStringList line = (*i).split(" ");
+        if(line.at(0) == "org") {
+            pc = line.at(1).toInt();
+        } else if(line.at(0) == "db") {
+            memory[pc++]->setValue((unsigned char)line.last().toInt());
+        } else if(line.at(0) == "dw") {
+            int word = line.last().toInt();
+            memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
+            memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
+        } else if(line.at(0) == "dab") {
+
+        } else if(line.at(0) == "daw") {
+
+        } else {
+            atual = getInstructionFromMnemonic(line.at(0));
+            line.replace(0, QString::number(atual->getValue()));
+            foreach (QString byte, line) {
+                memory[pc++]->setValue((unsigned char)byte.toInt());
+            }
+        }
+    }
+
+    foreach (QString tmp, sourceLines) {
+        std::cout << tmp.toStdString() << std::endl;
+    }
+
+    outputMachine->setMemory(memory);
+    outputMachine->printStatusDebug();
+    QString outputFilename = filename.split('.').at(0) + ".mem";
     outputMachine->save(outputFilename);
 }
 
 const bool NeanderMachine::validateInstructions(QStringList instructionList)
 {
-
+    return true;
 }
 
-const Instruction* NeanderMachine::getInstructionFromValue(int desiredInstruction) {
+Instruction* NeanderMachine::getInstructionFromValue(int desiredInstruction) {
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getValue() == (desiredInstruction & 0xF0)) {
@@ -183,7 +228,7 @@ const Instruction* NeanderMachine::getInstructionFromValue(int desiredInstructio
     }
     return NULL;
 }
-const Instruction* NeanderMachine::getInstructionFromMnemonic(QString desiredInstruction) {
+Instruction* NeanderMachine::getInstructionFromMnemonic(QString desiredInstruction) {
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getMnemonic() == desiredInstruction) {
