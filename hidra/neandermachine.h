@@ -20,8 +20,8 @@ public:
     virtual void run();
     virtual void assemble(QString filename);
 
-    virtual const Instruction* getInstructionFromValue(int);
-    virtual const Instruction* getInstructionFromMnemonic(QString);
+    virtual Instruction* getInstructionFromValue(int);
+    virtual Instruction* getInstructionFromMnemonic(QString);
     virtual const bool validateInstructions(QStringList);
 
 private:
