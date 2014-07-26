@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QVector>
+#include <QString>
+#include <QStringList>
 #include "bit.h"
 #include "byte.h"
 #include "register.h"
@@ -29,6 +31,7 @@ protected:
     QVector<Byte*> memory;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
+    bool running;
 
 
 signals:

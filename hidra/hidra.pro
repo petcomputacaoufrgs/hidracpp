@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     register.cpp \
     byte.cpp \
     instruction.cpp \
-    neandermachine.cpp
+    neandermachine.cpp \
+    ramsesmachine.cpp \
 
 HEADERS  += hidragui.h \
     machine.h \
@@ -27,6 +28,8 @@ HEADERS  += hidragui.h \
     register.h \
     byte.h \
     instruction.h \
-    neandermachine.h
+    neandermachine.h \
+    ramsesmachine.h \
+
 
 FORMS    += hidragui.ui
