@@ -48,6 +48,11 @@ RamsesMachine::RamsesMachine()
     instructions[15] = new Instruction("hlt", 240, 0);
 }
 
+void RamsesMachine::printStatusDebug()
+{
+
+}
+
 void RamsesMachine::load(QString filename)
 {
 
