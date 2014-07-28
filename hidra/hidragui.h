@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "neandermachine.h"
+#include "ramsesmachine.h"
 
 namespace Ui {
 class HidraGui;

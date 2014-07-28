@@ -29,6 +29,16 @@ RamsesMachine::RamsesMachine()
         *j = new Byte();
     }
 
+
+    // TESTE (INCOMPLETO)
+    memory[0]->setValue(32);
+    memory[1]->setValue(128);
+    memory[2]->setValue(48);
+    memory[3]->setValue(128);
+    memory[4]->setValue(240);
+
+    memory[128]->setValue(43);
+
     instructions = QVector<Instruction*>(16);
     instructions[0]  = new Instruction("nop",   0, 0);
     instructions[1]  = new Instruction("str",  16, 1);
@@ -50,7 +60,10 @@ RamsesMachine::RamsesMachine()
 
 void RamsesMachine::printStatusDebug()
 {
-
+    std::cout << std::endl;
+    std::cout << "RA: " << (int)RA->getValue() << std::endl;;
+    std::cout << "RB: " << (int)RB->getValue() << std::endl;;
+    std::cout << "RX: " << (int)RX->getValue() << std::endl;;
 }
 
 void RamsesMachine::load(QString filename)
@@ -148,24 +161,33 @@ void RamsesMachine::step() {
         if (C) PC->setValue(operand->getValue());
         break;
     case 0xC0: // jsr
-        // nao lembro como funciona
+        memory[operand->getValue()]->setValue(PC->getValue());
+        PC->setValue(operand->getValue() + 1);
         break;
     case 0xD0: // neg
         registers[reg]->setValue(~registers[reg]->getValue() + 1);
+        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(registers[reg]->getValue() == 0);
         break;
     case 0xE0: // shr
         C->setValue((registers[reg]->getValue() & 0x01) == 1);
         registers[reg]->setValue(registers[reg]->getValue() >> 1);
+        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
+        Z->setValue(registers[reg]->getValue() == 0);
         break;
     case 0xF0: // hlt
         this->running = false;
         break;
     }
+
+    PC->setValue(PC->getValue() + 1);
 }
 
 void RamsesMachine::run()
 {
-
+    this->running = true;
+    while (this->running)
+        step();
 }
 
 void RamsesMachine::assemble(QString filename)
@@ -190,9 +212,4 @@ const Instruction* RamsesMachine::getInstructionFromMnemonic(QString desiredInst
         }
     }
     return NULL;
-}
-
-const bool RamsesMachine::validateInstructions(QStringList)
-{
-    return true;
 }

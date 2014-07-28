@@ -3,9 +3,7 @@
 Register::Register()
 {
     this->value = 0;
-    this->numOfBits = 8;
 }
-
 int Register::getValue() const
 {
     return value;

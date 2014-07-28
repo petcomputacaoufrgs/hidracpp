@@ -21,8 +21,6 @@ public:
     virtual const Instruction* getInstructionFromValue(int);
     virtual const Instruction* getInstructionFromMnemonic(QString);
 
-    virtual const bool validateInstructions(QStringList);
-
 private:
     Register *RA, *RB, *RX;
     Bit *N, *Z, *C;
