@@ -25,13 +25,7 @@ public:
     virtual const Instruction* getInstructionFromMnemonic(QString);
 
 private:
-    bool hasSameSign(Byte n1, Byte n2);
-    void updateFlags(char operand);
-    bool isNegative(char value);
-    void ror();
-    void rol();
-    void shl();
-    void shr();
+    void updateFlags(unsigned char preAC, unsigned char operand, bool sour, bool sub);
 
     Register *AC;
     Bit *N, *Z, *V, *C, *B;

@@ -26,13 +26,13 @@ AhmesMachine::AhmesMachine()
     //test code
     memory[0]->setValue(32);
     memory[1]->setValue(128);
-    memory[2]->setValue(226);
-    memory[3]->setValue(226);
+    memory[2]->setValue(227);
+    memory[3]->setValue(227);
 //    memory[4]->setValue(16);
 //    memory[5]->setValue(130);
     memory[4]->setValue(240);
-    memory[128]->setValue(1);
-    memory[129]->setValue(8);
+    memory[128]->setValue(255);
+    memory[129]->setValue(255);
     memory[130]->setValue(2);
 
     instructions = QVector<Instruction*>(24);
@@ -103,12 +103,13 @@ void AhmesMachine::save(QString filename){
 void AhmesMachine::step() {
     const Instruction* actualInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
+    char tempAC = AC->getValue();
     if(actualInstruction->getNumberOfArguments() == 1) {
         PC->setValue(PC->getValue() + 1);
         operand = memory[PC->getValue()];
     }
 
-    std::cout << "\n-----> " << actualInstruction->getValue() << "\n";
+    std::cout << "\n-----> " << actualInstruction->getValue();
     switch (actualInstruction->getValue()) {
         case 0:
             break;
@@ -119,84 +120,95 @@ void AhmesMachine::step() {
             AC->setValue(memory[operand->getValue()]->getValue());
             break;
         case 0x30:
-            AC->setValue(AC->getValue() + memory[operand->getValue()]->getValue());
+            AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & 0xFF);
+            updateFlags(tempAC, operand->getValue(), false, false);
             break;
         case 0x40:
             AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
+            updateFlags(tempAC, operand->getValue(), false, false);
             break;
         case 0x50:
             AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
+            updateFlags(tempAC, operand->getValue(), false, false);
             break;
         case 0x60:
             AC->setValue(AC->getValue() ^ 0xFF);
+            updateFlags(tempAC, operand->getValue(), false, false);
             break;
         case 0x70:
-            AC->setValue(AC->getValue() - memory[operand->getValue()]->getValue());
+            AC->setValue((AC->getValue() - memory[operand->getValue()]->getValue()) & 0xFF);
+            updateFlags(tempAC, operand->getValue(), false, true);
             break;
         case 0x80:
             PC->setValue(operand->getValue());
             break;
         case 0x90:
-            if(N) {
+            if(N->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0x94:
-            if(!N) {
+            if(!N->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0x98:
-            if(V) {
+            if(V->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0x9C:
-            if(!V) {
+            if(!V->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xA0:
-            if(Z) {
+            if(Z->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xA4:
-            if(!Z) {
+            if(!Z->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xB0:
-            if(C) {
+            if(C->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xB4:
-            if(!C) {
+            if(!C->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xB8:
-            if(B) {
+            if(B->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xBC:
-            if(!B) {
+            if(!B->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
         case 0xE0:
-            shr();
+            AC->setValue(AC->getValue() >> 1);
+            updateFlags(tempAC, operand->getValue(), true, false);
             break;
         case 0xE1:
-            shl();
+            AC->setValue(AC->getValue() << 1);
+            updateFlags(tempAC, operand->getValue(), true, false);
             break;
         case 0xE2:
-            ror();
+            AC->setValue((AC->getValue() >> 1) & 0xFF);
+            if (C->getValue()) AC->setValue(AC->getValue() | 0x80);
+            updateFlags(tempAC, operand->getValue(), true, false);
             break;
         case 0xE3:
-            rol();
+            AC->setValue((AC->getValue() << 1) & 0xFF);
+            if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
+            updateFlags(tempAC, operand->getValue(), true, false);
             break;
         case 0xF0:
             this->running = false;
@@ -208,70 +220,75 @@ void AhmesMachine::step() {
 
 void AhmesMachine::run() {
     this->running = true;
-    while (this->running && this->PC->getValue() <= 255) {
-        this->step();
-        if (isNegative(AC->getValue())) N->setValue(1);
-        //std::cout << "\n ----> C: " << C->getValue() << "\n";
-    }
-    std::cout << "\n ----> AC: " << AC->getValue() << "\n";
-    std::cout << "\n ----> C: " << C->getValue() << "\n";
+    while (this->running && this->PC->getValue() <= 255) this->step();
+
+    std::cout << "\n";
+    std::cout << "\n ----> A: " << AC->getValue();
+    std::cout << "\n ----> N: " << N->getValue();
+    std::cout << "\n ----> Z: " << Z->getValue();
+    std::cout << "\n ----> V: " << V->getValue();
+    std::cout << "\n ----> C: " << C->getValue();
+    std::cout << "\n ----> B: " << B->getValue();
 }
 
-void AhmesMachine::updateFlags(char operand)
+void AhmesMachine::updateFlags(unsigned char preAC, unsigned char operand, bool sour, bool sub)
 {
-    int result = (int) operand + AC->getValue();
-    if (N)
+    if (AC->getValue() == 0) Z->setValue(1);
+    else Z->setValue(0);
+    if (AC->getValue() >= 128) N->setValue(1);
+    else N->setValue(0);
+
+    if (sub)
     {
-        if (!isNegative(result))
+        if (preAC < 128 && AC->getValue() >= 128) B->setValue(1);
+        else B->setValue(0);
+    }
+
+    if (preAC >= 128)
+    {
+        if (AC->getValue() < 128)
         {
-            N->setValue(0);
+            V->setValue(0);
             C->setValue(1);
+        }
+        else
+        {
+            V->setValue(0);
+            C->setValue(0);
         }
     }
     else
     {
-        if (isNegative(result))
+        if (AC->getValue() >= 128)
         {
-            N->setValue(1);
             V->setValue(1);
+            C->setValue(0);
+        }
+        else
+        {
+            V->setValue(0);
+            C->setValue(0);
         }
     }
+
+    if (preAC >= 128 && operand >= 128)
+    {
+        if (AC->getValue() < 128)
+        {
+            C->setValue(1);
+            V->setValue(1);
+        }
+        else
+        {
+            C->setValue(1);
+            V->setValue(0);
+        }
+        if (sub) V->setValue(0);
+    }
+
+    if (sour && AC->getValue() == 0) C->setValue(1);
 }
 
-bool AhmesMachine::isNegative(char value) {
-    if ((value & 0x80) == 0x80) return 1;
-    else return 0;
-}
-
-void AhmesMachine::ror()
-{
-    bool hbite = 0;
-    if ((AC->getValue() & 0x1) == 1) hbite = 1;
-    AC->setValue((AC->getValue() >> 1) & 0xFF);
-    if (C->getValue()) AC->setValue(AC->getValue() | 0x80);
-    if (hbite) C->setValue(1);
-    else C->setValue(0);
-}
-
-void AhmesMachine::rol()
-{
-    bool hbite = 0;
-    if ((AC->getValue() & 0x80) == 0x80) hbite = 1;
-    AC->setValue((AC->getValue() << 1) & 0xFF);
-    if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
-    if (hbite) C->setValue(1);
-    else C->setValue(0);
-}
-
-void AhmesMachine::shr()
-{
-    AC->setValue(AC->getValue() >> 1);
-}
-
-void AhmesMachine::shl()
-{
-    AC->setValue(AC->getValue() << 1);
-}
 
 void AhmesMachine::assemble(QString filename) {
        Machine *outputMachine = new AhmesMachine();
