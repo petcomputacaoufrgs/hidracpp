@@ -4,6 +4,10 @@
 #include "machine.h"
 #include <iostream>
 
+#include <QFile>
+#include <QHash>
+#include <QPair>
+
 class NeanderMachine : public Machine
 {
 public:
