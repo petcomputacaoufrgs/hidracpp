@@ -6,9 +6,21 @@ HidraGui::HidraGui(QWidget *parent) :
     ui(new Ui::HidraGui)
 {
     ui->setupUi(this);
-    Machine *maquina = new AhmesMachine();
+
+    Machine *maquina = new NeanderMachine();
     maquina->run();
-   // maquina->printStatusDebug();
+    maquina->printStatusDebug();
+    delete maquina;
+
+    maquina = new AhmesMachine();
+    maquina->run();
+    maquina->printStatusDebug();
+    delete maquina;
+
+    maquina = new RamsesMachine();
+    maquina->run();
+    maquina->printStatusDebug();
+    delete maquina;
 }
 
 HidraGui::~HidraGui()
