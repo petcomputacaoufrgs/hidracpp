@@ -2,7 +2,6 @@
 #define HIDRAGUI_H
 
 #include <QMainWindow>
-#include "neandermachine.h"
 #include "ahmesmachine.h"
 
 namespace Ui {

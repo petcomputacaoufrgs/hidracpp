@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QStringList>
 #include "bit.h"
 #include "byte.h"
 #include "register.h"
@@ -28,6 +29,9 @@ public:
 
     bool getRunning() const;
     void setRunning(bool value);
+
+    QVector<Byte *> getMemory() const;
+    void setMemory(const QVector<Byte *> &value);
 
 protected:
     QVector<Register*> registers;

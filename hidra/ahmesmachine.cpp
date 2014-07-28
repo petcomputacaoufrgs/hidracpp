@@ -26,12 +26,12 @@ AhmesMachine::AhmesMachine()
     //test code
     memory[0]->setValue(32);
     memory[1]->setValue(128);
-    memory[2]->setValue(227);
-    memory[3]->setValue(227);
+    memory[2]->setValue(226);
+    memory[3]->setValue(226);
 //    memory[4]->setValue(16);
 //    memory[5]->setValue(130);
-    memory[3]->setValue(240);
-    memory[128]->setValue(128);
+    memory[4]->setValue(240);
+    memory[128]->setValue(1);
     memory[129]->setValue(8);
     memory[130]->setValue(2);
 
@@ -261,7 +261,6 @@ void AhmesMachine::rol()
     if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
     if (hbite) C->setValue(1);
     else C->setValue(0);
-    std::cout << "\n ----> C: " << C->getValue() << "\n";
 }
 
 void AhmesMachine::shr()
@@ -275,7 +274,119 @@ void AhmesMachine::shl()
 }
 
 void AhmesMachine::assemble(QString filename) {
+       Machine *outputMachine = new AhmesMachine();
+       QHash<QString, int> labelsMap;
+       QFile sourceFile(filename);
+       sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
+       QString source = sourceFile.readAll();
+       QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
+       QStringList::iterator i;
+       for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+           (*i) = (*i).split(';').at(0).toLower().simplified();    //elimina os comentarios do codigo
+       }
+       sourceLines.removeAll("");  //remove as linhas em branco
 
+       std::cout << "1=========" << std::endl;
+       foreach (QString tmp, sourceLines) {
+           std::cout << tmp.toStdString() << std::endl;
+       }
+       std::cout << "2=========" << std::endl;
+       int pc = 0;
+       QVector<Byte *> memory = outputMachine->getMemory();
+       for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+           QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+            std::cout << line.join(" ").toStdString() << std::endl;
+           Instruction *atual;
+           if (line.at(0).contains(QRegExp("(.*:)"))) {
+               QString key = line.first();
+               (*i).replace(key, "");
+               key.chop(1);
+               labelsMap.insert(key, pc);
+           } else if(line.at(0) == "org") {
+               pc = line.at(1).toInt();
+           } else if(line.at(0) == "db") {
+               pc++;
+           } else if(line.at(0) == "dw") {
+               pc += 2;
+           } else if(line.at(0) == "dab") {
+               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                   QStringList dabValue = line.at(1).split("(");
+                   dabValue.last().chop(1);
+                   pc += dabValue.first().toInt();
+               }
+           } else if(line.at(0) == "daw") {
+               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                   QStringList dawValue = line.at(1).split("(");
+                   dawValue.last().chop(1);
+                   pc += dawValue.first().toInt() * 2;
+               }
+           } else {
+               atual = (Instruction*) getInstructionFromMnemonic(line.at(0));
+               pc += 1 + atual->getNumberOfArguments();
+           }
+       }
+       sourceLines.removeAll("");  //remove as linhas em branco
+       foreach(QString key, labelsMap.keys()) {
+           std::cout << key.toStdString() << ": " << labelsMap.value(key) << std::endl;
+       }
+       foreach(QString key, labelsMap.keys()) {
+           sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
+       }
+       foreach (QString tmp, sourceLines) {
+           std::cout << tmp.toStdString() << std::endl;
+       }
+       std::cout << "3=========" << std::endl;
+       pc = 0;
+       for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+           Instruction *atual;
+
+           QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+           std::cout << line.join(" ").toStdString() << std::endl;
+           if (line.at(0).contains(QRegExp("(.*:)"))) {
+               //skip
+           } else if(line.at(0) == "org") {
+               pc = line.at(1).toInt();
+           } else if(line.at(0) == "db") {
+               memory[pc++]->setValue((unsigned char)line.last().toInt());
+           } else if(line.at(0) == "dw") {
+               int word = line.last().toInt();
+               memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
+               memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
+           } else if(line.at(0) == "dab") {
+               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                   QStringList dabValue = line.at(1).split("(");
+                   dabValue.last().chop(1);
+                   for(int i = 0; i < dabValue.first().toInt(); i++) {
+                       memory[pc++]->setValue((unsigned char) dabValue.last().toInt());
+                   }
+               }
+           } else if(line.at(0) == "daw") {
+               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                   QStringList dabValue = line.at(1).split("(");
+                   dabValue.last().chop(1);
+                   for(int i = 0; i < dabValue.first().toInt(); i++) {
+                       int word = dabValue.last().toInt();
+                       memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8));
+                       memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
+                   }
+               }
+           } else {
+               atual = (Instruction*) getInstructionFromMnemonic(line.at(0));
+               line.replace(0, QString::number(atual->getValue()));
+               foreach (QString byte, line) {
+                   memory[pc++]->setValue((unsigned char)byte.toInt());
+               }
+           }
+       }
+
+       foreach (QString tmp, sourceLines) {
+           std::cout << tmp.toStdString() << std::endl;
+       }
+
+       outputMachine->setMemory(memory);
+       outputMachine->printStatusDebug();
+       QString outputFilename = filename.split('.').at(0) + ".mem";
+       outputMachine->save(outputFilename);
 }
 
 const Instruction* AhmesMachine::getInstructionFromValue(int desiredInstruction) {

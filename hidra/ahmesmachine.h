@@ -2,6 +2,9 @@
 #define AHMESMACHINE_H
 
 #include "machine.h"
+#include <QFile>
+#include <QHash>
+#include <QPair>
 #include <iostream>
 
 class AhmesMachine : public Machine
