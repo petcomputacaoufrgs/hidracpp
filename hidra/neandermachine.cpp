@@ -284,7 +284,7 @@ void NeanderMachine::assemble(QString filename) {
     outputMachine->save(outputFilename);
 }
 
-const bool NeanderMachine::validateInstructions(QStringList instructionList)
+bool NeanderMachine::validateInstructions(QStringList instructionList)
 {
     return true;
 }

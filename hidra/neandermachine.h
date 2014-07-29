@@ -2,11 +2,6 @@
 #define NEANDERMACHINE_H
 
 #include "machine.h"
-#include <iostream>
-
-#include <QFile>
-#include <QHash>
-#include <QPair>
 
 class NeanderMachine : public Machine
 {
@@ -24,7 +19,7 @@ public:
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
-    virtual const bool validateInstructions(QStringList);
+    virtual bool validateInstructions(QStringList);
 
 private:
     Register* AC;

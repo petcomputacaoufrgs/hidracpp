@@ -5,6 +5,11 @@
 #include <QVector>
 #include <QString>
 #include <QStringList>
+#include <QFile>
+#include <QHash>
+#include <QPair>
+#include <iostream>
+
 #include "bit.h"
 #include "byte.h"
 #include "register.h"

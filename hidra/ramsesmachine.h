@@ -2,7 +2,6 @@
 #define RAMSESMACHINE_H
 
 #include "machine.h"
-#include <iostream>
 
 class RamsesMachine : public Machine
 {
