@@ -85,7 +85,17 @@ void NeanderMachine::load(QString filename) {
 }
 
 void NeanderMachine::save(QString filename){
+    QFile memFile(filename);
+    memFile.open(QFile::WriteOnly);
+    QDataStream stream(&memFile);
+    stream.setByteOrder(QDataStream::BigEndian);
 
+    stream << (unsigned char)3 << (unsigned char)'N' << (unsigned char)'D' << (unsigned char)'R'; //prefixo identificador da maquina (basicamente o que muda em cada maquina
+
+    foreach (Byte *byte, memory) {
+        stream << byte->getValue() << (unsigned char)0;
+    }
+    memFile.close();
 }
 
 void NeanderMachine::step() {

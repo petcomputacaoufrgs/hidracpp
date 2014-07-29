@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
                               << "Neander \nAhmes \nRamses \nCesar" << std::endl;
                 }
                 machine->assemble(QApplication::arguments().at(++i));
-                machine->run();
                 machine->printStatusDebug();
             } else if(QApplication::arguments().at(i) == "init") {
                 //TODO
