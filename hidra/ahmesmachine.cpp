@@ -93,7 +93,30 @@ void AhmesMachine::printStatusDebug()
 }
 
 void AhmesMachine::load(QString filename) {
-
+    bool err = false;
+    QFile memFile(filename);
+    memFile.open(QFile::ReadOnly);
+    QDataStream stream(&memFile);
+    stream.setByteOrder(QDataStream::BigEndian);
+    unsigned char buffer;
+    unsigned char machineIdentifier[4] = {3, 'A', 'H', 'D'};    //machine identifier
+    int i;
+    for(i = 0; i < 4; i++) {
+        stream >> buffer;
+        if(buffer != machineIdentifier[i]) {
+            err = true;
+            break;
+        }
+    }
+    i = 0;
+    if(!err) {
+        while(!stream.atEnd()) {
+            stream >> buffer;
+            memory[i++]->setValue((unsigned char)buffer);
+            stream >> buffer;
+        }
+    }
+    memFile.close();
 }
 
 void AhmesMachine::save(QString filename){
