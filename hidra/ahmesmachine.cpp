@@ -21,20 +21,6 @@ AhmesMachine::AhmesMachine()
     C = flags[3];
     B = flags[4];
 
-   // std::cout << "\n----->>>> " << N->getValue();
-
-    //test code
-    memory[0]->setValue(32);
-    memory[1]->setValue(128);
-    memory[2]->setValue(227);
-    memory[3]->setValue(227);
-//    memory[4]->setValue(16);
-//    memory[5]->setValue(130);
-    memory[4]->setValue(240);
-    memory[128]->setValue(255);
-    memory[129]->setValue(255);
-    memory[130]->setValue(2);
-
     instructions = QVector<Instruction*>(24);
     instructions[0] = new Instruction("nop", 0, 0);
     instructions[1] = new Instruction("sta", 16, 1);
@@ -113,7 +99,7 @@ void AhmesMachine::load(QString filename) {
         while(!stream.atEnd()) {
             stream >> buffer;
             memory[i++]->setValue((unsigned char)buffer);
-            stream >> buffer;
+            stream >> buffer;   //ignore the byte 0
         }
     }
     memFile.close();
@@ -142,7 +128,6 @@ void AhmesMachine::step() {
         operand = memory[PC->getValue()];
     }
 
-    std::cout << "\n-----> " << actualInstruction->getValue();
     switch (actualInstruction->getValue()) {
         case 0:
             break;
@@ -253,15 +238,9 @@ void AhmesMachine::step() {
 
 void AhmesMachine::run() {
     this->running = true;
-    while (this->running && this->PC->getValue() <= 255) this->step();
-
-    std::cout << "\n";
-    std::cout << "\n ----> A: " << AC->getValue();
-    std::cout << "\n ----> N: " << N->getValue();
-    std::cout << "\n ----> Z: " << Z->getValue();
-    std::cout << "\n ----> V: " << V->getValue();
-    std::cout << "\n ----> C: " << C->getValue();
-    std::cout << "\n ----> B: " << B->getValue();
+    while (this->running && this->PC->getValue() <= 255) {
+        this->step();
+    }
 }
 
 void AhmesMachine::updateFlags(unsigned char preAC, unsigned char operand, bool sour, bool sub)
@@ -336,11 +315,6 @@ void AhmesMachine::assemble(QString filename) {
        }
        sourceLines.removeAll("");  //remove as linhas em branco
 
-       std::cout << "1=========" << std::endl;
-       foreach (QString tmp, sourceLines) {
-           std::cout << tmp.toStdString() << std::endl;
-       }
-       std::cout << "2=========" << std::endl;
        int pc = 0;
        QVector<Byte *> memory = outputMachine->getMemory();
        for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
@@ -377,21 +351,14 @@ void AhmesMachine::assemble(QString filename) {
        }
        sourceLines.removeAll("");  //remove as linhas em branco
        foreach(QString key, labelsMap.keys()) {
-           std::cout << key.toStdString() << ": " << labelsMap.value(key) << std::endl;
-       }
-       foreach(QString key, labelsMap.keys()) {
            sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
        }
-       foreach (QString tmp, sourceLines) {
-           std::cout << tmp.toStdString() << std::endl;
-       }
-       std::cout << "3=========" << std::endl;
        pc = 0;
        for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
            Instruction *atual;
 
            QStringList line = (*i).split(" ", QString::SkipEmptyParts);
-           std::cout << line.join(" ").toStdString() << std::endl;
+
            if (line.at(0).contains(QRegExp("(.*:)"))) {
                //skip
            } else if(line.at(0) == "org") {
@@ -427,10 +394,6 @@ void AhmesMachine::assemble(QString filename) {
                    memory[pc++]->setValue((unsigned char)byte.toInt());
                }
            }
-       }
-
-       foreach (QString tmp, sourceLines) {
-           std::cout << tmp.toStdString() << std::endl;
        }
 
        outputMachine->setMemory(memory);

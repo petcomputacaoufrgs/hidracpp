@@ -29,16 +29,6 @@ RamsesMachine::RamsesMachine()
         *j = new Byte();
     }
 
-
-    // TESTE (INCOMPLETO)
-    memory[0]->setValue(32);
-    memory[1]->setValue(128);
-    memory[2]->setValue(48);
-    memory[3]->setValue(128);
-    memory[4]->setValue(240);
-
-    memory[128]->setValue(43);
-
     instructions = QVector<Instruction*>(16);
     instructions[0]  = new Instruction("nop",   0, 0);
     instructions[1]  = new Instruction("str",  16, 1);
@@ -230,8 +220,9 @@ void RamsesMachine::step() {
 void RamsesMachine::run()
 {
     this->running = true;
-    while (this->running)
-        step();
+    while (this->running) {
+        this->step();
+    }
 }
 
 void RamsesMachine::assemble(QString filename)
