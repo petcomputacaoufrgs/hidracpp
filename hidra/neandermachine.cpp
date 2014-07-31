@@ -124,62 +124,63 @@ void NeanderMachine::save(QString filename){
 void NeanderMachine::step() {
     const Instruction* actualInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
-    if(actualInstruction->getNumberOfArguments() == 1) {    //se a instrucao tiver no end 255 vai dar bug, mas como
-        PC->setValue(PC->getValue() + 1);                   //o objetivo eh utilizar o montador, ele soh faz isso editando
-        operand = memory[PC->getValue()];                   //o binario diretamente, portanto, deixei propositalmente :p
+    if(actualInstruction->getNumberOfArguments() == 1) {
+        PC->incrementValue();
+        operand = memory[PC->getValue()];
     }
     switch (actualInstruction->getValue() & 0xF0) {
-    case 0:
+    case 0x00: // NOP
         break;
-    case 0x10:
+    case 0x10: // STA
         memory[operand->getValue()]->setValue((unsigned char)AC->getValue());
         break;
-    case 0x20:
+    case 0x20: // LDA
         AC->setValue(memory[operand->getValue()]->getValue());
         N->setValue(AC->getValue() > MAX_VALUE_SIGN);
         Z->setValue(AC->getValue() == 0);
         break;
-    case 0x30:
+    case 0x30: // ADD
         AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & MAX_VALUE);
         N->setValue(AC->getValue() > MAX_VALUE_SIGN);
         Z->setValue(AC->getValue() == 0);
         break;
-    case 0x40:
+    case 0x40: // OR
         AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
         N->setValue(AC->getValue() > MAX_VALUE_SIGN);
         Z->setValue(AC->getValue() == 0);
         break;
-    case 0x50:
+    case 0x50: // AND
         AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
         N->setValue(AC->getValue() > MAX_VALUE_SIGN);
         Z->setValue(AC->getValue() == 0);
         break;
-    case 0x60:
+    case 0x60: // NOT
         AC->setValue(AC->getValue() ^ 0xFF);
         N->setValue(AC->getValue() > MAX_VALUE_SIGN);
         Z->setValue(AC->getValue() == 0);
         break;
-    case 0x80:
+    case 0x80: // JMP
         PC->setValue(operand->getValue());
         break;
-    case 0x90:  //JN
+    case 0x90: // JN
         if(N->getValue()) {
             PC->setValue(operand->getValue());
         }
         break;
-    case 0xA0:  //JZ
+    case 0xA0: // JZ
         if(Z->getValue()) {
             PC->setValue(operand->getValue());
         }
         break;
-    case 0xF0:
+    case 0xF0: // HLT
         this->running = false;
         break;
     default:
         break;
     }
-    PC->setValue(PC->getValue() + 1);
-    if(PC->getValue() >=  MEM_SIZE) {
+
+    PC->incrementValue();
+    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
         this->running = false;
     }
 }

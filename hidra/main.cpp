@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
         w.show();
         return a.exec();
     } else {
-        for (int i = 0; i < QApplication::argc(); i++) {
+        for (int i = 0; i < argc; i++) {
             if(QApplication::arguments().at(i) == "run") {
                 QString targetMachine = QApplication::arguments().at(++i).toLower();
                 Machine *machine;

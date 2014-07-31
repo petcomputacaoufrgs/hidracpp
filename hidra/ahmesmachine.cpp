@@ -124,116 +124,119 @@ void AhmesMachine::step() {
     Byte *operand;
     char tempAC = AC->getValue();
     if(actualInstruction->getNumberOfArguments() == 1) {
-        PC->setValue(PC->getValue() + 1);
+        PC->incrementValue();
         operand = memory[PC->getValue()];
     }
 
-    switch (actualInstruction->getValue()) {
-        case 0:
+    switch (actualInstruction->getValue()) { // Arredondar para baixo
+        case 0x00: // NOP
             break;
-        case 0x10:
+        case 0x10: // STA
             memory[operand->getValue()]->setValue((unsigned char)AC->getValue());
             break;
-        case 0x20:
+        case 0x20: // LDA
             AC->setValue(memory[operand->getValue()]->getValue());
             break;
-        case 0x30:
+        case 0x30: // ADD
             AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & 0xFF);
             updateFlags(tempAC, operand->getValue(), false, false);
             break;
-        case 0x40:
+        case 0x40: // OR
             AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
             updateFlags(tempAC, operand->getValue(), false, false);
             break;
-        case 0x50:
+        case 0x50: // AND
             AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
             updateFlags(tempAC, operand->getValue(), false, false);
             break;
-        case 0x60:
+        case 0x60: // NOT
             AC->setValue(AC->getValue() ^ 0xFF);
             updateFlags(tempAC, operand->getValue(), false, false);
             break;
-        case 0x70:
+        case 0x70: // SUB
             AC->setValue((AC->getValue() - memory[operand->getValue()]->getValue()) & 0xFF);
             updateFlags(tempAC, operand->getValue(), false, true);
             break;
-        case 0x80:
+        case 0x80: // JMP
             PC->setValue(operand->getValue());
             break;
-        case 0x90:
+        case 0x90: // JN
             if(N->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0x94:
+        case 0x94: // JP
             if(!N->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0x98:
+        case 0x98: // JV
             if(V->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0x9C:
+        case 0x9C: // JNV
             if(!V->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xA0:
+        case 0xA0: // JZ
             if(Z->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xA4:
+        case 0xA4: // JNZ
             if(!Z->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xB0:
+        case 0xB0: // JC
             if(C->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xB4:
+        case 0xB4: // JNC
             if(!C->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xB8:
+        case 0xB8: // JB
             if(B->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xBC:
+        case 0xBC: // JNB
             if(!B->getValue()) {
                 PC->setValue(operand->getValue());
             }
             break;
-        case 0xE0:
+        case 0xE0: // SHR
             AC->setValue(AC->getValue() >> 1);
             updateFlags(tempAC, operand->getValue(), true, false);
             break;
-        case 0xE1:
+        case 0xE1: // SHL
             AC->setValue(AC->getValue() << 1);
             updateFlags(tempAC, operand->getValue(), true, false);
             break;
-        case 0xE2:
+        case 0xE2: // ROR
             AC->setValue((AC->getValue() >> 1) & 0xFF);
             if (C->getValue()) AC->setValue(AC->getValue() | 0x80);
             updateFlags(tempAC, operand->getValue(), true, false);
             break;
-        case 0xE3:
+        case 0xE3: // ROL
             AC->setValue((AC->getValue() << 1) & 0xFF);
             if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
             updateFlags(tempAC, operand->getValue(), true, false);
             break;
-        case 0xF0:
+        case 0xF0: // HLT
             this->running = false;
         default:
             break;
         }
-        PC->setValue(PC->getValue() + 1);
+        PC->incrementValue();
+        if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+            this->running = false;
+        }
 }
 
 void AhmesMachine::run() {

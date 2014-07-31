@@ -115,7 +115,7 @@ void RamsesMachine::step() {
     Byte *operand;
 
     if(actualInstruction->getNumberOfArguments() == 1) {
-        PC->setValue(PC->getValue() + 1);
+        PC->incrementValue();
 
         Byte *endOperand = NULL;
         switch (actualInstruction->getValue() & 0x03) {
@@ -214,7 +214,10 @@ void RamsesMachine::step() {
         break;
     }
 
-    PC->setValue(PC->getValue() + 1);
+    PC->incrementValue();
+    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+        this->running = false;
+    }
 }
 
 void RamsesMachine::run()
