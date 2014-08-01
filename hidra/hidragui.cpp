@@ -96,3 +96,23 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
         break;
     }
 }
+
+void HidraGui::on_action_Save_triggered()
+{
+
+}
+
+void HidraGui::on_actionClose_triggered()
+{
+
+}
+
+void HidraGui::on_actionManual_triggered()
+{
+
+}
+
+void HidraGui::on_actionRelatar_um_problema_triggered()
+{
+
+}

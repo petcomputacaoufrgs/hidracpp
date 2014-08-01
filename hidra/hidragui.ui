@@ -447,10 +447,10 @@ QCheckBox::indicator:unchecked {
     <addaction name="actionPasso"/>
     <addaction name="actionRodar"/>
     <addaction name="separator"/>
-    <addaction name="action_Salvar"/>
+    <addaction name="action_Save"/>
     <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
-    <addaction name="actionFechar"/>
+    <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuAjuda">
     <property name="title">
@@ -508,7 +508,7 @@ QCheckBox::indicator:unchecked {
     <string>Relatar um problema</string>
    </property>
   </action>
-  <action name="actionFechar">
+  <action name="actionClose">
    <property name="text">
     <string>Fechar</string>
    </property>
@@ -516,7 +516,7 @@ QCheckBox::indicator:unchecked {
     <string>Ctrl+X</string>
    </property>
   </action>
-  <action name="action_Salvar">
+  <action name="action_Save">
    <property name="text">
     <string>&amp;Salvar</string>
    </property>

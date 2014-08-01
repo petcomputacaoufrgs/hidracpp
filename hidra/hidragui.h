@@ -34,6 +34,14 @@ private slots:
 
     void on_comboBoxMachine_currentIndexChanged(int index);
 
+    void on_action_Save_triggered();
+
+    void on_actionClose_triggered();
+
+    void on_actionManual_triggered();
+
+    void on_actionRelatar_um_problema_triggered();
+
 private:
     Ui::HidraGui *ui;
     Machine *machine;
