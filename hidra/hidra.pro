@@ -34,3 +34,6 @@ HEADERS  += hidragui.h \
     ahmesmachine.h
 
 FORMS    += hidragui.ui
+
+RESOURCES += \
+    res.qrc
