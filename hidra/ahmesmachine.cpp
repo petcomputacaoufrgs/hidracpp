@@ -120,15 +120,20 @@ void AhmesMachine::save(QString filename){
 }
 
 void AhmesMachine::step() {
-    const Instruction* actualInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
     char tempAC = AC->getValue();
-    if(actualInstruction->getNumberOfArguments() == 1) {
+    if(currentInstruction->getNumberOfArguments() == 1) {
         PC->incrementValue();
         operand = memory[PC->getValue()];
     }
 
-    switch (actualInstruction->getValue()) { // Arredondar para baixo
+    PC->incrementValue();
+    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+        this->running = false;
+    }
+
+    switch (currentInstruction->getValue()) { // Arredondar para baixo
         case 0x00: // NOP
             break;
         case 0x10: // STA
@@ -232,10 +237,6 @@ void AhmesMachine::step() {
             this->running = false;
         default:
             break;
-        }
-        PC->incrementValue();
-        if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
-            this->running = false;
         }
 }
 

@@ -111,14 +111,14 @@ void RamsesMachine::save(QString filename)
 }
 
 void RamsesMachine::step() {
-    const Instruction *actualInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
 
-    if(actualInstruction->getNumberOfArguments() == 1) {
+    if(currentInstruction->getNumberOfArguments() == 1) {
         PC->incrementValue();
 
         Byte *endOperand = NULL;
-        switch (actualInstruction->getValue() & 0x03) {
+        switch (currentInstruction->getValue() & 0x03) {
         case 0x00: // modo de enderecamento direto
             endOperand = memory[PC->getValue()];
             break;
@@ -138,9 +138,14 @@ void RamsesMachine::step() {
         operand = memory[endOperand->getValue()];
     }
 
-    int reg = ((actualInstruction->getValue() & 0x0C) >> 2); // os bits 2 e 3 da instrucao indicam o registrador a ser usado;
+    int reg = ((currentInstruction->getValue() & 0x0C) >> 2); // os bits 2 e 3 da instrucao indicam o registrador a ser usado;
 
-    switch (actualInstruction->getValue() & 0xF0) {
+    PC->incrementValue();
+    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+        this->running = false;
+    }
+
+    switch (currentInstruction->getValue() & 0xF0) {
     case 0x00: // nop
         break;
     case 0x10: // str
@@ -212,11 +217,6 @@ void RamsesMachine::step() {
     case 0xF0: // hlt
         this->running = false;
         break;
-    }
-
-    PC->incrementValue();
-    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
-        this->running = false;
     }
 }
 

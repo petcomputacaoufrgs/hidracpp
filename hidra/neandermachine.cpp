@@ -122,12 +122,18 @@ void NeanderMachine::save(QString filename){
 }
 
 void NeanderMachine::step() {
-    const Instruction* actualInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
-    if(actualInstruction->getNumberOfArguments() == 1) {
+    if(currentInstruction->getNumberOfArguments() == 1) {
         PC->incrementValue();
         operand = memory[PC->getValue()];
     }
+
+    PC->incrementValue();
+    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+        this->running = false;
+    }
+
     switch (actualInstruction->getValue() & 0xF0) {
     case 0x00: // NOP
         break;
@@ -177,11 +183,6 @@ void NeanderMachine::step() {
         break;
     default:
         break;
-    }
-
-    PC->incrementValue();
-    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
-        this->running = false;
     }
 }
 
