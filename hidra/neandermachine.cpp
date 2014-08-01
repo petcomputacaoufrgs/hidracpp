@@ -134,7 +134,7 @@ void NeanderMachine::step() {
         this->running = false;
     }
 
-    switch (currentInstruction->getValue() & 0xF0) {
+    switch (currentInstruction->getValue()) {
     case 0x00: // NOP
         break;
     case 0x10: // STA
@@ -314,10 +314,13 @@ bool NeanderMachine::validateInstructions(QStringList instructionList)
     return true;
 }
 
-Instruction* NeanderMachine::getInstructionFromValue(int desiredInstruction) {
+Instruction* NeanderMachine::getInstructionFromValue(int value)
+{
     QVector<Instruction*>::iterator i;
+    value &= 0b11110000; // Filter "don't care" bits
+
     for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getValue() == (desiredInstruction & 0xF0)) {
+        if((*i)->getValue() == value) {
             return (*i);
         }
     }

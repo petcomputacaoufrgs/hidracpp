@@ -122,7 +122,8 @@ void AhmesMachine::save(QString filename){
 void AhmesMachine::step() {
     const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
-    char previousAC = AC->getValue();
+
+    unsigned char previousAC = AC->getValue();
     if(currentInstruction->getNumberOfArguments() == 1) {
         PC->incrementValue();
         operand = memory[PC->getValue()];
@@ -386,10 +387,20 @@ void AhmesMachine::assemble(QString filename) {
        outputMachine->save(outputFilename);
 }
 
-const Instruction* AhmesMachine::getInstructionFromValue(int desiredInstruction) {
+const Instruction* AhmesMachine::getInstructionFromValue(int value)
+{
     QVector<Instruction*>::iterator i;
+
+    // Ignore "don't care" bits:
+    if (value < 0x90 || value >= 0xF0)
+        value &= 0b11110000;
+    else if (value < 0xC0)
+        value &= 0x11111100; // Special jumps
+    else
+        value &= 0x11110011; // Shift and rotate
+
     for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getValue() == desiredInstruction) {
+        if((*i)->getValue() == value) {
             return (*i);
         }
     }

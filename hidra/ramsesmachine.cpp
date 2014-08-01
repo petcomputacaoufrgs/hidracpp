@@ -145,7 +145,7 @@ void RamsesMachine::step() {
         this->running = false;
     }
 
-    switch (currentInstruction->getValue() & 0xF0) {
+    switch (currentInstruction->getValue()) {
     case 0x00: // nop
         break;
     case 0x10: // str
@@ -233,10 +233,13 @@ void RamsesMachine::assemble(QString filename)
 
 }
 
-const Instruction* RamsesMachine::getInstructionFromValue(int desiredInstruction) {
+const Instruction* RamsesMachine::getInstructionFromValue(int value)
+{
     QVector<Instruction*>::iterator i;
+    value &= 0b11110000; // Filter bits
+
     for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getValue() == (desiredInstruction & 0xF0)) {
+        if((*i)->getValue() == value) {
             return (*i);
         }
     }
