@@ -1,24 +1,533 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>HidraGui</class>
- <widget class="QMainWindow" name="HidraGui" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="HidraGui">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>850</width>
+    <height>471</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>HidraGui</string>
   </property>
-  <widget class="QMenuBar" name="menuBar" />
-  <widget class="QToolBar" name="mainToolBar" />
-  <widget class="QWidget" name="centralWidget" />
-  <widget class="QStatusBar" name="statusBar" />
+  <property name="styleSheet">
+   <string notr="true">QCheckBox::indicator{
+	height: 20px;
+	width: 20px;
+}
+QCheckBox::indicator:checked {
+	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(0, 255, 0, 255), stop:0.7 rgba(0, 255, 0, 255), stop:0.7 rgba(200, 230, 200, 0));
+
+}
+
+QCheckBox::indicator:unchecked {
+	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(100, 110, 100, 255), stop:0.7 rgba(100, 110, 100, 255), stop:0.7 rgba(200, 230, 200, 0));
+
+}</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QTableView" name="tableViewMemory">
+    <property name="geometry">
+     <rect>
+      <x>430</x>
+      <y>10</y>
+      <width>121</width>
+      <height>401</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEditSouceCode">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>401</width>
+      <height>401</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QWidget" name="verticalLayoutWidget_4">
+    <property name="geometry">
+     <rect>
+      <x>560</x>
+      <y>10</y>
+      <width>281</width>
+      <height>401</height>
+     </rect>
+    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_5">
+     <item>
+      <widget class="QWidget" name="horizontalWidget" native="true">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>325</height>
+        </size>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::LeftToRight</enum>
+       </property>
+       <layout class="QHBoxLayout" name="hLayoutMachines">
+        <item>
+         <widget class="QFrame" name="frameNeander">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QWidget" name="verticalLayoutWidget_2">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>211</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <item>
+               <widget class="QCheckBox" name="checkBoxN_4">
+                <property name="text">
+                 <string>N</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="shortcut">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxZ_4">
+                <property name="text">
+                 <string>Z</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_7"/>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_8"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <zorder>textEditSouceCode</zorder>
+          <zorder>verticalLayoutWidget_2</zorder>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frameAhmes">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QWidget" name="verticalLayoutWidget">
+           <property name="geometry">
+            <rect>
+             <x>30</x>
+             <y>20</y>
+             <width>211</width>
+             <height>61</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <item>
+               <widget class="QCheckBox" name="checkBoxZ_3">
+                <property name="text">
+                 <string>Z</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxN_3">
+                <property name="text">
+                 <string>N</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="shortcut">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxB_3">
+                <property name="text">
+                 <string>B</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxV">
+                <property name="text">
+                 <string>V</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxC_3">
+                <property name="text">
+                 <string>C</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_5"/>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_6"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <zorder>verticalLayoutWidget</zorder>
+          <zorder>horizontalLayoutWidget_3</zorder>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frameRamses">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QWidget" name="verticalLayoutWidget_3">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>10</y>
+             <width>211</width>
+             <height>86</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <item>
+               <widget class="QCheckBox" name="checkBoxZ_5">
+                <property name="text">
+                 <string>Z</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxN_5">
+                <property name="text">
+                 <string>N</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+                <property name="shortcut">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="checkBoxC_4">
+                <property name="text">
+                 <string>C</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_11"/>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_12"/>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_9"/>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumber_10"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <zorder>frameNeander</zorder>
+          <zorder>frameNeander</zorder>
+          <zorder>frameAhmes</zorder>
+          <zorder>verticalLayoutWidget_3</zorder>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="frameCesar">
+          <property name="maximumSize">
+           <size>
+            <width>271</width>
+            <height>261</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="QPushButton" name="pushButtonCesar">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>271</width>
+             <height>251</height>
+            </rect>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>271</width>
+             <height>261</height>
+            </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-image: url(:/resources/cesar.jpg);</string>
+           </property>
+           <property name="text">
+            <string>OIE</string>
+           </property>
+           <property name="icon">
+            <iconset resource="res.qrc">
+             <normaloff>:/resources/cesar.jpg</normaloff>:/resources/cesar.jpg</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>271</width>
+             <height>261</height>
+            </size>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <widget class="QComboBox" name="comboBoxMachine">
+         <property name="currentText">
+          <string>Neander</string>
+         </property>
+         <property name="currentIndex">
+          <number>0</number>
+         </property>
+         <item>
+          <property name="text">
+           <string>Neander</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Ahmes</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Ramses</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Cesar</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QCommandLinkButton" name="commandLinkButtonRun">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="statusTip">
+            <string>Pressione para Rodar</string>
+           </property>
+           <property name="whatsThis">
+            <string/>
+           </property>
+           <property name="text">
+            <string>Rodar</string>
+           </property>
+           <property name="autoDefault">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCommandLinkButton" name="commandLinkButtonStep">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Passo</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </widget>
+   <zorder>textEditSouceCode</zorder>
+   <zorder>tableViewMemory</zorder>
+   <zorder>verticalLayoutWidget_4</zorder>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>850</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuPrograma">
+    <property name="title">
+     <string>Programa</string>
+    </property>
+    <addaction name="actionMontar"/>
+    <addaction name="actionPasso"/>
+    <addaction name="actionRodar"/>
+    <addaction name="separator"/>
+    <addaction name="action_Save"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menuAjuda">
+    <property name="title">
+     <string>Ajuda</string>
+    </property>
+    <addaction name="actionManual"/>
+    <addaction name="separator"/>
+    <addaction name="actionRelatar_um_problema"/>
+   </widget>
+   <addaction name="menuPrograma"/>
+   <addaction name="menuAjuda"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionMontar">
+   <property name="text">
+    <string>Montar</string>
+   </property>
+  </action>
+  <action name="actionPasso">
+   <property name="text">
+    <string>Passo</string>
+   </property>
+  </action>
+  <action name="actionRodar">
+   <property name="text">
+    <string>Rodar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>Salvar como...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionManual">
+   <property name="text">
+    <string>Manual</string>
+   </property>
+  </action>
+  <action name="actionRelatar_um_problema">
+   <property name="text">
+    <string>Relatar um problema</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Fechar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+X</string>
+   </property>
+  </action>
+  <action name="action_Save">
+   <property name="text">
+    <string>&amp;Salvar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
- <resources/>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>
