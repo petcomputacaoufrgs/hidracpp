@@ -134,7 +134,7 @@ void NeanderMachine::step() {
         this->running = false;
     }
 
-    switch (actualInstruction->getValue() & 0xF0) {
+    switch (currentInstruction->getValue() & 0xF0) {
     case 0x00: // NOP
         break;
     case 0x10: // STA

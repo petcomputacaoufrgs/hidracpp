@@ -21,7 +21,7 @@ public:
     virtual const Instruction* getInstructionFromMnemonic(QString);
 
 private:
-    void updateFlags(unsigned char preAC, unsigned char operand, bool sour, bool sub);
+    void updateFlags(unsigned char previous_AC, unsigned char operand, bool addition, bool subtraction, bool shift_rotate_left, bool shift_rotate_right);
 
     Register *AC;
     Bit *N, *Z, *V, *C, *B;

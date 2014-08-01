@@ -122,7 +122,7 @@ void AhmesMachine::save(QString filename){
 void AhmesMachine::step() {
     const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
-    char tempAC = AC->getValue();
+    char previousAC = AC->getValue();
     if(currentInstruction->getNumberOfArguments() == 1) {
         PC->incrementValue();
         operand = memory[PC->getValue()];
@@ -144,23 +144,23 @@ void AhmesMachine::step() {
             break;
         case 0x30: // ADD
             AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & 0xFF);
-            updateFlags(tempAC, operand->getValue(), false, false);
+            updateFlags(previousAC, operand->getValue(), true, false, false, false);
             break;
         case 0x40: // OR
             AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
-            updateFlags(tempAC, operand->getValue(), false, false);
+            updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
         case 0x50: // AND
             AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
-            updateFlags(tempAC, operand->getValue(), false, false);
+            updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
         case 0x60: // NOT
             AC->setValue(AC->getValue() ^ 0xFF);
-            updateFlags(tempAC, operand->getValue(), false, false);
+            updateFlags(previousAC, operand->getValue(), false, false, false, false);;
             break;
         case 0x70: // SUB
             AC->setValue((AC->getValue() - memory[operand->getValue()]->getValue()) & 0xFF);
-            updateFlags(tempAC, operand->getValue(), false, true);
+            updateFlags(previousAC, operand->getValue(), false, true, false, false);
             break;
         case 0x80: // JMP
             PC->setValue(operand->getValue());
@@ -217,21 +217,20 @@ void AhmesMachine::step() {
             break;
         case 0xE0: // SHR
             AC->setValue(AC->getValue() >> 1);
-            updateFlags(tempAC, operand->getValue(), true, false);
+            updateFlags(previousAC, operand->getValue(), false, false, true, false);
             break;
         case 0xE1: // SHL
             AC->setValue(AC->getValue() << 1);
-            updateFlags(tempAC, operand->getValue(), true, false);
+            updateFlags(previousAC, operand->getValue(), false, false, true, false);
             break;
         case 0xE2: // ROR
             AC->setValue((AC->getValue() >> 1) & 0xFF);
-            if (C->getValue()) AC->setValue(AC->getValue() | 0x80);
-            updateFlags(tempAC, operand->getValue(), true, false);
+            updateFlags(previousAC, operand->getValue(), false, false, false, true);
             break;
         case 0xE3: // ROL
             AC->setValue((AC->getValue() << 1) & 0xFF);
             if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
-            updateFlags(tempAC, operand->getValue(), true, false);
+            updateFlags(previousAC, operand->getValue(), false, false, false, true);
             break;
         case 0xF0: // HLT
             this->running = false;
@@ -247,62 +246,43 @@ void AhmesMachine::run() {
     }
 }
 
-void AhmesMachine::updateFlags(unsigned char preAC, unsigned char operand, bool sour, bool sub)
+void AhmesMachine::updateFlags(unsigned char previous_AC, unsigned char operand, bool addition, bool subtraction, bool shift_rotate_left, bool shift_rotate_right)
 {
-    if (AC->getValue() == 0) Z->setValue(1);
-    else Z->setValue(0);
-    if (AC->getValue() >= 128) N->setValue(1);
-    else N->setValue(0);
+    Z->setValue(AC->getValue() == 0);
+    N->setValue(AC->getValue() >= 128);
 
-    if (sub)
+    if (addition) // Update carry
     {
-        if (preAC < 128 && AC->getValue() >= 128) B->setValue(1);
-        else B->setValue(0);
+        C->setValue(AC->getValue() < previous_AC); // Result is less than initial value (Flag C is unsigned)
     }
 
-    if (preAC >= 128)
+    if (subtraction) // Update borrow
     {
-        if (AC->getValue() < 128)
-        {
-            V->setValue(0);
-            C->setValue(1);
-        }
-        else
-        {
-            V->setValue(0);
-            C->setValue(0);
-        }
-    }
-    else
-    {
-        if (AC->getValue() >= 128)
-        {
-            V->setValue(1);
-            C->setValue(0);
-        }
-        else
-        {
-            V->setValue(0);
-            C->setValue(0);
-        }
+        B->setValue(previous_AC < operand); // Subtraction needs borrow (Flag B is unsigned)
     }
 
-    if (preAC >= 128 && operand >= 128)
+    if (addition || subtraction)
     {
-        if (AC->getValue() < 128)
+        if ((previous_AC >= 128 && operand >= 128 && AC->getValue()  < 128) || // Overflow: negative operands with positive result
+            (previous_AC  < 128 && operand  < 128 && AC->getValue() >= 128))   // Overflow: positive operands with negative result
         {
-            C->setValue(1);
             V->setValue(1);
         }
         else
         {
-            C->setValue(1);
             V->setValue(0);
         }
-        if (sub) V->setValue(0);
     }
 
-    if (sour && AC->getValue() == 0) C->setValue(1);
+    if (shift_rotate_left)
+    {
+        C->setValue((previous_AC & 0b10000000) != 0);
+    }
+
+    if (shift_rotate_right)
+    {
+        C->setValue((previous_AC & 0b00000001) != 0);
+    }
 }
 
 
