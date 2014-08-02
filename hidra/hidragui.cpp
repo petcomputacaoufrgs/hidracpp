@@ -6,6 +6,10 @@ HidraGui::HidraGui(QWidget *parent) :
     ui(new Ui::HidraGui)
 {
     ui->setupUi(this);
+
+    currentFile = "";
+    savedFile = false;
+
     cleanMachines();
     ui->comboBoxMachine->setCurrentIndex(0);
 
@@ -32,6 +36,47 @@ void HidraGui::cleanMachines()
     ui->frameRamses->setVisible(false);
     ui->frameCesar->setVisible(false);
     ui->frameNeander->setVisible(false);
+}
+
+void HidraGui::save()
+{
+    QFile file(currentFile);
+    if (!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::information(this, "Incapaz de abrir arquivo",
+                                 file.errorString());
+        return;
+    }
+    QTextStream out(&file);
+    out << ui->textEditSouceCode->toPlainText();
+
+    savedFile = true;
+}
+
+void HidraGui::saveAs()
+{
+    QString ext;
+    switch (ui->comboBoxMachine->currentIndex()) {
+    case 0:
+        ext = "Fonte do Neander (*.ndr)";
+        break;
+    case 1:
+        ext = "Fonte do Ahmes (*.ahd)";
+        break;
+    case 2:
+        ext = "Fonte do Ramses (*.rms)";
+        break;
+    default:
+        break;
+    }
+    currentFile = QFileDialog::getSaveFileName(this,
+                                               "Salvar código-fonte", "",
+                                               ext);
+
+    if (currentFile.isEmpty())
+        return;
+    else {
+        save();
+    }
 }
 
 void HidraGui::on_commandLinkButtonStep_clicked(){
@@ -68,12 +113,12 @@ void HidraGui::on_actionRodar_triggered()
 
 void HidraGui::on_actionMontar_triggered()
 {
-    machine->assemble(actualFile);
+    machine->assemble(currentFile);
 }
 
 void HidraGui::on_actionSaveAs_triggered()
 {
-
+    saveAs();
 }
 
 void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
@@ -99,7 +144,11 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
 
 void HidraGui::on_action_Save_triggered()
 {
-
+    if(currentFile == "") {
+        saveAs();
+    } else {
+        save();
+    }
 }
 
 void HidraGui::on_actionClose_triggered()

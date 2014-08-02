@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QStandardItemModel>
+#include <QFileDialog>
+#include <QTextStream>
+#include <QMessageBox>
 #include "neandermachine.h"
 #include "ahmesmachine.h"
 #include "ramsesmachine.h"
@@ -20,6 +23,8 @@ public:
     ~HidraGui();
 
     void cleanMachines();
+    void save();
+    void saveAs();
 public slots:
     void on_commandLinkButtonStep_clicked();
     void on_commandLinkButtonRun_clicked();
@@ -45,7 +50,7 @@ private slots:
 private:
     Ui::HidraGui *ui;
     Machine *machine;
-    QString actualFile;
+    QString currentFile;
     bool savedFile;
     QStandardItemModel *model;
 };
