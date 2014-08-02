@@ -39,6 +39,12 @@ public:
     QVector<Byte *> getMemory() const;
     void setMemory(const QVector<Byte *> &value);
 
+    QVector<Bit *> getFlags() const;
+    void setFlags(const QVector<Bit *> &value);
+
+    QVector<Register *> getRegisters() const;
+    void setRegisters(const QVector<Register *> &value);
+
 protected:
     QVector<Register*> registers;
     Register* PC;

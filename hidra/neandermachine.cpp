@@ -25,18 +25,6 @@ NeanderMachine::NeanderMachine()
         *j = new Byte();
     }
 
-    //test code
-//    memory[0]->setValue(32);
-//    memory[1]->setValue(128);
-//    memory[2]->setValue(48);
-//    memory[3]->setValue(129);
-//    memory[4]->setValue(16);
-//    memory[5]->setValue(130);
-//    memory[6]->setValue(240);
-    memory[128]->setValue(4);
-    memory[129]->setValue(8);
-    memory[130]->setValue(2);
-
     // initialize instructions
     instructions = QVector<Instruction*>(11);
     instructions[0]  = new Instruction("nop",   0, 0);
@@ -206,11 +194,6 @@ void NeanderMachine::assemble(QString filename) {
     }
     sourceLines.removeAll("");  //remove as linhas em branco
 
-    std::cout << "1=========" << std::endl;
-    foreach (QString tmp, sourceLines) {
-        std::cout << tmp.toStdString() << std::endl;
-    }
-    std::cout << "2=========" << std::endl;
     int pc = 0;
     QVector<Byte *> memory = outputMachine->getMemory();
     for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
@@ -247,21 +230,14 @@ void NeanderMachine::assemble(QString filename) {
     }
     sourceLines.removeAll("");  //remove as linhas em branco
     foreach(QString key, labelsMap.keys()) {
-        std::cout << key.toStdString() << ": " << labelsMap.value(key) << std::endl;
-    }
-    foreach(QString key, labelsMap.keys()) {
         sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
     }
-    foreach (QString tmp, sourceLines) {
-        std::cout << tmp.toStdString() << std::endl;
-    }
-    std::cout << "3=========" << std::endl;
     pc = 0;
     for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
         Instruction *atual;
 
         QStringList line = (*i).split(" ", QString::SkipEmptyParts);
-        std::cout << line.join(" ").toStdString() << std::endl;
+
         if (line.at(0).contains(QRegExp("(.*:)"))) {
             //skip
         } else if(line.at(0) == "org") {
@@ -297,10 +273,6 @@ void NeanderMachine::assemble(QString filename) {
                 memory[pc++]->setValue((unsigned char)byte.toInt());
             }
         }
-    }
-
-    foreach (QString tmp, sourceLines) {
-        std::cout << tmp.toStdString() << std::endl;
     }
 
     outputMachine->setMemory(memory);

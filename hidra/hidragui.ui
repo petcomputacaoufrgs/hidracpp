@@ -54,7 +54,7 @@ QCheckBox::indicator:unchecked {
      <rect>
       <x>560</x>
       <y>10</y>
-      <width>281</width>
+      <width>348</width>
       <height>401</height>
      </rect>
     </property>
@@ -128,8 +128,6 @@ QCheckBox::indicator:unchecked {
             </item>
            </layout>
           </widget>
-          <zorder>textEditSouceCode</zorder>
-          <zorder>verticalLayoutWidget_2</zorder>
          </widget>
         </item>
         <item>
@@ -213,8 +211,6 @@ QCheckBox::indicator:unchecked {
             </item>
            </layout>
           </widget>
-          <zorder>verticalLayoutWidget</zorder>
-          <zorder>horizontalLayoutWidget_3</zorder>
          </widget>
         </item>
         <item>
@@ -291,10 +287,6 @@ QCheckBox::indicator:unchecked {
             </item>
            </layout>
           </widget>
-          <zorder>frameNeander</zorder>
-          <zorder>frameNeander</zorder>
-          <zorder>frameAhmes</zorder>
-          <zorder>verticalLayoutWidget_3</zorder>
          </widget>
         </item>
         <item>
@@ -356,10 +348,10 @@ QCheckBox::indicator:unchecked {
        <item>
         <widget class="QComboBox" name="comboBoxMachine">
          <property name="currentText">
-          <string>Neander</string>
+          <string/>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>-1</number>
          </property>
          <item>
           <property name="text">
@@ -436,7 +428,7 @@ QCheckBox::indicator:unchecked {
      <x>0</x>
      <y>0</y>
      <width>850</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPrograma">

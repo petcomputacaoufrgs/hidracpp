@@ -395,9 +395,9 @@ const Instruction* AhmesMachine::getInstructionFromValue(int value)
     if (value < 0x90 || value >= 0xF0)
         value &= 0b11110000;
     else if (value < 0xC0)
-        value &= 0x11111100; // Special jumps
+        value &= 0b11111100; // Special jumps
     else
-        value &= 0x11110011; // Shift and rotate
+        value &= 0b11110011; // Shift and rotate
 
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getValue() == value) {
