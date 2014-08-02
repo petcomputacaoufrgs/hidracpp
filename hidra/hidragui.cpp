@@ -41,7 +41,7 @@ void HidraGui::cleanMachines()
 void HidraGui::save()
 {
     QFile file(currentFile);
-    if (!file.open(QIODevice::WriteOnly)) {
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::information(this, "Incapaz de abrir arquivo",
                                  file.errorString());
         return;
@@ -164,4 +164,41 @@ void HidraGui::on_actionManual_triggered()
 void HidraGui::on_actionRelatar_um_problema_triggered()
 {
 
+}
+
+void HidraGui::on_actionOpen_triggered()
+{
+    QString ext;
+    switch (ui->comboBoxMachine->currentIndex()) {
+    case 0:
+        ext = "Fonte do Neander (*.ndr)";
+        break;
+    case 1:
+        ext = "Fonte do Ahmes (*.ahd)";
+        break;
+    case 2:
+        ext = "Fonte do Ramses (*.rms)";
+        break;
+    default:
+        break;
+    }
+    currentFile = QFileDialog::getOpenFileName(this,
+                                               "Abrir código-fonte", "",
+                                               ext);
+
+    if (currentFile.isEmpty())
+        return;
+    else {
+        QFile file(currentFile);
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::information(this, tr("Incapaz de abrir arquivo"),
+                                     file.errorString());
+            return;
+        }
+        QString tmp;
+        QTextStream in(&file);
+        in >> tmp;
+        ui->textEditSouceCode->setPlainText(tmp);
+    }
 }

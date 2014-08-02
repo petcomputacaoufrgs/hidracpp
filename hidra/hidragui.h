@@ -47,6 +47,8 @@ private slots:
 
     void on_actionRelatar_um_problema_triggered();
 
+    void on_actionOpen_triggered();
+
 private:
     Ui::HidraGui *ui;
     Machine *machine;

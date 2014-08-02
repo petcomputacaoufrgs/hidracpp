@@ -119,7 +119,29 @@ QCheckBox::indicator:unchecked {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
-               <widget class="QLCDNumber" name="lcdNumber_7"/>
+               <widget class="QLCDNumber" name="lcdNumber_7">
+                <property name="frameShadow">
+                 <enum>QFrame::Raised</enum>
+                </property>
+                <property name="lineWidth">
+                 <number>1</number>
+                </property>
+                <property name="midLineWidth">
+                 <number>0</number>
+                </property>
+                <property name="smallDecimalPoint">
+                 <bool>false</bool>
+                </property>
+                <property name="digitCount">
+                 <number>5</number>
+                </property>
+                <property name="segmentStyle">
+                 <enum>QLCDNumber::Filled</enum>
+                </property>
+                <property name="intValue" stdset="0">
+                 <number>0</number>
+                </property>
+               </widget>
               </item>
               <item>
                <widget class="QLCDNumber" name="lcdNumber_8"/>
@@ -439,6 +461,7 @@ QCheckBox::indicator:unchecked {
     <addaction name="actionPasso"/>
     <addaction name="actionRodar"/>
     <addaction name="separator"/>
+    <addaction name="actionOpen"/>
     <addaction name="action_Save"/>
     <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
@@ -514,6 +537,14 @@ QCheckBox::indicator:unchecked {
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Abrir</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>
