@@ -79,7 +79,7 @@ void HidraGui::on_actionSaveAs_triggered()
 void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
 {
     cleanMachines();
-    switch (ui->comboBoxMachine->currentIndex()) {
+    switch (index) {
     case 0:
         ui->frameNeander->setVisible(true);
         break;
@@ -104,7 +104,7 @@ void HidraGui::on_action_Save_triggered()
 
 void HidraGui::on_actionClose_triggered()
 {
-
+    this->close();
 }
 
 void HidraGui::on_actionManual_triggered()
