@@ -10,7 +10,8 @@ HidraGui::HidraGui(QWidget *parent) :
     currentFile = "";
     savedFile = false;
 
-    cleanMachines();
+    machine = NULL;
+    // limpa a interface, e seta a maquina selecionada como o neander
     ui->comboBoxMachine->setCurrentIndex(0);
 
     model = new QStandardItemModel(256,2, this);
@@ -124,18 +125,23 @@ void HidraGui::on_actionSaveAs_triggered()
 void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
 {
     cleanMachines();
+    delete machine;
     switch (index) {
     case 0:
         ui->frameNeander->setVisible(true);
+        machine = new NeanderMachine();
         break;
     case 1:
         ui->frameAhmes->setVisible(true);
+        machine = new AhmesMachine();
         break;
     case 2:
         ui->frameRamses->setVisible(true);
+        machine = new RamsesMachine();
         break;
     case 3:
         ui->frameCesar->setVisible(true);
+        //machine = new CesarMachine();
         break;
     default:
         break;
@@ -196,9 +202,7 @@ void HidraGui::on_actionOpen_triggered()
                                      file.errorString());
             return;
         }
-        QString tmp;
         QTextStream in(&file);
-        in >> tmp;
-        ui->textEditSouceCode->setPlainText(tmp);
+        ui->textEditSouceCode->setPlainText(in.readAll());
     }
 }

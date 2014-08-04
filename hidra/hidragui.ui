@@ -369,9 +369,6 @@ QCheckBox::indicator:unchecked {
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="QComboBox" name="comboBoxMachine">
-         <property name="currentText">
-          <string/>
-         </property>
          <property name="currentIndex">
           <number>-1</number>
          </property>
@@ -490,6 +487,9 @@ QCheckBox::indicator:unchecked {
   <action name="actionMontar">
    <property name="text">
     <string>Montar</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
    </property>
   </action>
   <action name="actionPasso">
