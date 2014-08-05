@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QDebug>
 #include "neandermachine.h"
 #include "ahmesmachine.h"
 #include "ramsesmachine.h"
@@ -28,6 +29,9 @@ public:
 public slots:
     void on_commandLinkButtonStep_clicked();
     void on_commandLinkButtonRun_clicked();
+
+    void updateMemoryMap();
+    void updateFlagsLeds();
 private slots:
     void on_actionPasso_triggered();
 

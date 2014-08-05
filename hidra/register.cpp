@@ -16,7 +16,7 @@ void Register::setValue(int value)
 
 void Register::incrementValue()
 {
-    this->value = (value + 1) % (1 << numOfBits);
+    this->value = (value + 1)  % (1 << numOfBits);
 }
 
 int Register::getNumOfBits() const
