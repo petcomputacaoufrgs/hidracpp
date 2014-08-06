@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
-    <height>471</height>
+    <width>916</width>
+    <height>551</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@ QCheckBox::indicator:unchecked {
       <x>430</x>
       <y>10</y>
       <width>121</width>
-      <height>401</height>
+      <height>481</height>
      </rect>
     </property>
    </widget>
@@ -54,17 +54,23 @@ QCheckBox::indicator:unchecked {
      <rect>
       <x>560</x>
       <y>10</y>
-      <width>348</width>
-      <height>401</height>
+      <width>351</width>
+      <height>481</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
       <widget class="QWidget" name="horizontalWidget" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>325</height>
+         <height>0</height>
         </size>
        </property>
        <property name="layoutDirection">
@@ -73,6 +79,12 @@ QCheckBox::indicator:unchecked {
        <layout class="QHBoxLayout" name="hLayoutMachines">
         <item>
          <widget class="QFrame" name="frameNeander">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
           </property>
@@ -337,7 +349,7 @@ QCheckBox::indicator:unchecked {
            <property name="maximumSize">
             <size>
              <width>271</width>
-             <height>261</height>
+             <height>374</height>
             </size>
            </property>
            <property name="styleSheet">
@@ -367,6 +379,9 @@ QCheckBox::indicator:unchecked {
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_6">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QComboBox" name="comboBoxMachine">
          <property name="currentIndex">
@@ -396,6 +411,22 @@ QCheckBox::indicator:unchecked {
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="spacing">
+          <number>4</number>
+         </property>
+         <item>
+          <widget class="QCommandLinkButton" name="commandLinkButton">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Montar</string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QCommandLinkButton" name="commandLinkButtonRun">
            <property name="maximumSize">
@@ -437,16 +468,41 @@ QCheckBox::indicator:unchecked {
      </item>
     </layout>
    </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>430</y>
+      <width>401</width>
+      <height>61</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>410</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mensagens:</string>
+    </property>
+   </widget>
    <zorder>textEditSouceCode</zorder>
    <zorder>tableViewMemory</zorder>
    <zorder>verticalLayoutWidget_4</zorder>
+   <zorder>textEdit</zorder>
+   <zorder>label</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>850</width>
+     <width>916</width>
      <height>25</height>
     </rect>
    </property>
@@ -472,7 +528,18 @@ QCheckBox::indicator:unchecked {
     <addaction name="separator"/>
     <addaction name="actionRelatar_um_problema"/>
    </widget>
+   <widget class="QMenu" name="menuMemoria">
+    <property name="title">
+     <string>Memória</string>
+    </property>
+    <addaction name="actionCarregar"/>
+    <addaction name="actionSalvar"/>
+    <addaction name="separator"/>
+    <addaction name="actionZerar_mem_ria"/>
+    <addaction name="actionZerar_registradores"/>
+   </widget>
    <addaction name="menuPrograma"/>
+   <addaction name="menuMemoria"/>
    <addaction name="menuAjuda"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -545,6 +612,26 @@ QCheckBox::indicator:unchecked {
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionCarregar">
+   <property name="text">
+    <string>Carregar</string>
+   </property>
+  </action>
+  <action name="actionSalvar">
+   <property name="text">
+    <string>Salvar</string>
+   </property>
+  </action>
+  <action name="actionZerar_mem_ria">
+   <property name="text">
+    <string>Zerar memória</string>
+   </property>
+  </action>
+  <action name="actionZerar_registradores">
+   <property name="text">
+    <string>Zerar registradores</string>
    </property>
   </action>
  </widget>
