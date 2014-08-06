@@ -21,12 +21,13 @@ public:
     virtual Instruction* getInstructionFromMnemonic(QString);
     virtual bool validateInstructions(QStringList);
 
-private:
-    Register* AC;
-    Bit *N, *Z;
     static const int MEM_SIZE = 256;
     static const int MAX_VALUE = 255;
     static const int MAX_VALUE_SIGN = 127;   //127 = 0x7F que eh o maior numero positico em 8 bits em complemente B-1
+private:
+    Register* AC;
+    Bit *N, *Z;
+
 };
 
 #endif // NEANDERMACHINE_H

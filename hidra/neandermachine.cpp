@@ -6,6 +6,7 @@ NeanderMachine::NeanderMachine()
     QVector<Register*>::iterator i;
     for(i = registers.begin(); i != registers.end(); i++) {
         *i = new Register();
+        (*i)->setNumOfBits(8);
     }
     PC = registers[1];
     AC = registers[0];
@@ -120,6 +121,7 @@ void NeanderMachine::step() {
     PC->incrementValue();
     if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
         this->running = false;
+        return;
     }
 
     switch (currentInstruction->getValue()) {
@@ -195,7 +197,7 @@ void NeanderMachine::assemble(QString filename) {
     sourceLines.removeAll("");  //remove as linhas em branco
 
     int pc = 0;
-    QVector<Byte *> memory = outputMachine->getMemory();
+    //QVector<Byte *> memory = outputMachine->getMemory();
     for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
         QStringList line = (*i).split(" ", QString::SkipEmptyParts);
          std::cout << line.join(" ").toStdString() << std::endl;
@@ -275,10 +277,10 @@ void NeanderMachine::assemble(QString filename) {
         }
     }
 
-    outputMachine->setMemory(memory);
-    outputMachine->printStatusDebug();
+    //outputMachine->setMemory(memory);
+    //outputMachine->printStatusDebug();
     QString outputFilename = filename.split('.').at(0) + ".mem";
-    outputMachine->save(outputFilename);
+    save(outputFilename);
 }
 
 bool NeanderMachine::validateInstructions(QStringList instructionList)

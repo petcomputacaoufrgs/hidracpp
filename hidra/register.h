@@ -1,6 +1,9 @@
 #ifndef REGISTER_H
 #define REGISTER_H
 
+#include <QDebug>
+#include <cmath>
+
 class Register
 {
 public:

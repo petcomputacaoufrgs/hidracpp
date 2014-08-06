@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>HidraGui</string>
+   <string>Hidra - PET Computaçao</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QCheckBox::indicator{
@@ -28,8 +28,14 @@ QCheckBox::indicator:unchecked {
 
 }</string>
   </property>
+  <property name="locale">
+   <locale language="Portuguese" country="Brazil"/>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <widget class="QTableView" name="tableViewMemory">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>430</x>
@@ -54,7 +60,7 @@ QCheckBox::indicator:unchecked {
      <rect>
       <x>560</x>
       <y>10</y>
-      <width>351</width>
+      <width>341</width>
       <height>481</height>
      </rect>
     </property>
@@ -96,7 +102,7 @@ QCheckBox::indicator:unchecked {
             <rect>
              <x>10</x>
              <y>10</y>
-             <width>211</width>
+             <width>228</width>
              <height>61</height>
             </rect>
            </property>
@@ -105,6 +111,9 @@ QCheckBox::indicator:unchecked {
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
                <widget class="QCheckBox" name="checkBoxN_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>N</string>
                 </property>
@@ -121,6 +130,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxZ_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Z</string>
                 </property>
@@ -131,7 +143,20 @@ QCheckBox::indicator:unchecked {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_5">
               <item>
-               <widget class="QLCDNumber" name="lcdNumber_7">
+               <widget class="QLabel" name="label_2">
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>AC:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumberAC_Neander">
                 <property name="frameShadow">
                  <enum>QFrame::Raised</enum>
                 </property>
@@ -156,7 +181,20 @@ QCheckBox::indicator:unchecked {
                </widget>
               </item>
               <item>
-               <widget class="QLCDNumber" name="lcdNumber_8"/>
+               <widget class="QLabel" name="label_3">
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>PC:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumberPC_Neander"/>
               </item>
              </layout>
             </item>
@@ -189,6 +227,9 @@ QCheckBox::indicator:unchecked {
              <layout class="QHBoxLayout" name="horizontalLayout_2">
               <item>
                <widget class="QCheckBox" name="checkBoxZ_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Z</string>
                 </property>
@@ -196,6 +237,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxN_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>N</string>
                 </property>
@@ -212,6 +256,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxB_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>B</string>
                 </property>
@@ -219,6 +266,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxV">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>V</string>
                 </property>
@@ -226,6 +276,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxC_3">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>C</string>
                 </property>
@@ -236,15 +289,43 @@ QCheckBox::indicator:unchecked {
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <widget class="QLCDNumber" name="lcdNumber_5"/>
+               <widget class="QLabel" name="label_4">
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>AC:</string>
+                </property>
+               </widget>
               </item>
               <item>
-               <widget class="QLCDNumber" name="lcdNumber_6"/>
+               <widget class="QLCDNumber" name="lcdNumberAC_Ahmes"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="maximumSize">
+                 <size>
+                  <width>30</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>PC:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLCDNumber" name="lcdNumberPC_Ahmes"/>
               </item>
              </layout>
             </item>
            </layout>
           </widget>
+          <zorder>verticalLayoutWidget</zorder>
+          <zorder>label_4</zorder>
          </widget>
         </item>
         <item>
@@ -269,6 +350,9 @@ QCheckBox::indicator:unchecked {
              <layout class="QHBoxLayout" name="horizontalLayout_6">
               <item>
                <widget class="QCheckBox" name="checkBoxZ_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>Z</string>
                 </property>
@@ -276,6 +360,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxN_5">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>N</string>
                 </property>
@@ -292,6 +379,9 @@ QCheckBox::indicator:unchecked {
               </item>
               <item>
                <widget class="QCheckBox" name="checkBoxC_4">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string>C</string>
                 </property>
@@ -469,6 +559,9 @@ QCheckBox::indicator:unchecked {
     </layout>
    </widget>
    <widget class="QTextEdit" name="textEdit">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>20</x>

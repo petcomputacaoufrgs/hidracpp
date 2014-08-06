@@ -8,6 +8,7 @@ AhmesMachine::AhmesMachine()
     PC = registers[1];
     AC = registers[0];
     AC->setValue(0);
+    PC->setValue(0);
 
     memory = QVector<Byte*>(256);
     for (int k = 0; k < memory.size(); k++) memory[k] = new Byte(0);
@@ -20,6 +21,8 @@ AhmesMachine::AhmesMachine()
     V = flags[2];
     C = flags[3];
     B = flags[4];
+
+    Z->setValue(true);
 
     instructions = QVector<Instruction*>(24);
     instructions[0] = new Instruction("nop", 0, 0);
