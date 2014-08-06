@@ -415,7 +415,7 @@ QCheckBox::indicator:unchecked {
           <number>4</number>
          </property>
          <item>
-          <widget class="QCommandLinkButton" name="commandLinkButton">
+          <widget class="QCommandLinkButton" name="commandLinkButtonMontar">
            <property name="maximumSize">
             <size>
              <width>16777215</width>
@@ -533,9 +533,9 @@ QCheckBox::indicator:unchecked {
      <string>Memória</string>
     </property>
     <addaction name="actionCarregar"/>
-    <addaction name="actionSalvar"/>
+    <addaction name="actionSaveMem"/>
     <addaction name="separator"/>
-    <addaction name="actionZerar_mem_ria"/>
+    <addaction name="actionZerarMemoria"/>
     <addaction name="actionZerar_registradores"/>
    </widget>
    <addaction name="menuPrograma"/>
@@ -619,12 +619,12 @@ QCheckBox::indicator:unchecked {
     <string>Carregar</string>
    </property>
   </action>
-  <action name="actionSalvar">
+  <action name="actionSaveMem">
    <property name="text">
     <string>Salvar</string>
    </property>
   </action>
-  <action name="actionZerar_mem_ria">
+  <action name="actionZerarMemoria">
    <property name="text">
     <string>Zerar memória</string>
    </property>

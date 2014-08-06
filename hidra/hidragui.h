@@ -49,6 +49,18 @@ private slots:
 
     void on_actionOpen_triggered();
 
+    void on_textEditSouceCode_textChanged();
+
+    void on_actionCarregar_triggered();
+
+    void on_actionSaveMem_triggered();
+
+    void on_actionZerarMemoria_triggered();
+
+    void on_actionZerar_registradores_triggered();
+
+    void on_commandLinkButtonMontar_clicked();
+
 private:
     Ui::HidraGui *ui;
     Machine *machine;
