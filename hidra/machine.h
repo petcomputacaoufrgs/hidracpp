@@ -55,7 +55,7 @@ protected:
 
 
 signals:
-
+    void buildErrorDetected(QString);
 public slots:
 
 };

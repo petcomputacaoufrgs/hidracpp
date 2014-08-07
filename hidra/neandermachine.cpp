@@ -184,9 +184,10 @@ void NeanderMachine::run() {
 }
 
 void NeanderMachine::assemble(QString filename) {
-    NeanderMachine *outputMachine = new NeanderMachine();
     QHash<QString, int> labelsMap;
+    bool ok;
     QFile sourceFile(filename);
+    qDebug() << filename;
     sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString source = sourceFile.readAll();
     QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
@@ -197,10 +198,8 @@ void NeanderMachine::assemble(QString filename) {
     sourceLines.removeAll("");  //remove as linhas em branco
 
     int pc = 0;
-    //QVector<Byte *> memory = outputMachine->getMemory();
     for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
         QStringList line = (*i).split(" ", QString::SkipEmptyParts);
-         std::cout << line.join(" ").toStdString() << std::endl;
         Instruction *atual;
         if (line.at(0).contains(QRegExp("(.*:)"))) {
             QString key = line.first();
@@ -208,26 +207,69 @@ void NeanderMachine::assemble(QString filename) {
             key.chop(1);
             labelsMap.insert(key, pc);
         } else if(line.at(0) == "org") {
-            pc = line.at(1).toInt();
+            pc = line.at(1).toInt(&ok, 0);
+            if(!ok) {
+                emit buildErrorDetected("Endereço desejado não reconhecido");
+                return;
+            } else if(pc > MAX_VALUE) {
+                emit buildErrorDetected("Endereço pedido excede o limite da memória");
+                return;
+            }
         } else if(line.at(0) == "db") {
+            if(pc > MAX_VALUE) {
+                emit buildErrorDetected("Código excede o limite da memória");
+                return;
+            }
             pc++;
         } else if(line.at(0) == "dw") {
+            if(pc > MAX_VALUE) {
+                emit buildErrorDetected("Código excede o limite da memória");
+                return;
+            }
             pc += 2;
         } else if(line.at(0) == "dab") {
+            if(pc > MAX_VALUE) {
+                emit buildErrorDetected("Código excede o limite da memória");
+                return;
+            }
             if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
                 QStringList dabValue = line.at(1).split("(");
                 dabValue.last().chop(1);
-                pc += dabValue.first().toInt();
+                pc += dabValue.first().toInt(&ok, 0);
+                if(pc > (MAX_VALUE + 1)) {
+                    emit buildErrorDetected("Código excede o limite da memória");
+                    return;
+                }
             }
         } else if(line.at(0) == "daw") {
+            if(pc > MAX_VALUE) {
+                emit buildErrorDetected("Código excede o limite da memória");
+                return;
+            }
             if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
                 QStringList dawValue = line.at(1).split("(");
                 dawValue.last().chop(1);
                 pc += dawValue.first().toInt() * 2;
+                if(pc > (MAX_VALUE + 1)) {
+                    emit buildErrorDetected("Código excede o limite da memória");
+                    return;
+                }
             }
         } else {
+            if(pc > MAX_VALUE) {
+                emit buildErrorDetected("Código excede o limite da memória");
+                return;
+            }
             atual = getInstructionFromMnemonic(line.at(0));
+            if(atual == NULL) {
+                emit buildErrorDetected("Instrução não reconhecida: " + line.at(0));
+                return;
+            }
             pc += 1 + atual->getNumberOfArguments();
+            if(pc > (MAX_VALUE + 1)) {
+                emit buildErrorDetected("Código excede o limite da memória");
+                return;
+            }
         }
     }
     sourceLines.removeAll("");  //remove as linhas em branco
@@ -277,8 +319,6 @@ void NeanderMachine::assemble(QString filename) {
         }
     }
 
-    //outputMachine->setMemory(memory);
-    //outputMachine->printStatusDebug();
     QString outputFilename = filename.split('.').at(0) + ".mem";
     save(outputFilename);
 }

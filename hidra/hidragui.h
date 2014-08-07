@@ -33,6 +33,8 @@ public slots:
     void updateMemoryMap();
     void updateFlagsLeds();
     void updateLCDDisplay();
+
+    void addError(QString);
 private slots:
     void on_actionPasso_triggered();
 

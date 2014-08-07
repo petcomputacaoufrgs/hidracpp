@@ -16,6 +16,9 @@ HidraGui::HidraGui(QWidget *parent) :
     savedFile = false;
     model = NULL;
     machine = NULL;
+
+    connect(this, SLOT(addError(QString)), machine, SIGNAL(buildErrorDetected(QString)));
+
     // limpa a interface, e seta a maquina selecionada como o neander
     ui->comboBoxMachine->setCurrentIndex(0);
 
@@ -48,7 +51,7 @@ void HidraGui::save()
     }
     QTextStream out(&file);
     out << ui->textEditSouceCode->toPlainText();
-
+    file.close();
     savedFile = true;
 }
 
@@ -167,6 +170,11 @@ void HidraGui::updateLCDDisplay()
     default:
         break;
     }
+}
+
+void HidraGui::addError(QString errorString)
+{
+    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\ntcholoris");
 }
 
 void HidraGui::on_actionPasso_triggered()
@@ -299,6 +307,7 @@ void HidraGui::on_actionOpen_triggered()
         QTextStream in(&file);
         ui->textEditSouceCode->setPlainText(in.readAll());
         savedFile = true;
+        file.close();
     }
 }
 

@@ -60,7 +60,7 @@ QCheckBox::indicator:unchecked {
      <rect>
       <x>560</x>
       <y>10</y>
-      <width>341</width>
+      <width>530</width>
       <height>481</height>
      </rect>
     </property>
@@ -324,8 +324,6 @@ QCheckBox::indicator:unchecked {
             </item>
            </layout>
           </widget>
-          <zorder>verticalLayoutWidget</zorder>
-          <zorder>label_4</zorder>
          </widget>
         </item>
         <item>
@@ -558,7 +556,7 @@ QCheckBox::indicator:unchecked {
      </item>
     </layout>
    </widget>
-   <widget class="QTextEdit" name="textEdit">
+   <widget class="QTextEdit" name="textEditError">
     <property name="enabled">
      <bool>false</bool>
     </property>
@@ -587,7 +585,7 @@ QCheckBox::indicator:unchecked {
    <zorder>textEditSouceCode</zorder>
    <zorder>tableViewMemory</zorder>
    <zorder>verticalLayoutWidget_4</zorder>
-   <zorder>textEdit</zorder>
+   <zorder>textEditError</zorder>
    <zorder>label</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -596,7 +594,7 @@ QCheckBox::indicator:unchecked {
      <x>0</x>
      <y>0</y>
      <width>916</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPrograma">
