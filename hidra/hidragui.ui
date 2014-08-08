@@ -34,7 +34,7 @@ QCheckBox::indicator:unchecked {
   <widget class="QWidget" name="centralWidget">
    <widget class="QTableView" name="tableViewMemory">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -43,6 +43,12 @@ QCheckBox::indicator:unchecked {
       <width>121</width>
       <height>481</height>
      </rect>
+    </property>
+    <property name="selectionMode">
+     <enum>QAbstractItemView::SingleSelection</enum>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
     </property>
    </widget>
    <widget class="QTextEdit" name="textEditSouceCode">
@@ -558,7 +564,7 @@ QCheckBox::indicator:unchecked {
    </widget>
    <widget class="QTextEdit" name="textEditError">
     <property name="enabled">
-     <bool>false</bool>
+     <bool>true</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -567,6 +573,9 @@ QCheckBox::indicator:unchecked {
       <width>401</width>
       <height>61</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -594,7 +603,7 @@ QCheckBox::indicator:unchecked {
      <x>0</x>
      <y>0</y>
      <width>916</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPrograma">

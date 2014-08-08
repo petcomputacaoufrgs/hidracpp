@@ -14,10 +14,9 @@ HidraGui::HidraGui(QWidget *parent) :
     //FIM DO BETA CODE
     currentFile = "";
     savedFile = false;
+    buildSuccessful = true;
     model = NULL;
     machine = NULL;
-
-    connect(this, SLOT(addError(QString)), machine, SIGNAL(buildErrorDetected(QString)));
 
     // limpa a interface, e seta a maquina selecionada como o neander
     ui->comboBoxMachine->setCurrentIndex(0);
@@ -172,15 +171,19 @@ void HidraGui::updateLCDDisplay()
     }
 }
 
+void HidraGui::cleanErrorsField()
+{
+    ui->textEditError->clear();
+}
+
 void HidraGui::addError(QString errorString)
 {
-    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\ntcholoris");
+    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
+    buildSuccessful = false;
 }
 
 void HidraGui::on_actionPasso_triggered()
 {
-    qDebug() << "step";
-    machine->printStatusDebug();
     machine->step();
     updateMemoryMap();
     updateFlagsLeds();
@@ -189,7 +192,6 @@ void HidraGui::on_actionPasso_triggered()
 
 void HidraGui::on_actionRodar_triggered()
 {
-    qDebug() << "run";
     machine->run();
     updateMemoryMap();
     updateFlagsLeds();
@@ -206,8 +208,12 @@ void HidraGui::on_actionMontar_triggered()
         }
     }
     if(savedFile) {
+        cleanErrorsField();
         machine->assemble(currentFile);
-        machine->load(currentFile.split(".")[0].append(".mem"));
+        if(buildSuccessful) {
+            machine->load(currentFile.split(".")[0].append(".mem"));
+        }
+        buildSuccessful = true;
         updateMemoryMap();
         updateFlagsLeds();
         updateLCDDisplay();
@@ -227,7 +233,6 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     case 0:
         ui->frameNeander->setVisible(true);
         machine = new NeanderMachine();
-        machine->printStatusDebug();
         break;
     case 1:
         ui->frameAhmes->setVisible(true);
@@ -245,6 +250,7 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     default:
         break;
     }
+    connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();

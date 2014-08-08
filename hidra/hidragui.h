@@ -33,6 +33,7 @@ public slots:
     void updateMemoryMap();
     void updateFlagsLeds();
     void updateLCDDisplay();
+    void cleanErrorsField();
 
     void addError(QString);
 private slots:
@@ -72,7 +73,7 @@ private:
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFile;
-    bool savedFile;
+    bool savedFile, buildSuccessful;
     QStandardItemModel *model;
 };
 

@@ -187,7 +187,6 @@ void NeanderMachine::assemble(QString filename) {
     QHash<QString, int> labelsMap;
     bool ok;
     QFile sourceFile(filename);
-    qDebug() << filename;
     sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString source = sourceFile.readAll();
     QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
@@ -222,7 +221,7 @@ void NeanderMachine::assemble(QString filename) {
             }
             pc++;
         } else if(line.at(0) == "dw") {
-            if(pc > MAX_VALUE) {
+            if(pc > (MAX_VALUE - 1)) {  //-1 pq o dw usa 2 ends
                 emit buildErrorDetected("Código excede o limite da memória");
                 return;
             }
