@@ -8,8 +8,8 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->setupUi(this);
 
     //CODIGO PARA BETA VERSION
-    ui->comboBoxMachine->removeItem(3);
-    ui->comboBoxMachine->removeItem(2);
+//    ui->comboBoxMachine->removeItem(3);
+//    ui->comboBoxMachine->removeItem(2);
 
     //FIM DO BETA CODE
     currentFile = "";
