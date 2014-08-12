@@ -272,6 +272,7 @@ void NeanderMachine::assemble(QString filename) {
                 emit buildErrorDetected("Código excede o limite da memória");
                 return;
             }
+
         }
     }
     sourceLines.removeAll("");  //remove as linhas em branco
@@ -316,7 +317,17 @@ void NeanderMachine::assemble(QString filename) {
             atual = getInstructionFromMnemonic(line.at(0));
             line.replace(0, QString::number(atual->getValue()));
             foreach (QString byte, line) {
-                memory[pc++]->setValue((unsigned char)byte.toInt());
+                memory[pc++]->setValue((unsigned char)byte.toInt(&ok, 0));
+                if(!ok) {
+                    emit buildErrorDetected("Valor nao reconhecido: " + byte);
+                    qDeleteAll(memory);
+                    memory = QVector<Byte *>(MEM_SIZE);
+                    QVector<Byte*>::iterator j;
+                    for(j = memory.begin(); j != memory.end();j++) {
+                        *j = new Byte();
+                    }
+                    return;
+                }
             }
         }
     }
