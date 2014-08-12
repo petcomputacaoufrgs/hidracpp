@@ -24,6 +24,16 @@ void Machine::setRegisters(const QVector<Register *> &value)
 {
     registers = value;
 }
+QVector<Instruction *> Machine::getInstructions() const
+{
+    return instructions;
+}
+
+void Machine::setInstructions(const QVector<Instruction *> &value)
+{
+    instructions = value;
+}
+
 
 QVector<Bit *> Machine::getFlags() const
 {

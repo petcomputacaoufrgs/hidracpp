@@ -76,6 +76,7 @@ private:
     QString currentFile;
     bool savedFile, buildSuccessful;
     QStandardItemModel *model;
+    HidraHighlighter *highlighter;
 };
 
 #endif // HIDRAGUI_H

@@ -11,7 +11,7 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->comboBoxMachine->removeItem(3);
     ui->comboBoxMachine->removeItem(2);
 
-    HidraHighlighter *highlighter = new HidraHighlighter(ui->textEditSouceCode->document());
+    highlighter = new HidraHighlighter(ui->textEditSouceCode->document());
 
     //FIM DO BETA CODE
     currentFile = "";
@@ -253,6 +253,7 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
         break;
     }
     connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
+    highlighter->setTargetMachine(machine);
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();

@@ -16,7 +16,13 @@ void HidraHighlighter::highlightBlock(const QString & text)
     QTextCharFormat myClassFormat;
     myClassFormat.setFontWeight(QFont::Bold);
     myClassFormat.setForeground(Qt::darkMagenta);
-    QString pattern = "^lda$";
+    QVector<Instruction *> instructions = targetMachine->getInstructions();
+    QString pattern = "(";
+    foreach (Instruction *tmp, instructions) {
+        pattern.append(tmp->getMnemonic()+"|");
+    }
+    pattern.chop(1);
+    pattern.append(")");
 
     QRegExp expression(pattern);
     int index = text.indexOf(expression);
@@ -26,3 +32,13 @@ void HidraHighlighter::highlightBlock(const QString & text)
         index = text.indexOf(expression, index + length);
     }
 }
+Machine *HidraHighlighter::getTargetMachine() const
+{
+    return targetMachine;
+}
+
+void HidraHighlighter::setTargetMachine(Machine *value)
+{
+    targetMachine = value;
+}
+

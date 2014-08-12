@@ -45,6 +45,9 @@ public:
     QVector<Register *> getRegisters() const;
     void setRegisters(const QVector<Register *> &value);
 
+    QVector<Instruction *> getInstructions() const;
+    void setInstructions(const QVector<Instruction *> &value);
+
 protected:
     QVector<Register*> registers;
     Register* PC;
