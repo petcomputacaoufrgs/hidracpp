@@ -32,7 +32,7 @@ RamsesMachine::RamsesMachine()
     instructions = QVector<Instruction*>(16);
     instructions[0]  = new Instruction("nop",   0, 0);
     instructions[1]  = new Instruction("str",  16, 1);
-    instructions[2]  = new Instruction("lda",  32, 1);
+    instructions[2]  = new Instruction("ldr",  32, 1);
     instructions[3]  = new Instruction("add",  48, 1);
     instructions[4]  = new Instruction( "or",  64, 1);
     instructions[5]  = new Instruction("and",  80, 1);
@@ -230,10 +230,146 @@ void RamsesMachine::run()
 
 void RamsesMachine::assemble(QString filename)
 {
+//    NeanderMachine *outputMachine = new NeanderMachine();
+    QHash<QString, int> labelsMap;
+    QFile sourceFile(filename);
+    sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    QString source = sourceFile.readAll();
+    QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
+    QStringList::iterator i;
+    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+        (*i) = (*i).split(';').at(0).toLower().simplified();    //elimina os comentarios do codigo
+    }
+    unsigned int sumAux;
+    sourceLines.removeAll("");  //remove as linhas em branco
 
+    int pc = 0;
+    //QVector<Byte *> memory = outputMachine->getMemory();
+    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+        QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+         std::cout << line.join(" ").toStdString() << std::endl;
+        Instruction *atual;
+        if (line.at(0).contains(QRegExp("(.*:)"))) {
+            QString key = line.first();
+            (*i).replace(key, "");
+            key.chop(1);
+            labelsMap.insert(key, pc);
+        } else if(line.at(0) == "org") {
+            pc = line.at(1).toInt();
+        } else if(line.at(0) == "db") {
+            pc++;
+        } else if(line.at(0) == "dw") {
+            pc += 2;
+        } else if(line.at(0) == "dab") {
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dabValue = line.at(1).split("(");
+                dabValue.last().chop(1);
+                pc += dabValue.first().toInt();
+            }
+        } else if(line.at(0) == "daw") {
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dawValue = line.at(1).split("(");
+                dawValue.last().chop(1);
+                pc += dawValue.first().toInt() * 2;
+            }
+        } else {
+            atual = getInstructionFromMnemonic(line.at(0));
+            pc += 1 + atual->getNumberOfArguments();
+        }
+    }
+    sourceLines.removeAll("");  //remove as linhas em branco
+    foreach(QString key, labelsMap.keys()) {
+        sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
+    }
+    pc = 0;
+    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
+        Instruction *atual;
+
+        QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+
+        if (line.at(0).contains(QRegExp("(.*:)"))) {
+            //skip
+        } else if(line.at(0) == "org") {
+            pc = line.at(1).toInt();
+        } else if(line.at(0) == "db") {
+            memory[pc++]->setValue((unsigned char)line.last().toInt());
+        } else if(line.at(0) == "dw") {
+            int word = line.last().toInt();
+            memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
+            memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
+        } else if(line.at(0) == "dab") {
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dabValue = line.at(1).split("(");
+                dabValue.last().chop(1);
+                for(int i = 0; i < dabValue.first().toInt(); i++) {
+                    memory[pc++]->setValue((unsigned char) dabValue.last().toInt());
+                }
+            }
+        } else if(line.at(0) == "daw") {
+            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
+                QStringList dabValue = line.at(1).split("(");
+                dabValue.last().chop(1);
+                for(int i = 0; i < dabValue.first().toInt(); i++) {
+                    int word = dabValue.last().toInt();
+                    memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8));
+                    memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
+                }
+            }
+        } else {
+            atual = getInstructionFromMnemonic(line.at(0));
+            line.replace(0, QString::number(atual->getValue()));
+            memory[pc]->setValue((unsigned char)line[0].toInt());
+            for(int i=1; i<line.length();i++)
+            {
+
+              /*  if(line[i]=="a" || line[i]=="A" && i==1)
+                {
+                    sumAux=memory[pc]->getValue();
+                    memory[pc]->setValue();
+                }
+                else*/ if((line[i]=="b" || line[i]=="B") && i==1)
+                {
+                    sumAux= (int)memory[pc]->getValue() + 4;
+                    memory[pc]->setValue((unsigned char)sumAux);
+                    sumAux= (int)memory[pc]->getValue();
+                }
+                else if((line[i]=="x" || line[i]=="X") && i==1)
+                {
+                    memory[pc++]->setValue(memory[pc]->getValue()+5);
+                }
+                else if(line[i].contains("#"))
+                {
+                    sumAux= (int)memory[pc]->getValue() + 2;
+                    memory[pc++]->setValue((unsigned char)sumAux);
+                    line[i].replace("#","");
+                    memory[pc++]->setValue((unsigned char)line[i].toInt());
+                }
+                else if(line[i].contains(",i$") || line[i].contains(",I$"))
+                {
+                    memory[pc]->setValue(memory[pc]->getValue()+(unsigned char)1);
+                    memory[pc++]->setValue((unsigned char)line[i].toInt());
+                }
+                else if(line[i].contains(",x$") || line[i].contains(",X$"))
+                {
+                    memory[pc]->setValue(memory[pc]->getValue()+(unsigned char)3);
+                    memory[pc++]->setValue((unsigned char)line[i].toInt());
+                }
+
+
+
+            //foreach (QString byte, line) {
+                //
+            }
+        }
+
+    }
+    //outputMachine->setMemory(memory);
+    //outputMachine->printStatusDebug();
+    QString outputFilename = filename.split('.').at(0) + ".mem";
+    save(outputFilename);
 }
 
-const Instruction* RamsesMachine::getInstructionFromValue(int value)
+Instruction* RamsesMachine::getInstructionFromValue(int value)
 {
     QVector<Instruction*>::iterator i;
     value &= 0b11110000; // Filter bits
@@ -245,7 +381,7 @@ const Instruction* RamsesMachine::getInstructionFromValue(int value)
     }
     return NULL;
 }
-const Instruction* RamsesMachine::getInstructionFromMnemonic(QString desiredInstruction) {
+Instruction* RamsesMachine::getInstructionFromMnemonic(QString desiredInstruction) {
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getMnemonic() == desiredInstruction) {
