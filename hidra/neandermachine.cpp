@@ -205,7 +205,9 @@ void NeanderMachine::assemble(QString filename) {
             (*i).replace(key, "");
             key.chop(1);
             labelsMap.insert(key, pc);
-            i--;
+            if(!(*i).isEmpty()) {
+                i--;
+            }
         } else if(line.at(0) == "org") {
             pc = line.at(1).toInt(&ok, 0);
             if(!ok) {
