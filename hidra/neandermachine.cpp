@@ -218,18 +218,30 @@ void NeanderMachine::assemble(QString filename) {
                 return;
             }
         } else if(line.at(0) == "db") {
+            if(line.count() != 1) {
+                emit buildErrorDetected("Número de parâmetros inválido");
+                return;
+            }
             if(pc > MAX_VALUE) {
                 emit buildErrorDetected("Código excede o limite da memória");
                 return;
             }
             pc++;
         } else if(line.at(0) == "dw") {
+            if(line.count() != 1) {
+                emit buildErrorDetected("Número de parâmetros inválido");
+                return;
+            }
             if(pc > (MAX_VALUE - 1)) {  //-1 pq o dw usa 2 ends
                 emit buildErrorDetected("Código excede o limite da memória");
                 return;
             }
             pc += 2;
         } else if(line.at(0) == "dab") {
+            if(line.count() != 1) {
+                emit buildErrorDetected("Número de parâmetros inválido");
+                return;
+            }
             if(pc > MAX_VALUE) {
                 emit buildErrorDetected("Código excede o limite da memória");
                 return;
@@ -244,6 +256,10 @@ void NeanderMachine::assemble(QString filename) {
                 }
             }
         } else if(line.at(0) == "daw") {
+            if(line.count() != 1) {
+                emit buildErrorDetected("Número de parâmetros inválido");
+                return;
+            }
             if(pc > MAX_VALUE) {
                 emit buildErrorDetected("Código excede o limite da memória");
                 return;
@@ -288,11 +304,11 @@ void NeanderMachine::assemble(QString filename) {
         if (line.at(0).contains(QRegExp("(.*:)"))) {
             //skip
         } else if(line.at(0) == "org") {
-            pc = line.at(1).toInt();
+            pc = line.at(1).toInt(&ok, 0);
         } else if(line.at(0) == "db") {
-            memory[pc++]->setValue((unsigned char)line.last().toInt());
+            memory[pc++]->setValue((unsigned char)line.last().toInt(&ok, 0));
         } else if(line.at(0) == "dw") {
-            int word = line.last().toInt();
+            int word = line.last().toInt(&ok, 0);
             memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
             memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
         } else if(line.at(0) == "dab") {
@@ -300,7 +316,7 @@ void NeanderMachine::assemble(QString filename) {
                 QStringList dabValue = line.at(1).split("(");
                 dabValue.last().chop(1);
                 for(int i = 0; i < dabValue.first().toInt(); i++) {
-                    memory[pc++]->setValue((unsigned char) dabValue.last().toInt());
+                    memory[pc++]->setValue((unsigned char) dabValue.last().toInt(&ok, 0));
                 }
             }
         } else if(line.at(0) == "daw") {
@@ -308,7 +324,7 @@ void NeanderMachine::assemble(QString filename) {
                 QStringList dabValue = line.at(1).split("(");
                 dabValue.last().chop(1);
                 for(int i = 0; i < dabValue.first().toInt(); i++) {
-                    int word = dabValue.last().toInt();
+                    int word = dabValue.last().toInt(&ok, 0);
                     memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8));
                     memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
                 }
@@ -320,6 +336,15 @@ void NeanderMachine::assemble(QString filename) {
                 memory[pc++]->setValue((unsigned char)byte.toInt(&ok, 0));
                 if(!ok) {
                     emit buildErrorDetected("Valor nao reconhecido: " + byte);
+                    qDeleteAll(memory);
+                    memory = QVector<Byte *>(MEM_SIZE);
+                    QVector<Byte*>::iterator j;
+                    for(j = memory.begin(); j != memory.end();j++) {
+                        *j = new Byte();
+                    }
+                    return;
+                } else if(byte.toInt(&ok, 0) > MAX_VALUE) {
+                    emit buildErrorDetected("Valor maior que o limite suportado: " + byte);
                     qDeleteAll(memory);
                     memory = QVector<Byte *>(MEM_SIZE);
                     QVector<Byte*>::iterator j;
