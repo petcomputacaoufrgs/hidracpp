@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QDebug>
+#include "hidrahighlighter.h"
 #include "neandermachine.h"
 #include "ahmesmachine.h"
 #include "ramsesmachine.h"

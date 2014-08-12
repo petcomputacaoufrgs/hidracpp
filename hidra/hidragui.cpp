@@ -11,6 +11,8 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->comboBoxMachine->removeItem(3);
     ui->comboBoxMachine->removeItem(2);
 
+    HidraHighlighter *highlighter = new HidraHighlighter(ui->textEditSouceCode->document());
+
     //FIM DO BETA CODE
     currentFile = "";
     savedFile = false;

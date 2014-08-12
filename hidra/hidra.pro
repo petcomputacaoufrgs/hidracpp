@@ -22,7 +22,8 @@ SOURCES += main.cpp\
     ramsesmachine.cpp \
     neandermachine.cpp \
     ahmesmachine.cpp \
-    hidracli.cpp
+    hidracli.cpp \
+    hidrahighlighter.cpp
 
 HEADERS  += hidragui.h \
     machine.h \
@@ -33,7 +34,8 @@ HEADERS  += hidragui.h \
     ramsesmachine.h \
     neandermachine.h \
     ahmesmachine.h \
-    hidracli.h
+    hidracli.h \
+    hidrahighlighter.h
 
 FORMS    += hidragui.ui
 
