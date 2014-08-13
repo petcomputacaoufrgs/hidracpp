@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>916</width>
-    <height>551</height>
+    <width>1098</width>
+    <height>545</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -587,7 +587,7 @@ QCheckBox::indicator:unchecked {
       <x>20</x>
       <y>10</y>
       <width>401</width>
-      <height>411</height>
+      <height>401</height>
      </rect>
     </property>
    </widget>
@@ -597,7 +597,7 @@ QCheckBox::indicator:unchecked {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>916</width>
+     <width>1098</width>
      <height>21</height>
     </rect>
    </property>
