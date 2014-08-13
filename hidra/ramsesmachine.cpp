@@ -372,7 +372,7 @@ void RamsesMachine::assemble(QString filename)
 Instruction* RamsesMachine::getInstructionFromValue(int value)
 {
     QVector<Instruction*>::iterator i;
-    value &= 0b11110000; // Filter bits
+    value &= 0xf0; // Filter bits
 
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getValue() == value) {

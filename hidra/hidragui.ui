@@ -2,13 +2,31 @@
 <ui version="4.0">
  <class>HidraGui</class>
  <widget class="QMainWindow" name="HidraGui">
+  <property name="windowModality">
+   <enum>Qt::NonModal</enum>
+  </property>
+  <property name="enabled">
+   <bool>true</bool>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1098</width>
-    <height>545</height>
+    <width>1020</width>
+    <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1020</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1020</width>
+    <height>600</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Hidra - PET Computaçao</string>
@@ -38,10 +56,10 @@ QCheckBox::indicator:unchecked {
     </property>
     <property name="geometry">
      <rect>
-      <x>430</x>
+      <x>620</x>
       <y>10</y>
       <width>121</width>
-      <height>481</height>
+      <height>531</height>
      </rect>
     </property>
     <property name="selectionMode">
@@ -54,10 +72,10 @@ QCheckBox::indicator:unchecked {
    <widget class="QWidget" name="verticalLayoutWidget_4">
     <property name="geometry">
      <rect>
-      <x>560</x>
+      <x>750</x>
       <y>10</y>
       <width>530</width>
-      <height>481</height>
+      <height>531</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -196,6 +214,8 @@ QCheckBox::indicator:unchecked {
             </item>
            </layout>
           </widget>
+          <zorder>verticalLayoutWidget_2</zorder>
+          <zorder>frameAhmes</zorder>
          </widget>
         </item>
         <item>
@@ -558,10 +578,10 @@ QCheckBox::indicator:unchecked {
     </property>
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>430</y>
-      <width>401</width>
-      <height>61</height>
+      <x>10</x>
+      <y>510</y>
+      <width>601</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="readOnly">
@@ -571,8 +591,8 @@ QCheckBox::indicator:unchecked {
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>410</y>
+      <x>11</x>
+      <y>490</y>
       <width>91</width>
       <height>21</height>
      </rect>
@@ -586,8 +606,8 @@ QCheckBox::indicator:unchecked {
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>411</width>
-      <height>401</height>
+      <width>601</width>
+      <height>481</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="layoutSourceCodeHolder"/>
@@ -598,8 +618,8 @@ QCheckBox::indicator:unchecked {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1098</width>
-     <height>25</height>
+     <width>1020</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPrograma">

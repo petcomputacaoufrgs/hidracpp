@@ -5,14 +5,16 @@ HidraHighlighter::HidraHighlighter(QObject *parent) :
 {
 }
 
-HidraHighlighter::HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
+HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
     QSyntaxHighlighter(parent)
 {
 
 }
 
-void HidraHighlighter::highlightBlock(const QString & text)
+void HidraHighlighter::highlightBlock(const QString & text1)
 {
+    QString text;
+    text = text1.toLower();
     QTextCharFormat mnemonicsFormat;
     mnemonicsFormat.setFontWeight(QFont::Bold);
     mnemonicsFormat.setForeground(Qt::darkMagenta);
@@ -35,7 +37,7 @@ void HidraHighlighter::highlightBlock(const QString & text)
     QTextCharFormat commentsFormat;
     commentsFormat.setFontWeight(QFont::Normal);
     commentsFormat.setFontItalic(true);
-    commentsFormat.setForeground(Qt::lightGray);
+    commentsFormat.setForeground(Qt::darkGreen);
     pattern = ";.*";
 
     expression = QRegExp(pattern);

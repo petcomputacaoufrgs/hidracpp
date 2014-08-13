@@ -1,5 +1,7 @@
 #include "hidragui.h"
 #include "ui_hidragui.h"
+#include <QSizeGrip>
+#include "qsizegrip.h"
 
 HidraGui::HidraGui(QWidget *parent) :
     QMainWindow(parent),
@@ -36,6 +38,17 @@ HidraGui::HidraGui(QWidget *parent) :
 HidraGui::~HidraGui()
 {
     delete ui;
+}
+
+bool HidraGui::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::MouseMove)
+    {
+        QSizeGrip *sg = qobject_cast<QSizeGrip*>(obj);
+        if(sg)
+            qDebug() << sg->parentWidget();
+    }
+    return false;
 }
 
 void HidraGui::cleanMachines()

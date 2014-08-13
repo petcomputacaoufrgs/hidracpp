@@ -280,12 +280,12 @@ void AhmesMachine::updateFlags(unsigned char previous_AC, unsigned char operand,
 
     if (shift_rotate_left)
     {
-        C->setValue((previous_AC & 0b10000000) != 0);
+        C->setValue((previous_AC & 0x80) != 0);
     }
 
     if (shift_rotate_right)
     {
-        C->setValue((previous_AC & 0b00000001) != 0);
+        C->setValue((previous_AC & 0x01) != 0);
     }
 }
 
@@ -396,11 +396,11 @@ const Instruction* AhmesMachine::getInstructionFromValue(int value)
 
     // Ignore "don't care" bits:
     if (value < 0x90 || value >= 0xF0)
-        value &= 0b11110000;
+        value &= 0xf0;
     else if (value < 0xC0)
-        value &= 0b11111100; // Special jumps
+        value &= 0xfc; // Special jumps
     else
-        value &= 0b11110011; // Shift and rotate
+        value &= 0xf3; // Shift and rotate
 
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getValue() == value) {

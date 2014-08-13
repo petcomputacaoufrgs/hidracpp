@@ -24,7 +24,7 @@ class HidraGui : public QMainWindow
 public:
     explicit HidraGui(QWidget *parent = 0);
     ~HidraGui();
-
+    bool HidraGui::eventFilter(QObject *obj, QEvent *event);
     void cleanMachines();
     void save();
     void saveAs();
