@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QDebug>
+#include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "neandermachine.h"
 #include "ahmesmachine.h"
@@ -77,6 +78,7 @@ private:
     bool savedFile, buildSuccessful;
     QStandardItemModel *model;
     HidraHighlighter *highlighter;
+    HidraCodeEditor *codeEditor;
 };
 
 #endif // HIDRAGUI_H

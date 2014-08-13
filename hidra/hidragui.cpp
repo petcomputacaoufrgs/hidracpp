@@ -8,10 +8,14 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->setupUi(this);
 
     //CODIGO PARA BETA VERSION
+    codeEditor = new HidraCodeEditor();
+    ui->layoutSourceCodeHolder->addWidget(codeEditor);
+    //ui->textEditSouceCode = new HidraCodeEditor();
+    //ui->textEditSouceCode->show();
     ui->comboBoxMachine->removeItem(3);
     ui->comboBoxMachine->removeItem(2);
 
-    highlighter = new HidraHighlighter(ui->textEditSouceCode->document());
+    highlighter = new HidraHighlighter(codeEditor->document());
 
     //FIM DO BETA CODE
     currentFile = "";
@@ -51,7 +55,7 @@ void HidraGui::save()
         return;
     }
     QTextStream out(&file);
-    out << ui->textEditSouceCode->toPlainText();
+    out << codeEditor->toPlainText();
     file.close();
     savedFile = true;
 }
@@ -314,7 +318,7 @@ void HidraGui::on_actionOpen_triggered()
             return;
         }
         QTextStream in(&file);
-        ui->textEditSouceCode->setPlainText(in.readAll());
+        codeEditor->setPlainText(in.readAll());
         savedFile = true;
         file.close();
     }

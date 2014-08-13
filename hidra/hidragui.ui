@@ -581,15 +581,16 @@ QCheckBox::indicator:unchecked {
      <string>Mensagens:</string>
     </property>
    </widget>
-   <widget class="QPlainTextEdit" name="textEditSouceCode">
+   <widget class="QWidget" name="verticalLayoutWidget_5">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>10</y>
-      <width>401</width>
+      <width>411</width>
       <height>401</height>
      </rect>
     </property>
+    <layout class="QVBoxLayout" name="layoutSourceCodeHolder"/>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -598,7 +599,7 @@ QCheckBox::indicator:unchecked {
      <x>0</x>
      <y>0</y>
      <width>1098</width>
-     <height>21</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPrograma">

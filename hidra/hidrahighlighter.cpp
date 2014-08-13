@@ -13,13 +13,13 @@ HidraHighlighter::HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
 
 void HidraHighlighter::highlightBlock(const QString & text)
 {
-    QTextCharFormat myClassFormat;
-    myClassFormat.setFontWeight(QFont::Bold);
-    myClassFormat.setForeground(Qt::darkMagenta);
+    QTextCharFormat mnemonicsFormat;
+    mnemonicsFormat.setFontWeight(QFont::Bold);
+    mnemonicsFormat.setForeground(Qt::darkMagenta);
     QVector<Instruction *> instructions = targetMachine->getInstructions();
     QString pattern = "(";
     foreach (Instruction *tmp, instructions) {
-        pattern.append(tmp->getMnemonic()+"|");
+        pattern.append("\\b" + tmp->getMnemonic()+"\\b|");
     }
     pattern.chop(1);
     pattern.append(")");
@@ -28,9 +28,24 @@ void HidraHighlighter::highlightBlock(const QString & text)
     int index = text.indexOf(expression);
     while (index >= 0) {
         int length = expression.matchedLength();
-        setFormat(index, length, myClassFormat);
+        setFormat(index, length, mnemonicsFormat);
         index = text.indexOf(expression, index + length);
     }
+
+    QTextCharFormat commentsFormat;
+    commentsFormat.setFontWeight(QFont::Normal);
+    commentsFormat.setFontItalic(true);
+    commentsFormat.setForeground(Qt::lightGray);
+    pattern = ";.*";
+
+    expression = QRegExp(pattern);
+    index = text.indexOf(expression);
+    while (index >= 0) {
+        int length = expression.matchedLength();
+        setFormat(index, length, commentsFormat);
+        index = text.indexOf(expression, index + length);
+    }
+
 }
 Machine *HidraHighlighter::getTargetMachine() const
 {
