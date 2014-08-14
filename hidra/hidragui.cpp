@@ -252,11 +252,11 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     default:
         break;
     }
-    connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
-    highlighter->setTargetMachine(machine);
-    updateMemoryMap();
-    updateFlagsLeds();
-    updateLCDDisplay();
+    if(index != 3) {
+        connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
+        highlighter->setTargetMachine(machine);
+    }
+    updateMachineInterface();
 }
 
 void HidraGui::on_action_Save_triggered()
