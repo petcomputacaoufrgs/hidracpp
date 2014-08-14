@@ -2,8 +2,9 @@
 #define AHMESMACHINE_H
 
 #include "machine.h"
+#include "neandermachine.h"
 
-class AhmesMachine : public Machine
+class AhmesMachine : public NeanderMachine
 {
 public:
     AhmesMachine();
@@ -15,10 +16,10 @@ public:
 
     virtual void step();
     virtual void run();
-    virtual void assemble(QString filename);
+//    virtual void assemble(QString filename);
 
-    virtual const Instruction* getInstructionFromValue(int);
-    virtual const Instruction* getInstructionFromMnemonic(QString);
+    virtual Instruction* getInstructionFromValue(int);
+    virtual Instruction* getInstructionFromMnemonic(QString);
 
 private:
     void updateFlags(unsigned char previous_AC, unsigned char operand, bool addition, bool subtraction, bool shift_rotate_left, bool shift_rotate_right);
