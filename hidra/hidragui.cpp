@@ -247,7 +247,7 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     case 3:
         ui->frameCesar->setVisible(true);
         //machine = new CesarMachine();
-        machine = NULL; //evita o crash
+        machine = new RamsesMachine();  //evita  o crash
         break;
     default:
         break;
@@ -255,8 +255,8 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     if(index != 3) {
         connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
         highlighter->setTargetMachine(machine);
+        updateMachineInterface();
     }
-    updateMachineInterface();
 }
 
 void HidraGui::on_action_Save_triggered()
