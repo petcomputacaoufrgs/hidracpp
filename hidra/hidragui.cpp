@@ -9,11 +9,9 @@ HidraGui::HidraGui(QWidget *parent) :
 
     //CODIGO PARA BETA VERSION
     codeEditor = new HidraCodeEditor();
+    connect(codeEditor, SIGNAL(textChanged()), this, SLOT(on_textEditSouceCode_textChanged()));
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
-    //ui->textEditSouceCode = new HidraCodeEditor();
-    //ui->textEditSouceCode->show();
     ui->comboBoxMachine->removeItem(3);
-    ui->comboBoxMachine->removeItem(2);
 
     highlighter = new HidraHighlighter(codeEditor->document());
 
@@ -27,9 +25,7 @@ HidraGui::HidraGui(QWidget *parent) :
     // limpa a interface, e seta a maquina selecionada como o neander
     ui->comboBoxMachine->setCurrentIndex(0);
 
-    updateMemoryMap();
-    updateFlagsLeds();
-    updateLCDDisplay();
+    updateMachineInterface();
     ui->tableViewMemory->setEditTriggers(0);
 }
 
@@ -188,27 +184,30 @@ void HidraGui::addError(QString errorString)
     buildSuccessful = false;
 }
 
-void HidraGui::on_actionPasso_triggered()
+void HidraGui::updateMachineInterface()
 {
-    machine->step();
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();
 }
 
+void HidraGui::on_actionPasso_triggered()
+{
+    machine->step();
+    updateMachineInterface();
+}
+
 void HidraGui::on_actionRodar_triggered()
 {
     machine->run();
-    updateMemoryMap();
-    updateFlagsLeds();
-    updateLCDDisplay();
+    updateMachineInterface();
 }
 
 void HidraGui::on_actionMontar_triggered()
 {
     if(!savedFile) {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::information(this, "Salvar arquivo", "O arquivo näo esta salvo, deseja salva-lo antes de montar?");
+        reply = QMessageBox::information(this, "Salvar arquivo", "O arquivo nao esta salvo, deseja salva-lo antes de montar?");
         if (reply == QMessageBox::Ok){
             ui->action_Save->trigger();
         }
@@ -220,9 +219,7 @@ void HidraGui::on_actionMontar_triggered()
             machine->load(currentFile.split(".")[0].append(".mem"));
         }
         buildSuccessful = true;
-        updateMemoryMap();
-        updateFlagsLeds();
-        updateLCDDisplay();
+        updateMachineInterface();
     }
 }
 
