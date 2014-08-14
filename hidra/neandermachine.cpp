@@ -187,6 +187,11 @@ void NeanderMachine::assemble(QString filename) {
     QHash<QString, int> labelsMap;
     bool ok;
     QFile sourceFile(filename);
+    QVector<Byte *> memory(MEM_SIZE);
+    QVector<Byte*>::iterator k;
+    for(k = memory.begin(); k != memory.end(); k++) {
+        *k = new Byte();
+    }
     sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString source = sourceFile.readAll();
     QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
@@ -218,7 +223,7 @@ void NeanderMachine::assemble(QString filename) {
                 return;
             }
         } else if(line.at(0) == "db") {
-            if(line.count() != 1) {
+            if(line.count() != 2) {
                 emit buildErrorDetected("Número de parâmetros inválido");
                 return;
             }
@@ -228,7 +233,7 @@ void NeanderMachine::assemble(QString filename) {
             }
             pc++;
         } else if(line.at(0) == "dw") {
-            if(line.count() != 1) {
+            if(line.count() != 2) {
                 emit buildErrorDetected("Número de parâmetros inválido");
                 return;
             }
@@ -238,7 +243,7 @@ void NeanderMachine::assemble(QString filename) {
             }
             pc += 2;
         } else if(line.at(0) == "dab") {
-            if(line.count() != 1) {
+            if(line.count() != 2) {
                 emit buildErrorDetected("Número de parâmetros inválido");
                 return;
             }
@@ -256,7 +261,7 @@ void NeanderMachine::assemble(QString filename) {
                 }
             }
         } else if(line.at(0) == "daw") {
-            if(line.count() != 1) {
+            if(line.count() != 2) {
                 emit buildErrorDetected("Número de parâmetros inválido");
                 return;
             }
@@ -356,7 +361,7 @@ void NeanderMachine::assemble(QString filename) {
             }
         }
     }
-
+    this->setMemory(memory);
     QString outputFilename = filename.split('.').at(0) + ".mem";
     save(outputFilename);
 }
