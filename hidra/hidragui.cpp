@@ -11,7 +11,6 @@ HidraGui::HidraGui(QWidget *parent) :
     codeEditor = new HidraCodeEditor();
     connect(codeEditor, SIGNAL(textChanged()), this, SLOT(on_textEditSouceCode_textChanged()));
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
-    ui->comboBoxMachine->removeItem(3);
 
     highlighter = new HidraHighlighter(codeEditor->document());
 
