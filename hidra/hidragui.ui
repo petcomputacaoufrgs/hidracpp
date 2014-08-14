@@ -12,19 +12,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1020</width>
+    <width>1200</width>
     <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>1020</width>
+    <width>1200</width>
     <height>600</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1020</width>
+    <width>1200</width>
     <height>600</height>
    </size>
   </property>
@@ -74,7 +74,7 @@ QCheckBox::indicator:unchecked {
      <rect>
       <x>750</x>
       <y>10</y>
-      <width>530</width>
+      <width>411</width>
       <height>531</height>
      </rect>
     </property>
@@ -214,8 +214,6 @@ QCheckBox::indicator:unchecked {
             </item>
            </layout>
           </widget>
-          <zorder>verticalLayoutWidget_2</zorder>
-          <zorder>frameAhmes</zorder>
          </widget>
         </item>
         <item>
@@ -618,7 +616,7 @@ QCheckBox::indicator:unchecked {
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1020</width>
+     <width>1200</width>
      <height>21</height>
     </rect>
    </property>

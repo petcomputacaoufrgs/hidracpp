@@ -339,22 +339,29 @@ void RamsesMachine::assemble(QString filename)
                 }
                 else if(line[i].contains("#"))
                 {
-                    sumAux= (int)memory[pc]->getValue() + 2;
+                    sumAux= (int)memory[pc]->getValue() + 1;
                     memory[pc++]->setValue((unsigned char)sumAux);
                     line[i].replace("#","");
                     memory[pc++]->setValue((unsigned char)line[i].toInt());
                 }
                 else if(line[i].contains(",i$") || line[i].contains(",I$"))
                 {
-                    memory[pc]->setValue(memory[pc]->getValue()+(unsigned char)1);
+                    sumAux= (int)memory[pc]->getValue() + 2;
+                    memory[pc]->setValue(sumAux);
+                    line[i].replace(",i$","");
+                    line[i].replace(",I$","");
                     memory[pc++]->setValue((unsigned char)line[i].toInt());
                 }
                 else if(line[i].contains(",x$") || line[i].contains(",X$"))
                 {
-                    memory[pc]->setValue(memory[pc]->getValue()+(unsigned char)3);
+                    sumAux= (int)memory[pc]->getValue() + 3;
+                    memory[pc]->setValue(sumAux);
+                    line[i].replace(",x$","");
+                    line[i].replace(",X$","");
                     memory[pc++]->setValue((unsigned char)line[i].toInt());
                 }
-
+                else if(i==2)
+                    memory[++pc]->setValue((unsigned char)line[i].toInt());
 
 
             //foreach (QString byte, line) {
