@@ -28,6 +28,7 @@ public:
     void cleanMachines();
     void save();
     void saveAs();
+    void updateMachineInterface();
 public slots:
     void on_commandLinkButtonStep_clicked();
     void on_commandLinkButtonRun_clicked();
