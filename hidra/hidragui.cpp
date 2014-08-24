@@ -204,22 +204,18 @@ void HidraGui::on_actionRodar_triggered()
 
 void HidraGui::on_actionMontar_triggered()
 {
+    // Oferece para salvar o arquivo (não é necessário para montar):
     if(!savedFile) {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::information(this, "Salvar arquivo", "O arquivo nao esta salvo, deseja salva-lo antes de montar?");
-        if (reply == QMessageBox::Ok){
+        reply = QMessageBox::question(this, "Salvar arquivo", "Deseja salvar as alterações feitas?", QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
             ui->action_Save->trigger();
         }
     }
-    if(savedFile) {
-        cleanErrorsField();
-        machine->assemble(currentFile);
-        if(buildSuccessful) {
-            machine->load(currentFile.split(".")[0].append(".mem"));
-        }
-        buildSuccessful = true;
-        updateMachineInterface();
-    }
+
+    cleanErrorsField();
+    machine->assemble(codeEditor->toPlainText());
+    updateMachineInterface();
 }
 
 void HidraGui::on_actionSaveAs_triggered()

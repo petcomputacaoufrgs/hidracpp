@@ -16,7 +16,8 @@ public:
 
     virtual void step();
     virtual void run();
-//    virtual void assemble(QString filename);
+
+    virtual int getMemorySize();
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);

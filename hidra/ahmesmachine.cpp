@@ -3,15 +3,27 @@
 AhmesMachine::AhmesMachine()
 {
     registers = QVector<Register*>(2);
-    for (int k = 0; k < registers.size(); k++) registers[k] = new Register();
-
+    QVector<Register*>::iterator i;
+    for(i = registers.begin(); i != registers.end(); i++) {
+        *i = new Register();
+        (*i)->setNumOfBits(8);
+    }
     PC = registers[1];
     AC = registers[0];
-    AC->setValue(0);
-    PC->setValue(0);
 
-    memory = QVector<Byte*>(256);
-    for (int k = 0; k < memory.size(); k++) memory[k] = new Byte(0);
+    memory = QVector<Byte*>(MEM_SIZE);
+
+    assemblerMemory = QVector<Byte*>(MEM_SIZE);
+    reserved = QVector<bool>(MEM_SIZE);
+    correspondingLine = QVector<int>(MEM_SIZE);
+
+    QVector<Byte*>::iterator j;
+    for(j = memory.begin(); j != memory.end();j++) {
+        *j = new Byte();
+    }
+    for(j = assemblerMemory.begin(); j != assemblerMemory.end();j++) {
+        *j = new Byte();
+    }
 
     flags = QVector<Bit*>(5);
     for (int k = 0; k < flags.size(); k++) flags[k] = new Bit();
@@ -25,30 +37,29 @@ AhmesMachine::AhmesMachine()
     Z->setValue(true);
 
     instructions = QVector<Instruction*>(24);
-    instructions[0] = new Instruction("nop", 0, 0);
-    instructions[1] = new Instruction("sta", 16, 1);
-    instructions[2] = new Instruction("lda", 32, 1);
-    instructions[3] = new Instruction("add", 48, 1);
-    instructions[4] = new Instruction( "or", 64, 1);
-    instructions[5] = new Instruction("and", 80, 1);
-    instructions[6] = new Instruction("not", 96, 0);
-    instructions[7] = new Instruction("sub", 112, 1);
-    instructions[8] = new Instruction("jmp", 128, 1);
-    instructions[9] = new Instruction( "jn", 144, 1);
-    instructions[10] = new Instruction(  "jp", 148, 1);
-    instructions[11] = new Instruction(  "jv", 152, 1);
-    instructions[12] = new Instruction( "jnv", 156, 1);
-    instructions[13] = new Instruction(  "jz", 160, 1);
-    instructions[14] = new Instruction( "jnz", 164, 1);
-    instructions[15] = new Instruction(  "jc", 176, 1);
-    instructions[16] = new Instruction( "jnc", 180, 1);
-    instructions[17] = new Instruction(  "jb", 184, 1);
-    instructions[18] = new Instruction( "jnb", 188, 1);
-    instructions[19] = new Instruction( "shr", 224, 0);
-    instructions[20] = new Instruction( "shl", 225, 0);
-    instructions[21] = new Instruction( "ror", 226, 0);
-    instructions[22] = new Instruction( "rol", 227, 0);
-    instructions[23] = new Instruction( "hlt", 240, 0);
+    instructions[0]  = new Instruction("nop",   0, 0, 1);
+    instructions[1]  = new Instruction("sta",  16, 1, 2);
+    instructions[2]  = new Instruction("lda",  32, 1, 2);
+    instructions[3]  = new Instruction("add",  48, 1, 2);
+    instructions[4]  = new Instruction( "or",  64, 1, 2);
+    instructions[5]  = new Instruction("and",  80, 1, 2);
+    instructions[6]  = new Instruction("not",  96, 0, 1);
+    instructions[7]  = new Instruction("sub", 112, 1, 2);
+    instructions[8]  = new Instruction("jmp", 128, 1, 2);
+    instructions[9]  = new Instruction( "jn", 144, 1, 2);
+    instructions[10] = new Instruction( "jp", 148, 1, 2);
+    instructions[11] = new Instruction( "jv", 152, 1, 2);
+    instructions[12] = new Instruction("jnv", 156, 1, 2);
+    instructions[13] = new Instruction( "jz", 160, 1, 2);
+    instructions[14] = new Instruction("jnz", 164, 1, 2);
+    instructions[15] = new Instruction( "jc", 176, 1, 2);
+    instructions[16] = new Instruction("jnc", 180, 1, 2);
+    instructions[17] = new Instruction( "jb", 184, 1, 2);
+    instructions[18] = new Instruction("jnb", 188, 1, 2);
+    instructions[20] = new Instruction("shl", 225, 0, 1);
+    instructions[21] = new Instruction("ror", 226, 0, 1);
+    instructions[22] = new Instruction("rol", 227, 0, 1);
+    instructions[23] = new Instruction("hlt", 240, 0, 1);
 }
 
 /**
@@ -248,6 +259,11 @@ void AhmesMachine::run() {
     while (this->running && this->PC->getValue() <= 255) {
         this->step();
     }
+}
+
+int AhmesMachine::getMemorySize()
+{
+    return MEM_SIZE;
 }
 
 void AhmesMachine::updateFlags(unsigned char previous_AC, unsigned char operand, bool addition, bool subtraction, bool shift_rotate_left, bool shift_rotate_right)

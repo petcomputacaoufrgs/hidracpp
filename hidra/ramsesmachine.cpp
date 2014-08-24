@@ -24,28 +24,36 @@ RamsesMachine::RamsesMachine()
     C->setValue(true);
 
     memory = QVector<Byte*>(MEM_SIZE);
+
+    assemblerMemory = QVector<Byte*>(MEM_SIZE);
+    reserved = QVector<bool>(MEM_SIZE);
+    correspondingLine = QVector<int>(MEM_SIZE);
+
     QVector<Byte*>::iterator j;
-    for (j = memory.begin(); j != memory.end(); j++) {
+    for(j = memory.begin(); j != memory.end();j++) {
+        *j = new Byte();
+    }
+    for(j = assemblerMemory.begin(); j != assemblerMemory.end();j++) {
         *j = new Byte();
     }
 
     instructions = QVector<Instruction*>(16);
-    instructions[0]  = new Instruction("nop",   0, 0);
-    instructions[1]  = new Instruction("str",  16, 1);
-    instructions[2]  = new Instruction("ldr",  32, 1);
-    instructions[3]  = new Instruction("add",  48, 1);
-    instructions[4]  = new Instruction( "or",  64, 1);
-    instructions[5]  = new Instruction("and",  80, 1);
-    instructions[6]  = new Instruction("not",  96, 0);
-    instructions[7]  = new Instruction("sub", 112, 1);
-    instructions[8]  = new Instruction("jmp", 128, 1);
-    instructions[9]  = new Instruction( "jn", 144, 1);
-    instructions[10] = new Instruction( "jz", 160, 1);
-    instructions[11] = new Instruction( "jc", 176, 1);
-    instructions[12] = new Instruction("jsr", 192, 1);
-    instructions[13] = new Instruction("neg", 208, 0);
-    instructions[14] = new Instruction("shr", 224, 0);
-    instructions[15] = new Instruction("hlt", 240, 0);
+    instructions[0]  = new Instruction("nop",   0, 0, 1);
+    instructions[1]  = new Instruction("str",  16, 2, 2);
+    instructions[2]  = new Instruction("ldr",  32, 2, 2);
+    instructions[3]  = new Instruction("add",  48, 2, 2);
+    instructions[4]  = new Instruction( "or",  64, 2, 2);
+    instructions[5]  = new Instruction("and",  80, 2, 2);
+    instructions[6]  = new Instruction("not",  96, 1, 1);
+    instructions[7]  = new Instruction("sub", 112, 2, 2);
+    instructions[8]  = new Instruction("jmp", 128, 1, 2);
+    instructions[9]  = new Instruction( "jn", 144, 1, 2);
+    instructions[10] = new Instruction( "jz", 160, 1, 2);
+    instructions[11] = new Instruction( "jc", 176, 1, 2);
+    instructions[12] = new Instruction("jsr", 192, 1, 2);
+    instructions[13] = new Instruction("neg", 208, 1, 1);
+    instructions[14] = new Instruction("shr", 224, 1, 1);
+    instructions[15] = new Instruction("hlt", 240, 0, 1);
 }
 
 void RamsesMachine::printStatusDebug()
@@ -114,7 +122,7 @@ void RamsesMachine::step() {
     const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
 
-    if(currentInstruction->getNumberOfArguments() == 1) {
+    if(currentInstruction->getSize() == 2) {
         PC->incrementValue();
 
         Byte *endOperand = NULL;
@@ -228,11 +236,87 @@ void RamsesMachine::run()
     }
 }
 
-void RamsesMachine::assemble(QString filename)
+int RamsesMachine::getMemorySize()
+{
+    return MEM_SIZE;
+}
+
+Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+{
+    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+    int numberOfArguments = instruction->getNumberOfArguments();
+    bool ok;
+
+    int registerID = 0;
+    int addressingMode = 0;
+
+    // Check if correct number of arguments:
+    if (argumentList.size() != numberOfArguments)
+        return wrongNumberOfArguments;
+
+    // If first argument is a register (every instruction that has arguments, except jumps):
+    if (numberOfArguments > 0 && !(mnemonic.startsWith("j")))
+    {
+        if (argumentList.first() == "a")
+            registerID = 0;
+        else if (argumentList.first() == "b")
+            registerID = 1;
+        else if (argumentList.first() == "x")
+            registerID = 2;
+        else
+            return invalidArgument;
+    }
+
+    // If last argument is an address (every two-byte instruction):
+    if (instruction->getSize() == 2)
+    {
+        // Extract and remove addressing mode:
+        if (argumentList.last().endsWith(",i"))
+        {
+            argumentList.last() = argumentList.last().replace(",i", "");
+            addressingMode = 1; // Direct
+        }
+        else if (argumentList.last().startsWith("#"))
+        {
+            argumentList.last() = argumentList.last().replace("#", "");
+            addressingMode = 2; // Indirect
+        }
+        else if (argumentList.last().endsWith(",x"))
+        {
+            argumentList.last() = argumentList.last().replace(",x", "");
+            addressingMode = 3; // Indexed
+        }
+    }
+
+    // Write first byte (instruction with register and addressing mode):
+    assemblerMemory[PC->getValue()]->setValue(instruction->getValue() + (registerID << 2) + addressingMode);
+    PC->incrementValue();
+
+    // If instruction has two bytes, write second byte:
+    if (instruction->getSize() > 1)
+    {
+        // Convert possible label to number:
+        if (labelPCMap.contains(argumentList.last()))
+            argumentList.last() = QString::number(labelPCMap.value(argumentList.last()));
+
+        // Check if valid address:
+        if (!isValidAddress(argumentList.last()))
+            return invalidArgument;
+
+        // Write address argument:
+        assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(&ok, 0));
+        PC->incrementValue();
+    }
+
+    return noError;
+}
+/*
+void RamsesMachine::assemble(QString sourceCode)
 {
 //    NeanderMachine *outputMachine = new NeanderMachine();
     QHash<QString, int> labelsMap;
-    QFile sourceFile(filename);
+    QFile sourceFile(sourceCode);
     sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
     QString source = sourceFile.readAll();
     QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
@@ -322,12 +406,12 @@ void RamsesMachine::assemble(QString filename)
             for(int i=1; i<line.length();i++)
             {
 
-              /*  if(line[i]=="a" || line[i]=="A" && i==1)
-                {
-                    sumAux=memory[pc]->getValue();
-                    memory[pc]->setValue();
-                }
-                else*/ if((line[i]=="b" || line[i]=="B") && i==1)
+              //  if(line[i]=="a" || line[i]=="A" && i==1)
+              //{
+              //    sumAux=memory[pc]->getValue();
+              //    memory[pc]->setValue();
+              //}
+              //else if((line[i]=="b" || line[i]=="B") && i==1)
                 {
                     sumAux= (int)memory[pc]->getValue() + 4;
                     memory[pc]->setValue((unsigned char)sumAux);
@@ -365,10 +449,10 @@ void RamsesMachine::assemble(QString filename)
     }
     //outputMachine->setMemory(memory);
     //outputMachine->printStatusDebug();
-    QString outputFilename = filename.split('.').at(0) + ".mem";
+    QString outputFilename = sourceCode.split('.').at(0) + ".mem";
     save(outputFilename);
 }
-
+*/
 Instruction* RamsesMachine::getInstructionFromValue(int value)
 {
     QVector<Instruction*>::iterator i;

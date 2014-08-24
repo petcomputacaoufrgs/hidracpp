@@ -19,6 +19,21 @@ class Machine : public QObject
 {
     Q_OBJECT
 public:
+
+    enum ErrorCode
+    {
+        noError = 0,
+        wrongNumberOfArguments,
+        invalidInstruction,
+        invalidAddress,
+        invalidValue,
+        invalidLabel,
+        invalidArgument,
+        duplicatedLabel,
+        memoryOverflow,
+        notImplemented,
+    };
+
     explicit Machine(QObject *parent = 0);
 
     virtual void printStatusDebug() = 0;
@@ -28,7 +43,26 @@ public:
 
     virtual void step() = 0;
     virtual void run() = 0;
-    virtual void assemble(QString filename) = 0;
+
+    virtual int getMemorySize() = 0;
+
+    // Machine specific:
+    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
+
+    // Assembly:
+    void assemble(QString sourceCode);
+    Machine::ErrorCode obeyDirective(QString mnemonic, QString arguments, bool reserveOnly);
+    void emitError(int lineNumber, Machine::ErrorCode errorCode);
+
+    // Assembler memory:
+    void clearAssemblerMemory();
+    void copyAssemblerMemoryToMemory();
+    Machine::ErrorCode reserveAssemblerMemory(int sizeToReserve);
+
+    // Assembler checks:
+    bool isValidValue(QString valueString, int min, int max);
+    bool isValidByteValue(QString valueString);
+    bool isValidAddress(QString addressString);
 
     virtual const Instruction* getInstructionFromValue(int) = 0;
     virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
@@ -49,9 +83,13 @@ public:
     void setInstructions(const QVector<Instruction *> &value);
 
 protected:
+
     QVector<Register*> registers;
     Register* PC;
     QVector<Byte*> memory;
+    QVector<Byte*> assemblerMemory;
+    QVector<bool> reserved;
+    QVector<int> correspondingLine;
     QVector<Bit*> flags;
     QVector<Instruction*> instructions;
     bool running;

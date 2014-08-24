@@ -15,7 +15,10 @@ public:
 
     virtual void step();
     virtual void run();
-    virtual void assemble(QString filename);
+
+    virtual int getMemorySize();
+
+    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
