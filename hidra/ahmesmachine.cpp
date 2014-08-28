@@ -2,31 +2,46 @@
 
 AhmesMachine::AhmesMachine()
 {
+    //////////////////////////////////////////////////
+    // Initialize registers
+    //////////////////////////////////////////////////
+
     registers = QVector<Register*>(2);
-    QVector<Register*>::iterator i;
-    for(i = registers.begin(); i != registers.end(); i++) {
-        *i = new Register();
-        (*i)->setNumOfBits(8);
-    }
+
+    for (int i=0; i<registers.size(); i++)
+        registers[i] = new Register(8);
+
     PC = registers[1];
     AC = registers[0];
 
-    memory = QVector<Byte*>(MEM_SIZE);
 
+
+    //////////////////////////////////////////////////
+    // Initialize memory
+    //////////////////////////////////////////////////
+
+    memory = QVector<Byte*>(MEM_SIZE);
     assemblerMemory = QVector<Byte*>(MEM_SIZE);
     reserved = QVector<bool>(MEM_SIZE);
-    correspondingLine = QVector<int>(MEM_SIZE);
 
-    QVector<Byte*>::iterator j;
-    for(j = memory.begin(); j != memory.end();j++) {
-        *j = new Byte();
-    }
-    for(j = assemblerMemory.begin(); j != assemblerMemory.end();j++) {
-        *j = new Byte();
-    }
+    correspondingLine = QVector<int>(MEM_SIZE); // Every PC value can have a corresponding line of code
+
+    for (int i=0; i<memory.size(); i++)
+        memory[i] = new Byte();
+
+    for (int i=0; i<assemblerMemory.size(); i++)
+        assemblerMemory[i] = new Byte();
+
+
+
+    //////////////////////////////////////////////////
+    // Initialize flags
+    //////////////////////////////////////////////////
 
     flags = QVector<Bit*>(5);
-    for (int k = 0; k < flags.size(); k++) flags[k] = new Bit();
+
+    for (int i = 0; i < flags.size(); i++)
+        flags[i] = new Bit();
 
     N = flags[0];
     Z = flags[1];
@@ -35,6 +50,12 @@ AhmesMachine::AhmesMachine()
     B = flags[4];
 
     Z->setValue(true);
+
+
+
+    //////////////////////////////////////////////////
+    // Initialize instructions
+    //////////////////////////////////////////////////
 
     instructions = QVector<Instruction*>(24);
     instructions[0]  = new Instruction("nop",   0, 0, 1);
@@ -56,43 +77,20 @@ AhmesMachine::AhmesMachine()
     instructions[16] = new Instruction("jnc", 180, 1, 2);
     instructions[17] = new Instruction( "jb", 184, 1, 2);
     instructions[18] = new Instruction("jnb", 188, 1, 2);
+    instructions[19] = new Instruction("shr", 225, 0, 1);
     instructions[20] = new Instruction("shl", 225, 0, 1);
     instructions[21] = new Instruction("ror", 226, 0, 1);
     instructions[22] = new Instruction("rol", 227, 0, 1);
     instructions[23] = new Instruction("hlt", 240, 0, 1);
 }
 
-/**
- * @brief AhmesMachine::printStatusDebug
- * debug function to see a status of the machine on the terminal, without gui implementations
- */
 void AhmesMachine::printStatusDebug()
 {
-    std::cout << "PC: " << PC->getValue() << std::endl;
-    std::cout << "AC: " << AC->getValue() << std::endl;
-    int j;
-    QVector<Byte*>::iterator i;
-    for(j = 0, i = memory.begin(); i != memory.end(); i++, j=j+1) {
-        const Instruction *actual = getInstructionFromValue((int)(*i)->getValue());
-        if(actual != NULL) {
-            std::cout << j << ": " << actual->getMnemonic().toStdString() << " " << (int)(*i)->getValue() << std::endl;
-            for(int k = 0; k < actual->getNumberOfArguments(); k++) {
-                i++;
-                j++;
-                std::cout << j << ": " << (int)(*i)->getValue() << std::endl;
-            }
-        } else {
-            std::cout << j << ": " << (int)(*i)->getValue() << std::endl;
-        }
-    }
 
-    QVector<Instruction*>::iterator i2;
-    for(j = 0, i2 = instructions.begin(); i2 != instructions.end(); i2++, j=j+1) {
-        std::cout << j << ": " << (*i2)->getMnemonic().toStdString() << " " << (*i2)->getValue() <<  std::endl;
-    }
 }
 
-void AhmesMachine::load(QString filename) {
+void AhmesMachine::load(QString filename)
+{
     bool err = false;
     QFile memFile(filename);
     memFile.open(QFile::ReadOnly);
@@ -119,7 +117,8 @@ void AhmesMachine::load(QString filename) {
     memFile.close();
 }
 
-void AhmesMachine::save(QString filename){
+void AhmesMachine::save(QString filename)
+{
     QFile memFile(filename);
     memFile.open(QFile::WriteOnly);
     QDataStream stream(&memFile);
@@ -148,110 +147,128 @@ void AhmesMachine::step() {
         this->running = false;
     }
 
-    switch (currentInstruction->getValue()) { // Arredondar para baixo
+    switch (currentInstruction->getValue())
+    {
         case 0x00: // NOP
             break;
+
         case 0x10: // STA
             memory[operand->getValue()]->setValue((unsigned char)AC->getValue());
             break;
+
         case 0x20: // LDA
             AC->setValue(memory[operand->getValue()]->getValue());
+            updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
+
         case 0x30: // ADD
             AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & 0xFF);
             updateFlags(previousAC, operand->getValue(), true, false, false, false);
             break;
+
         case 0x40: // OR
             AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
             updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
+
         case 0x50: // AND
             AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
             updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
+
         case 0x60: // NOT
             AC->setValue(AC->getValue() ^ 0xFF);
             updateFlags(previousAC, operand->getValue(), false, false, false, false);;
             break;
+
         case 0x70: // SUB
             AC->setValue((AC->getValue() - memory[operand->getValue()]->getValue()) & 0xFF);
             updateFlags(previousAC, operand->getValue(), false, true, false, false);
             break;
+
         case 0x80: // JMP
             PC->setValue(operand->getValue());
             break;
+
         case 0x90: // JN
-            if(N->getValue()) {
+            if(N->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0x94: // JP
-            if(!N->getValue()) {
+            if(!N->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0x98: // JV
-            if(V->getValue()) {
+            if(V->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0x9C: // JNV
-            if(!V->getValue()) {
+            if(!V->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xA0: // JZ
-            if(Z->getValue()) {
+            if(Z->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xA4: // JNZ
-            if(!Z->getValue()) {
+            if(!Z->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xB0: // JC
-            if(C->getValue()) {
+            if(C->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xB4: // JNC
-            if(!C->getValue()) {
+            if(!C->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xB8: // JB
-            if(B->getValue()) {
+            if(B->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xBC: // JNB
-            if(!B->getValue()) {
+            if(!B->getValue())
                 PC->setValue(operand->getValue());
-            }
             break;
+
         case 0xE0: // SHR
             AC->setValue(AC->getValue() >> 1);
             updateFlags(previousAC, operand->getValue(), false, false, true, false);
             break;
+
         case 0xE1: // SHL
             AC->setValue(AC->getValue() << 1);
             updateFlags(previousAC, operand->getValue(), false, false, true, false);
             break;
+
         case 0xE2: // ROR
             AC->setValue((AC->getValue() >> 1) & 0xFF);
             updateFlags(previousAC, operand->getValue(), false, false, false, true);
             break;
+
         case 0xE3: // ROL
             AC->setValue((AC->getValue() << 1) & 0xFF);
-            if (C->getValue()) AC->setValue(AC->getValue() | 0x1);
+            if (C->getValue())
+                AC->setValue(AC->getValue() | 0x1);
             updateFlags(previousAC, operand->getValue(), false, false, false, true);
             break;
+
         case 0xF0: // HLT
             this->running = false;
+            break;
+
         default:
             break;
-        }
+    }
 }
 
 void AhmesMachine::run() {
@@ -266,25 +283,25 @@ int AhmesMachine::getMemorySize()
     return MEM_SIZE;
 }
 
-void AhmesMachine::updateFlags(unsigned char previous_AC, unsigned char operand, bool addition, bool subtraction, bool shift_rotate_left, bool shift_rotate_right)
+void AhmesMachine::updateFlags(unsigned char previousAC, unsigned char operand, bool addition, bool subtraction, bool shiftRotateLeft, bool shiftRotateRight)
 {
     Z->setValue(AC->getValue() == 0);
     N->setValue(AC->getValue() >= 128);
 
     if (addition) // Update carry
     {
-        C->setValue(AC->getValue() < previous_AC); // Result is less than initial value (Flag C is unsigned)
+        C->setValue(AC->getValue() < previousAC); // Result is less than initial value (Flag C is unsigned)
     }
 
     if (subtraction) // Update borrow
     {
-        B->setValue(previous_AC < operand); // Subtraction needs borrow (Flag B is unsigned)
+        B->setValue(previousAC < operand); // Subtraction needs borrow (Flag B is unsigned)
     }
 
     if (addition || subtraction)
     {
-        if ((previous_AC >= 128 && operand >= 128 && AC->getValue()  < 128) || // Overflow: negative operands with positive result
-            (previous_AC  < 128 && operand  < 128 && AC->getValue() >= 128))   // Overflow: positive operands with negative result
+        if ((previousAC >= 128 && operand >= 128 && AC->getValue()  < 128) || // Overflow: negative operands with positive result
+            (previousAC  < 128 && operand  < 128 && AC->getValue() >= 128))   // Overflow: positive operands with negative result
         {
             V->setValue(1);
         }
@@ -294,117 +311,51 @@ void AhmesMachine::updateFlags(unsigned char previous_AC, unsigned char operand,
         }
     }
 
-    if (shift_rotate_left)
+    if (shiftRotateLeft)
     {
-        C->setValue((previous_AC & 0b10000000) != 0);
+        C->setValue((previousAC & 0b10000000) != 0);
     }
 
-    if (shift_rotate_right)
+    if (shiftRotateRight)
     {
-        C->setValue((previous_AC & 0b00000001) != 0);
+        C->setValue((previousAC & 0b00000001) != 0);
     }
 }
 
+// EXACT DUPLICATE OF NEANDER'S METHOD:
+// Returns 0 if no error, otherwise returns error code
+Machine::ErrorCode AhmesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+{
+    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+    int numberOfArguments = instruction->getNumberOfArguments();
+    bool ok;
 
-//void AhmesMachine::assemble(QString filename) {
-//       Machine *outputMachine = new AhmesMachine();
-//       QHash<QString, int> labelsMap;
-//       QFile sourceFile(filename);
-//       sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
-//       QString source = sourceFile.readAll();
-//       QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
-//       QStringList::iterator i;
-//       for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
-//           (*i) = (*i).split(';').at(0).toLower().simplified();    //elimina os comentarios do codigo
-//       }
-//       sourceLines.removeAll("");  //remove as linhas em branco
+    // Check if correct number of arguments:
+    if (argumentList.size() != numberOfArguments)
+        return wrongNumberOfArguments;
 
-//       int pc = 0;
-//       QVector<Byte *> memory = outputMachine->getMemory();
-//       for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
-//           QStringList line = (*i).split(" ", QString::SkipEmptyParts);
-//            std::cout << line.join(" ").toStdString() << std::endl;
-//           Instruction *atual;
-//           if (line.at(0).contains(QRegExp("(.*:)"))) {
-//               QString key = line.first();
-//               (*i).replace(key, "");
-//               key.chop(1);
-//               labelsMap.insert(key, pc);
-//           } else if(line.at(0) == "org") {
-//               pc = line.at(1).toInt();
-//           } else if(line.at(0) == "db") {
-//               pc++;
-//           } else if(line.at(0) == "dw") {
-//               pc += 2;
-//           } else if(line.at(0) == "dab") {
-//               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-//                   QStringList dabValue = line.at(1).split("(");
-//                   dabValue.last().chop(1);
-//                   pc += dabValue.first().toInt();
-//               }
-//           } else if(line.at(0) == "daw") {
-//               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-//                   QStringList dawValue = line.at(1).split("(");
-//                   dawValue.last().chop(1);
-//                   pc += dawValue.first().toInt() * 2;
-//               }
-//           } else {
-//               atual = (Instruction*) getInstructionFromMnemonic(line.at(0));
-//               pc += 1 + atual->getNumberOfArguments();
-//           }
-//       }
-//       sourceLines.removeAll("");  //remove as linhas em branco
-//       foreach(QString key, labelsMap.keys()) {
-//           sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
-//       }
-//       pc = 0;
-//       for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
-//           Instruction *atual;
+    // Write instruction:
+    assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
+    PC->incrementValue();
 
-//           QStringList line = (*i).split(" ", QString::SkipEmptyParts);
+    if (numberOfArguments == 1)
+    {
+        // Convert possible label to number:
+        if (labelPCMap.contains(argumentList[0]))
+            argumentList[0] = QString::number(labelPCMap.value(argumentList[0]));
 
-//           if (line.at(0).contains(QRegExp("(.*:)"))) {
-//               //skip
-//           } else if(line.at(0) == "org") {
-//               pc = line.at(1).toInt();
-//           } else if(line.at(0) == "db") {
-//               memory[pc++]->setValue((unsigned char)line.last().toInt());
-//           } else if(line.at(0) == "dw") {
-//               int word = line.last().toInt();
-//               memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
-//               memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
-//           } else if(line.at(0) == "dab") {
-//               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-//                   QStringList dabValue = line.at(1).split("(");
-//                   dabValue.last().chop(1);
-//                   for(int i = 0; i < dabValue.first().toInt(); i++) {
-//                       memory[pc++]->setValue((unsigned char) dabValue.last().toInt());
-//                   }
-//               }
-//           } else if(line.at(0) == "daw") {
-//               if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-//                   QStringList dabValue = line.at(1).split("(");
-//                   dabValue.last().chop(1);
-//                   for(int i = 0; i < dabValue.first().toInt(); i++) {
-//                       int word = dabValue.last().toInt();
-//                       memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8));
-//                       memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
-//                   }
-//               }
-//           } else {
-//               atual = (Instruction*) getInstructionFromMnemonic(line.at(0));
-//               line.replace(0, QString::number(atual->getValue()));
-//               foreach (QString byte, line) {
-//                   memory[pc++]->setValue((unsigned char)byte.toInt());
-//               }
-//           }
-//       }
+        // Check if valid argument:
+        if (!isValidAddress(argumentList[0]))
+            return invalidAddress;
 
-//       outputMachine->setMemory(memory);
-//       outputMachine->printStatusDebug();
-//       QString outputFilename = filename.split('.').at(0) + ".mem";
-//       outputMachine->save(outputFilename);
-//}
+        // Write argument:
+        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(&ok, 0));
+        PC->incrementValue();
+    }
+
+    return noError;
+}
 
 Instruction* AhmesMachine::getInstructionFromValue(int value)
 {
@@ -425,7 +376,9 @@ Instruction* AhmesMachine::getInstructionFromValue(int value)
     }
     return NULL;
 }
-Instruction* AhmesMachine::getInstructionFromMnemonic(QString desiredInstruction) {
+
+Instruction* AhmesMachine::getInstructionFromMnemonic(QString desiredInstruction)
+{
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getMnemonic() == desiredInstruction) {

@@ -2,39 +2,58 @@
 
 NeanderMachine::NeanderMachine()
 {
+    //////////////////////////////////////////////////
+    // Initialize registers
+    //////////////////////////////////////////////////
+
     registers = QVector<Register*>(2);
-    QVector<Register*>::iterator i;
-    for(i = registers.begin(); i != registers.end(); i++) {
-        *i = new Register();
-        (*i)->setNumOfBits(8);
-    }
+
+    for (int i=0; i<registers.size(); i++)
+        registers[i] = new Register(8);
+
     PC = registers[1];
     AC = registers[0];
 
-    flags = QVector<Bit*>(2);
-    QVector<Bit*>::iterator k;
-    for(k = flags.begin(); k != flags.end();k++) {
-        *k = new Bit();
-    }
-    N = flags[0];
-    Z = flags[1];
-    Z->setValue(true);
+
+
+    //////////////////////////////////////////////////
+    // Initialize memory
+    //////////////////////////////////////////////////
 
     memory = QVector<Byte*>(MEM_SIZE);
-
     assemblerMemory = QVector<Byte*>(MEM_SIZE);
     reserved = QVector<bool>(MEM_SIZE);
-    correspondingLine = QVector<int>(MEM_SIZE);
 
-    QVector<Byte*>::iterator j;
-    for(j = memory.begin(); j != memory.end();j++) {
-        *j = new Byte();
-    }
-    for(j = assemblerMemory.begin(); j != assemblerMemory.end();j++) {
-        *j = new Byte();
-    }
+    correspondingLine = QVector<int>(MEM_SIZE); // Each PC value can have its corresponding line of code
 
-    // initialize instructions
+    for (int i=0; i<memory.size(); i++)
+        memory[i] = new Byte();
+
+    for (int i=0; i<assemblerMemory.size(); i++)
+        assemblerMemory[i] = new Byte();
+
+
+
+    //////////////////////////////////////////////////
+    // Initialize flags
+    //////////////////////////////////////////////////
+
+    flags = QVector<Bit*>(2);
+
+    for (int i = 0; i < flags.size(); i++)
+        flags[i] = new Bit();
+
+    N = flags[0];
+    Z = flags[1];
+
+    Z->setValue(true);
+
+
+
+    //////////////////////////////////////////////////
+    // Initialize instructions
+    //////////////////////////////////////////////////
+
     instructions = QVector<Instruction*>(11);
     instructions[0]  = new Instruction("nop",   0, 0, 1);
     instructions[1]  = new Instruction("sta",  16, 1, 2);
@@ -47,37 +66,15 @@ NeanderMachine::NeanderMachine()
     instructions[8]  = new Instruction( "jn", 144, 1, 2);
     instructions[9]  = new Instruction( "jz", 160, 1, 2);
     instructions[10] = new Instruction("hlt", 240, 0, 1);
-
 }
 
-/**
- * @brief NeanderMachine::printStatusDebug
- * debug function to see a status of the machine on the terminal, without gui implementations
- */
 void NeanderMachine::printStatusDebug()
 {
-    std::cout << "PC: " << PC->getValue() << std::endl;
-    std::cout << "AC: " << AC->getValue() << std::endl;
-    std::cout << "N: "  << (N->getValue()? "1" : "0") << "\t";
-    std::cout << "Z: "  << (Z->getValue()? "1" : "0") << std::endl;
-    int j;
-    QVector<Byte*>::iterator i;
-    for(j = 0, i = memory.begin(); i != memory.end(); i++, j=j+1) {
-        const Instruction *actual = getInstructionFromValue((int)(*i)->getValue());
-        if(actual != NULL) {
-            std::cout << j << ": " << actual->getMnemonic().toStdString() << " " << (int)(*i)->getValue() << std::endl;
-            for(int k = 0; k < actual->getNumberOfArguments(); k++) {
-                i++;
-                j++;
-                std::cout << j << ": " << (int)(*i)->getValue() << std::endl;
-            }
-        } else {
-            std::cout << j << ": " << (int)(*i)->getValue() << std::endl;
-        }
-    }
+
 }
 
-void NeanderMachine::load(QString filename) {
+void NeanderMachine::load(QString filename)
+{
     bool err = false;
     QFile memFile(filename);
     memFile.open(QFile::ReadOnly);
@@ -132,55 +129,65 @@ void NeanderMachine::step() {
         return;
     }
 
-    switch (currentInstruction->getValue()) {
-    case 0x00: // NOP
-        break;
-    case 0x10: // STA
-        memory[operand->getValue()]->setValue((unsigned char)AC->getValue());
-        break;
-    case 0x20: // LDA
-        AC->setValue(memory[operand->getValue()]->getValue());
-        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(AC->getValue() == 0);
-        break;
-    case 0x30: // ADD
-        AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & MAX_VALUE);
-        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(AC->getValue() == 0);
-        break;
-    case 0x40: // OR
-        AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
-        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(AC->getValue() == 0);
-        break;
-    case 0x50: // AND
-        AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
-        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(AC->getValue() == 0);
-        break;
-    case 0x60: // NOT
-        AC->setValue(AC->getValue() ^ 0xFF);
-        N->setValue(AC->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(AC->getValue() == 0);
-        break;
-    case 0x80: // JMP
-        PC->setValue(operand->getValue());
-        break;
-    case 0x90: // JN
-        if(N->getValue()) {
+    switch (currentInstruction->getValue())
+    {
+        case 0x00: // NOP
+            break;
+
+        case 0x10: // STA
+            memory[operand->getValue()]->setValue((unsigned char)AC->getValue());
+            break;
+
+        case 0x20: // LDA
+            AC->setValue(memory[operand->getValue()]->getValue());
+            N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(AC->getValue() == 0);
+            break;
+
+        case 0x30: // ADD
+            AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & MAX_VALUE);
+            N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(AC->getValue() == 0);
+            break;
+
+        case 0x40: // OR
+            AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
+            N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(AC->getValue() == 0);
+            break;
+
+        case 0x50: // AND
+            AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
+            N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(AC->getValue() == 0);
+            break;
+
+        case 0x60: // NOT
+            AC->setValue(AC->getValue() ^ 0xFF);
+            N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(AC->getValue() == 0);
+            break;
+
+        case 0x80: // JMP
             PC->setValue(operand->getValue());
-        }
-        break;
-    case 0xA0: // JZ
-        if(Z->getValue()) {
-            PC->setValue(operand->getValue());
-        }
-        break;
-    case 0xF0: // HLT
-        this->running = false;
-        break;
-    default:
-        break;
+            break;
+
+        case 0x90: // JN
+            if(N->getValue())
+                PC->setValue(operand->getValue());
+            break;
+
+        case 0xA0: // JZ
+            if(Z->getValue())
+                PC->setValue(operand->getValue());
+            break;
+
+        case 0xF0: // HLT
+            this->running = false;
+            break;
+
+        default:
+            break;
     }
 }
 
@@ -230,11 +237,6 @@ Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString ar
     return noError;
 }
 
-bool NeanderMachine::validateInstructions(QStringList instructionList)
-{
-    return true;
-}
-
 Instruction* NeanderMachine::getInstructionFromValue(int value)
 {
     QVector<Instruction*>::iterator i;
@@ -248,12 +250,16 @@ Instruction* NeanderMachine::getInstructionFromValue(int value)
     return NULL;
 }
 
-Instruction* NeanderMachine::getInstructionFromMnemonic(QString desiredInstruction) {
+Instruction* NeanderMachine::getInstructionFromMnemonic(QString desiredInstruction)
+{
+    std::cout << "0" << std::endl;
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
+        std::cout << "1" << std::endl;
         if((*i)->getMnemonic() == desiredInstruction) {
             return (*i);
         }
     }
+    std::cout << "2" << std::endl;
     return NULL;
 }

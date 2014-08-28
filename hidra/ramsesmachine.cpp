@@ -2,40 +2,61 @@
 
 RamsesMachine::RamsesMachine()
 {
+    //////////////////////////////////////////////////
+    // Initialize registers
+    //////////////////////////////////////////////////
+
     registers = QVector<Register*>(4);
-    QVector<Register*>::iterator i;
-    for (i = registers.begin(); i != registers.end(); i++) {
-        *i = new Register();
-    }
+
+    for (int i=0; i<registers.size(); i++)
+        registers[i] = new Register(8);
+
     RA = registers[0];
     RB = registers[1];
     RX = registers[2];
     PC = registers[3];
 
+
+
+    //////////////////////////////////////////////////
+    // Initialize memory
+    //////////////////////////////////////////////////
+
+    memory = QVector<Byte*>(MEM_SIZE);
+    assemblerMemory = QVector<Byte*>(MEM_SIZE);
+    reserved = QVector<bool>(MEM_SIZE);
+
+    correspondingLine = QVector<int>(MEM_SIZE); // Every PC value can have a corresponding line of code
+
+    for (int i=0; i<memory.size(); i++)
+        memory[i] = new Byte();
+
+    for (int i=0; i<assemblerMemory.size(); i++)
+        assemblerMemory[i] = new Byte();
+
+
+
+    //////////////////////////////////////////////////
+    // Initialize flags
+    //////////////////////////////////////////////////
+
     flags = QVector<Bit*>(3);
-    QVector<Bit*>::iterator k;
-    for (k = flags.begin(); k != flags.end(); k++) {
-        *k = new Bit();
-    }
+
+    for (int i = 0; i < flags.size(); i++)
+        flags[i] = new Bit();
+
     N = flags[0];
     Z = flags[1];
     C = flags[2];
+
     Z->setValue(true);
     C->setValue(true);
 
-    memory = QVector<Byte*>(MEM_SIZE);
 
-    assemblerMemory = QVector<Byte*>(MEM_SIZE);
-    reserved = QVector<bool>(MEM_SIZE);
-    correspondingLine = QVector<int>(MEM_SIZE);
 
-    QVector<Byte*>::iterator j;
-    for(j = memory.begin(); j != memory.end();j++) {
-        *j = new Byte();
-    }
-    for(j = assemblerMemory.begin(); j != assemblerMemory.end();j++) {
-        *j = new Byte();
-    }
+    //////////////////////////////////////////////////
+    // Initialize instructions
+    //////////////////////////////////////////////////
 
     instructions = QVector<Instruction*>(16);
     instructions[0]  = new Instruction("nop",   0, 0, 1);
@@ -58,10 +79,7 @@ RamsesMachine::RamsesMachine()
 
 void RamsesMachine::printStatusDebug()
 {
-    std::cout << std::endl;
-    std::cout << "RA: " << (int)RA->getValue() << std::endl;;
-    std::cout << "RB: " << (int)RB->getValue() << std::endl;;
-    std::cout << "RX: " << (int)RX->getValue() << std::endl;;
+
 }
 
 void RamsesMachine::load(QString filename)
@@ -118,113 +136,137 @@ void RamsesMachine::save(QString filename)
     memFile.close();
 }
 
-void RamsesMachine::step() {
+void RamsesMachine::step()
+{
     const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    int addressingMode = memory[PC->getValue()]->getValue() & 0b00000011; // Extract last two bits
+    int reg = (memory[PC->getValue()]->getValue() & 0b00001100) >> 2; // Bits 2 and 3 indicate register (A, B or X)
     Byte *operand;
 
-    if(currentInstruction->getSize() == 2) {
-        PC->incrementValue();
+    if(currentInstruction->getSize() == 2)
+    {
+        PC->incrementValue(); // Go to operand
 
         Byte *endOperand = NULL;
-        switch (currentInstruction->getValue() & 0x03) {
-        case 0x00: // modo de enderecamento direto
-            endOperand = memory[PC->getValue()];
-            break;
-        case 0x01: // modo indireto
-            Byte *endPointer;
-            endPointer = memory[PC->getValue()];
-            endOperand = memory[endPointer->getValue()];
-            break;
-        case 0x02: // modo imediato
-            endOperand->setValue(PC->getValue());
-            break;
-        case 0x03: // modo indexado
-            endOperand = memory[PC->getValue() + RX->getValue()];
-            break;
+        switch (addressingMode)
+        {
+            case 0x00: // Direct addressing mode
+                endOperand = memory[PC->getValue()];
+                break;
+
+            case 0x01: // Indirect addressing mode
+                Byte *endPointer;
+                endPointer = memory[PC->getValue()];
+                endOperand = memory[endPointer->getValue()];
+                break;
+
+            case 0x02: // Immediate addressing mode
+                endOperand->setValue(PC->getValue());
+                break;
+
+            case 0x03: // Indexed addressing mode
+                endOperand = memory[PC->getValue() + RX->getValue()];
+                break;
         }
 
         operand = memory[endOperand->getValue()];
     }
 
-    int reg = ((currentInstruction->getValue() & 0x0C) >> 2); // os bits 2 e 3 da instrucao indicam o registrador a ser usado;
-
-    PC->incrementValue();
-    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+    PC->incrementValue(); // Prepare for the next step
+    if(PC->getValue() == 0) // TO-DO: ADICIONAR BREAKPOINT
+    {
         this->running = false;
+        return;
     }
 
-    switch (currentInstruction->getValue()) {
-    case 0x00: // nop
-        break;
-    case 0x10: // str
-        operand->setValue(registers[reg]->getValue());
-        break;
-    case 0x20: // ldr
-        registers[reg]->setValue(operand->getValue());
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        C->setValue(false);
-        break;
-    case 0x30: // add
-        registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE);
-        break;
-    case 0x40: // or
-        registers[reg]->setValue(operand->getValue() | registers[reg]->getValue());
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        C->setValue(false);
-        break;
-    case 0x50: // and
-        registers[reg]->setValue(operand->getValue() & registers[reg]->getValue());
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        C->setValue(false);
-        break;
-    case 0x60: // not
-        registers[reg]->setValue(~registers[reg]->getValue());
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        C->setValue(false);
-        break;
-    case 0x70: // sub
-        registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        C->setValue((registers[reg]->getValue() - operand->getValue()) < 0);
-        break;
-    case 0x80: // jmp
-        PC->setValue(operand->getValue());
-        break;
-    case 0x90: // jn
-        if (N) PC->setValue(operand->getValue());
-        break;
-    case 0xA0: // jz
-        if (Z) PC->setValue(operand->getValue());
-        break;
-    case 0xB0: // jc
-        if (C) PC->setValue(operand->getValue());
-        break;
-    case 0xC0: // jsr
-        memory[operand->getValue()]->setValue(PC->getValue());
-        PC->setValue(operand->getValue() + 1);
-        break;
-    case 0xD0: // neg
-        registers[reg]->setValue(~registers[reg]->getValue() + 1);
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        break;
-    case 0xE0: // shr
-        C->setValue((registers[reg]->getValue() & 0x01) == 1);
-        registers[reg]->setValue(registers[reg]->getValue() >> 1);
-        N->setValue(registers[reg]->getValue() > MAX_VALUE_SIGN);
-        Z->setValue(registers[reg]->getValue() == 0);
-        break;
-    case 0xF0: // hlt
-        this->running = false;
-        break;
+    switch (currentInstruction->getValue())
+    {
+        case 0x00: // NOP
+            break;
+
+        case 0x10: // STR
+            operand->setValue(registers[reg]->getValue());
+            break;
+
+        case 0x20: // LDR
+            registers[reg]->setValue(operand->getValue());
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            C->setValue(false);
+            break;
+
+        case 0x30: // ADD
+            registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE);
+            break;
+
+        case 0x40: // OR
+            registers[reg]->setValue(operand->getValue() | registers[reg]->getValue());
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            C->setValue(false);
+            break;
+
+        case 0x50: // AND
+            registers[reg]->setValue(operand->getValue() & registers[reg]->getValue());
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            C->setValue(false);
+            break;
+
+        case 0x60: // NOT
+            registers[reg]->setValue(~registers[reg]->getValue());
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            C->setValue(false);
+            break;
+
+        case 0x70: // SUB
+            registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            C->setValue((registers[reg]->getValue() - operand->getValue()) < 0);
+            break;
+
+        case 0x80: // JMP
+            PC->setValue(operand->getValue());
+            break;
+
+        case 0x90: // JN
+            if (N) PC->setValue(operand->getValue());
+            break;
+
+        case 0xA0: // JZ
+            if (Z) PC->setValue(operand->getValue());
+            break;
+
+        case 0xB0: // JC
+            if (C) PC->setValue(operand->getValue());
+            break;
+
+        case 0xC0: // JSR
+            memory[operand->getValue()]->setValue(PC->getValue());
+            PC->setValue(operand->getValue() + 1);
+            break;
+
+        case 0xD0: // NEG
+            registers[reg]->setValue(~registers[reg]->getValue() + 1);
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            break;
+
+        case 0xE0: // SHR
+            C->setValue((registers[reg]->getValue() & 0x01) == 1);
+            registers[reg]->setValue(registers[reg]->getValue() >> 1);
+            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+            Z->setValue(registers[reg]->getValue() == 0);
+            break;
+
+        case 0xF0: // HLT
+            this->running = false;
+            break;
     }
 }
 
@@ -311,148 +353,7 @@ Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arg
 
     return noError;
 }
-/*
-void RamsesMachine::assemble(QString sourceCode)
-{
-//    NeanderMachine *outputMachine = new NeanderMachine();
-    QHash<QString, int> labelsMap;
-    QFile sourceFile(sourceCode);
-    sourceFile.open(QIODevice::ReadOnly | QIODevice::Text);
-    QString source = sourceFile.readAll();
-    QStringList sourceLines = source.split("\n", QString::SkipEmptyParts);  //separa o arquivo fonte por linhas de codigo
-    QStringList::iterator i;
-    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
-        (*i) = (*i).split(';').at(0).toLower().simplified();    //elimina os comentarios do codigo
-    }
-    unsigned int sumAux;
-    sourceLines.removeAll("");  //remove as linhas em branco
 
-    int pc = 0;
-    //QVector<Byte *> memory = outputMachine->getMemory();
-    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
-        QStringList line = (*i).split(" ", QString::SkipEmptyParts);
-         std::cout << line.join(" ").toStdString() << std::endl;
-        Instruction *atual;
-        if (line.at(0).contains(QRegExp("(.*:)"))) {
-            QString key = line.first();
-            (*i).replace(key, "");
-            key.chop(1);
-            labelsMap.insert(key, pc);
-        } else if(line.at(0) == "org") {
-            pc = line.at(1).toInt();
-        } else if(line.at(0) == "db") {
-            pc++;
-        } else if(line.at(0) == "dw") {
-            pc += 2;
-        } else if(line.at(0) == "dab") {
-            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-                QStringList dabValue = line.at(1).split("(");
-                dabValue.last().chop(1);
-                pc += dabValue.first().toInt();
-            }
-        } else if(line.at(0) == "daw") {
-            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-                QStringList dawValue = line.at(1).split("(");
-                dawValue.last().chop(1);
-                pc += dawValue.first().toInt() * 2;
-            }
-        } else {
-            atual = getInstructionFromMnemonic(line.at(0));
-            pc += 1 + atual->getNumberOfArguments();
-        }
-    }
-    sourceLines.removeAll("");  //remove as linhas em branco
-    foreach(QString key, labelsMap.keys()) {
-        sourceLines.replaceInStrings(QString(key), QString::number(labelsMap.value(key)));
-    }
-    pc = 0;
-    for(i = sourceLines.begin(); i != sourceLines.end(); i++) {
-        Instruction *atual;
-
-        QStringList line = (*i).split(" ", QString::SkipEmptyParts);
-
-        if (line.at(0).contains(QRegExp("(.*:)"))) {
-            //skip
-        } else if(line.at(0) == "org") {
-            pc = line.at(1).toInt();
-        } else if(line.at(0) == "db") {
-            memory[pc++]->setValue((unsigned char)line.last().toInt());
-        } else if(line.at(0) == "dw") {
-            int word = line.last().toInt();
-            memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8) );
-            memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
-        } else if(line.at(0) == "dab") {
-            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-                QStringList dabValue = line.at(1).split("(");
-                dabValue.last().chop(1);
-                for(int i = 0; i < dabValue.first().toInt(); i++) {
-                    memory[pc++]->setValue((unsigned char) dabValue.last().toInt());
-                }
-            }
-        } else if(line.at(0) == "daw") {
-            if(line.at(1).contains(QRegExp("(\\d+\\(\\d+\\))"))) {
-                QStringList dabValue = line.at(1).split("(");
-                dabValue.last().chop(1);
-                for(int i = 0; i < dabValue.first().toInt(); i++) {
-                    int word = dabValue.last().toInt();
-                    memory[pc++]->setValue((unsigned char)((word & 0xFF00)>>8));
-                    memory[pc++]->setValue((unsigned char)(word & 0x00FF) );
-                }
-            }
-        } else {
-            atual = getInstructionFromMnemonic(line.at(0));
-            line.replace(0, QString::number(atual->getValue()));
-            memory[pc]->setValue((unsigned char)line[0].toInt());
-            for(int i=1; i<line.length();i++)
-            {
-
-              //  if(line[i]=="a" || line[i]=="A" && i==1)
-              //{
-              //    sumAux=memory[pc]->getValue();
-              //    memory[pc]->setValue();
-              //}
-              //else if((line[i]=="b" || line[i]=="B") && i==1)
-                {
-                    sumAux= (int)memory[pc]->getValue() + 4;
-                    memory[pc]->setValue((unsigned char)sumAux);
-                    sumAux= (int)memory[pc]->getValue();
-                }
-                else if((line[i]=="x" || line[i]=="X") && i==1)
-                {
-                    memory[pc++]->setValue(memory[pc]->getValue()+5);
-                }
-                else if(line[i].contains("#"))
-                {
-                    sumAux= (int)memory[pc]->getValue() + 2;
-                    memory[pc++]->setValue((unsigned char)sumAux);
-                    line[i].replace("#","");
-                    memory[pc++]->setValue((unsigned char)line[i].toInt());
-                }
-                else if(line[i].contains(",i$") || line[i].contains(",I$"))
-                {
-                    memory[pc]->setValue(memory[pc]->getValue()+(unsigned char)1);
-                    memory[pc++]->setValue((unsigned char)line[i].toInt());
-                }
-                else if(line[i].contains(",x$") || line[i].contains(",X$"))
-                {
-                    memory[pc]->setValue(memory[pc]->getValue()+(unsigned char)3);
-                    memory[pc++]->setValue((unsigned char)line[i].toInt());
-                }
-
-
-
-            //foreach (QString byte, line) {
-                //
-            }
-        }
-
-    }
-    //outputMachine->setMemory(memory);
-    //outputMachine->printStatusDebug();
-    QString outputFilename = sourceCode.split('.').at(0) + ".mem";
-    save(outputFilename);
-}
-*/
 Instruction* RamsesMachine::getInstructionFromValue(int value)
 {
     QVector<Instruction*>::iterator i;
@@ -465,7 +366,9 @@ Instruction* RamsesMachine::getInstructionFromValue(int value)
     }
     return NULL;
 }
-Instruction* RamsesMachine::getInstructionFromMnemonic(QString desiredInstruction) {
+
+Instruction* RamsesMachine::getInstructionFromMnemonic(QString desiredInstruction)
+{
     QVector<Instruction*>::iterator i;
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getMnemonic() == desiredInstruction) {

@@ -7,7 +7,7 @@
 class Register
 {
 public:
-    Register();
+    Register(int numOfBits);
 
     int getValue() const;
     void setValue(int value);
