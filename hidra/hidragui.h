@@ -76,7 +76,8 @@ private:
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFile;
-    bool savedFile, buildSuccessful;
+    bool modifiedFile, sourceAndMemoryInSync; // Both turn false when code is changed
+    bool fileSaved; // Feedback from Save and SaveAs
     QStandardItemModel *model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;

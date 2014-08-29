@@ -16,8 +16,8 @@ HidraGui::HidraGui(QWidget *parent) :
 
     //FIM DO BETA CODE
     currentFile = "";
-    savedFile = false;
-    buildSuccessful = true;
+    modifiedFile = true;
+    sourceAndMemoryInSync = false;
     model = NULL;
     machine = NULL;
 
@@ -47,12 +47,19 @@ void HidraGui::save()
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::information(this, "Incapaz de abrir arquivo",
                                  file.errorString());
+        fileSaved = false;
         return;
     }
+
+    fileSaved = true;
     QTextStream out(&file);
     out << codeEditor->toPlainText();
     file.close();
-    savedFile = true;
+
+    // Save memory
+    machine->save(currentFile.section(".", 0, -2).append(".mem"));
+
+    modifiedFile = false;
 }
 
 void HidraGui::saveAs()
@@ -75,10 +82,12 @@ void HidraGui::saveAs()
                                                "Salvar código-fonte", "",
                                                ext);
 
-    if (currentFile.isEmpty())
+    if (currentFile.isEmpty()) {
+        fileSaved = false;
         return;
+    }
     else {
-        save();
+        save(); // Sets fileSaved to true if successful
     }
 }
 
@@ -180,7 +189,6 @@ void HidraGui::cleanErrorsField()
 void HidraGui::addError(QString errorString)
 {
     ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
-    buildSuccessful = false;
 }
 
 void HidraGui::updateMachineInterface()
@@ -204,18 +212,28 @@ void HidraGui::on_actionRodar_triggered()
 
 void HidraGui::on_actionMontar_triggered()
 {
+    bool saveRequest = false;
+
     // Oferece para salvar o arquivo (não é necessário para montar):
-    if(!savedFile) {
+    if (modifiedFile) {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "Salvar arquivo", "Deseja salvar as alterações feitas?", QMessageBox::Yes|QMessageBox::No);
         if (reply == QMessageBox::Yes) {
             ui->action_Save->trigger();
+            saveRequest = true;
         }
     }
 
     cleanErrorsField();
     machine->assemble(codeEditor->toPlainText());
     updateMachineInterface();
+
+    if (machine->buildSuccessful)
+    {
+        sourceAndMemoryInSync = true;
+        if (saveRequest && fileSaved) // If file was successfully saved, save .mem too
+            machine->save(currentFile.section(".", 0, -2).append(".mem"));
+    }
 }
 
 void HidraGui::on_actionSaveAs_triggered()
@@ -311,14 +329,15 @@ void HidraGui::on_actionOpen_triggered()
         }
         QTextStream in(&file);
         codeEditor->setPlainText(in.readAll());
-        savedFile = true;
+        modifiedFile = false;
         file.close();
     }
 }
 
 void HidraGui::on_textEditSouceCode_textChanged()
 {
-    savedFile = false;
+    sourceAndMemoryInSync = false;
+    modifiedFile = true;
 }
 
 void HidraGui::on_actionCarregar_triggered()
@@ -333,10 +352,7 @@ void HidraGui::on_actionSaveMem_triggered()
 
 void HidraGui::on_actionZerarMemoria_triggered()
 {
-    QVector<Byte *> regs = machine->getMemory();
-    foreach (Byte* tmp, regs) {
-        tmp->setValue((unsigned char)0);
-    }
+    machine->clearMemory();
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();
@@ -344,10 +360,7 @@ void HidraGui::on_actionZerarMemoria_triggered()
 
 void HidraGui::on_actionZerar_registradores_triggered()
 {
-    QVector<Register *> regs = machine->getRegisters();
-    foreach (Register* tmp, regs) {
-        tmp->setValue(0);
-    }
+    machine->clearRegisters();
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();

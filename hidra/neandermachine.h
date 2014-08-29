@@ -19,8 +19,6 @@ public:
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
 
-    virtual int getMemorySize();
-
     virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     static const int MEM_SIZE = 256;

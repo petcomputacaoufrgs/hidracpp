@@ -32,6 +32,8 @@ AhmesMachine::AhmesMachine()
     for (int i=0; i<assemblerMemory.size(); i++)
         assemblerMemory[i] = new Byte();
 
+    setBreakpoint(0); // Reset breakpoint
+
 
 
     //////////////////////////////////////////////////
@@ -86,7 +88,8 @@ AhmesMachine::AhmesMachine()
 
 void AhmesMachine::printStatusDebug()
 {
-
+    std::cout << "PC: " << PC->getValue() << std::endl;
+    std::cout << "AC: " << AC->getValue() << std::endl;
 }
 
 void AhmesMachine::load(QString filename)
@@ -132,20 +135,21 @@ void AhmesMachine::save(QString filename)
     memFile.close();
 }
 
-void AhmesMachine::step() {
+void AhmesMachine::step()
+{
     const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand;
 
-    unsigned char previousAC = AC->getValue();
-    if(currentInstruction->getNumberOfArguments() == 1) {
-        PC->incrementValue();
+    int previousAC = AC->getValue();
+    if(currentInstruction->getSize() == 2)
+    {
+        PC->incrementValue(); // Go to next byte
         operand = memory[PC->getValue()];
     }
 
-    PC->incrementValue();
-    if(PC->getValue() == 0) { // ADICIONAR BREAKPOINT
+    PC->incrementValue(); // Prepare for the next step
+    if(PC->getValue() == breakpoint)
         this->running = false;
-    }
 
     switch (currentInstruction->getValue())
     {
@@ -153,37 +157,43 @@ void AhmesMachine::step() {
             break;
 
         case 0x10: // STA
-            memory[operand->getValue()]->setValue((unsigned char)AC->getValue());
+            memory[operand->getValue()]->setValue(AC->getValue());
             break;
 
         case 0x20: // LDA
             AC->setValue(memory[operand->getValue()]->getValue());
-            updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
 
         case 0x30: // ADD
             AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & 0xFF);
-            updateFlags(previousAC, operand->getValue(), true, false, false, false);
+
+            // Unsigned carry flag (true when result is less than initial value):
+            C->setValue(AC->getValue() < previousAC);
+            // Signed overflow flag (true if unexpected signed result):
+            V->setValue(getSignedInt(previousAC) + getSignedInt(memory[operand->getValue()]->getValue()) != getSignedInt(AC->getValue()));
+
             break;
 
         case 0x40: // OR
             AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
-            updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
 
         case 0x50: // AND
             AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
-            updateFlags(previousAC, operand->getValue(), false, false, false, false);
             break;
 
         case 0x60: // NOT
             AC->setValue(AC->getValue() ^ 0xFF);
-            updateFlags(previousAC, operand->getValue(), false, false, false, false);;
             break;
 
         case 0x70: // SUB
             AC->setValue((AC->getValue() - memory[operand->getValue()]->getValue()) & 0xFF);
-            updateFlags(previousAC, operand->getValue(), false, true, false, false);
+
+            // Unsigned carry flag (true when result is less than initial value):
+            B->setValue(previousAC < operand->getValue());
+            // Signed overflow flag (true if unexpected signed result):
+            V->setValue(getSignedInt(previousAC) - getSignedInt(memory[operand->getValue()]->getValue()) != getSignedInt(AC->getValue()));
+
             break;
 
         case 0x80: // JMP
@@ -191,75 +201,75 @@ void AhmesMachine::step() {
             break;
 
         case 0x90: // JN
-            if(N->getValue())
+            if (N->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0x94: // JP
-            if(!N->getValue())
+            if (!N->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0x98: // JV
-            if(V->getValue())
+            if (V->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0x9C: // JNV
-            if(!V->getValue())
+            if (!V->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xA0: // JZ
-            if(Z->getValue())
+            if (Z->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xA4: // JNZ
-            if(!Z->getValue())
+            if (!Z->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xB0: // JC
-            if(C->getValue())
+            if (C->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xB4: // JNC
-            if(!C->getValue())
+            if (!C->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xB8: // JB
-            if(B->getValue())
+            if (B->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xBC: // JNB
-            if(!B->getValue())
+            if (!B->getValue())
                 PC->setValue(operand->getValue());
             break;
 
         case 0xE0: // SHR
             AC->setValue(AC->getValue() >> 1);
-            updateFlags(previousAC, operand->getValue(), false, false, true, false);
+            C->setValue((previousAC & 0x01) != 0);
             break;
 
         case 0xE1: // SHL
             AC->setValue(AC->getValue() << 1);
-            updateFlags(previousAC, operand->getValue(), false, false, true, false);
+            C->setValue((AC->getValue() & 0x80) != 0);
             break;
 
         case 0xE2: // ROR
             AC->setValue((AC->getValue() >> 1) & 0xFF);
-            updateFlags(previousAC, operand->getValue(), false, false, false, true);
+            C->setValue((previousAC & 0x01) != 0);
             break;
 
         case 0xE3: // ROL
             AC->setValue((AC->getValue() << 1) & 0xFF);
             if (C->getValue())
-                AC->setValue(AC->getValue() | 0x1);
-            updateFlags(previousAC, operand->getValue(), false, false, false, true);
+                AC->setValue(AC->getValue() | 0x01);
+            C->setValue((previousAC & 0x80) != 0);
             break;
 
         case 0xF0: // HLT
@@ -269,6 +279,10 @@ void AhmesMachine::step() {
         default:
             break;
     }
+
+    // Update flags:
+    Z->setValue(AC->getValue() == 0);
+    N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
 }
 
 void AhmesMachine::run() {
@@ -278,48 +292,12 @@ void AhmesMachine::run() {
     }
 }
 
-int AhmesMachine::getMemorySize()
+int AhmesMachine::getSignedInt(int eightBitValue)
 {
-    return MEM_SIZE;
-}
-
-void AhmesMachine::updateFlags(unsigned char previousAC, unsigned char operand, bool addition, bool subtraction, bool shiftRotateLeft, bool shiftRotateRight)
-{
-    Z->setValue(AC->getValue() == 0);
-    N->setValue(AC->getValue() >= 128);
-
-    if (addition) // Update carry
-    {
-        C->setValue(AC->getValue() < previousAC); // Result is less than initial value (Flag C is unsigned)
-    }
-
-    if (subtraction) // Update borrow
-    {
-        B->setValue(previousAC < operand); // Subtraction needs borrow (Flag B is unsigned)
-    }
-
-    if (addition || subtraction)
-    {
-        if ((previousAC >= 128 && operand >= 128 && AC->getValue()  < 128) || // Overflow: negative operands with positive result
-            (previousAC  < 128 && operand  < 128 && AC->getValue() >= 128))   // Overflow: positive operands with negative result
-        {
-            V->setValue(1);
-        }
-        else
-        {
-            V->setValue(0);
-        }
-    }
-
-    if (shiftRotateLeft)
-    {
-        C->setValue((previousAC & 0b10000000) != 0);
-    }
-
-    if (shiftRotateRight)
-    {
-        C->setValue((previousAC & 0b00000001) != 0);
-    }
+    if (eightBitValue <= MAX_SIGNED_VALUE)
+        return eightBitValue;
+    else
+        return eightBitValue - (MAX_VALUE + 1);
 }
 
 // EXACT DUPLICATE OF NEANDER'S METHOD:

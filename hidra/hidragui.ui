@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Hidra - PET Computaçao</string>
+   <string>Hidra - PET Computação</string>
   </property>
   <property name="styleSheet">
    <string notr="true">QCheckBox::indicator{
@@ -599,7 +599,7 @@ QCheckBox::indicator:unchecked {
      <x>0</x>
      <y>0</y>
      <width>1098</width>
-     <height>25</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPrograma">

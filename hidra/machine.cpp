@@ -5,6 +5,19 @@ Machine::Machine(QObject *parent) :
 {
 }
 
+int Machine::getBreakpoint() const
+{
+    return breakpoint;
+}
+
+void Machine::setBreakpoint(int value)
+{
+    if (value > memory.size() || value < 0)
+        breakpoint = 0;
+    else
+        breakpoint = value;
+}
+
 QVector<Byte *> Machine::getMemory() const
 {
     return memory;
@@ -15,6 +28,12 @@ void Machine::setMemory(const QVector<Byte *> &value)
     memory = value;
 }
 
+void Machine::clearMemory()
+{
+    for (int i=0; i<memory.size(); i++)
+        memory[i]->setValue(0);
+}
+
 QVector<Register *> Machine::getRegisters() const
 {
     return registers;
@@ -23,6 +42,12 @@ QVector<Register *> Machine::getRegisters() const
 void Machine::setRegisters(const QVector<Register *> &value)
 {
     registers = value;
+}
+
+void Machine::clearRegisters()
+{
+    for (int i=0; i<registers.size(); i++)
+        registers[i]->setValue(0);
 }
 
 QVector<Instruction *> Machine::getInstructions() const
@@ -48,17 +73,18 @@ void Machine::setFlags(const QVector<Bit *> &value)
 
 void Machine::clearAssemblerMemory()
 {
-    for (int i=0; i<getMemorySize(); i++)
+    for (int i=0; i<assemblerMemory.size(); i++)
     {
         assemblerMemory[i]->setValue(0);
         reserved[i] = false;
+        correspondingLine[i] = -1;
     }
 }
 
 // Copies assemblerMemory to machine's memory
 void Machine::copyAssemblerMemoryToMemory()
 {
-    for (int i=0; i<getMemorySize(); i++)
+    for (int i=0; i<memory.size(); i++)
         memory[i]->setValue(assemblerMemory[i]->getValue());
 }
 
@@ -102,7 +128,7 @@ bool Machine::isValidByteValue(QString valueString)
 
 bool Machine::isValidAddress(QString addressString)
 {
-    return isValidValue(addressString, 0, getMemorySize()-1);
+    return isValidValue(addressString, 0, memory.size()-1);
 }
 
 void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
@@ -200,6 +226,8 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
 void Machine::assemble(QString sourceCode)
 {
     Machine::ErrorCode errorCode;
+
+    buildSuccessful = false;
 
     //////////////////////////////////////////////////
     // Simplify source code
@@ -300,10 +328,12 @@ void Machine::assemble(QString sourceCode)
             const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
             if (instruction != NULL)
             {
+                correspondingLine[PC->getValue()] = lineNumber;
                 errorCode = mountInstruction(mnemonic, arguments, labelPCMap);
             }
             else // Directive
             {
+                correspondingLine[PC->getValue()] = lineNumber;
                 errorCode = obeyDirective(mnemonic, arguments, false);
             }
 
@@ -315,7 +345,7 @@ void Machine::assemble(QString sourceCode)
         }
     }
 
-    // TO-DO: Generate .mem file
+    buildSuccessful = true;
     copyAssemblerMemoryToMemory();
     PC->setValue(0);
 }

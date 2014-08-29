@@ -34,6 +34,8 @@ RamsesMachine::RamsesMachine()
     for (int i=0; i<assemblerMemory.size(); i++)
         assemblerMemory[i] = new Byte();
 
+    setBreakpoint(0); // Reset breakpoint
+
 
 
     //////////////////////////////////////////////////
@@ -79,7 +81,10 @@ RamsesMachine::RamsesMachine()
 
 void RamsesMachine::printStatusDebug()
 {
-
+    std::cout << std::endl;
+    std::cout << "RA: " << (int)RA->getValue() << std::endl;;
+    std::cout << "RB: " << (int)RB->getValue() << std::endl;;
+    std::cout << "RX: " << (int)RX->getValue() << std::endl;;
 }
 
 void RamsesMachine::load(QString filename)
@@ -141,11 +146,12 @@ void RamsesMachine::step()
     const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     int addressingMode = memory[PC->getValue()]->getValue() & 0b00000011; // Extract last two bits
     int reg = (memory[PC->getValue()]->getValue() & 0b00001100) >> 2; // Bits 2 and 3 indicate register (A, B or X)
+    bool updateFlags = false;
     Byte *operand;
 
     if(currentInstruction->getSize() == 2)
     {
-        PC->incrementValue(); // Go to operand
+        PC->incrementValue(); // Go to next byte
 
         Byte *endOperand = NULL;
         switch (addressingMode)
@@ -161,7 +167,7 @@ void RamsesMachine::step()
                 break;
 
             case 0x02: // Immediate addressing mode
-                endOperand->setValue(PC->getValue());
+                endOperand->setValue(PC->getValue()); // ERROR! NULL pointer
                 break;
 
             case 0x03: // Indexed addressing mode
@@ -173,11 +179,8 @@ void RamsesMachine::step()
     }
 
     PC->incrementValue(); // Prepare for the next step
-    if(PC->getValue() == 0) // TO-DO: ADICIONAR BREAKPOINT
-    {
+    if(PC->getValue() == breakpoint)
         this->running = false;
-        return;
-    }
 
     switch (currentInstruction->getValue())
     {
@@ -190,44 +193,38 @@ void RamsesMachine::step()
 
         case 0x20: // LDR
             registers[reg]->setValue(operand->getValue());
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
             C->setValue(false);
+            updateFlags = true;
             break;
 
         case 0x30: // ADD
             registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
             C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE);
+            updateFlags = true;
             break;
 
         case 0x40: // OR
             registers[reg]->setValue(operand->getValue() | registers[reg]->getValue());
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
             C->setValue(false);
+            updateFlags = true;
             break;
 
         case 0x50: // AND
             registers[reg]->setValue(operand->getValue() & registers[reg]->getValue());
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
             C->setValue(false);
+            updateFlags = true;
             break;
 
         case 0x60: // NOT
             registers[reg]->setValue(~registers[reg]->getValue());
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
             C->setValue(false);
+            updateFlags = true;
             break;
 
         case 0x70: // SUB
             registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
             C->setValue((registers[reg]->getValue() - operand->getValue()) < 0);
+            updateFlags = true;
             break;
 
         case 0x80: // JMP
@@ -235,15 +232,18 @@ void RamsesMachine::step()
             break;
 
         case 0x90: // JN
-            if (N) PC->setValue(operand->getValue());
+            if (N->getValue())
+                PC->setValue(operand->getValue());
             break;
 
         case 0xA0: // JZ
-            if (Z) PC->setValue(operand->getValue());
+            if (Z->getValue())
+                PC->setValue(operand->getValue());
             break;
 
         case 0xB0: // JC
-            if (C) PC->setValue(operand->getValue());
+            if (C->getValue())
+                PC->setValue(operand->getValue());
             break;
 
         case 0xC0: // JSR
@@ -253,20 +253,25 @@ void RamsesMachine::step()
 
         case 0xD0: // NEG
             registers[reg]->setValue(~registers[reg]->getValue() + 1);
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
+            updateFlags = true;
             break;
 
         case 0xE0: // SHR
             C->setValue((registers[reg]->getValue() & 0x01) == 1);
             registers[reg]->setValue(registers[reg]->getValue() >> 1);
-            N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-            Z->setValue(registers[reg]->getValue() == 0);
+            updateFlags = true;
             break;
 
         case 0xF0: // HLT
             this->running = false;
             break;
+    }
+
+    // Update flags:
+    if (updateFlags)
+    {
+        N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
+        Z->setValue(registers[reg]->getValue() == 0);
     }
 }
 
@@ -276,11 +281,6 @@ void RamsesMachine::run()
     while (this->running) {
         this->step();
     }
-}
-
-int RamsesMachine::getMemorySize()
-{
-    return MEM_SIZE;
 }
 
 Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)

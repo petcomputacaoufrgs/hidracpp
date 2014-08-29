@@ -19,8 +19,6 @@ public:
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
 
-    virtual int getMemorySize();
-
     virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     static const int MEM_SIZE = 256;
@@ -29,7 +27,7 @@ public:
 
 
 private:
-    void updateFlags(unsigned char previousAC, unsigned char operand, bool addition, bool subtraction, bool shiftRotateLeft, bool shiftRotateRight);
+    int getSignedInt(int eightBitValue);
 
     Register *AC;
     Bit *N, *Z, *V, *C, *B;
