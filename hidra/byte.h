@@ -5,10 +5,10 @@ class Byte
 {
 public:
     Byte();
-    Byte(unsigned char);
+    Byte(int);
 
-    unsigned char getValue() const;
-    void setValue(unsigned char value);
+    int getValue() const;
+    void setValue(int value);
 
 private:
     unsigned char value;

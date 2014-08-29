@@ -138,13 +138,20 @@ void AhmesMachine::save(QString filename)
 void AhmesMachine::step()
 {
     const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
-    Byte *operand;
+    Byte *operand = NULL;
+    int jumpAddress;
 
     int previousAC = AC->getValue();
-    if(currentInstruction->getSize() == 2)
+
+    if (currentInstruction->getSize() == 2)
     {
+        // Read second byte, which contains either the operand's address (ALU, load and store) or the jump's destination address:
+        int operandAddress;
+
         PC->incrementValue(); // Go to next byte
-        operand = memory[PC->getValue()];
+        operandAddress = memory[PC->getValue()]->getValue(); // Read address where operand is located
+        operand = memory[operandAddress]; // Pointer to operand's byte
+        jumpAddress = memory[PC->getValue()]->getValue(); // Address to jump to
     }
 
     PC->incrementValue(); // Prepare for the next step
@@ -157,29 +164,28 @@ void AhmesMachine::step()
             break;
 
         case 0x10: // STA
-            memory[operand->getValue()]->setValue(AC->getValue());
+            operand->setValue(AC->getValue());
             break;
 
         case 0x20: // LDA
-            AC->setValue(memory[operand->getValue()]->getValue());
+            AC->setValue(operand->getValue());
             break;
 
         case 0x30: // ADD
-            AC->setValue((AC->getValue() + memory[operand->getValue()]->getValue()) & 0xFF);
+            AC->setValue((AC->getValue() + operand->getValue()) & 0xFF);
+            C->setValue(AC->getValue() + operand->getValue() > MAX_VALUE); // Unsigned carry flag
 
-            // Unsigned carry flag (true when result is less than initial value):
-            C->setValue(AC->getValue() < previousAC);
-            // Signed overflow flag (true if unexpected signed result):
-            V->setValue(getSignedInt(previousAC) + getSignedInt(memory[operand->getValue()]->getValue()) != getSignedInt(AC->getValue()));
+            // Signed overflow flag (true on incorrect result):
+            V->setValue(getSignedInt(previousAC) + getSignedInt(operand->getValue()) != getSignedInt(AC->getValue()));
 
             break;
 
         case 0x40: // OR
-            AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
+            AC->setValue(AC->getValue() | operand->getValue());
             break;
 
         case 0x50: // AND
-            AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
+            AC->setValue(AC->getValue() & operand->getValue());
             break;
 
         case 0x60: // NOT
@@ -187,67 +193,66 @@ void AhmesMachine::step()
             break;
 
         case 0x70: // SUB
-            AC->setValue((AC->getValue() - memory[operand->getValue()]->getValue()) & 0xFF);
+            AC->setValue((AC->getValue() - operand->getValue()) & 0xFF);
+            B->setValue(AC->getValue() - operand->getValue() < 0); // Unsigned borrow flag
 
-            // Unsigned carry flag (true when result is less than initial value):
-            B->setValue(previousAC < operand->getValue());
-            // Signed overflow flag (true if unexpected signed result):
-            V->setValue(getSignedInt(previousAC) - getSignedInt(memory[operand->getValue()]->getValue()) != getSignedInt(AC->getValue()));
+            // Signed overflow flag (true on incorrect result):
+            V->setValue(getSignedInt(previousAC) - getSignedInt(operand->getValue()) != getSignedInt(AC->getValue()));
 
             break;
 
         case 0x80: // JMP
-            PC->setValue(operand->getValue());
+            PC->setValue(jumpAddress);
             break;
 
         case 0x90: // JN
             if (N->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0x94: // JP
             if (!N->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0x98: // JV
             if (V->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0x9C: // JNV
             if (!V->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xA0: // JZ
             if (Z->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xA4: // JNZ
             if (!Z->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xB0: // JC
             if (C->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xB4: // JNC
             if (!C->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xB8: // JB
             if (B->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xBC: // JNB
             if (!B->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xE0: // SHR
@@ -307,7 +312,6 @@ Machine::ErrorCode AhmesMachine::mountInstruction(QString mnemonic, QString argu
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
     int numberOfArguments = instruction->getNumberOfArguments();
-    bool ok;
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
@@ -328,7 +332,7 @@ Machine::ErrorCode AhmesMachine::mountInstruction(QString mnemonic, QString argu
             return invalidAddress;
 
         // Write argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(&ok, 0));
+        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
         PC->incrementValue();
     }
 

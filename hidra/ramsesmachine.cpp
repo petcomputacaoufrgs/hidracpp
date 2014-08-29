@@ -52,7 +52,6 @@ RamsesMachine::RamsesMachine()
     C = flags[2];
 
     Z->setValue(true);
-    C->setValue(true);
 
 
 
@@ -144,42 +143,50 @@ void RamsesMachine::save(QString filename)
 void RamsesMachine::step()
 {
     const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    Byte *operand = NULL; // Final operand byte
+    int jumpAddress;
+
     int addressingMode = memory[PC->getValue()]->getValue() & 0b00000011; // Extract last two bits
     int reg = (memory[PC->getValue()]->getValue() & 0b00001100) >> 2; // Bits 2 and 3 indicate register (A, B or X)
+
     bool updateFlags = false;
-    Byte *operand;
 
-    if(currentInstruction->getSize() == 2)
+    if (currentInstruction->getSize() == 2)
     {
-        PC->incrementValue(); // Go to next byte
+        int operandAddress, currentByteValue;
 
-        Byte *endOperand = NULL;
+        PC->incrementValue(); // Go to next byte
+        currentByteValue = memory[PC->getValue()]->getValue();
+
         switch (addressingMode)
         {
             case 0x00: // Direct addressing mode
-                endOperand = memory[PC->getValue()];
+                operandAddress = currentByteValue;
+                operand = memory[operandAddress];
+                jumpAddress = operandAddress;
                 break;
 
             case 0x01: // Indirect addressing mode
-                Byte *endPointer;
-                endPointer = memory[PC->getValue()];
-                endOperand = memory[endPointer->getValue()];
+                operandAddress = memory[currentByteValue]->getValue();
+                operand = memory[operandAddress];
+                jumpAddress = operandAddress;
                 break;
 
             case 0x02: // Immediate addressing mode
-                endOperand->setValue(PC->getValue()); // ERROR! NULL pointer
+                operand = memory[PC->getValue()];
+                jumpAddress = (PC->getValue()+1) % MEM_SIZE; // Invalid, jump to next byte (ignore jump)
                 break;
 
             case 0x03: // Indexed addressing mode
-                endOperand = memory[PC->getValue() + RX->getValue()];
+                operandAddress = (currentByteValue + RX->getValue()) % MEM_SIZE;
+                operand = memory[operandAddress];
+                jumpAddress = operandAddress;
                 break;
         }
-
-        operand = memory[endOperand->getValue()];
     }
 
     PC->incrementValue(); // Prepare for the next step
-    if(PC->getValue() == breakpoint)
+    if (PC->getValue() == breakpoint)
         this->running = false;
 
     switch (currentInstruction->getValue())
@@ -199,18 +206,18 @@ void RamsesMachine::step()
 
         case 0x30: // ADD
             registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
-            C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE);
+            C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE); // Carry flag (unsigned)
             updateFlags = true;
             break;
 
         case 0x40: // OR
-            registers[reg]->setValue(operand->getValue() | registers[reg]->getValue());
+            registers[reg]->setValue(registers[reg]->getValue() | operand->getValue());
             C->setValue(false);
             updateFlags = true;
             break;
 
         case 0x50: // AND
-            registers[reg]->setValue(operand->getValue() & registers[reg]->getValue());
+            registers[reg]->setValue(registers[reg]->getValue() & operand->getValue());
             C->setValue(false);
             updateFlags = true;
             break;
@@ -223,32 +230,32 @@ void RamsesMachine::step()
 
         case 0x70: // SUB
             registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
-            C->setValue((registers[reg]->getValue() - operand->getValue()) < 0);
+            C->setValue((registers[reg]->getValue() - operand->getValue()) < 0); // Carry flag (unsigned)
             updateFlags = true;
             break;
 
         case 0x80: // JMP
-            PC->setValue(operand->getValue());
+            PC->setValue(jumpAddress);
             break;
 
         case 0x90: // JN
             if (N->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xA0: // JZ
             if (Z->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xB0: // JC
             if (C->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xC0: // JSR
             memory[operand->getValue()]->setValue(PC->getValue());
-            PC->setValue(operand->getValue() + 1);
+            PC->setValue(jumpAddress + 1);
             break;
 
         case 0xD0: // NEG
@@ -288,7 +295,6 @@ Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arg
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
     int numberOfArguments = instruction->getNumberOfArguments();
-    bool ok;
 
     int registerID = 0;
     int addressingMode = 0;
@@ -347,7 +353,7 @@ Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arg
             return invalidArgument;
 
         // Write address argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(&ok, 0));
+        assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(NULL, 0));
         PC->incrementValue();
     }
 

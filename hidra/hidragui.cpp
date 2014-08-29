@@ -143,13 +143,12 @@ void HidraGui::updateFlagsLeds()
         ui->checkBoxB_3->setChecked(machine->getFlags().at(4)->getValue());
         break;
     case 2:
-        ui->frameRamses->setVisible(true);
-        machine = new RamsesMachine();
+        ui->checkBoxN_5->setChecked(machine->getFlags().at(0)->getValue());
+        ui->checkBoxZ_5->setChecked(machine->getFlags().at(1)->getValue());
+        ui->checkBoxC_4->setChecked(machine->getFlags().at(2)->getValue());
         break;
     case 3:
-        ui->frameCesar->setVisible(true);
-        //machine = new CesarMachine();
-        machine = NULL; //evita o crash
+        // TO-DO: Acertar flags Cesar
         break;
     default:
         break;
@@ -168,13 +167,12 @@ void HidraGui::updateLCDDisplay()
         ui->lcdNumberPC_Ahmes->display(machine->getRegisters().at(1)->getValue());
         break;
     case 2:
-        ui->frameRamses->setVisible(true);
-        machine = new RamsesMachine();
+        ui->lcdNumber_11->display(machine->getRegisters().at(0)->getValue());
+        ui->lcdNumber_12->display(machine->getRegisters().at(1)->getValue());
+        ui->lcdNumber_9->display(machine->getRegisters().at(2)->getValue());
+        ui->lcdNumber_10->display(machine->getRegisters().at(3)->getValue());
         break;
     case 3:
-        ui->frameCesar->setVisible(true);
-        //machine = new CesarMachine();
-        machine = NULL; //evita o crash
         break;
     default:
         break;

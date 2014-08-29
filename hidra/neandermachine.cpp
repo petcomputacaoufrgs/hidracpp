@@ -123,12 +123,18 @@ void NeanderMachine::save(QString filename){
 void NeanderMachine::step()
 {
     const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
-    Byte *operand;
+    int jumpAddress;
+    Byte *operand = NULL;
 
     if (currentInstruction->getSize() == 2)
     {
+        // Read second byte, which contains either the operand's address (ALU, load and store) or the jump's destination address:
+        int operandAddress;
+
         PC->incrementValue(); // Go to next byte
-        operand = memory[PC->getValue()];
+        operandAddress = memory[PC->getValue()]->getValue(); // Read address where operand is located
+        operand = memory[operandAddress]; // Pointer to operand's byte
+        jumpAddress = memory[PC->getValue()]->getValue(); // Address to jump to
     }
 
     PC->incrementValue(); // Prepare for the next step
@@ -141,23 +147,23 @@ void NeanderMachine::step()
             break;
 
         case 0x10: // STA
-            memory[operand->getValue()]->setValue(AC->getValue());
+            operand->setValue(AC->getValue());
             break;
 
         case 0x20: // LDA
-            AC->setValue(memory[operand->getValue()]->getValue());
+            AC->setValue(operand->getValue());
             break;
 
         case 0x30: // ADD
-            AC->setValue((AC->getValue() + (int)memory[operand->getValue()]->getValue()) & MAX_VALUE);
+            AC->setValue((AC->getValue() + operand->getValue()) & MAX_VALUE);
             break;
 
         case 0x40: // OR
-            AC->setValue(AC->getValue() | memory[operand->getValue()]->getValue());
+            AC->setValue(AC->getValue() | operand->getValue());
             break;
 
         case 0x50: // AND
-            AC->setValue(AC->getValue() & memory[operand->getValue()]->getValue());
+            AC->setValue(AC->getValue() & operand->getValue());
             break;
 
         case 0x60: // NOT
@@ -165,17 +171,17 @@ void NeanderMachine::step()
             break;
 
         case 0x80: // JMP
-            PC->setValue(operand->getValue());
+            PC->setValue(jumpAddress);
             break;
 
         case 0x90: // JN
             if (N->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xA0: // JZ
             if (Z->getValue())
-                PC->setValue(operand->getValue());
+                PC->setValue(jumpAddress);
             break;
 
         case 0xF0: // HLT
@@ -204,7 +210,6 @@ Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString ar
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
     int numberOfArguments = instruction->getNumberOfArguments();
-    bool ok;
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
@@ -225,7 +230,7 @@ Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString ar
             return invalidAddress;
 
         // Write argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(&ok, 0));
+        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
         PC->incrementValue();
     }
 

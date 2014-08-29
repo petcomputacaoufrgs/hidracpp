@@ -5,17 +5,18 @@ Byte::Byte()
     this->value = 0;
 }
 
-Byte::Byte(unsigned char value)
+Byte::Byte(int value)
 {
-    this->value = value;
+    this->value = (unsigned char)(value % 256);
 }
-unsigned char Byte::getValue() const
+
+int Byte::getValue() const
 {
     return value;
 }
 
-void Byte::setValue(unsigned char value)
+void Byte::setValue(int value)
 {
-    this->value = value;
+    this->value = (unsigned char)(value % 256);
 }
 
