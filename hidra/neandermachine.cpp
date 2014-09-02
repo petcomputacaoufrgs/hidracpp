@@ -240,7 +240,7 @@ Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString ar
 Instruction* NeanderMachine::getInstructionFromValue(int value)
 {
     QVector<Instruction*>::iterator i;
-    value &= 0b11110000; // Filter "don't care" bits
+    value &= 0xf0; // Filter "don't care" bits
 
     for( i = instructions.begin(); i != instructions.end(); i++) {
         if((*i)->getValue() == value) {
