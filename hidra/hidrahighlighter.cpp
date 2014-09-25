@@ -23,6 +23,10 @@ void HidraHighlighter::highlightBlock(const QString & text1)
     foreach (Instruction *tmp, instructions) {
         pattern.append("\\b" + tmp->getMnemonic()+"\\b|");
     }
+    pattern.append("\\b" + QString("org") + "\\b|");
+    pattern.append("\\b" + QString("db") + "\\b|");
+    pattern.append("\\b" + QString("dw") + "\\b|");
+
     pattern.chop(1);
     pattern.append(")");
 
