@@ -61,12 +61,12 @@ void Machine::setInstructions(const QVector<Instruction *> &value)
 }
 
 
-QVector<Bit *> Machine::getFlags() const
+QVector<Flag *> Machine::getFlags() const
 {
     return flags;
 }
 
-void Machine::setFlags(const QVector<Bit *> &value)
+void Machine::setFlags(const QVector<Flag *> &value)
 {
     flags = value;
 }

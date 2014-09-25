@@ -1,9 +1,15 @@
 #include "register.h"
 
-Register::Register(int numOfBits)
+Register::Register(QString name, int numOfBits)
 {
+    this->name = name;
     this->value = 0;
     this->numOfBits = numOfBits;
+}
+
+QString Register::getName() const
+{
+    return name;
 }
 
 int Register::getValue() const

@@ -28,7 +28,7 @@ public:
 private:
 
     Register* AC;
-    Bit *N, *Z;
+    Flag *N, *Z;
 
 };
 

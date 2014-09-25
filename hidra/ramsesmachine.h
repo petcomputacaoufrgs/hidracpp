@@ -27,7 +27,7 @@ public:
 
 private:
     Register *RA, *RB, *RX;
-    Bit *N, *Z, *C;
+    Flag *N, *Z, *C;
 };
 
 #endif // RAMSESMACHINE_H

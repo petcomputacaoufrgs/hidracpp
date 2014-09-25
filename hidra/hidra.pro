@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     ahmesmachine.cpp \
     hidracli.cpp \
     hidrahighlighter.cpp \
-    hidracodeeditor.cpp
+    hidracodeeditor.cpp \
+    flag.cpp
 
 HEADERS  += hidragui.h \
     machine.h \
@@ -37,9 +38,13 @@ HEADERS  += hidragui.h \
     ahmesmachine.h \
     hidracli.h \
     hidrahighlighter.h \
-    hidracodeeditor.h
+    hidracodeeditor.h \
+    flag.h
 
 FORMS    += hidragui.ui
 
 RESOURCES += \
     res.qrc
+
+OTHER_FILES += \
+    Changed.txt

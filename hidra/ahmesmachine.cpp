@@ -8,11 +8,8 @@ AhmesMachine::AhmesMachine()
 
     registers = QVector<Register*>(2);
 
-    for (int i=0; i<registers.size(); i++)
-        registers[i] = new Register(8);
-
-    PC = registers[1];
-    AC = registers[0];
+    AC = registers[0] = new Register("AC", 8);
+    PC = registers[1] = new Register("PC", 8);
 
 
 
@@ -40,18 +37,13 @@ AhmesMachine::AhmesMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags = QVector<Bit*>(5);
+    flags = QVector<Flag*>(5);
 
-    for (int i = 0; i < flags.size(); i++)
-        flags[i] = new Bit();
-
-    N = flags[0];
-    Z = flags[1];
-    V = flags[2];
-    C = flags[3];
-    B = flags[4];
-
-    Z->setValue(true);
+    N = flags[0] = new Flag("N");
+    Z = flags[1] = new Flag("Z", true);
+    V = flags[2] = new Flag("V");
+    C = flags[3] = new Flag("C");
+    B = flags[4] = new Flag("B");
 
 
 
@@ -60,6 +52,7 @@ AhmesMachine::AhmesMachine()
     //////////////////////////////////////////////////
 
     instructions = QVector<Instruction*>(24);
+
     instructions[0]  = new Instruction("nop",   0, 0, 1);
     instructions[1]  = new Instruction("sta",  16, 1, 2);
     instructions[2]  = new Instruction("lda",  32, 1, 2);
@@ -146,12 +139,12 @@ void AhmesMachine::step()
     if (currentInstruction->getSize() == 2)
     {
         // Read second byte, which contains either the operand's address (ALU, load and store) or the jump's destination address:
-        int operandAddress;
+        int currentByteValue;
 
         PC->incrementValue(); // Go to next byte
-        operandAddress = memory[PC->getValue()]->getValue(); // Read address where operand is located
-        operand = memory[operandAddress]; // Pointer to operand's byte
-        jumpAddress = memory[PC->getValue()]->getValue(); // Address to jump to
+        currentByteValue = memory[PC->getValue()]->getValue(); // Read byte
+        operand = memory[currentByteValue]; // Pointer to operand
+        jumpAddress = currentByteValue; // Address to jump to
     }
 
     PC->incrementValue(); // Prepare for the next step

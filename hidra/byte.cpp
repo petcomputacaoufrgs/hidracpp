@@ -7,7 +7,7 @@ Byte::Byte()
 
 Byte::Byte(int value)
 {
-    this->value = (unsigned char)(value % 256);
+    this->value = (unsigned char)(value & 0xFF);
 }
 
 int Byte::getValue() const
@@ -17,6 +17,6 @@ int Byte::getValue() const
 
 void Byte::setValue(int value)
 {
-    this->value = (unsigned char)(value % 256);
+    this->value = (unsigned char)(value & 0xFF);
 }
 

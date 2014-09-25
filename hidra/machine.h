@@ -10,8 +10,8 @@
 #include <QPair>
 #include <iostream>
 
-#include "bit.h"
 #include "byte.h"
+#include "flag.h"
 #include "register.h"
 #include "instruction.h"
 
@@ -75,8 +75,8 @@ public:
     void setMemory(const QVector<Byte *> &value);
     void clearMemory();
 
-    QVector<Bit *> getFlags() const;
-    void setFlags(const QVector<Bit *> &value);
+    QVector<Flag *> getFlags() const;
+    void setFlags(const QVector<Flag *> &value);
 
     QVector<Register *> getRegisters() const;
     void setRegisters(const QVector<Register *> &value);
@@ -95,7 +95,7 @@ protected:
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
     QVector<int> correspondingLine;
-    QVector<Bit*> flags;
+    QVector<Flag*> flags;
     QVector<Instruction*> instructions;
     bool running;
     int breakpoint;

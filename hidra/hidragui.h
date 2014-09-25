@@ -30,8 +30,8 @@ public:
     void saveAs();
     void updateMachineInterface();
 public slots:
-    void on_commandLinkButtonStep_clicked();
-    void on_commandLinkButtonRun_clicked();
+    void on_pushButtonStep_clicked();
+    void on_pushButtonRun_clicked();
 
     void updateMemoryMap();
     void updateFlagsLeds();
@@ -41,36 +41,21 @@ public slots:
     void addError(QString);
 private slots:
     void on_actionPasso_triggered();
-
     void on_actionRodar_triggered();
-
     void on_actionMontar_triggered();
-
     void on_actionSaveAs_triggered();
-
     void on_comboBoxMachine_currentIndexChanged(int index);
-
     void on_action_Save_triggered();
-
     void on_actionClose_triggered();
-
     void on_actionManual_triggered();
-
     void on_actionRelatar_um_problema_triggered();
-
     void on_actionOpen_triggered();
-
     void on_textEditSouceCode_textChanged();
-
     void on_actionCarregar_triggered();
-
     void on_actionSaveMem_triggered();
-
     void on_actionZerarMemoria_triggered();
-
     void on_actionZerar_registradores_triggered();
-
-    void on_commandLinkButtonMontar_clicked();
+    void on_pushButtonMontar_clicked();
 
 private:
     Ui::HidraGui *ui;
@@ -81,6 +66,8 @@ private:
     QStandardItemModel *model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
+
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // HIDRAGUI_H

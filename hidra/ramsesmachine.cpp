@@ -8,13 +8,10 @@ RamsesMachine::RamsesMachine()
 
     registers = QVector<Register*>(4);
 
-    for (int i=0; i<registers.size(); i++)
-        registers[i] = new Register(8);
-
-    RA = registers[0];
-    RB = registers[1];
-    RX = registers[2];
-    PC = registers[3];
+    RA = registers[0] = new Register( "A", 8);
+    RB = registers[1] = new Register( "B", 8);
+    RX = registers[2] = new Register( "X", 8);
+    PC = registers[3] = new Register("PC", 8);
 
 
 
@@ -42,16 +39,11 @@ RamsesMachine::RamsesMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags = QVector<Bit*>(3);
+    flags = QVector<Flag*>(3);
 
-    for (int i = 0; i < flags.size(); i++)
-        flags[i] = new Bit();
-
-    N = flags[0];
-    Z = flags[1];
-    C = flags[2];
-
-    Z->setValue(true);
+    N = flags[0] = new Flag("N");
+    Z = flags[1] = new Flag("Z", true);
+    C = flags[2] = new Flag("C");
 
 
 
@@ -60,6 +52,7 @@ RamsesMachine::RamsesMachine()
     //////////////////////////////////////////////////
 
     instructions = QVector<Instruction*>(16);
+
     instructions[0]  = new Instruction("nop",   0, 0, 1);
     instructions[1]  = new Instruction("str",  16, 2, 2);
     instructions[2]  = new Instruction("ldr",  32, 2, 2);

@@ -2,13 +2,15 @@
 #define REGISTER_H
 
 #include <QDebug>
+#include <QString>
 #include <cmath>
 
 class Register
 {
 public:
-    Register(int numOfBits);
+    Register(QString name, int numOfBits);
 
+    QString getName() const;
     int getValue() const;
     void setValue(int value);
     void incrementValue();
@@ -17,6 +19,8 @@ public:
     void setNumOfBits(int value);
 
 private:
+    QString name;
+
     int value;
     int numOfBits;
 };

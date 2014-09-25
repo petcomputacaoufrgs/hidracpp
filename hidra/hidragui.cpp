@@ -25,7 +25,7 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->comboBoxMachine->setCurrentIndex(0);
 
     updateMachineInterface();
-    ui->tableViewMemory->setEditTriggers(0);
+    ui->tableViewMemoryInstructions->setEditTriggers(0);
 }
 
 HidraGui::~HidraGui()
@@ -35,10 +35,12 @@ HidraGui::~HidraGui()
 
 void HidraGui::cleanMachines()
 {
+    /*
     ui->frameAhmes->setVisible(false);
     ui->frameRamses->setVisible(false);
     ui->frameCesar->setVisible(false);
     ui->frameNeander->setVisible(false);
+    */
 }
 
 void HidraGui::save()
@@ -91,11 +93,11 @@ void HidraGui::saveAs()
     }
 }
 
-void HidraGui::on_commandLinkButtonStep_clicked(){
+void HidraGui::on_pushButtonStep_clicked(){
     ui->actionPasso->trigger();
 }
 
-void HidraGui::on_commandLinkButtonRun_clicked(){
+void HidraGui::on_pushButtonRun_clicked(){
     ui->actionRodar->trigger();
 }
 
@@ -122,15 +124,15 @@ void HidraGui::updateMemoryMap()
     index = model->index(machine->getRegisters().last()->getValue(), 0);
     model->setData(index, "->");
 
-    ui->tableViewMemory->setModel(model);
-    ui->tableViewMemory->resizeColumnsToContents();
-    ui->tableViewMemory->resizeRowsToContents();
-    ui->tableViewMemory->verticalHeader()->hide();
+    ui->tableViewMemoryInstructions->setModel(model);
+    ui->tableViewMemoryInstructions->resizeColumnsToContents();
+    ui->tableViewMemoryInstructions->resizeRowsToContents();
+    ui->tableViewMemoryInstructions->verticalHeader()->hide();
 }
 
 void HidraGui::updateFlagsLeds()
 {
-    switch (ui->comboBoxMachine->currentIndex()) {
+    /*switch (ui->comboBoxMachine->currentIndex()) {
     case 0:
         ui->checkBoxN_4->setChecked(machine->getFlags().at(0)->getValue());
         ui->checkBoxZ_4->setChecked(machine->getFlags().at(1)->getValue());
@@ -152,12 +154,12 @@ void HidraGui::updateFlagsLeds()
         break;
     default:
         break;
-    }
+    }*/
 }
 
 void HidraGui::updateLCDDisplay()
 {
-    switch (ui->comboBoxMachine->currentIndex()) {
+    /*switch (ui->comboBoxMachine->currentIndex()) {
     case 0:
         ui->lcdNumberAC_Neander->display(machine->getRegisters().at(0)->getValue());
         ui->lcdNumberPC_Neander->display(machine->getRegisters().at(1)->getValue());
@@ -176,7 +178,7 @@ void HidraGui::updateLCDDisplay()
         break;
     default:
         break;
-    }
+    }*/
 }
 
 void HidraGui::cleanErrorsField()
@@ -210,28 +212,12 @@ void HidraGui::on_actionRodar_triggered()
 
 void HidraGui::on_actionMontar_triggered()
 {
-    bool saveRequest = false;
-
-    // Oferece para salvar o arquivo (não é necessário para montar):
-    if (modifiedFile) {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Salvar arquivo", "Deseja salvar as alterações feitas?", QMessageBox::Yes|QMessageBox::No);
-        if (reply == QMessageBox::Yes) {
-            ui->action_Save->trigger();
-            saveRequest = true;
-        }
-    }
-
     cleanErrorsField();
     machine->assemble(codeEditor->toPlainText());
     updateMachineInterface();
 
     if (machine->buildSuccessful)
-    {
         sourceAndMemoryInSync = true;
-        if (saveRequest && fileSaved) // If file was successfully saved, save .mem too
-            machine->save(currentFile.section(".", 0, -2).append(".mem"));
-    }
 }
 
 void HidraGui::on_actionSaveAs_triggered()
@@ -245,19 +231,19 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     delete machine;
     switch (index) {
     case 0:
-        ui->frameNeander->setVisible(true);
+        //->frameNeander->setVisible(true);
         machine = new NeanderMachine();
         break;
     case 1:
-        ui->frameAhmes->setVisible(true);
+        //ui->frameAhmes->setVisible(true);
         machine = new AhmesMachine();
         break;
     case 2:
-        ui->frameRamses->setVisible(true);
+        //ui->frameRamses->setVisible(true);
         machine = new RamsesMachine();
         break;
     case 3:
-        ui->frameCesar->setVisible(true);
+        //ui->frameCesar->setVisible(true);
         //machine = new CesarMachine();
         machine = new RamsesMachine();  //evita  o crash
         break;
@@ -283,6 +269,37 @@ void HidraGui::on_action_Save_triggered()
 void HidraGui::on_actionClose_triggered()
 {
     this->close();
+}
+
+void HidraGui::closeEvent(QCloseEvent *event)
+{
+    bool cancelled = false;
+
+    // Se o arquivo foi modificado, oferece para salvar alterações
+    if (modifiedFile)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Hidra",
+                                      "Deseja salvar as alterações feitas?",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            cancelled = true;
+
+        if (reply == QMessageBox::Yes)
+        {
+            ui->action_Save->trigger();
+
+            if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
+                cancelled = true;
+        }
+    }
+
+    // Aceita ou rejeita o evento que fecha a janela
+    if (!cancelled)
+        event->accept();
+    else
+        event->ignore();
 }
 
 void HidraGui::on_actionManual_triggered()
@@ -364,7 +381,7 @@ void HidraGui::on_actionZerar_registradores_triggered()
     updateLCDDisplay();
 }
 
-void HidraGui::on_commandLinkButtonMontar_clicked()
+void HidraGui::on_pushButtonMontar_clicked()
 {
     ui->actionMontar->trigger();
 }
