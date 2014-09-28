@@ -6,9 +6,13 @@
 #include <QFileDialog>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QCheckBox>
 #include <QDebug>
+#include <QVector>
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
+#include "registerwidget.h"
+#include "flagwidget.h"
 #include "neandermachine.h"
 #include "ahmesmachine.h"
 #include "ramsesmachine.h"
@@ -25,21 +29,30 @@ public:
     explicit HidraGui(QWidget *parent = 0);
     ~HidraGui();
 
-    void cleanMachines();
+    void initializeMachineInterface();
+    void clearMachineInterface();
+    void updateMachineInterface();
     void save();
     void saveAs();
-    void updateMachineInterface();
+
 public slots:
     void on_pushButtonStep_clicked();
     void on_pushButtonRun_clicked();
 
+    void initializeFlagWidgets();
+    void initializeRegisterWidgets();
+    void clearFlagWidgets();
+    void clearRegisterWidgets();
+    void updateFlagWidgets();
+    void updateRegisterWidgets();
     void updateMemoryMap();
-    void updateFlagsLeds();
-    void updateLCDDisplay();
+
     void cleanErrorsField();
 
     void addError(QString);
 private slots:
+    void sourceCodeChanged();
+
     void on_actionPasso_triggered();
     void on_actionRodar_triggered();
     void on_actionMontar_triggered();
@@ -50,7 +63,6 @@ private slots:
     void on_actionManual_triggered();
     void on_actionRelatar_um_problema_triggered();
     void on_actionOpen_triggered();
-    void on_textEditSouceCode_textChanged();
     void on_actionCarregar_triggered();
     void on_actionSaveMem_triggered();
     void on_actionZerarMemoria_triggered();
@@ -66,6 +78,9 @@ private:
     QStandardItemModel *model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
+
+    QVector<FlagWidget*> flagWidgets;
+    QVector<RegisterWidget*> registerWidgets;
 
     void closeEvent(QCloseEvent *event);
 };

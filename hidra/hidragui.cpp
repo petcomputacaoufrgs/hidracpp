@@ -9,23 +9,24 @@ HidraGui::HidraGui(QWidget *parent) :
 
     //CODIGO PARA BETA VERSION
     codeEditor = new HidraCodeEditor();
-    connect(codeEditor, SIGNAL(textChanged()), this, SLOT(on_textEditSouceCode_textChanged()));
+    connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
 
     highlighter = new HidraHighlighter(codeEditor->document());
 
     //FIM DO BETA CODE
     currentFile = "";
-    modifiedFile = true;
+    modifiedFile = false;
     sourceAndMemoryInSync = false;
     model = NULL;
     machine = NULL;
 
+    ui->layoutRegisters->setAlignment(Qt::AlignTop);
+    ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
+    ui->tableViewMemoryInstructions->setEditTriggers(false);
+
     // limpa a interface, e seta a maquina selecionada como o neander
     ui->comboBoxMachine->setCurrentIndex(0);
-
-    updateMachineInterface();
-    ui->tableViewMemoryInstructions->setEditTriggers(0);
 }
 
 HidraGui::~HidraGui()
@@ -33,14 +34,53 @@ HidraGui::~HidraGui()
     delete ui;
 }
 
-void HidraGui::cleanMachines()
+void HidraGui::initializeFlagWidgets()
 {
-    /*
-    ui->frameAhmes->setVisible(false);
-    ui->frameRamses->setVisible(false);
-    ui->frameCesar->setVisible(false);
-    ui->frameNeander->setVisible(false);
-    */
+    for (int i=0; i < machine->getNumberOfFlags(); i++)
+    {
+        FlagWidget *newFlag = new FlagWidget(this, machine->getFlagName(i), machine->getFlagValue(i));
+        ui->layoutFlags->addWidget(newFlag);
+        flagWidgets.append(newFlag);
+    }
+}
+
+void HidraGui::initializeRegisterWidgets()
+{
+    for (int i=0; i < machine->getNumberOfRegisters(); i++)
+    {
+        RegisterWidget *newRegister = new RegisterWidget(this, machine->getRegisterName(i));
+        ui->layoutRegisters->addWidget(newRegister, i/2, i%2); // Two per line, alternates left and right columns with i%2
+        registerWidgets.append(newRegister);
+    }
+}
+
+void HidraGui::initializeMachineInterface()
+{
+    clearMachineInterface();
+    initializeFlagWidgets();
+    initializeRegisterWidgets();
+}
+
+void HidraGui::clearFlagWidgets()
+{
+    while(ui->layoutFlags->count() > 0)
+        delete ui->layoutFlags->takeAt(0)->widget();
+
+    flagWidgets.clear();
+}
+
+void HidraGui::clearRegisterWidgets()
+{
+    while(ui->layoutRegisters->count() > 0)
+        delete ui->layoutRegisters->takeAt(0)->widget();
+
+    registerWidgets.clear();
+}
+
+void HidraGui::clearMachineInterface()
+{
+    clearRegisterWidgets();
+    clearFlagWidgets();
 }
 
 void HidraGui::save()
@@ -89,16 +129,8 @@ void HidraGui::saveAs()
         return;
     }
     else {
-        save(); // Sets fileSaved to true if successful
+        save(); // Resets fileModified to false if successful
     }
-}
-
-void HidraGui::on_pushButtonStep_clicked(){
-    ui->actionPasso->trigger();
-}
-
-void HidraGui::on_pushButtonRun_clicked(){
-    ui->actionRodar->trigger();
 }
 
 void HidraGui::updateMemoryMap()
@@ -121,8 +153,8 @@ void HidraGui::updateMemoryMap()
         i++;
 
     }
-    index = model->index(machine->getRegisters().last()->getValue(), 0);
-    model->setData(index, "->");
+    index = model->index(machine->getPCValue(), 0);
+    model->setData(index, QString::fromUtf8("\u2192")); // Unicode arrow
 
     ui->tableViewMemoryInstructions->setModel(model);
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
@@ -130,55 +162,23 @@ void HidraGui::updateMemoryMap()
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
 }
 
-void HidraGui::updateFlagsLeds()
+void HidraGui::updateFlagWidgets()
 {
-    /*switch (ui->comboBoxMachine->currentIndex()) {
-    case 0:
-        ui->checkBoxN_4->setChecked(machine->getFlags().at(0)->getValue());
-        ui->checkBoxZ_4->setChecked(machine->getFlags().at(1)->getValue());
-        break;
-    case 1:
-        ui->checkBoxN_3->setChecked(machine->getFlags().at(0)->getValue());
-        ui->checkBoxZ_3->setChecked(machine->getFlags().at(1)->getValue());
-        ui->checkBoxV->setChecked(machine->getFlags().at(2)->getValue());
-        ui->checkBoxC_3->setChecked(machine->getFlags().at(3)->getValue());
-        ui->checkBoxB_3->setChecked(machine->getFlags().at(4)->getValue());
-        break;
-    case 2:
-        ui->checkBoxN_5->setChecked(machine->getFlags().at(0)->getValue());
-        ui->checkBoxZ_5->setChecked(machine->getFlags().at(1)->getValue());
-        ui->checkBoxC_4->setChecked(machine->getFlags().at(2)->getValue());
-        break;
-    case 3:
-        // TO-DO: Acertar flags Cesar
-        break;
-    default:
-        break;
-    }*/
+    for (int i=0; i<flagWidgets.count(); i++)
+        flagWidgets.at(i)->setValue(machine->getFlagValue(i));
 }
 
-void HidraGui::updateLCDDisplay()
+void HidraGui::updateRegisterWidgets()
 {
-    /*switch (ui->comboBoxMachine->currentIndex()) {
-    case 0:
-        ui->lcdNumberAC_Neander->display(machine->getRegisters().at(0)->getValue());
-        ui->lcdNumberPC_Neander->display(machine->getRegisters().at(1)->getValue());
-        break;
-    case 1:
-        ui->lcdNumberAC_Ahmes->display(machine->getRegisters().at(0)->getValue());
-        ui->lcdNumberPC_Ahmes->display(machine->getRegisters().at(1)->getValue());
-        break;
-    case 2:
-        ui->lcdNumber_11->display(machine->getRegisters().at(0)->getValue());
-        ui->lcdNumber_12->display(machine->getRegisters().at(1)->getValue());
-        ui->lcdNumber_9->display(machine->getRegisters().at(2)->getValue());
-        ui->lcdNumber_10->display(machine->getRegisters().at(3)->getValue());
-        break;
-    case 3:
-        break;
-    default:
-        break;
-    }*/
+    for (int i=0; i<registerWidgets.count(); i++)
+        registerWidgets.at(i)->setValue(machine->getRegisterValue(i));
+}
+
+void HidraGui::updateMachineInterface()
+{
+    updateMemoryMap();
+    updateFlagWidgets();
+    updateRegisterWidgets();
 }
 
 void HidraGui::cleanErrorsField()
@@ -191,11 +191,12 @@ void HidraGui::addError(QString errorString)
     ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
 }
 
-void HidraGui::updateMachineInterface()
-{
-    updateMemoryMap();
-    updateFlagsLeds();
-    updateLCDDisplay();
+void HidraGui::on_pushButtonStep_clicked(){
+    ui->actionPasso->trigger();
+}
+
+void HidraGui::on_pushButtonRun_clicked(){
+    ui->actionRodar->trigger();
 }
 
 void HidraGui::on_actionPasso_triggered()
@@ -227,23 +228,18 @@ void HidraGui::on_actionSaveAs_triggered()
 
 void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
 {
-    cleanMachines();
     delete machine;
     switch (index) {
     case 0:
-        //->frameNeander->setVisible(true);
         machine = new NeanderMachine();
         break;
     case 1:
-        //ui->frameAhmes->setVisible(true);
         machine = new AhmesMachine();
         break;
     case 2:
-        //ui->frameRamses->setVisible(true);
         machine = new RamsesMachine();
         break;
     case 3:
-        //ui->frameCesar->setVisible(true);
         //machine = new CesarMachine();
         machine = new RamsesMachine();  //evita  o crash
         break;
@@ -253,8 +249,9 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     if(index != 3) {
         connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
         highlighter->setTargetMachine(machine);
-        updateMachineInterface();
     }
+
+    initializeMachineInterface();
 }
 
 void HidraGui::on_action_Save_triggered()
@@ -349,7 +346,7 @@ void HidraGui::on_actionOpen_triggered()
     }
 }
 
-void HidraGui::on_textEditSouceCode_textChanged()
+void HidraGui::sourceCodeChanged()
 {
     sourceAndMemoryInSync = false;
     modifiedFile = true;
@@ -368,17 +365,13 @@ void HidraGui::on_actionSaveMem_triggered()
 void HidraGui::on_actionZerarMemoria_triggered()
 {
     machine->clearMemory();
-    updateMemoryMap();
-    updateFlagsLeds();
-    updateLCDDisplay();
+    updateMachineInterface();
 }
 
 void HidraGui::on_actionZerar_registradores_triggered()
 {
     machine->clearRegisters();
-    updateMemoryMap();
-    updateFlagsLeds();
-    updateLCDDisplay();
+    updateMachineInterface();
 }
 
 void HidraGui::on_pushButtonMontar_clicked()

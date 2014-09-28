@@ -34,20 +34,40 @@ void Machine::clearMemory()
         memory[i]->setValue(0);
 }
 
-QVector<Register *> Machine::getRegisters() const
+int Machine::getNumberOfRegisters() const
 {
-    return registers;
+    return registers.count();
 }
 
-void Machine::setRegisters(const QVector<Register *> &value)
+QString Machine::getRegisterName(int id) const
 {
-    registers = value;
+    return registers[id]->getName();
+}
+
+int Machine::getRegisterValue(int id) const
+{
+    return registers[id]->getValue();
+}
+
+void Machine::setRegisterValue(int id, int value)
+{
+    registers[id]->setValue(value);
 }
 
 void Machine::clearRegisters()
 {
     for (int i=0; i<registers.size(); i++)
         registers[i]->setValue(0);
+}
+
+int Machine::getPCValue() const
+{
+    return PC->getValue();
+}
+
+void Machine::setPCValue(int value)
+{
+    PC->setValue(value);
 }
 
 QVector<Instruction *> Machine::getInstructions() const
@@ -60,15 +80,24 @@ void Machine::setInstructions(const QVector<Instruction *> &value)
     instructions = value;
 }
 
-
-QVector<Flag *> Machine::getFlags() const
+int Machine::getNumberOfFlags() const
 {
-    return flags;
+    return flags.count();
 }
 
-void Machine::setFlags(const QVector<Flag *> &value)
+QString Machine::getFlagName(int id) const
 {
-    flags = value;
+    return flags[id]->getName();
+}
+
+int Machine::getFlagValue(int id) const
+{
+    return flags[id]->getValue();
+}
+
+void Machine::setFlagValue(int id, int value)
+{
+    flags[id]->setValue(value);
 }
 
 void Machine::clearAssemblerMemory()

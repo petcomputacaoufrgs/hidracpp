@@ -14,19 +14,7 @@
    <string>Hidra - PET Computação</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QCheckBox::indicator{
-	height: 20px;
-	width: 20px;
-}
-QCheckBox::indicator:checked {
-	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(0, 255, 0, 255), stop:0.7 rgba(0, 255, 0, 255), stop:0.7 rgba(200, 230, 200, 0));
-
-}
-
-QCheckBox::indicator:unchecked {
-	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(100, 110, 100, 255), stop:0.7 rgba(100, 110, 100, 255), stop:0.7 rgba(200, 230, 200, 0));
-
-}</string>
+   <string notr="true"/>
   </property>
   <property name="locale">
    <locale language="Portuguese" country="Brazil"/>
@@ -37,7 +25,7 @@ QCheckBox::indicator:unchecked {
      <widget class="QWidget" name="areaEditor" native="true">
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
-        <number>0</number>
+        <number>3</number>
        </property>
        <property name="leftMargin">
         <number>0</number>
@@ -56,11 +44,11 @@ QCheckBox::indicator:unchecked {
        </item>
        <item>
         <widget class="QLabel" name="labelMensagens">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>21</height>
-          </size>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
          <property name="text">
           <string>Mensagens:</string>
@@ -135,9 +123,6 @@ QCheckBox::indicator:unchecked {
        </size>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="spacing">
-        <number>9</number>
-       </property>
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -178,25 +163,128 @@ QCheckBox::indicator:unchecked {
         </widget>
        </item>
        <item>
-        <widget class="QScrollArea" name="scrollAreaRegisters">
-         <property name="widgetResizable">
-          <bool>true</bool>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Registradores</string>
          </property>
-         <widget class="QWidget" name="areaRegisters">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>299</width>
-            <height>238</height>
-           </rect>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="topMargin">
+           <number>3</number>
           </property>
-          <layout class="QGridLayout" name="gridLayout"/>
-         </widget>
+          <item>
+           <widget class="QScrollArea" name="scrollAreaRegisters">
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarAsNeeded</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+            </property>
+            <widget class="QWidget" name="widgetRegisters">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>279</width>
+               <height>190</height>
+              </rect>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <layout class="QGridLayout" name="layoutRegisters">
+                <property name="horizontalSpacing">
+                 <number>0</number>
+                </property>
+                <property name="verticalSpacing">
+                 <number>6</number>
+                </property>
+               </layout>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <widget class="QWidget" name="areaFlags" native="true"/>
+        <widget class="QGroupBox" name="areaFlags">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>Flags</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <item row="0" column="1">
+           <layout class="QHBoxLayout" name="layoutFlags">
+            <property name="spacing">
+             <number>18</number>
+            </property>
+           </layout>
+          </item>
+          <item row="0" column="0">
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="2">
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">

@@ -12,6 +12,11 @@ Flag::Flag(QString name, bool defaultValue)
     this->value = defaultValue;
 }
 
+QString Flag::getName() const
+{
+    return name;
+}
+
 bool Flag::getValue() const
 {
     return value;

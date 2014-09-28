@@ -76,8 +76,8 @@ void HidraCli::handleCommandPrompt()
             auxMemory = machine->getMemory();
             std::cout << (int)auxMemory[cmdList.at(1).toInt()]->getValue() << std::endl;
         }else if(cmdList.at(0) ==  "getr") {
-            foreach (Register *reg, machine->getRegisters()) {
-                std::cout << reg->getValue() << " ";
+            for (int i=0; i<machine->getNumberOfRegisters(); i++) {
+                std::cout << machine->getRegisterValue(i) << " ";
             }
             std::cout << std::endl;
         } else if(cmdList.at(0) ==  "step") {
