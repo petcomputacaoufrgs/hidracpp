@@ -24,7 +24,7 @@ class HidraGui : public QMainWindow
 public:
     explicit HidraGui(QWidget *parent = 0);
     ~HidraGui();
-
+    bool eventFilter(QObject *obj, QEvent *event);
     void cleanMachines();
     void save();
     void saveAs();
@@ -78,7 +78,9 @@ private:
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFile;
-    bool savedFile, buildSuccessful, showHexaValues;
+    bool modifiedFile, sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
+    bool fileSaved; // Feedback from Save and SaveAs
+    bool showHexaValues;
     QStandardItemModel *model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;

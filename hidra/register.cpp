@@ -1,9 +1,11 @@
 #include "register.h"
 
-Register::Register()
+Register::Register(int numOfBits)
 {
     this->value = 0;
+    this->numOfBits = numOfBits;
 }
+
 int Register::getValue() const
 {
     return value;

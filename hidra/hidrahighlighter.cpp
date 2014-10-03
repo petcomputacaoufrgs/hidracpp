@@ -5,14 +5,16 @@ HidraHighlighter::HidraHighlighter(QObject *parent) :
 {
 }
 
-HidraHighlighter::HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
+HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
     QSyntaxHighlighter(parent)
 {
 
 }
 
-void HidraHighlighter::highlightBlock(const QString & text)
+void HidraHighlighter::highlightBlock(const QString & text1)
 {
+    QString text;
+    text = text1.toLower();
     QTextCharFormat mnemonicsFormat;
     mnemonicsFormat.setFontWeight(QFont::Bold);
     mnemonicsFormat.setForeground(Qt::darkMagenta);
@@ -21,6 +23,10 @@ void HidraHighlighter::highlightBlock(const QString & text)
     foreach (Instruction *tmp, instructions) {
         pattern.append("\\b" + tmp->getMnemonic()+"\\b|");
     }
+    pattern.append("\\b" + QString("org") + "\\b|");
+    pattern.append("\\b" + QString("db") + "\\b|");
+    pattern.append("\\b" + QString("dw") + "\\b|");
+
     pattern.chop(1);
     pattern.append(")");
 
@@ -35,7 +41,7 @@ void HidraHighlighter::highlightBlock(const QString & text)
     QTextCharFormat commentsFormat;
     commentsFormat.setFontWeight(QFont::Normal);
     commentsFormat.setFontItalic(true);
-    commentsFormat.setForeground(Qt::lightGray);
+    commentsFormat.setForeground(Qt::darkGreen);
     pattern = ";.*";
 
     expression = QRegExp(pattern);

@@ -2,9 +2,8 @@
 #define AHMESMACHINE_H
 
 #include "machine.h"
-#include "neandermachine.h"
 
-class AhmesMachine : public NeanderMachine
+class AhmesMachine : public Machine
 {
 public:
     AhmesMachine();
@@ -16,13 +15,19 @@ public:
 
     virtual void step();
     virtual void run();
-//    virtual void assemble(QString filename);
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
 
+    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
+
+    static const int MEM_SIZE = 256;
+    static const int MAX_VALUE = 255;
+    static const int MAX_SIGNED_VALUE = 127; // Maximum positive number for 8-bits in two's complement
+
+
 private:
-    void updateFlags(unsigned char previous_AC, unsigned char operand, bool addition, bool subtraction, bool shift_rotate_left, bool shift_rotate_right);
+    int getSignedInt(int eightBitValue);
 
     Register *AC;
     Bit *N, *Z, *V, *C, *B;

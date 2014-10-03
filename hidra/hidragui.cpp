@@ -1,5 +1,7 @@
 #include "hidragui.h"
 #include "ui_hidragui.h"
+#include <QSizeGrip>
+#include "qsizegrip.h"
 
 HidraGui::HidraGui(QWidget *parent) :
     QMainWindow(parent),
@@ -16,7 +18,7 @@ HidraGui::HidraGui(QWidget *parent) :
 
     //FIM DO BETA CODE
     currentFile = "";
-    savedFile = false;
+    fileSaved = false;
     buildSuccessful = true;
     showHexaValues = false;
     model = NULL;
@@ -34,6 +36,17 @@ HidraGui::~HidraGui()
     delete ui;
 }
 
+bool HidraGui::eventFilter(QObject *obj, QEvent *event)
+{
+    if(event->type() == QEvent::MouseMove)
+    {
+        QSizeGrip *sg = qobject_cast<QSizeGrip*>(obj);
+        if(sg)
+            qDebug() << sg->parentWidget();
+    }
+    return false;
+}
+
 void HidraGui::cleanMachines()
 {
     ui->frameAhmes->setVisible(false);
@@ -48,12 +61,19 @@ void HidraGui::save()
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::information(this, "Incapaz de abrir arquivo",
                                  file.errorString());
+        fileSaved = false;
         return;
     }
+
+    fileSaved = true;
     QTextStream out(&file);
     out << codeEditor->toPlainText();
     file.close();
-    savedFile = true;
+
+    // Save memory
+    machine->save(currentFile.section(".", 0, -2).append(".mem"));
+
+    modifiedFile = false;
 }
 
 void HidraGui::saveAs()
@@ -76,10 +96,12 @@ void HidraGui::saveAs()
                                                "Salvar código-fonte", "",
                                                ext);
 
-    if (currentFile.isEmpty())
+    if (currentFile.isEmpty()) {
+        fileSaved = false;
         return;
+    }
     else {
-        save();
+        save(); // Sets fileSaved to true if successful
     }
 }
 
@@ -105,10 +127,10 @@ void HidraGui::updateMemoryMap()
     int base = showHexaValues? 16 : 10;
     foreach (Byte* tmp, auxMem) {
         index = model->index(i,1);
-        model->setData(index, QString::number(i, base));
+        model->setData(index, QString::number(i, base).toUpper());
 
         index = model->index(i,2);
-        QStandardItem *item = new QStandardItem(QString::number(tmp->getValue(), base));
+        QStandardItem *item = new QStandardItem(QString::number(tmp->getValue(), base).toUpper());
         item->setToolTip(QString::number(tmp->getValue(), 2).rightJustified(8, '0'));
        // model->setData(index, item);
         model->setItem(i,2, item);
@@ -139,13 +161,12 @@ void HidraGui::updateFlagsLeds()
         ui->checkBoxB_3->setChecked(machine->getFlags().at(4)->getValue());
         break;
     case 2:
-        ui->frameRamses->setVisible(true);
-        machine = new RamsesMachine();
+        ui->checkBoxN_5->setChecked(machine->getFlags().at(0)->getValue());
+        ui->checkBoxZ_5->setChecked(machine->getFlags().at(1)->getValue());
+        ui->checkBoxC_4->setChecked(machine->getFlags().at(2)->getValue());
         break;
     case 3:
-        ui->frameCesar->setVisible(true);
-        //machine = new CesarMachine();
-        machine = NULL; //evita o crash
+        // TO-DO: Acertar flags Cesar
         break;
     default:
         break;
@@ -178,13 +199,23 @@ void HidraGui::updateLCDDisplay()
         ui->lcdNumberPC_Ahmes->display(machine->getRegisters().at(1)->getValue());
         break;
     case 2:
-        //ui->frameRamses->setVisible(true);
-        //machine = new RamsesMachine();
+    if(showHexaValues) {	//refactor to good names
+            ui->lcdNumber_11->setHexMode();
+            ui->lcdNumber_12->setHexMode();
+            ui->lcdNumber_9->setHexMode();
+            ui->lcdNumber_10->setHexMode();
+        } else {
+            ui->lcdNumber_11->setDecMode();
+            ui->lcdNumber_12->setDecMode();
+            ui->lcdNumber_9->setDecMode();
+            ui->lcdNumber_10->setDecMode();
+        }
+        ui->lcdNumber_11->display(machine->getRegisters().at(0)->getValue());
+        ui->lcdNumber_12->display(machine->getRegisters().at(1)->getValue());
+        ui->lcdNumber_9->display(machine->getRegisters().at(2)->getValue());
+        ui->lcdNumber_10->display(machine->getRegisters().at(3)->getValue());
         break;
     case 3:
-        //ui->frameCesar->setVisible(true);
-        //machine = new CesarMachine();
-        machine = NULL; //evita o crash
         break;
     default:
         break;
@@ -199,7 +230,6 @@ void HidraGui::cleanErrorsField()
 void HidraGui::addError(QString errorString)
 {
     ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
-    buildSuccessful = false;
 }
 
 void HidraGui::updateMachineInterface()
@@ -223,21 +253,27 @@ void HidraGui::on_actionRodar_triggered()
 
 void HidraGui::on_actionMontar_triggered()
 {
-    if(!savedFile) {
+    bool saveRequest = false;
+
+    // Oferece para salvar o arquivo (não é necessário para montar):
+    if (modifiedFile) {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::information(this, "Salvar arquivo", "O arquivo nao esta salvo, deseja salva-lo antes de montar?");
-        if (reply == QMessageBox::Ok){
+        reply = QMessageBox::question(this, "Salvar arquivo", "Deseja salvar as alterações feitas?", QMessageBox::Yes|QMessageBox::No);
+        if (reply == QMessageBox::Yes) {
             ui->action_Save->trigger();
+            saveRequest = true;
         }
     }
-    if(savedFile) {
-        cleanErrorsField();
-        machine->assemble(currentFile);
-        if(buildSuccessful) {
-            machine->load(currentFile.split(".")[0].append(".mem"));
-        }
-        buildSuccessful = true;
-        updateMachineInterface();
+
+    cleanErrorsField();
+    machine->assemble(codeEditor->toPlainText());
+    updateMachineInterface();
+
+    if (machine->buildSuccessful)
+    {
+        sourceAndMemoryInSync = true;
+        if (saveRequest && fileSaved) // If file was successfully saved, save .mem too
+            machine->save(currentFile.section(".", 0, -2).append(".mem"));
     }
 }
 
@@ -334,14 +370,15 @@ void HidraGui::on_actionOpen_triggered()
         }
         QTextStream in(&file);
         codeEditor->setPlainText(in.readAll());
-        savedFile = true;
+        modifiedFile = false;
         file.close();
     }
 }
 
 void HidraGui::on_textEditSouceCode_textChanged()
 {
-    savedFile = false;
+    sourceAndMemoryInSync = false;
+    modifiedFile = true;
 }
 
 void HidraGui::on_actionCarregar_triggered()
@@ -356,10 +393,7 @@ void HidraGui::on_actionSaveMem_triggered()
 
 void HidraGui::on_actionZerarMemoria_triggered()
 {
-    QVector<Byte *> regs = machine->getMemory();
-    foreach (Byte* tmp, regs) {
-        tmp->setValue((unsigned char)0);
-    }
+    machine->clearMemory();
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();
@@ -367,10 +401,7 @@ void HidraGui::on_actionZerarMemoria_triggered()
 
 void HidraGui::on_actionZerar_registradores_triggered()
 {
-    QVector<Register *> regs = machine->getRegisters();
-    foreach (Register* tmp, regs) {
-        tmp->setValue(0);
-    }
+    machine->clearRegisters();
     updateMemoryMap();
     updateFlagsLeds();
     updateLCDDisplay();

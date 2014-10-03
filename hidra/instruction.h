@@ -7,7 +7,7 @@ class Instruction
 {
 public:
     Instruction();
-    Instruction(QString, int, int);
+    Instruction(QString, int, int, int);
 
     QString getMnemonic() const;
     void setMnemonic(const QString &value);
@@ -18,10 +18,14 @@ public:
     int getNumberOfArguments() const;
     void setNumberOfArguments(int value);
 
+    int getSize() const;
+    void setSize(int size);
+
 private:
     QString mnemonic;
     int value;
     int numberOfArguments;
+    int size;
 };
 
 #endif // INSTRUCTION_H
