@@ -72,11 +72,13 @@ private slots:
 
     void on_commandLinkButtonMontar_clicked();
 
+    void on_radioButtonHexa_toggled(bool checked);
+
 private:
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFile;
-    bool savedFile, buildSuccessful;
+    bool savedFile, buildSuccessful, showHexaValues;
     QStandardItemModel *model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;

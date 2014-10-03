@@ -18,6 +18,7 @@ HidraGui::HidraGui(QWidget *parent) :
     currentFile = "";
     savedFile = false;
     buildSuccessful = true;
+    showHexaValues = false;
     model = NULL;
     machine = NULL;
 
@@ -101,12 +102,13 @@ void HidraGui::updateMemoryMap()
     QVector<Byte *> auxMem = machine->getMemory();
     int i = 0;
     QModelIndex index;
+    int base = showHexaValues? 16 : 10;
     foreach (Byte* tmp, auxMem) {
         index = model->index(i,1);
-        model->setData(index, i);
+        model->setData(index, QString::number(i, base));
 
         index = model->index(i,2);
-        QStandardItem *item = new QStandardItem(QString("%1").arg(tmp->getValue()));
+        QStandardItem *item = new QStandardItem(QString::number(tmp->getValue(), base));
         item->setToolTip(QString::number(tmp->getValue(), 2).rightJustified(8, '0'));
        // model->setData(index, item);
         model->setItem(i,2, item);
@@ -154,19 +156,33 @@ void HidraGui::updateLCDDisplay()
 {
     switch (ui->comboBoxMachine->currentIndex()) {
     case 0:
+        if(showHexaValues) {    //do it to other machines iin future
+            ui->lcdNumberAC_Neander->setHexMode();
+            ui->lcdNumberPC_Neander->setHexMode();
+        } else {
+            ui->lcdNumberAC_Neander->setDecMode();
+            ui->lcdNumberPC_Neander->setDecMode();
+        }
         ui->lcdNumberAC_Neander->display(machine->getRegisters().at(0)->getValue());
         ui->lcdNumberPC_Neander->display(machine->getRegisters().at(1)->getValue());
         break;
     case 1:
+        if(showHexaValues) {
+            ui->lcdNumberAC_Ahmes->setHexMode();
+            ui->lcdNumberPC_Ahmes->setHexMode();
+        } else {
+            ui->lcdNumberAC_Ahmes->setDecMode();
+            ui->lcdNumberPC_Ahmes->setDecMode();
+        }
         ui->lcdNumberAC_Ahmes->display(machine->getRegisters().at(0)->getValue());
         ui->lcdNumberPC_Ahmes->display(machine->getRegisters().at(1)->getValue());
         break;
     case 2:
-        ui->frameRamses->setVisible(true);
-        machine = new RamsesMachine();
+        //ui->frameRamses->setVisible(true);
+        //machine = new RamsesMachine();
         break;
     case 3:
-        ui->frameCesar->setVisible(true);
+        //ui->frameCesar->setVisible(true);
         //machine = new CesarMachine();
         machine = NULL; //evita o crash
         break;
@@ -363,4 +379,10 @@ void HidraGui::on_actionZerar_registradores_triggered()
 void HidraGui::on_commandLinkButtonMontar_clicked()
 {
     ui->actionMontar->trigger();
+}
+
+void HidraGui::on_radioButtonHexa_toggled(bool checked)
+{
+    showHexaValues = checked;
+    updateMachineInterface();
 }
