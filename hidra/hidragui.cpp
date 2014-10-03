@@ -106,7 +106,10 @@ void HidraGui::updateMemoryMap()
         model->setData(index, i);
 
         index = model->index(i,2);
-        model->setData(index, tmp->getValue());
+        QStandardItem *item = new QStandardItem(QString("%1").arg(tmp->getValue()));
+        item->setToolTip(QString::number(tmp->getValue(), 2).rightJustified(8, '0'));
+       // model->setData(index, item);
+        model->setItem(i,2, item);
         i++;
 
     }

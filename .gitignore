@@ -1,6 +1,11 @@
+#Hidra Specifica Files:
+*.mem
+*.ndr
+*.ahd
+
 # Qt Files
 
-*.user
+*.user*
 *moc_*.cpp
 *ui_*.h
 *Makefile*
