@@ -247,8 +247,10 @@ void HidraGui::on_actionPasso_triggered()
 
 void HidraGui::on_actionRodar_triggered()
 {
-    machine->run();
-    updateMachineInterface();
+    while (machine->isRunning()) {
+        on_actionPasso_triggered();
+        QApplication::processEvents();
+    }
 }
 
 void HidraGui::on_actionMontar_triggered()

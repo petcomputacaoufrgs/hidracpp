@@ -290,12 +290,12 @@ void AhmesMachine::step()
     N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
 }
 
-void AhmesMachine::run() {
-    this->running = true;
-    while (this->running && this->PC->getValue() <= 255) {
-        this->step();
-    }
-}
+//void AhmesMachine::run() {
+//    this->running = true;
+//    while (this->running && this->PC->getValue() <= 255) {
+//        this->step();
+//    }
+//}
 
 int AhmesMachine::getSignedInt(int eightBitValue)
 {

@@ -197,12 +197,12 @@ void NeanderMachine::step()
     Z->setValue(AC->getValue() == 0);
 }
 
-void NeanderMachine::run() {
-    this->running = true;
-    while (this->running) {
-        this->step();
-    }
-}
+//void NeanderMachine::run() {
+//    this->running = true;
+//    while (this->running) {
+//        this->step();
+//    }
+//}
 
 // Returns 0 if no error, otherwise returns error code
 Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)

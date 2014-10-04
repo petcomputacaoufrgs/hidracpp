@@ -42,7 +42,7 @@ public:
     virtual void save(QString filename) = 0;
 
     virtual void step() = 0;
-    virtual void run() = 0;
+    //virtual void run() = 0;
 
     // Machine specific:
     virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
@@ -65,7 +65,7 @@ public:
     virtual const Instruction* getInstructionFromValue(int) = 0;
     virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
 
-    bool getRunning() const;
+    bool isRunning() const;
     void setRunning(bool value);
 
     int getBreakpoint() const;

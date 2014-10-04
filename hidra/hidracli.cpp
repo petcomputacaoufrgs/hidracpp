@@ -19,7 +19,7 @@ HidraCli::HidraCli(QStringList argv, int argc, QObject *parent) :
                           << "Neander \nAhmes \nRamses \nCesar" << std::endl;
             }
             machine->load(argv.at(++i));
-            machine->run();
+            //machine->run();
             machine->printStatusDebug();
         } else if(argv.at(i) == "assembly") {
             QString targetMachine = argv.at(++i).toLower();
@@ -83,7 +83,7 @@ void HidraCli::handleCommandPrompt()
         } else if(cmdList.at(0) ==  "step") {
             machine->step();
         } else if(cmdList.at(0) ==  "run") {
-            machine->run();
+            //machine->run();
         } else {
             std::cout << "Comando inválido" << std::endl;
             continue;

@@ -131,6 +131,11 @@ bool Machine::isValidAddress(QString addressString)
     return isValidValue(addressString, 0, memory.size()-1);
 }
 
+bool Machine::isRunning() const
+{
+    return this->running;
+}
+
 void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
 {
     QString errorString;

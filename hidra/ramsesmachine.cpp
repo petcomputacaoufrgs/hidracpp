@@ -282,13 +282,13 @@ void RamsesMachine::step()
     }
 }
 
-void RamsesMachine::run()
-{
-    this->running = true;
-    while (this->running) {
-        this->step();
-    }
-}
+//void RamsesMachine::run()
+//{
+//    this->running = true;
+//    while (this->running) {
+//        this->step();
+//    }
+//}
 
 Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {

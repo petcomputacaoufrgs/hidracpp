@@ -14,7 +14,7 @@ public:
     virtual void save(QString filename);
 
     virtual void step();
-    virtual void run();
+    //virtual void run();
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
