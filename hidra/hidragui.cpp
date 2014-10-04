@@ -247,6 +247,7 @@ void HidraGui::on_actionPasso_triggered()
 
 void HidraGui::on_actionRodar_triggered()
 {
+    //ui->commandLinkButtonRun->setText("Parar");
     while (machine->isRunning()) {
         on_actionPasso_triggered();
         QApplication::processEvents();
