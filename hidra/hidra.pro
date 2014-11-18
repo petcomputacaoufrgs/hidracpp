@@ -15,7 +15,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
         hidragui.cpp \
     machine.cpp \
-    bit.cpp \
     register.cpp \
     byte.cpp \
     instruction.cpp \
@@ -24,11 +23,13 @@ SOURCES += main.cpp\
     ahmesmachine.cpp \
     hidracli.cpp \
     hidrahighlighter.cpp \
-    hidracodeeditor.cpp
+    hidracodeeditor.cpp \
+    flag.cpp \
+    registerwidget.cpp \
+    flagwidget.cpp
 
 HEADERS  += hidragui.h \
     machine.h \
-    bit.h \
     register.h \
     byte.h \
     instruction.h \
@@ -37,9 +38,18 @@ HEADERS  += hidragui.h \
     ahmesmachine.h \
     hidracli.h \
     hidrahighlighter.h \
-    hidracodeeditor.h
+    hidracodeeditor.h \
+    flag.h \
+    registerwidget.h \
+    flagwidget.h
 
-FORMS    += hidragui.ui
+FORMS    += hidragui.ui \
+    registerwidget.ui \
+    flagwidget.ui
 
 RESOURCES += \
     res.qrc
+
+OTHER_FILES += \
+    Changed.txt \
+    Notes.txt

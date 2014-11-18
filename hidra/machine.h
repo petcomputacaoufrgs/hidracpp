@@ -10,8 +10,8 @@
 #include <QPair>
 #include <iostream>
 
-#include "bit.h"
 #include "byte.h"
+#include "flag.h"
 #include "register.h"
 #include "instruction.h"
 
@@ -44,20 +44,20 @@ public:
     virtual void step() = 0;
     //virtual void run() = 0;
 
-    // Machine specific:
+    // Machine specific
     virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
 
-    // Assembly:
+    // Assembly
     void assemble(QString sourceCode);
     Machine::ErrorCode obeyDirective(QString mnemonic, QString arguments, bool reserveOnly);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
-    // Assembler memory:
+    // Assembler memory
     void clearAssemblerMemory();
     void copyAssemblerMemoryToMemory();
     Machine::ErrorCode reserveAssemblerMemory(int sizeToReserve);
 
-    // Assembler checks:
+    // Assembler checks
     bool isValidValue(QString valueString, int min, int max);
     bool isValidByteValue(QString valueString);
     bool isValidAddress(QString addressString);
@@ -66,7 +66,7 @@ public:
     virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
 
     bool isRunning() const;
-    void setRunning(bool value);
+    void setRunning(bool running);
 
     int getBreakpoint() const;
     void setBreakpoint(int value);
@@ -75,12 +75,20 @@ public:
     void setMemory(const QVector<Byte *> &value);
     void clearMemory();
 
-    QVector<Bit *> getFlags() const;
-    void setFlags(const QVector<Bit *> &value);
+    int getNumberOfFlags() const;
+    QString getFlagName(int id) const;
+    int  getFlagValue(int id) const;
+    void setFlagValue(int id, int value);
+    void clearFlags();
 
-    QVector<Register *> getRegisters() const;
-    void setRegisters(const QVector<Register *> &value);
+    int getNumberOfRegisters() const;
+    QString getRegisterName(int id) const;
+    int  getRegisterValue(int id) const;
+    void setRegisterValue(int id, int value);
     void clearRegisters();
+
+    int getPCValue() const;
+    void setPCValue(int value);
 
     QVector<Instruction *> getInstructions() const;
     void setInstructions(const QVector<Instruction *> &value);
@@ -95,7 +103,7 @@ protected:
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
     QVector<int> correspondingLine;
-    QVector<Bit*> flags;
+    QVector<Flag*> flags;
     QVector<Instruction*> instructions;
     bool running;
     int breakpoint;

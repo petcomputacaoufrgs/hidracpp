@@ -30,7 +30,7 @@ private:
     int getSignedInt(int eightBitValue);
 
     Register *AC;
-    Bit *N, *Z, *V, *C, *B;
+    Flag *N, *Z, *V, *C, *B;
 };
 
 #endif // AHMESMACHINE_H
