@@ -38,17 +38,23 @@ public:
     void save();
     void saveAs();
 
+
 public slots:
     void on_pushButtonStep_clicked();
     void on_pushButtonRun_clicked();
 
-    void initializeFlagWidgets();
+    void initializeMemoryMap();
     void initializeRegisterWidgets();
-    void clearFlagWidgets();
+    void initializeFlagWidgets();
+
+    void clearMemoryMap();
     void clearRegisterWidgets();
-    void updateFlagWidgets();
-    void updateRegisterWidgets();
+    void clearFlagWidgets();
+
     void updateMemoryMap();
+    void updateRegisterWidgets();
+    void updateFlagWidgets();
+
     void clearErrorsField();
     void addError(QString);
 
@@ -79,7 +85,7 @@ private:
     bool modifiedFile, sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
     bool fileSaved; // Feedback from Save and SaveAs
     bool showHexValues;
-    QStandardItemModel *model;
+    QStandardItemModel model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
 

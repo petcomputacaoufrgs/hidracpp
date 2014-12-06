@@ -25,7 +25,6 @@ HidraGui::HidraGui(QWidget *parent) :
     buildSuccessful = true;
     showHexValues = false;
 
-    model = NULL;
     machine = NULL;
 
     ui->layoutRegisters->setAlignment(Qt::AlignTop);
@@ -65,6 +64,7 @@ void HidraGui::initializeRegisterWidgets()
 void HidraGui::initializeMachineInterface()
 {
     clearMachineInterface();
+    initializeMemoryMap();
     initializeFlagWidgets();
     initializeRegisterWidgets();
 }
@@ -87,8 +87,14 @@ void HidraGui::clearRegisterWidgets()
 
 void HidraGui::clearMachineInterface()
 {
+    clearMemoryMap();
     clearRegisterWidgets();
     clearFlagWidgets();
+}
+
+void HidraGui::clearMemoryMap()
+{
+    model.clear();
 }
 
 void HidraGui::save()
@@ -141,37 +147,50 @@ void HidraGui::saveAs()
     }
 }
 
-void HidraGui::updateMemoryMap()
+void HidraGui::initializeMemoryMap()
 {
-    delete model;
-    model = new QStandardItemModel(NeanderMachine::MEM_SIZE, 3, this);  //temp gamby, will change
+    QVector<Byte*> memory = machine->getMemory();
+    model.setRowCount(memory.size());
+    model.setColumnCount(3);
 
-    model->setHeaderData(0, Qt::Horizontal, " ");
-    model->setHeaderData(1, Qt::Horizontal, "End");
-    model->setHeaderData(2, Qt::Horizontal, "Valor");
-    QVector<Byte *> auxMem = machine->getMemory();
-    int i = 0;
-    QModelIndex index;
-    int base = showHexValues? 16 : 10;
-    foreach (Byte* tmp, auxMem) {
-        index = model->index(i,1);
-        model->setData(index, QString::number(i, base).toUpper());
+    model.setHeaderData(0, Qt::Horizontal, " ");
+    model.setHeaderData(1, Qt::Horizontal, "End");
+    model.setHeaderData(2, Qt::Horizontal, "Valor");
 
-        index = model->index(i,2);
-        QStandardItem *item = new QStandardItem(QString::number(tmp->getValue(), base).toUpper());
-        item->setToolTip(QString::number(tmp->getValue(), 2).rightJustified(8, '0'));
-       // model->setData(index, item);
-        model->setItem(i,2, item);
-        i++;
+    ui->tableViewMemoryInstructions->setModel(&model);
 
-    }
-    index = model->index(machine->getPCValue(), 0);
-    model->setData(index, QString::fromUtf8("\u2192")); // Unicode arrow
-
-    ui->tableViewMemoryInstructions->setModel(model);
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryInstructions->resizeRowsToContents();
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
+}
+
+void HidraGui::updateMemoryMap()
+{
+    QVector<Byte*> memory = machine->getMemory();
+    int pcValue = machine->getPCValue();
+    int base = showHexValues? 16 : 10;
+
+    QModelIndex index;
+
+    for (int byteAddress=0; byteAddress<memory.size(); byteAddress++)
+    {
+        // Column 0: PC Arrow
+        index = model.index(byteAddress, 0);
+        model.setData(index, byteAddress == pcValue ? QString::fromUtf8("\u2192") : ""); // Unicode arrow / blank
+
+        // Column 1: Byte address
+        index = model.index(byteAddress, 1);
+        model.setData(index, QString::number(byteAddress, base).toUpper());
+
+        // Column 2: Byte value
+        index = model.index(byteAddress, 2);
+        model.setData(index, QString::number(memory[byteAddress]->getValue(), base).toUpper());
+    }
+
+    // TODO Binary tooltip/status bar
+
+    // Update all cells
+    emit model.dataChanged(model.index(0, 0), model.index(memory.size(), 0));
 }
 
 void HidraGui::updateFlagWidgets()
