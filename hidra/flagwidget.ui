@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FlagWidget</class>
+ <widget class="QWidget" name="FlagWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>41</width>
+    <height>20</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QCheckBox::indicator{
+	height: 20px;
+	width: 20px;
+}
+
+QCheckBox::indicator:checked {
+	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(0, 255, 0, 255), stop:0.7 rgba(0, 255, 0, 255), stop:0.7 rgba(200, 230, 200, 0));
+}
+
+QCheckBox::indicator:unchecked {
+	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(100, 110, 100, 255), stop:0.7 rgba(100, 110, 100, 255), stop:0.7 rgba(200, 230, 200, 0));
+
+}</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QCheckBox" name="flagCheckBox">
+     <property name="text">
+      <string>F</string>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
