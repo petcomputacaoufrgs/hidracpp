@@ -61,6 +61,8 @@ NeanderMachine::NeanderMachine()
     instructions[8]  = new Instruction( "jn", 144, 1, 2);
     instructions[9]  = new Instruction( "jz", 160, 1, 2);
     instructions[10] = new Instruction("hlt", 240, 0, 1);
+
+    running = false;
 }
 
 void NeanderMachine::printStatusDebug()

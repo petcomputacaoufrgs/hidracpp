@@ -259,6 +259,8 @@ void HidraGui::on_actionMontar_triggered()
 
     if (machine->buildSuccessful)
         sourceAndMemoryInSync = true;
+
+    machine->setPCValue(0);
 }
 
 void HidraGui::on_actionSaveAs_triggered()

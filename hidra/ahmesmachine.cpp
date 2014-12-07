@@ -77,6 +77,8 @@ AhmesMachine::AhmesMachine()
     instructions[21] = new Instruction("ror", 226, 0, 1);
     instructions[22] = new Instruction("rol", 227, 0, 1);
     instructions[23] = new Instruction("hlt", 240, 0, 1);
+
+    running = false;
 }
 
 void AhmesMachine::printStatusDebug()

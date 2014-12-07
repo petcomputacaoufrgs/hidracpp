@@ -69,6 +69,8 @@ RamsesMachine::RamsesMachine()
     instructions[13] = new Instruction("neg", 208, 1, 1);
     instructions[14] = new Instruction("shr", 224, 1, 1);
     instructions[15] = new Instruction("hlt", 240, 0, 1);
+
+    running = false;
 }
 
 void RamsesMachine::printStatusDebug()
