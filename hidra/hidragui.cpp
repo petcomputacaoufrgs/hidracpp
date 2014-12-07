@@ -33,7 +33,6 @@ HidraGui::HidraGui(QWidget *parent) :
 
     // Escolhe a máquina Neander e atualiza a interface
     ui->comboBoxMachine->setCurrentIndex(0);
-    updateMachineInterface();
 }
 
 HidraGui::~HidraGui()
@@ -41,9 +40,56 @@ HidraGui::~HidraGui()
     delete ui;
 }
 
-void HidraGui::initializeHighlighter()
+
+
+//////////////////////////////////////////////////
+// Initialize/update methods
+//////////////////////////////////////////////////
+
+void HidraGui::initializeMachineInterface()
 {
-    highlighter->initializeHighlighter(*machine);
+    clearMachineInterfaceComponents();
+    initializeMachineInterfaceComponents();
+    updateMachineInterfaceComponents();
+}
+
+void HidraGui::updateMachineInterface()
+{
+    updateMachineInterfaceComponents();
+}
+
+
+
+//////////////////////////////////////////////////
+// Initialization internal methods
+//////////////////////////////////////////////////
+
+void HidraGui::initializeMachineInterfaceComponents()
+{
+    initializeMemoryTable();
+    initializeFlagWidgets();
+    initializeRegisterWidgets();
+    initializeHighlighter();
+}
+
+void HidraGui::initializeMemoryTable()
+{
+    ui->tableViewMemoryInstructions->setModel(&model);
+    QVector<Byte*> memory = machine->getMemory();
+
+    // Set table size
+    model.setRowCount(memory.size());
+    model.setColumnCount(3);
+
+    // Set table headers
+    model.setHeaderData(0, Qt::Horizontal, " ");
+    model.setHeaderData(1, Qt::Horizontal, "End");
+    model.setHeaderData(2, Qt::Horizontal, "Valor");
+
+    // Adjust table settings
+    ui->tableViewMemoryInstructions->resizeColumnsToContents();
+    ui->tableViewMemoryInstructions->resizeRowsToContents();
+    ui->tableViewMemoryInstructions->verticalHeader()->hide();
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -66,32 +112,18 @@ void HidraGui::initializeRegisterWidgets()
     }
 }
 
-void HidraGui::initializeMachineInterface()
+void HidraGui::initializeHighlighter()
 {
-    clearMachineInterface();
-    initializeMemoryMap();
-    initializeFlagWidgets();
-    initializeRegisterWidgets();
-    initializeHighlighter();
+    highlighter->initializeHighlighter(*machine);
 }
 
-void HidraGui::clearFlagWidgets()
-{
-    while(ui->layoutFlags->count() > 0)
-        delete ui->layoutFlags->takeAt(0)->widget();
 
-    flagWidgets.clear();
-}
 
-void HidraGui::clearRegisterWidgets()
-{
-    while(ui->layoutRegisters->count() > 0)
-        delete ui->layoutRegisters->takeAt(0)->widget();
+//////////////////////////////////////////////////
+// Clearing internal methods
+//////////////////////////////////////////////////
 
-    registerWidgets.clear();
-}
-
-void HidraGui::clearMachineInterface()
+void HidraGui::clearMachineInterfaceComponents()
 {
     clearMemoryMap();
     clearRegisterWidgets();
@@ -102,6 +134,82 @@ void HidraGui::clearMemoryMap()
 {
     model.clear();
 }
+
+void HidraGui::clearRegisterWidgets()
+{
+    while(ui->layoutRegisters->count() > 0)
+        delete ui->layoutRegisters->takeAt(0)->widget();
+
+    registerWidgets.clear();
+}
+
+void HidraGui::clearFlagWidgets()
+{
+    while(ui->layoutFlags->count() > 0)
+        delete ui->layoutFlags->takeAt(0)->widget();
+
+    flagWidgets.clear();
+}
+
+
+
+//////////////////////////////////////////////////
+// Updating internal methods
+//////////////////////////////////////////////////
+
+void HidraGui::updateMachineInterfaceComponents()
+{
+    updateMemoryMap();
+    updateFlagWidgets();
+    updateRegisterWidgets();
+}
+
+void HidraGui::updateMemoryMap()
+{
+    QVector<Byte*> memory = machine->getMemory();
+    int pcValue = machine->getPCValue();
+    int base = showHexValues? 16 : 10;
+
+    QModelIndex index;
+
+    for (int byteAddress=0; byteAddress<memory.size(); byteAddress++)
+    {
+        // Column 0: PC Arrow
+        index = model.index(byteAddress, 0);
+        model.setData(index, byteAddress == pcValue ? QString::fromUtf8("\u2192") : ""); // Unicode arrow / blank
+
+        // Column 1: Byte address
+        index = model.index(byteAddress, 1);
+        model.setData(index, QString::number(byteAddress, base).toUpper());
+
+        // Column 2: Byte value
+        index = model.index(byteAddress, 2);
+        model.setData(index, QString::number(memory[byteAddress]->getValue(), base).toUpper());
+    }
+
+    // TODO Binary tooltip/status bar
+
+    // Update all cells
+    emit model.dataChanged(model.index(0, 0), model.index(memory.size(), 0));
+}
+
+void HidraGui::updateRegisterWidgets()
+{
+    for (int i=0; i<registerWidgets.count(); i++)
+        registerWidgets.at(i)->setValue(machine->getRegisterValue(i));
+}
+
+void HidraGui::updateFlagWidgets()
+{
+    for (int i=0; i<flagWidgets.count(); i++)
+        flagWidgets.at(i)->setValue(machine->getFlagValue(i));
+}
+
+
+
+//////////////////////////////////////////////////
+// Saving/loading
+//////////////////////////////////////////////////
 
 void HidraGui::save()
 {
@@ -153,70 +261,27 @@ void HidraGui::saveAs()
     }
 }
 
-void HidraGui::initializeMemoryMap()
+
+
+//////////////////////////////////////////////////
+// Errors field
+//////////////////////////////////////////////////
+
+void HidraGui::clearErrorsField()
 {
-    QVector<Byte*> memory = machine->getMemory();
-    model.setRowCount(memory.size());
-    model.setColumnCount(3);
-
-    model.setHeaderData(0, Qt::Horizontal, " ");
-    model.setHeaderData(1, Qt::Horizontal, "End");
-    model.setHeaderData(2, Qt::Horizontal, "Valor");
-
-    ui->tableViewMemoryInstructions->setModel(&model);
-
-    ui->tableViewMemoryInstructions->resizeColumnsToContents();
-    ui->tableViewMemoryInstructions->resizeRowsToContents();
-    ui->tableViewMemoryInstructions->verticalHeader()->hide();
+    ui->textEditError->clear();
 }
 
-void HidraGui::updateMemoryMap()
+void HidraGui::addError(QString errorString)
 {
-    QVector<Byte*> memory = machine->getMemory();
-    int pcValue = machine->getPCValue();
-    int base = showHexValues? 16 : 10;
-
-    QModelIndex index;
-
-    for (int byteAddress=0; byteAddress<memory.size(); byteAddress++)
-    {
-        // Column 0: PC Arrow
-        index = model.index(byteAddress, 0);
-        model.setData(index, byteAddress == pcValue ? QString::fromUtf8("\u2192") : ""); // Unicode arrow / blank
-
-        // Column 1: Byte address
-        index = model.index(byteAddress, 1);
-        model.setData(index, QString::number(byteAddress, base).toUpper());
-
-        // Column 2: Byte value
-        index = model.index(byteAddress, 2);
-        model.setData(index, QString::number(memory[byteAddress]->getValue(), base).toUpper());
-    }
-
-    // TODO Binary tooltip/status bar
-
-    // Update all cells
-    emit model.dataChanged(model.index(0, 0), model.index(memory.size(), 0));
+    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
 }
 
-void HidraGui::updateFlagWidgets()
-{
-    for (int i=0; i<flagWidgets.count(); i++)
-        flagWidgets.at(i)->setValue(machine->getFlagValue(i));
-}
 
-void HidraGui::updateRegisterWidgets()
-{
-    for (int i=0; i<registerWidgets.count(); i++)
-        registerWidgets.at(i)->setValue(machine->getRegisterValue(i));
-}
 
-void HidraGui::updateMachineInterface()
-{
-    updateMemoryMap();
-    updateFlagWidgets();
-    updateRegisterWidgets();
-}
+//////////////////////////////////////////////////
+// Event filter
+//////////////////////////////////////////////////
 
 bool HidraGui::eventFilter(QObject *obj, QEvent *event)
 {
@@ -229,15 +294,11 @@ bool HidraGui::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
-void HidraGui::clearErrorsField()
-{
-    ui->textEditError->clear();
-}
 
-void HidraGui::addError(QString errorString)
-{
-    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
-}
+
+//////////////////////////////////////////////////
+// Actions
+//////////////////////////////////////////////////
 
 void HidraGui::on_pushButtonStep_clicked(){
     ui->actionPasso->trigger();
@@ -332,37 +393,6 @@ void HidraGui::on_actionClose_triggered()
     this->close();
 }
 
-void HidraGui::closeEvent(QCloseEvent *event)
-{
-    bool cancelled = false;
-
-    // Se o arquivo foi modificado, oferece para salvar alterações
-    if (modifiedFile)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Hidra",
-                                      "Deseja salvar as alterações feitas?",
-                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-
-        if (reply == QMessageBox::Cancel)
-            cancelled = true;
-
-        if (reply == QMessageBox::Yes)
-        {
-            ui->action_Save->trigger();
-
-            if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
-                cancelled = true;
-        }
-    }
-
-    // Aceita ou rejeita o evento que fecha a janela
-    if (!cancelled)
-        event->accept();
-    else
-        event->ignore();
-}
-
 void HidraGui::on_actionManual_triggered()
 {
 
@@ -454,3 +484,33 @@ void HidraGui::on_actionHexadecimal_toggled(bool checked)
     updateMachineInterface();
 }
 
+void HidraGui::closeEvent(QCloseEvent *event)
+{
+    bool cancelled = false;
+
+    // Se o arquivo foi modificado, oferece para salvar alterações
+    if (modifiedFile)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Hidra",
+                                      "Deseja salvar as alterações feitas?",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            cancelled = true;
+
+        if (reply == QMessageBox::Yes)
+        {
+            ui->action_Save->trigger();
+
+            if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
+                cancelled = true;
+        }
+    }
+
+    // Aceita ou rejeita o evento que fecha a janela
+    if (!cancelled)
+        event->accept();
+    else
+        event->ignore();
+}

@@ -29,10 +29,6 @@ public:
     explicit HidraGui(QWidget *parent = 0);
     ~HidraGui();
 
-    void initializeMachineInterface();
-    void clearMachineInterface();
-    void updateMachineInterface();
-
     bool eventFilter(QObject *obj, QEvent *event);
 
     void save();
@@ -42,18 +38,8 @@ public slots:
     void on_pushButtonStep_clicked();
     void on_pushButtonRun_clicked();
 
-    void initializeMemoryMap();
-    void initializeRegisterWidgets();
-    void initializeFlagWidgets();
-    void initializeHighlighter();
-
-    void clearMemoryMap();
-    void clearRegisterWidgets();
-    void clearFlagWidgets();
-
-    void updateMemoryMap();
-    void updateRegisterWidgets();
-    void updateFlagWidgets();
+    void initializeMachineInterface();
+    void updateMachineInterface();
 
     void clearErrorsField();
     void addError(QString);
@@ -79,6 +65,23 @@ private slots:
     void on_actionHexadecimal_toggled(bool arg1);
 
 private:
+
+    void initializeMachineInterfaceComponents();
+    void initializeMemoryTable();
+    void initializeRegisterWidgets();
+    void initializeFlagWidgets();
+    void initializeHighlighter();
+
+    void clearMachineInterfaceComponents();
+    void clearMemoryMap();
+    void clearRegisterWidgets();
+    void clearFlagWidgets();
+
+    void updateMachineInterfaceComponents();
+    void updateMemoryMap();
+    void updateRegisterWidgets();
+    void updateFlagWidgets();
+
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFile;
