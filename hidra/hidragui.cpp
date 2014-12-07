@@ -41,6 +41,11 @@ HidraGui::~HidraGui()
     delete ui;
 }
 
+void HidraGui::initializeHighlighter()
+{
+    highlighter->initializeHighlighter(*machine);
+}
+
 void HidraGui::initializeFlagWidgets()
 {
     for (int i=0; i < machine->getNumberOfFlags(); i++)
@@ -67,6 +72,7 @@ void HidraGui::initializeMachineInterface()
     initializeMemoryMap();
     initializeFlagWidgets();
     initializeRegisterWidgets();
+    initializeHighlighter();
 }
 
 void HidraGui::clearFlagWidgets()
@@ -307,7 +313,6 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     }
     if(index != 3) {
         connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
-        highlighter->setTargetMachine(machine);
     }
 
     initializeMachineInterface();

@@ -38,7 +38,6 @@ public:
     void save();
     void saveAs();
 
-
 public slots:
     void on_pushButtonStep_clicked();
     void on_pushButtonRun_clicked();
@@ -46,6 +45,7 @@ public slots:
     void initializeMemoryMap();
     void initializeRegisterWidgets();
     void initializeFlagWidgets();
+    void initializeHighlighter();
 
     void clearMemoryMap();
     void clearRegisterWidgets();

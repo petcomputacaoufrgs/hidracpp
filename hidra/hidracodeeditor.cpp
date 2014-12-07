@@ -2,7 +2,11 @@
 
 HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
+    // Set font to Courier (monospaced)
+    this->setFont(QFont("Courier", 10));
+
     lineNumberArea = new LineNumberArea(this);
+    lineNumberArea->setFont(QFont("Courier", 10));
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
