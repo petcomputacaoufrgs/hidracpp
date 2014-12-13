@@ -2,7 +2,7 @@
 #define HIDRAHIGHLIGHTER_H
 
 #include <QSyntaxHighlighter>
-#include "machine.h"
+#include "core/machine.h"
 
 
 

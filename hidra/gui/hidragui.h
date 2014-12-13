@@ -9,13 +9,14 @@
 #include <QCheckBox>
 #include <QDebug>
 #include <QVector>
+
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "registerwidget.h"
 #include "flagwidget.h"
-#include "neandermachine.h"
-#include "ahmesmachine.h"
-#include "ramsesmachine.h"
+#include "machines/neandermachine.h"
+#include "machines/ahmesmachine.h"
+#include "machines/ramsesmachine.h"
 
 namespace Ui {
 class HidraGui;

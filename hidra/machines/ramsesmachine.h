@@ -1,12 +1,12 @@
-#ifndef NEANDERMACHINE_H
-#define NEANDERMACHINE_H
+#ifndef RAMSESMACHINE_H
+#define RAMSESMACHINE_H
 
-#include "machine.h"
+#include "core/machine.h"
 
-class NeanderMachine : public Machine
+class RamsesMachine : public Machine
 {
 public:
-    NeanderMachine();
+    RamsesMachine();
 
     virtual void printStatusDebug();
 
@@ -16,20 +16,18 @@ public:
     virtual void step();
     //virtual void run();
 
+    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
+
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
-
-    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     static const int MEM_SIZE = 256;
     static const int MAX_VALUE = 255;
     static const int MAX_SIGNED_VALUE = 127; // Maximum positive number for 8-bits in two's complement
 
 private:
-
-    Register* AC;
-    Flag *N, *Z;
-
+    Register *RA, *RB, *RX;
+    Flag *N, *Z, *C;
 };
 
-#endif // NEANDERMACHINE_H
+#endif // RAMSESMACHINE_H

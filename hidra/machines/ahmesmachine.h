@@ -1,12 +1,12 @@
-#ifndef RAMSESMACHINE_H
-#define RAMSESMACHINE_H
+#ifndef AHMESMACHINE_H
+#define AHMESMACHINE_H
 
-#include "machine.h"
+#include "core/machine.h"
 
-class RamsesMachine : public Machine
+class AhmesMachine : public Machine
 {
 public:
-    RamsesMachine();
+    AhmesMachine();
 
     virtual void printStatusDebug();
 
@@ -16,18 +16,21 @@ public:
     virtual void step();
     //virtual void run();
 
-    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
-
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
+
+    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     static const int MEM_SIZE = 256;
     static const int MAX_VALUE = 255;
     static const int MAX_SIGNED_VALUE = 127; // Maximum positive number for 8-bits in two's complement
 
+
 private:
-    Register *RA, *RB, *RX;
-    Flag *N, *Z, *C;
+    int getSignedInt(int eightBitValue);
+
+    Register *AC;
+    Flag *N, *Z, *V, *C, *B;
 };
 
-#endif // RAMSESMACHINE_H
+#endif // AHMESMACHINE_H

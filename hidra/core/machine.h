@@ -89,6 +89,7 @@ public:
 
     int getPCValue() const;
     void setPCValue(int value);
+    int getPCCorrespondingLine();
 
     QVector<Instruction *> getInstructions() const;
     void setInstructions(const QVector<Instruction *> &value);

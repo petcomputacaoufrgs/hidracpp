@@ -70,6 +70,14 @@ void Machine::setPCValue(int value)
     PC->setValue(value);
 }
 
+int Machine::getPCCorrespondingLine()
+{
+    if (!correspondingLine.isEmpty())
+        return correspondingLine[PC->getValue()];
+    else
+        return -1;
+}
+
 QVector<Instruction *> Machine::getInstructions() const
 {
     return instructions;

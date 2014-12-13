@@ -1,7 +1,6 @@
 #include "hidragui.h"
 #include "ui_hidragui.h"
 #include <QSizeGrip>
-#include "qsizegrip.h"
 
 HidraGui::HidraGui(QWidget *parent) :
     QMainWindow(parent),

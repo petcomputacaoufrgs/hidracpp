@@ -4,9 +4,9 @@
 #include <QObject>
 #include <iostream>
 #include <string>
-#include "neandermachine.h"
-#include "ahmesmachine.h"
-#include "ramsesmachine.h"
+#include "machines/neandermachine.h"
+#include "machines/ahmesmachine.h"
+#include "machines/ramsesmachine.h"
 
 class HidraCli : public QObject
 {

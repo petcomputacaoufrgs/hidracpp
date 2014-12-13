@@ -1,7 +1,7 @@
 #include <QApplication>
 //#include <QTextCodec>
-#include "hidragui.h"
-#include "hidracli.h"
+#include "gui/hidragui.h"
+#include "gui/hidracli.h"
 
 int main(int argc, char *argv[])
 {

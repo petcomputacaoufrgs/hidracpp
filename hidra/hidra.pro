@@ -12,44 +12,46 @@ TARGET = hidra
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
-        hidragui.cpp \
-    machine.cpp \
-    register.cpp \
-    byte.cpp \
-    instruction.cpp \
-    ramsesmachine.cpp \
-    neandermachine.cpp \
-    ahmesmachine.cpp \
-    hidracli.cpp \
-    hidrahighlighter.cpp \
-    hidracodeeditor.cpp \
-    flag.cpp \
-    registerwidget.cpp \
-    flagwidget.cpp
+SOURCES += \
+    gui/flagwidget.cpp \
+    gui/hidracodeeditor.cpp \
+    gui/hidragui.cpp \
+    gui/hidrahighlighter.cpp \
+    gui/registerwidget.cpp \
+    core/byte.cpp \
+    core/flag.cpp \
+    core/instruction.cpp \
+    core/machine.cpp \
+    core/main.cpp \
+    core/register.cpp \
+    machines/ahmesmachine.cpp \
+    machines/neandermachine.cpp \
+    machines/ramsesmachine.cpp \
+    gui/hidracli.cpp
 
-HEADERS  += hidragui.h \
-    machine.h \
-    register.h \
-    byte.h \
-    instruction.h \
-    ramsesmachine.h \
-    neandermachine.h \
-    ahmesmachine.h \
-    hidracli.h \
-    hidrahighlighter.h \
-    hidracodeeditor.h \
-    flag.h \
-    registerwidget.h \
-    flagwidget.h
+HEADERS  += \
+    gui/flagwidget.h \
+    gui/hidracodeeditor.h \
+    gui/hidragui.h \
+    gui/hidrahighlighter.h \
+    gui/registerwidget.h \
+    core/byte.h \
+    core/flag.h \
+    core/instruction.h \
+    core/machine.h \
+    core/register.h \
+    machines/ahmesmachine.h \
+    machines/neandermachine.h \
+    machines/ramsesmachine.h \
+    gui/hidracli.h
 
-FORMS    += hidragui.ui \
-    registerwidget.ui \
-    flagwidget.ui
+FORMS    += \
+    gui/flagwidget.ui \
+    gui/hidragui.ui \
+    gui/registerwidget.ui
 
 RESOURCES += \
     res.qrc
 
 OTHER_FILES += \
-    Changed.txt \
-    Notes.txt
+    notes.txt
