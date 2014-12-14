@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>41</width>
+    <width>39</width>
     <height>20</height>
    </rect>
   </property>
@@ -14,19 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QCheckBox::indicator{
-	height: 20px;
-	width: 20px;
-}
-
-QCheckBox::indicator:checked {
-	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(0, 255, 0, 255), stop:0.7 rgba(0, 255, 0, 255), stop:0.7 rgba(200, 230, 200, 0));
-}
-
-QCheckBox::indicator:unchecked {
-	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(100, 110, 100, 255), stop:0.7 rgba(100, 110, 100, 255), stop:0.7 rgba(200, 230, 200, 0));
-
-}</string>
+   <string notr="true"/>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="leftMargin">
@@ -43,11 +31,25 @@ QCheckBox::indicator:unchecked {
    </property>
    <item>
     <widget class="QCheckBox" name="flagCheckBox">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QCheckBox::indicator{
+	height: 20px;
+	width: 20px;
+}
+
+QCheckBox::indicator:checked {
+	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(0, 255, 0, 255), stop:0.7 rgba(0, 255, 0, 255), stop:0.7 rgba(200, 230, 200, 0));
+}
+
+QCheckBox::indicator:unchecked {
+	background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.7, fx:0.5, fy:0.5, stop:0 rgba(100, 110, 100, 255), stop:0.7 rgba(100, 110, 100, 255), stop:0.7 rgba(200, 230, 200, 0));
+}</string>
+     </property>
      <property name="text">
       <string>F</string>
-     </property>
-     <property name="checkable">
-      <bool>false</bool>
      </property>
     </widget>
    </item>
