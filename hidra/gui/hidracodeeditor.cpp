@@ -145,6 +145,12 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     int bottom = top + (int) blockBoundingRect(block).height();
 
     while (block.isValid() && top <= event->rect().bottom()) {
+
+        // Breakpoint
+        if (blockNumber == 2) {
+            painter.fillRect(0, top, lineNumberArea->width(), bottom - top, QColor(255, 64, 64)); // Red
+        }
+
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(QColor(128, 128, 128)); // Dark gray
