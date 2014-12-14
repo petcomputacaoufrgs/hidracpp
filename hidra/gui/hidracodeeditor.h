@@ -20,6 +20,11 @@ public:
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int lineNumberAreaWidth();
 
+    void highlightPCLine(int pcLine);
+    void disableLineHighlight();
+
+public slots:
+
 protected:
     void resizeEvent(QResizeEvent *event);
 

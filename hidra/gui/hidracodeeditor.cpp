@@ -10,10 +10,10 @@ HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
-    connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+    //connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
     updateLineNumberAreaWidth(0);
-    highlightCurrentLine();
+    //highlightCurrentLine();
 }
 
 
@@ -27,7 +27,7 @@ int HidraCodeEditor::lineNumberAreaWidth()
         ++digits;
     }
 
-    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+    int space = fontMetrics().width(QLatin1Char('9')) * digits + 6;
 
     return space;
 }
@@ -71,7 +71,7 @@ void HidraCodeEditor::highlightCurrentLine()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(Qt::yellow).lighter(160);
+        QColor lineColor = QColor(QColor(240, 240, 240));
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -85,10 +85,58 @@ void HidraCodeEditor::highlightCurrentLine()
 
 
 
+void HidraCodeEditor::highlightPCLine(int pcLine)
+{
+    bool blockFound = false;
+    QTextBlock block = firstVisibleBlock();
+
+    // Find PC line's block
+    while (!blockFound && block.isValid() && block.isVisible())
+    {
+        if (block.blockNumber() == pcLine)
+            blockFound = true;
+        else
+            block = block.next();
+    }
+
+    // Highlight block, if found
+    if (blockFound)
+    {
+        QList<QTextEdit::ExtraSelection> extraSelections;
+
+        if (!isReadOnly())
+        {
+            QTextEdit::ExtraSelection selection;
+
+            QColor lineColor = QColor(255, 240, 0); // Yellow
+
+            selection.format.setBackground(lineColor);
+            selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+            selection.cursor = QTextCursor(block); // PC Block
+            selection.cursor.clearSelection();
+            extraSelections.append(selection);
+        }
+
+        setExtraSelections(extraSelections);
+    }
+    else
+    {
+        disableLineHighlight();
+    }
+}
+
+
+
+void HidraCodeEditor::disableLineHighlight()
+{
+    QList<QTextEdit::ExtraSelection> extraSelections;
+    setExtraSelections(extraSelections);
+}
+
 void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(), Qt::lightGray);
+    painter.fillRect(event->rect(), QColor(240, 240, 240)); // Light gray
 
 
     QTextBlock block = firstVisibleBlock();
@@ -99,8 +147,8 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(Qt::black);
-            painter.drawText(0, top, lineNumberArea->width(), fontMetrics().height(),
+            painter.setPen(QColor(128, 128, 128)); // Dark gray
+            painter.drawText(0, top, lineNumberArea->width() - 1, fontMetrics().height(),
                              Qt::AlignRight, number);
         }
 

@@ -16,6 +16,7 @@ HidraGui::HidraGui(QWidget *parent) :
     highlighter = new HidraHighlighter(codeEditor->document());
 
     //FIM DO BETA CODE
+
     currentFile = "";
     modifiedFile = false;
     sourceAndMemoryInSync = false;
@@ -114,6 +115,7 @@ void HidraGui::initializeRegisterWidgets()
 void HidraGui::initializeHighlighter()
 {
     highlighter->initializeHighlighter(*machine);
+    highlighter->rehighlight();
 }
 
 
@@ -161,6 +163,8 @@ void HidraGui::updateMachineInterfaceComponents()
     updateMemoryMap();
     updateFlagWidgets();
     updateRegisterWidgets();
+    updateCodeEditor();
+    updateButtons();
 }
 
 void HidraGui::updateMemoryMap()
@@ -202,6 +206,22 @@ void HidraGui::updateFlagWidgets()
 {
     for (int i=0; i<flagWidgets.count(); i++)
         flagWidgets.at(i)->setValue(machine->getFlagValue(i));
+}
+
+void HidraGui::updateCodeEditor()
+{
+    if (sourceAndMemoryInSync)
+        codeEditor->highlightPCLine(machine->getPCCorrespondingLine());
+    else
+        codeEditor->disableLineHighlight();
+}
+
+void HidraGui::updateButtons()
+{
+    if (machine->isRunning())
+        ui->pushButtonRun->setText("Parar");
+    else
+        ui->pushButtonRun->setText("Rodar");
 }
 
 
@@ -320,13 +340,12 @@ void HidraGui::on_actionRodar_triggered()
     {
         // Stop
         machine->setRunning(false);
-        ui->pushButtonRun->setText("Rodar");
+        updateMachineInterface();
     }
     else
     {
         // Start running
         machine->setRunning(true);
-        ui->pushButtonRun->setText("Parar");
 
         // Keep running until stopped
         while (machine->isRunning()) {
@@ -340,12 +359,12 @@ void HidraGui::on_actionMontar_triggered()
 {
     clearErrorsField();
     machine->assemble(codeEditor->toPlainText());
-    updateMachineInterface();
 
     if (machine->buildSuccessful)
         sourceAndMemoryInSync = true;
 
     machine->setPCValue(0);
+    updateMachineInterface();
 }
 
 void HidraGui::on_actionSaveAs_triggered()
@@ -377,6 +396,8 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
         connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
     }
 
+    sourceAndMemoryInSync = false;
+    codeEditor->disableLineHighlight();
     initializeMachineInterface();
 }
 
@@ -443,8 +464,13 @@ void HidraGui::on_actionOpen_triggered()
 
 void HidraGui::sourceCodeChanged()
 {
-    sourceAndMemoryInSync = false;
     modifiedFile = true;
+
+    if (sourceAndMemoryInSync)
+    {
+        sourceAndMemoryInSync = false;
+        codeEditor->disableLineHighlight();
+    }
 }
 
 void HidraGui::on_actionCarregar_triggered()

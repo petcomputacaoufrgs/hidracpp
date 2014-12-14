@@ -82,6 +82,8 @@ private:
     void updateMemoryMap();
     void updateRegisterWidgets();
     void updateFlagWidgets();
+    void updateCodeEditor();
+    void updateButtons();
 
     Ui::HidraGui *ui;
     Machine *machine;
