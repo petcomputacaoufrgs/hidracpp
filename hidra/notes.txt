@@ -1,1 +1,14 @@
-'Salvar' deve verificar se a máquina foi alterada e virar 'Salvar como' para trocar a extensão
+Interface
+ - 'Salvar' deve verificar se a máquina foi alterada e virar 'Salvar como' para trocar a extensão
+ - Nome do arquivo no título da janela? Asterisco quando for modificado
+
+Hexa e binário
+ - Modo hexa pronto
+ - Refazer tooltip para valores binários (ou colocar na status bar)
+
+Breakpoints
+ - Já existe machine.setBreakpoint(address)
+ - Falta colocar breakpoints a partir da interface
+ - Achar endereço da linha atual (criar machine.getLineAddress? usar correspondingLine)
+ - Sugestão: Alguma tecla, F12?
+

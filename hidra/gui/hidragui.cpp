@@ -8,23 +8,18 @@ HidraGui::HidraGui(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //CODIGO PARA BETA VERSION
-    codeEditor = new HidraCodeEditor();
-    connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
-    ui->layoutSourceCodeHolder->addWidget(codeEditor);
-
+    codeEditor  = new HidraCodeEditor();
     highlighter = new HidraHighlighter(codeEditor->document());
-
-    //FIM DO BETA CODE
+    ui->layoutSourceCodeHolder->addWidget(codeEditor);
+    connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
 
     currentFile = "";
-    modifiedFile = false;
-    sourceAndMemoryInSync = false;
 
     fileSaved = false;
     buildSuccessful = true;
     showHexValues = false;
 
+    sourceAndMemoryInSync = false;
     machine = NULL;
 
     ui->layoutRegisters->setAlignment(Qt::AlignTop);
@@ -33,6 +28,8 @@ HidraGui::HidraGui(QWidget *parent) :
 
     // Escolhe a máquina Neander e atualiza a interface
     ui->comboBoxMachine->setCurrentIndex(0);
+
+    modifiedFile = false;
 }
 
 HidraGui::~HidraGui()
