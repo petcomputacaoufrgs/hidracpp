@@ -436,7 +436,15 @@ void HidraGui::on_actionSaveAs_triggered()
 
 void HidraGui::on_actionImportMemory_triggered()
 {
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    "Importar memória", "",
+                                                    "Arquivo de memória (*.mem)");
 
+    if (!filename.isEmpty())
+    {
+        // Load memory
+        machine->load(filename);
+    }
 }
 
 void HidraGui::on_actionExportMemory_triggered()
