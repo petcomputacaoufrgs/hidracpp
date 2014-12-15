@@ -242,9 +242,6 @@ void HidraGui::save()
     out << codeEditor->toPlainText();
     file.close();
 
-    // Save memory
-    machine->save(currentFile.section(".", 0, -2).append(".mem"));
-
     modifiedFile = false;
 }
 
@@ -477,7 +474,15 @@ void HidraGui::on_actionCarregar_triggered()
 
 void HidraGui::on_actionSaveMem_triggered()
 {
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    "Exportar memória", "",
+                                                    "Arquivo de memória (*.mem)");
 
+    if (!filename.isEmpty())
+    {
+        // Save memory
+        machine->save(filename);
+    }
 }
 
 void HidraGui::on_actionZerarMemoria_triggered()

@@ -125,7 +125,7 @@ void AhmesMachine::save(QString filename)
     stream << (unsigned char)3 << (unsigned char)'A' << (unsigned char)'H' << (unsigned char)'D'; //prefixo identificador da maquina (basicamente o que muda em cada maquina
 
     foreach (Byte *byte, memory) {
-        stream << byte->getValue() << (unsigned char)0;
+        stream << (unsigned char)byte->getValue() << (unsigned char)0;
     }
     memFile.close();
 }
