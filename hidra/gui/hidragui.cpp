@@ -231,7 +231,7 @@ void HidraGui::save()
 {
     QFile file(currentFile);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::information(this, "Incapaz de abrir arquivo",
+        QMessageBox::information(this, "Erro ao salvar arquivo",
                                  file.errorString());
         fileSaved = false;
         return;
@@ -293,7 +293,7 @@ void HidraGui::addError(QString errorString)
 
 
 //////////////////////////////////////////////////
-// Event filter
+// Others
 //////////////////////////////////////////////////
 
 bool HidraGui::eventFilter(QObject *obj, QEvent *event)
@@ -307,27 +307,51 @@ bool HidraGui::eventFilter(QObject *obj, QEvent *event)
     return false;
 }
 
+void HidraGui::sourceCodeChanged()
+{
+    modifiedFile = true;
+
+    if (sourceAndMemoryInSync)
+    {
+        sourceAndMemoryInSync = false;
+        codeEditor->disableLineHighlight();
+    }
+}
+
 
 
 //////////////////////////////////////////////////
 // Actions
 //////////////////////////////////////////////////
 
-void HidraGui::on_pushButtonStep_clicked(){
-    ui->actionPasso->trigger();
+void HidraGui::on_pushButtonBuild_clicked()
+{
+    ui->actionBuild->trigger();
 }
 
 void HidraGui::on_pushButtonRun_clicked(){
-    ui->actionRodar->trigger();
+    ui->actionRun->trigger();
 }
 
-void HidraGui::on_actionPasso_triggered()
+void HidraGui::on_pushButtonStep_clicked(){
+    ui->actionStep->trigger();
+}
+
+
+
+void HidraGui::on_actionBuild_triggered()
 {
-    machine->step();
+    clearErrorsField();
+    machine->assemble(codeEditor->toPlainText());
+
+    if (machine->buildSuccessful)
+        sourceAndMemoryInSync = true;
+
+    machine->setPCValue(0);
     updateMachineInterface();
 }
 
-void HidraGui::on_actionRodar_triggered()
+void HidraGui::on_actionRun_triggered()
 {
     // If already running
     if (machine->isRunning())
@@ -343,27 +367,108 @@ void HidraGui::on_actionRodar_triggered()
 
         // Keep running until stopped
         while (machine->isRunning()) {
-            ui->actionPasso->trigger();
+            ui->actionStep->trigger();
             QApplication::processEvents();
         }
     }
 }
 
-void HidraGui::on_actionMontar_triggered()
+void HidraGui::on_actionStep_triggered()
 {
-    clearErrorsField();
-    machine->assemble(codeEditor->toPlainText());
-
-    if (machine->buildSuccessful)
-        sourceAndMemoryInSync = true;
-
-    machine->setPCValue(0);
+    machine->step();
     updateMachineInterface();
+}
+
+
+
+void HidraGui::on_actionOpen_triggered()
+{
+    QString ext;
+    switch (ui->comboBoxMachine->currentIndex()) {
+    case 0:
+        ext = "Fonte do Neander (*.ndr)";
+        break;
+    case 1:
+        ext = "Fonte do Ahmes (*.ahd)";
+        break;
+    case 2:
+        ext = "Fonte do Ramses (*.rms)";
+        break;
+    default:
+        break;
+    }
+    currentFile = QFileDialog::getOpenFileName(this,
+                                               "Abrir código-fonte", "",
+                                               ext);
+
+    if (currentFile.isEmpty())
+        return;
+    else {
+        QFile file(currentFile);
+
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::information(this, tr("Erro ao salvar arquivo"),
+                                     file.errorString());
+            return;
+        }
+        QTextStream in(&file);
+        codeEditor->setPlainText(in.readAll());
+        modifiedFile = false;
+        file.close();
+    }
+}
+
+void HidraGui::on_actionSave_triggered()
+{
+    if(currentFile == "") {
+        saveAs();
+    } else {
+        save();
+    }
 }
 
 void HidraGui::on_actionSaveAs_triggered()
 {
     saveAs();
+}
+
+
+
+void HidraGui::on_actionImportMemory_triggered()
+{
+
+}
+
+void HidraGui::on_actionExportMemory_triggered()
+{
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    "Exportar memória", "",
+                                                    "Arquivo de memória (*.mem)");
+
+    if (!filename.isEmpty())
+    {
+        // Save memory
+        machine->save(filename);
+    }
+}
+
+
+
+void HidraGui::on_actionClearRegisters_triggered()
+{
+    machine->clearRegisters();
+    machine->clearFlags();
+    updateMachineInterface();
+}
+
+void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
+{
+    showHexValues = checked;
+
+    for (int i=0; i<registerWidgets.count(); i++)
+        registerWidgets.at(i)->setMode(showHexValues);
+
+    updateMachineInterface();
 }
 
 void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
@@ -395,18 +500,11 @@ void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
     initializeMachineInterface();
 }
 
-void HidraGui::on_action_Save_triggered()
-{
-    if(currentFile == "") {
-        saveAs();
-    } else {
-        save();
-    }
-}
 
-void HidraGui::on_actionClose_triggered()
+
+void HidraGui::on_actionReportProblem_triggered()
 {
-    this->close();
+
 }
 
 void HidraGui::on_actionManual_triggered()
@@ -414,103 +512,9 @@ void HidraGui::on_actionManual_triggered()
 
 }
 
-void HidraGui::on_actionRelatar_um_problema_triggered()
+void HidraGui::on_actionClose_triggered()
 {
-
-}
-
-void HidraGui::on_actionOpen_triggered()
-{
-    QString ext;
-    switch (ui->comboBoxMachine->currentIndex()) {
-    case 0:
-        ext = "Fonte do Neander (*.ndr)";
-        break;
-    case 1:
-        ext = "Fonte do Ahmes (*.ahd)";
-        break;
-    case 2:
-        ext = "Fonte do Ramses (*.rms)";
-        break;
-    default:
-        break;
-    }
-    currentFile = QFileDialog::getOpenFileName(this,
-                                               "Abrir código-fonte", "",
-                                               ext);
-
-    if (currentFile.isEmpty())
-        return;
-    else {
-        QFile file(currentFile);
-
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox::information(this, tr("Incapaz de abrir arquivo"),
-                                     file.errorString());
-            return;
-        }
-        QTextStream in(&file);
-        codeEditor->setPlainText(in.readAll());
-        modifiedFile = false;
-        file.close();
-    }
-}
-
-void HidraGui::sourceCodeChanged()
-{
-    modifiedFile = true;
-
-    if (sourceAndMemoryInSync)
-    {
-        sourceAndMemoryInSync = false;
-        codeEditor->disableLineHighlight();
-    }
-}
-
-void HidraGui::on_actionCarregar_triggered()
-{
-
-}
-
-void HidraGui::on_actionSaveMem_triggered()
-{
-    QString filename = QFileDialog::getSaveFileName(this,
-                                                    "Exportar memória", "",
-                                                    "Arquivo de memória (*.mem)");
-
-    if (!filename.isEmpty())
-    {
-        // Save memory
-        machine->save(filename);
-    }
-}
-
-void HidraGui::on_actionZerarMemoria_triggered()
-{
-    machine->clearMemory();
-    updateMachineInterface();
-}
-
-void HidraGui::on_actionZerar_registradores_triggered()
-{
-    machine->clearRegisters();
-    machine->clearFlags();
-    updateMachineInterface();
-}
-
-void HidraGui::on_pushButtonMontar_clicked()
-{
-    ui->actionMontar->trigger();
-}
-
-void HidraGui::on_actionHexadecimal_toggled(bool checked)
-{
-    showHexValues = checked;
-
-    for (int i=0; i<registerWidgets.count(); i++)
-        registerWidgets.at(i)->setMode(showHexValues);
-
-    updateMachineInterface();
+    this->close();
 }
 
 void HidraGui::closeEvent(QCloseEvent *event)
@@ -530,7 +534,7 @@ void HidraGui::closeEvent(QCloseEvent *event)
 
         if (reply == QMessageBox::Yes)
         {
-            ui->action_Save->trigger();
+            ui->actionSave->trigger();
 
             if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
                 cancelled = true;
