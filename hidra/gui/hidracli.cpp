@@ -67,13 +67,13 @@ void HidraCli::handleCommandPrompt()
         actualCmd = actualCmd.simplified();
         QStringList cmdList = actualCmd.toLower().split(" ", QString::SkipEmptyParts);
         if(cmdList.at(0) ==  "set") {
-            auxMemory = machine->getMemory();
+            // TODO: auxMemory = machine->getMemory();
             auxMemory[cmdList.at(1).toInt()]->setValue((unsigned char) cmdList.at(2).toShort());
             machine->setMemory(auxMemory);
         } else if(cmdList.at(0) ==  "setr") {
 
         } else if(cmdList.at(0) ==  "get") {
-            auxMemory = machine->getMemory();
+            // TODO: auxMemory = machine->getMemory();
             std::cout << (int)auxMemory[cmdList.at(1).toInt()]->getValue() << std::endl;
         }else if(cmdList.at(0) ==  "getr") {
             for (int i=0; i<machine->getNumberOfRegisters(); i++) {

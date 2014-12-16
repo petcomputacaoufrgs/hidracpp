@@ -18,14 +18,19 @@ void Machine::setBreakpoint(int value)
         breakpoint = value;
 }
 
-QVector<Byte *> Machine::getMemory() const
+int Machine::getMemorySize() const
 {
-    return memory;
+    return memory.size();
 }
 
-void Machine::setMemory(const QVector<Byte *> &value)
+int Machine::getMemoryValue(int address) const
 {
-    memory = value;
+    return memory.at(address)->getValue();
+}
+
+void Machine::setMemoryValue(int address, int value)
+{
+    memory.at(address)->setValue(value);
 }
 
 void Machine::clearMemory()

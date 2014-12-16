@@ -72,10 +72,9 @@ void HidraGui::initializeMachineInterfaceComponents()
 void HidraGui::initializeMemoryTable()
 {
     ui->tableViewMemoryInstructions->setModel(&model);
-    QVector<Byte*> memory = machine->getMemory();
 
     // Set table size
-    model.setRowCount(memory.size());
+    model.setRowCount(machine->getMemorySize());
     model.setColumnCount(3);
 
     // Set table headers
@@ -166,13 +165,13 @@ void HidraGui::updateMachineInterfaceComponents()
 
 void HidraGui::updateMemoryMap()
 {
-    QVector<Byte*> memory = machine->getMemory();
+    int memorySize = machine->getMemorySize();
     int pcValue = machine->getPCValue();
     int base = showHexValues? 16 : 10;
 
     QModelIndex index;
 
-    for (int byteAddress=0; byteAddress<memory.size(); byteAddress++)
+    for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
     {
         // Column 0: PC Arrow
         index = model.index(byteAddress, 0);
@@ -184,13 +183,13 @@ void HidraGui::updateMemoryMap()
 
         // Column 2: Byte value
         index = model.index(byteAddress, 2);
-        model.setData(index, QString::number(memory[byteAddress]->getValue(), base).toUpper());
+        model.setData(index, QString::number(machine->getMemoryValue(byteAddress), base).toUpper());
     }
 
     // TODO Binary tooltip/status bar
 
     // Update all cells
-    emit model.dataChanged(model.index(0, 0), model.index(memory.size(), 0));
+    emit model.dataChanged(model.index(0, 0), model.index(memorySize, 0));
 }
 
 void HidraGui::updateRegisterWidgets()

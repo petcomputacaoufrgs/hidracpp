@@ -71,8 +71,9 @@ public:
     int getBreakpoint() const;
     void setBreakpoint(int value);
 
-    QVector<Byte *> getMemory() const;
-    void setMemory(const QVector<Byte *> &value);
+    int getMemorySize() const;
+    int getMemoryValue(int address) const;
+    void setMemoryValue(int address, int value);
     void clearMemory();
 
     int getNumberOfFlags() const;
@@ -98,6 +99,7 @@ public:
 
 protected:
 
+    QString identifier;
     QVector<Register*> registers;
     Register* PC;
     QVector<Byte*> memory;
