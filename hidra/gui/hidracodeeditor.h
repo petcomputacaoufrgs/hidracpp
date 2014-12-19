@@ -21,6 +21,7 @@ public:
     int lineNumberAreaWidth();
 
     void highlightPCLine(int pcLine);
+    void setBreakpointBlock(QTextBlock breakpointBlock);
     void disableLineHighlight();
 
 public slots:
@@ -35,6 +36,7 @@ private slots:
 
 private:
     QWidget *lineNumberArea;
+    QTextBlock breakpointBlock;
 };
 
 

@@ -125,7 +125,11 @@ void HidraCodeEditor::highlightPCLine(int pcLine)
     }
 }
 
-
+void HidraCodeEditor::setBreakpointBlock(QTextBlock breakpointBlock)
+{
+    this->breakpointBlock = breakpointBlock;
+    this->repaint();
+}
 
 void HidraCodeEditor::disableLineHighlight()
 {
@@ -138,16 +142,17 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(), QColor(240, 240, 240)); // Light gray
 
-
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
     int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
     int bottom = top + (int) blockBoundingRect(block).height();
 
+    qDebug("breakpoint line: %d", breakpointBlock.blockNumber());
+
     while (block.isValid() && top <= event->rect().bottom()) {
 
-        // Breakpoint
-        if (blockNumber == 2) {
+        // Breakpoint marker
+        if (block == breakpointBlock) {
             painter.fillRect(0, top, lineNumberArea->width(), bottom - top, QColor(255, 64, 64)); // Red
         }
 

@@ -78,6 +78,14 @@ int Machine::getPCCorrespondingLine()
         return -1;
 }
 
+int Machine::getLineCorrespondingAddress(int line)
+{
+    if (line >= 0 && line < correspondingAddress.size())
+        return correspondingAddress[line];
+    else
+        return 0;
+}
+
 QVector<Instruction *> Machine::getInstructions() const
 {
     return instructions;
@@ -370,10 +378,13 @@ void Machine::assemble(QString sourceCode)
     // SECOND PASS: Mount instructions/defines
     //////////////////////////////////////////////////
 
+    correspondingAddress = QVector<int>(sourceLines.size());
     PC->setValue(0);
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
+        correspondingAddress[lineNumber] = PC->getValue();
+
         if (!sourceLines[lineNumber].isEmpty())
         {
             QString mnemonic  = sourceLines[lineNumber].section(" ", 0, 0);

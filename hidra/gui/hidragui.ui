@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>736</width>
-    <height>378</height>
+    <width>774</width>
+    <height>388</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,6 +23,12 @@
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <widget class="QWidget" name="areaEditor" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>40</width>
+        <height>40</height>
+       </size>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout">
        <property name="spacing">
         <number>3</number>
@@ -43,7 +49,7 @@
         <layout class="QVBoxLayout" name="layoutSourceCodeHolder"/>
        </item>
        <item>
-        <widget class="QLabel" name="labelMensagens">
+        <widget class="QLabel" name="labelMessages">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -109,7 +115,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QWidget" name="areaSimulador" native="true">
+     <widget class="QWidget" name="areaSimulator" native="true">
       <property name="minimumSize">
        <size>
         <width>301</width>
@@ -163,7 +169,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="areaRegisters">
          <property name="title">
           <string>Registradores</string>
          </property>
@@ -188,12 +194,12 @@
                <x>0</x>
                <y>0</y>
                <width>279</width>
-               <height>187</height>
+               <height>197</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
-               <spacer name="horizontalSpacer">
+               <spacer name="spacerRegistersLeft">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -216,7 +222,7 @@
                </layout>
               </item>
               <item>
-               <spacer name="horizontalSpacer_2">
+               <spacer name="spacerRegistersRight">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
@@ -258,7 +264,7 @@
            </layout>
           </item>
           <item row="0" column="0">
-           <spacer name="horizontalSpacer_3">
+           <spacer name="spacerFlagsLeft">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -271,7 +277,7 @@
            </spacer>
           </item>
           <item row="0" column="2">
-           <spacer name="horizontalSpacer_4">
+           <spacer name="spacerFlagsRight">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -292,7 +298,7 @@
           <number>4</number>
          </property>
          <item>
-          <widget class="QPushButton" name="pushButtonMontar">
+          <widget class="QPushButton" name="pushButtonBuild">
            <property name="maximumSize">
             <size>
              <width>16777215</width>
@@ -343,7 +349,7 @@
     </item>
    </layout>
    <zorder>areaEditor</zorder>
-   <zorder>areaSimulador</zorder>
+   <zorder>areaSimulator</zorder>
    <zorder>tableViewMemoryInstructions</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -351,49 +357,50 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>736</width>
+     <width>774</width>
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuPrograma">
+   <widget class="QMenu" name="menuProgram">
     <property name="title">
      <string>Arquivo</string>
     </property>
     <addaction name="actionOpen"/>
-    <addaction name="action_Save"/>
+    <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
    </widget>
-   <widget class="QMenu" name="menuAjuda">
+   <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Ajuda</string>
     </property>
     <addaction name="actionManual"/>
     <addaction name="separator"/>
-    <addaction name="actionRelatar_um_problema"/>
+    <addaction name="actionReportProblem"/>
    </widget>
-   <widget class="QMenu" name="menuMemoria">
+   <widget class="QMenu" name="menuMemory">
     <property name="title">
      <string>Máquina</string>
     </property>
-    <addaction name="actionMontar"/>
-    <addaction name="actionRodar"/>
-    <addaction name="actionPasso"/>
+    <addaction name="actionBuild"/>
+    <addaction name="actionRun"/>
+    <addaction name="actionStep"/>
     <addaction name="separator"/>
-    <addaction name="actionCarregar"/>
-    <addaction name="actionSaveMem"/>
+    <addaction name="actionClearRegisters"/>
+    <addaction name="actionSetBreakpoint"/>
     <addaction name="separator"/>
-    <addaction name="actionZerar_registradores"/>
+    <addaction name="actionImportMemory"/>
+    <addaction name="actionExportMemory"/>
     <addaction name="separator"/>
-    <addaction name="actionHexadecimal"/>
+    <addaction name="actionHexadecimalMode"/>
    </widget>
-   <addaction name="menuPrograma"/>
-   <addaction name="menuMemoria"/>
-   <addaction name="menuAjuda"/>
+   <addaction name="menuProgram"/>
+   <addaction name="menuMemory"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="actionMontar">
+  <action name="actionBuild">
    <property name="text">
     <string>Montar</string>
    </property>
@@ -401,12 +408,15 @@
     <string>Ctrl+B</string>
    </property>
   </action>
-  <action name="actionPasso">
+  <action name="actionStep">
    <property name="text">
     <string>Passo</string>
    </property>
+   <property name="shortcut">
+    <string>F8</string>
+   </property>
   </action>
-  <action name="actionRodar">
+  <action name="actionRun">
    <property name="text">
     <string>Rodar</string>
    </property>
@@ -426,8 +436,11 @@
    <property name="text">
     <string>Manual</string>
    </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
   </action>
-  <action name="actionRelatar_um_problema">
+  <action name="actionReportProblem">
    <property name="text">
     <string>Relatar um problema</string>
    </property>
@@ -437,10 +450,10 @@
     <string>Fechar</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+X</string>
+    <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="actionSave">
    <property name="text">
     <string>&amp;Salvar</string>
    </property>
@@ -456,32 +469,35 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionCarregar">
+  <action name="actionImportMemory">
    <property name="text">
     <string>Importar memória...</string>
    </property>
   </action>
-  <action name="actionSaveMem">
+  <action name="actionExportMemory">
    <property name="text">
     <string>Exportar memória...</string>
    </property>
   </action>
-  <action name="actionZerarMemoria">
-   <property name="text">
-    <string>Zerar memória</string>
-   </property>
-  </action>
-  <action name="actionZerar_registradores">
+  <action name="actionClearRegisters">
    <property name="text">
     <string>Zerar registradores</string>
    </property>
   </action>
-  <action name="actionHexadecimal">
+  <action name="actionHexadecimalMode">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
     <string>Modo hexadecimal</string>
+   </property>
+  </action>
+  <action name="actionSetBreakpoint">
+   <property name="text">
+    <string>Inserir/remover breakpoint</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
   </action>
  </widget>

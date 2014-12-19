@@ -89,7 +89,9 @@ public:
 
     int getPCValue() const;
     void setPCValue(int value);
+
     int getPCCorrespondingLine();
+    int getLineCorrespondingAddress(int line);
 
     QVector<Instruction *> getInstructions() const;
     void setInstructions(const QVector<Instruction *> &value);
@@ -103,7 +105,7 @@ protected:
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
-    QVector<int> correspondingLine;
+    QVector<int> correspondingLine, correspondingAddress;
     QVector<Flag*> flags;
     QVector<Instruction*> instructions;
     bool running;

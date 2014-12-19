@@ -36,8 +36,9 @@ public:
     void saveAs();
 
 public slots:
-    void on_pushButtonStep_clicked();
+    void on_pushButtonBuild_clicked();
     void on_pushButtonRun_clicked();
+    void on_pushButtonStep_clicked();
 
     void initializeMachineInterface();
     void updateMachineInterface();
@@ -48,22 +49,27 @@ public slots:
 private slots:
     void sourceCodeChanged();
 
-    void on_actionPasso_triggered();
-    void on_actionRodar_triggered();
-    void on_actionMontar_triggered();
-    void on_actionSaveAs_triggered();
-    void on_comboBoxMachine_currentIndexChanged(int index);
-    void on_action_Save_triggered();
-    void on_actionClose_triggered();
-    void on_actionManual_triggered();
-    void on_actionRelatar_um_problema_triggered();
+    void on_actionBuild_triggered();
+    void on_actionRun_triggered();
+    void on_actionStep_triggered();
+
     void on_actionOpen_triggered();
-    void on_actionCarregar_triggered();
-    void on_actionSaveMem_triggered();
-    void on_actionZerarMemoria_triggered();
-    void on_actionZerar_registradores_triggered();
-    void on_pushButtonMontar_clicked();
-    void on_actionHexadecimal_toggled(bool arg1);
+    void on_actionSave_triggered();
+    void on_actionSaveAs_triggered();
+
+    void on_actionImportMemory_triggered();
+    void on_actionExportMemory_triggered();
+
+    void on_actionClearRegisters_triggered();
+    void on_actionHexadecimalMode_toggled(bool checked);
+    void on_comboBoxMachine_currentIndexChanged(int index);
+
+    void on_actionManual_triggered();
+    void on_actionReportProblem_triggered();
+    void on_actionClose_triggered();
+    void closeEvent(QCloseEvent *event);
+
+    void on_actionSetBreakpoint_triggered();
 
 private:
 
@@ -95,10 +101,10 @@ private:
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
 
+    QTextBlock breakpointBlock;
+
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
-
-    void closeEvent(QCloseEvent *event);
 };
 
 #endif // HIDRAGUI_H
