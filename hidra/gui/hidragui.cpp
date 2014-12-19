@@ -567,4 +567,9 @@ void HidraGui::closeEvent(QCloseEvent *event)
 void HidraGui::on_actionSetBreakpoint_triggered()
 {
     codeEditor->toggleBreakpointOnCursor();
+
+    // Set breakpoint
+    int breakpointLine = codeEditor->getBreakpointLine();
+    int breakpointAddress = machine->getLineCorrespondingAddress(breakpointLine);
+    machine->setBreakpoint(breakpointAddress);
 }

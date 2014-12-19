@@ -176,14 +176,9 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         {
             // If block is breakpoint's block, paint number area
             if (block == breakpointBlock)
-            {
                 painter.fillRect(0, top, lineNumberArea->width(), bottom - top, QColor(255, 64, 64)); // Red
-            }
             else
-            {
-                // Invalidate block
-                breakpointBlock = QTextBlock();
-            }
+                breakpointBlock = QTextBlock(); // Invalidate block
         }
 
         if (block.isVisible() && bottom >= event->rect().top()) {
