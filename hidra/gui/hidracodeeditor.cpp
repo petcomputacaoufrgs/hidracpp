@@ -147,13 +147,17 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
     int bottom = top + (int) blockBoundingRect(block).height();
 
-    qDebug("breakpoint line: %d", breakpointBlock.blockNumber());
-
-    while (block.isValid() && top <= event->rect().bottom()) {
-
-        // Breakpoint marker
-        if (block == breakpointBlock) {
-            painter.fillRect(0, top, lineNumberArea->width(), bottom - top, QColor(255, 64, 64)); // Red
+    // Iterate over all visible text blocks (lines)
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        // If on the same block as breakpoint block
+        if (blockNumber == breakpointBlock.blockNumber())
+        {
+            // If block is breakpoint's block, paint number area
+            if (block == breakpointBlock)
+                painter.fillRect(0, top, lineNumberArea->width(), bottom - top, QColor(255, 64, 64)); // Red
+            else
+                breakpointBlock = QTextBlock(); // Invalidate block
         }
 
         if (block.isVisible() && bottom >= event->rect().top()) {
