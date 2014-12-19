@@ -21,7 +21,8 @@ public:
     int lineNumberAreaWidth();
 
     void highlightPCLine(int pcLine);
-    void setBreakpointBlock(QTextBlock breakpointBlock);
+    int getBreakpointLine();
+    void toggleBreakpointOnCursor();
     void disableLineHighlight();
 
 public slots:
@@ -43,18 +44,12 @@ private:
 class LineNumberArea : public QWidget
 {
 public:
-    LineNumberArea(HidraCodeEditor *editor) : QWidget(editor) {
-        codeEditor = editor;
-    }
+    LineNumberArea(HidraCodeEditor *editor);
 
-    QSize sizeHint() const {
-        return QSize(codeEditor->lineNumberAreaWidth(), 0);
-    }
+    QSize sizeHint() const;
 
 protected:
-    void paintEvent(QPaintEvent *event) {
-        codeEditor->lineNumberAreaPaintEvent(event);
-    }
+    void paintEvent(QPaintEvent *event);
 
 private:
     HidraCodeEditor *codeEditor;

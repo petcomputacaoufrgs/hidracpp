@@ -101,8 +101,6 @@ private:
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
 
-    QTextBlock breakpointBlock;
-
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
 };

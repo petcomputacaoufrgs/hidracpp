@@ -209,8 +209,6 @@ void HidraGui::updateFlagWidgets()
 
 void HidraGui::updateCodeEditor()
 {
-    codeEditor->setBreakpointBlock(breakpointBlock);
-
     if (sourceAndMemoryInSync)
         codeEditor->highlightPCLine(machine->getPCCorrespondingLine());
     else
@@ -352,7 +350,6 @@ void HidraGui::on_actionBuild_triggered()
         sourceAndMemoryInSync = true;
 
     machine->setPCValue(0);
-    machine->setBreakpoint(machine->getLineCorrespondingAddress(breakpointBlock.blockNumber()));
 
     updateMachineInterface();
 }
@@ -368,6 +365,11 @@ void HidraGui::on_actionRun_triggered()
     }
     else
     {
+        // Set breakpoint
+        int breakpointLine = codeEditor->getBreakpointLine();
+        int breakpointAddress = machine->getLineCorrespondingAddress(breakpointLine);
+        machine->setBreakpoint(breakpointAddress);
+
         // Start running
         machine->setRunning(true);
 
@@ -564,21 +566,5 @@ void HidraGui::closeEvent(QCloseEvent *event)
 
 void HidraGui::on_actionSetBreakpoint_triggered()
 {
-    int oldBreakpointLine = breakpointBlock.blockNumber();
-    int newBreakpointLine = codeEditor->textCursor().blockNumber();
-
-    // If previous breakpoint was here, remove it
-    if (breakpointBlock.isValid() && oldBreakpointLine == newBreakpointLine)
-    {
-        breakpointBlock = QTextBlock(); // Invalidate breakpoint
-        machine->setBreakpoint(0);
-        codeEditor->setBreakpointBlock(breakpointBlock);
-    }
-    else
-    {
-        // Create new breakpoint
-        breakpointBlock = codeEditor->textCursor().block();
-        machine->setBreakpoint(machine->getLineCorrespondingAddress(breakpointBlock.blockNumber()));
-        codeEditor->setBreakpointBlock(breakpointBlock);
-    }
+    codeEditor->toggleBreakpointOnCursor();
 }
