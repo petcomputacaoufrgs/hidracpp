@@ -60,6 +60,7 @@ private slots:
     void on_actionImportMemory_triggered();
     void on_actionExportMemory_triggered();
 
+    void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_actionClearRegisters_triggered();
     void on_actionHexadecimalMode_toggled(bool checked);
     void on_comboBoxMachine_currentIndexChanged(int index);
@@ -78,7 +79,7 @@ private:
     void initializeHighlighter();
 
     void clearMachineInterfaceComponents();
-    void clearMemoryMap();
+    void clearMemoryTable();
     void clearRegisterWidgets();
     void clearFlagWidgets();
 

@@ -122,12 +122,12 @@ void HidraGui::initializeHighlighter()
 
 void HidraGui::clearMachineInterfaceComponents()
 {
-    clearMemoryMap();
+    clearMemoryTable();
     clearRegisterWidgets();
     clearFlagWidgets();
 }
 
-void HidraGui::clearMemoryMap()
+void HidraGui::clearMemoryTable()
 {
     model.clear();
 }
@@ -461,6 +461,12 @@ void HidraGui::on_actionExportMemory_triggered()
 
 
 
+void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index)
+{
+    machine->setPCValue(index.row());
+    updateMachineInterface();
+}
+
 void HidraGui::on_actionClearRegisters_triggered()
 {
     machine->clearRegisters();
@@ -554,3 +560,4 @@ void HidraGui::closeEvent(QCloseEvent *event)
     else
         event->ignore();
 }
+
