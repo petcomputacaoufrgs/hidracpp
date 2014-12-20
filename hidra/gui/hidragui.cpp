@@ -27,7 +27,7 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->tableViewMemoryInstructions->setEditTriggers(false);
 
     // Escolhe a máquina Neander e atualiza a interface
-    ui->comboBoxMachine->setCurrentIndex(0);
+    selectMachine("Neander");
 
     modifiedFile = false;
 }
@@ -42,6 +42,29 @@ HidraGui::~HidraGui()
 //////////////////////////////////////////////////
 // Initialize/update methods
 //////////////////////////////////////////////////
+
+void HidraGui::selectMachine(QString machineName)
+{
+    if (currentMachineName != machineName)
+    {
+        if (machineName == "Ahmes")
+            machine = new AhmesMachine();
+        else if (machineName == "Ramses")
+            machine = new RamsesMachine();
+        else
+            machine = new NeanderMachine(); // Default to Neander
+
+        connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
+
+        ui->comboBoxMachine->setCurrentText(machineName);
+
+        sourceAndMemoryInSync = false;
+        codeEditor->disableLineHighlight();
+        initializeMachineInterface();
+
+        currentMachineName = machineName;
+    }
+}
 
 void HidraGui::initializeMachineInterface()
 {
@@ -246,23 +269,16 @@ void HidraGui::save()
 
 void HidraGui::saveAs()
 {
-    QString ext;
-    switch (ui->comboBoxMachine->currentIndex()) {
-    case 0:
-        ext = "Fonte do Neander (*.ndr)";
-        break;
-    case 1:
-        ext = "Fonte do Ahmes (*.ahd)";
-        break;
-    case 2:
-        ext = "Fonte do Ramses (*.rms)";
-        break;
-    default:
-        break;
-    }
+    QString extension = "Fonte do Neander (*.ndr)"; // Default
+
+    if (currentMachineName == "Ahmes")
+        extension = "Fonte do Ahmes (*.ahd)";
+    else if (currentMachineName == "Ramses")
+        extension = "Fonte do Ramses (*.rms)";
+
     currentFile = QFileDialog::getSaveFileName(this,
                                                "Salvar código-fonte", "",
-                                               ext);
+                                               extension);
 
     if (currentFile.isEmpty()) {
         fileSaved = false;
@@ -382,38 +398,37 @@ void HidraGui::on_actionStep_triggered()
 
 void HidraGui::on_actionOpen_triggered()
 {
-    QString ext;
-    switch (ui->comboBoxMachine->currentIndex()) {
-    case 0:
-        ext = "Fonte do Neander (*.ndr)";
-        break;
-    case 1:
-        ext = "Fonte do Ahmes (*.ahd)";
-        break;
-    case 2:
-        ext = "Fonte do Ramses (*.rms)";
-        break;
-    default:
-        break;
-    }
+    QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rms)";
+
     currentFile = QFileDialog::getOpenFileName(this,
                                                "Abrir código-fonte", "",
-                                               ext);
+                                               allExtensions);
 
-    if (currentFile.isEmpty())
-        return;
-    else {
+    if (!currentFile.isEmpty())
+    {
         QFile file(currentFile);
 
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            QMessageBox::information(this, tr("Erro ao salvar arquivo"),
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        {
+            QMessageBox::information(this, tr("Erro ao abrir arquivo"),
                                      file.errorString());
             return;
         }
+
         QTextStream in(&file);
         codeEditor->setPlainText(in.readAll());
-        modifiedFile = false;
         file.close();
+
+        QString extension = currentFile.section(".", -1);
+
+        if (extension == "ndr")
+            selectMachine("Neander");
+        else if (extension == "ahd")
+            selectMachine("Ahmes");
+        else if (extension == "rms")
+            selectMachine("Ramses");
+
+        modifiedFile = false;
     }
 }
 
@@ -484,33 +499,9 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
     updateMachineInterface();
 }
 
-void HidraGui::on_comboBoxMachine_currentIndexChanged(int index)
+void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
 {
-    delete machine;
-    switch (index) {
-    case 0:
-        machine = new NeanderMachine();
-        break;
-    case 1:
-        machine = new AhmesMachine();
-        break;
-    case 2:
-        machine = new RamsesMachine();
-        break;
-    case 3:
-        //machine = new CesarMachine();
-        machine = new RamsesMachine();  //evita  o crash
-        break;
-    default:
-        break;
-    }
-    if(index != 3) {
-        connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
-    }
-
-    sourceAndMemoryInSync = false;
-    codeEditor->disableLineHighlight();
-    initializeMachineInterface();
+    selectMachine(machineName);
 }
 
 
