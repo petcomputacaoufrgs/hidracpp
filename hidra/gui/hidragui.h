@@ -32,7 +32,7 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event);
 
-    void save();
+    void save(QString filename);
     void saveAs();
 
 public slots:
@@ -63,6 +63,7 @@ private slots:
 
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_actionClearRegisters_triggered();
+    void on_actionSetBreakpoint_triggered();
     void on_actionHexadecimalMode_toggled(bool checked);
     void on_comboBoxMachine_currentIndexChanged(const QString machineName);
 
@@ -70,8 +71,6 @@ private slots:
     void on_actionReportProblem_triggered();
     void on_actionClose_triggered();
     void closeEvent(QCloseEvent *event);
-
-    void on_actionSetBreakpoint_triggered();
 
 private:
 
@@ -95,9 +94,9 @@ private:
 
     Ui::HidraGui *ui;
     Machine *machine;
-    QString currentFile;
+    QString currentFilename;
     bool modifiedFile, sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
-    bool fileSaved; // Feedback from Save and SaveAs
+    bool forceSaveAs; // Set to true when Save should trigger SaveAs
     bool showHexValues;
     QStandardItemModel model;
     HidraHighlighter *highlighter;

@@ -13,9 +13,8 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
     connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
 
-    currentFile = "";
+    currentFilename = "";
 
-    fileSaved = false;
     buildSuccessful = true;
     showHexValues = false;
 
@@ -30,6 +29,7 @@ HidraGui::HidraGui(QWidget *parent) :
     selectMachine("Neander");
 
     modifiedFile = false;
+    forceSaveAs = true;
 }
 
 HidraGui::~HidraGui()
@@ -59,6 +59,8 @@ void HidraGui::selectMachine(QString machineName)
         ui->comboBoxMachine->setCurrentText(machineName);
 
         sourceAndMemoryInSync = false;
+        forceSaveAs = true;
+
         codeEditor->disableLineHighlight();
         initializeMachineInterface();
 
@@ -251,22 +253,22 @@ void HidraGui::updateButtons()
 // Saving/loading
 //////////////////////////////////////////////////
 
-void HidraGui::save()
+void HidraGui::save(QString filename)
 {
-    QFile file(currentFile);
+    QFile file(filename);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::information(this, "Erro ao salvar arquivo",
                                  file.errorString());
-        fileSaved = false;
         return;
     }
 
-    fileSaved = true;
     QTextStream out(&file);
     out << codeEditor->toPlainText();
     file.close();
 
+    currentFilename = filename;
     modifiedFile = false;
+    forceSaveAs = false;
 }
 
 void HidraGui::saveAs()
@@ -278,17 +280,12 @@ void HidraGui::saveAs()
     else if (currentMachineName == "Ramses")
         extension = "Fonte do Ramses (*.rms)";
 
-    currentFile = QFileDialog::getSaveFileName(this,
-                                               "Salvar código-fonte", "",
-                                               extension);
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                   "Salvar código-fonte", "",
+                                                   extension);
 
-    if (currentFile.isEmpty()) {
-        fileSaved = false;
-        return;
-    }
-    else {
-        save(); // Resets fileModified to false if successful
-    }
+    if (!filename.isEmpty())
+        save(filename); // Resets fileModified to false if successful
 }
 
 
@@ -408,13 +405,13 @@ void HidraGui::on_actionOpen_triggered()
 {
     QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rms)";
 
-    currentFile = QFileDialog::getOpenFileName(this,
+    currentFilename = QFileDialog::getOpenFileName(this,
                                                "Abrir código-fonte", "",
                                                allExtensions);
 
-    if (!currentFile.isEmpty())
+    if (!currentFilename.isEmpty())
     {
-        QFile file(currentFile);
+        QFile file(currentFilename);
 
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
@@ -427,7 +424,7 @@ void HidraGui::on_actionOpen_triggered()
         codeEditor->setPlainText(in.readAll());
         file.close();
 
-        QString extension = currentFile.section(".", -1);
+        QString extension = currentFilename.section(".", -1);
 
         if (extension == "ndr")
             selectMachine("Neander");
@@ -442,10 +439,10 @@ void HidraGui::on_actionOpen_triggered()
 
 void HidraGui::on_actionSave_triggered()
 {
-    if(currentFile == "") {
+    if(currentFilename == "" || forceSaveAs) {
         saveAs();
     } else {
-        save();
+        save(currentFilename);
     }
 }
 

@@ -1,5 +1,5 @@
 Interface
- - 'Salvar' deve verificar se a máquina foi alterada e virar 'Salvar como' para trocar a extensão
+ - Usar caminho e nome do arquivo anterior em SaveAs
  - Nome do arquivo no título da janela? Asterisco quando for modificado
 
 Hexa e binário
