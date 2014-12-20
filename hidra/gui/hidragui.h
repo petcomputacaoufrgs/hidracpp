@@ -40,6 +40,7 @@ public slots:
     void on_pushButtonRun_clicked();
     void on_pushButtonStep_clicked();
 
+    void selectMachine(QString machineName);
     void initializeMachineInterface();
     void updateMachineInterface();
 
@@ -62,7 +63,7 @@ private slots:
 
     void on_actionClearRegisters_triggered();
     void on_actionHexadecimalMode_toggled(bool checked);
-    void on_comboBoxMachine_currentIndexChanged(int index);
+    void on_comboBoxMachine_currentIndexChanged(const QString machineName);
 
     void on_actionManual_triggered();
     void on_actionReportProblem_triggered();
@@ -98,6 +99,7 @@ private:
     QStandardItemModel model;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
+    QString currentMachineName;
 
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;

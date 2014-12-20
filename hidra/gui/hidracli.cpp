@@ -69,7 +69,7 @@ void HidraCli::handleCommandPrompt()
         if(cmdList.at(0) ==  "set") {
             // TODO: auxMemory = machine->getMemory();
             auxMemory[cmdList.at(1).toInt()]->setValue((unsigned char) cmdList.at(2).toShort());
-            machine->setMemory(auxMemory);
+            // TODO: machine->setMemory(auxMemory);
         } else if(cmdList.at(0) ==  "setr") {
 
         } else if(cmdList.at(0) ==  "get") {
