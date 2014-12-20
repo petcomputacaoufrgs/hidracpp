@@ -7,8 +7,5 @@ Hexa e binário
  - Refazer tooltip para valores binários (ou colocar na status bar)
 
 Breakpoints
- - Já existe machine.setBreakpoint(address)
- - Falta colocar breakpoints a partir da interface
- - Achar endereço da linha atual (criar machine.getLineAddress? usar correspondingLine)
- - Sugestão: Alguma tecla, F12?
+ - Adicionar e remover com clique, além de F12
 

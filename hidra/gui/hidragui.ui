@@ -186,7 +186,7 @@
                <x>0</x>
                <y>0</y>
                <width>279</width>
-               <height>200</height>
+               <height>197</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -350,7 +350,7 @@
      <x>0</x>
      <y>0</y>
      <width>774</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProgram">
@@ -379,10 +379,11 @@
     <addaction name="actionRun"/>
     <addaction name="actionStep"/>
     <addaction name="separator"/>
+    <addaction name="actionClearRegisters"/>
+    <addaction name="actionSetBreakpoint"/>
+    <addaction name="separator"/>
     <addaction name="actionImportMemory"/>
     <addaction name="actionExportMemory"/>
-    <addaction name="separator"/>
-    <addaction name="actionClearRegisters"/>
     <addaction name="separator"/>
     <addaction name="actionHexadecimalMode"/>
    </widget>
@@ -481,6 +482,14 @@
    </property>
    <property name="text">
     <string>Modo hexadecimal</string>
+   </property>
+  </action>
+  <action name="actionSetBreakpoint">
+   <property name="text">
+    <string>Inserir/remover breakpoint</string>
+   </property>
+   <property name="shortcut">
+    <string>F12</string>
    </property>
   </action>
  </widget>

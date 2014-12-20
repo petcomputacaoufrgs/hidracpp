@@ -209,6 +209,8 @@ void HidraGui::updateMemoryMap()
         model.setData(index, QString::number(machine->getMemoryValue(byteAddress), base).toUpper());
     }
 
+
+
     // TODO Binary tooltip/status bar
 
     // Update all cells
@@ -363,6 +365,7 @@ void HidraGui::on_actionBuild_triggered()
         sourceAndMemoryInSync = true;
 
     machine->setPCValue(0);
+
     updateMachineInterface();
 }
 
@@ -377,6 +380,11 @@ void HidraGui::on_actionRun_triggered()
     }
     else
     {
+        // Set breakpoint
+        int breakpointLine = codeEditor->getBreakpointLine();
+        int breakpointAddress = machine->getLineCorrespondingAddress(breakpointLine);
+        machine->setBreakpoint(breakpointAddress);
+
         // Start running
         machine->setRunning(true);
 
@@ -487,6 +495,16 @@ void HidraGui::on_actionClearRegisters_triggered()
     machine->clearRegisters();
     machine->clearFlags();
     updateMachineInterface();
+}
+
+void HidraGui::on_actionSetBreakpoint_triggered()
+{
+    codeEditor->toggleBreakpointOnCursor();
+
+    // Set breakpoint
+    int breakpointLine = codeEditor->getBreakpointLine();
+    int breakpointAddress = machine->getLineCorrespondingAddress(breakpointLine);
+    machine->setBreakpoint(breakpointAddress);
 }
 
 void HidraGui::on_actionHexadecimalMode_toggled(bool checked)

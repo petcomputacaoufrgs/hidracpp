@@ -71,6 +71,8 @@ private slots:
     void on_actionClose_triggered();
     void closeEvent(QCloseEvent *event);
 
+    void on_actionSetBreakpoint_triggered();
+
 private:
 
     void initializeMachineInterfaceComponents();

@@ -125,7 +125,32 @@ void HidraCodeEditor::highlightPCLine(int pcLine)
     }
 }
 
+int HidraCodeEditor::getBreakpointLine()
+{
+    if (breakpointBlock.isValid())
+        return this->breakpointBlock.blockNumber();
+    else
+        return -1;
+}
 
+void HidraCodeEditor::toggleBreakpointOnCursor()
+{
+    int oldBreakpointLine = breakpointBlock.blockNumber();
+    int newBreakpointLine = textCursor().blockNumber();
+
+    // If previous breakpoint was here, remove it
+    if (breakpointBlock.isValid() && oldBreakpointLine == newBreakpointLine)
+    {
+        breakpointBlock = QTextBlock(); // Invalidate breakpoint
+    }
+    else
+    {
+        // Create new breakpoint
+        breakpointBlock = textCursor().block();
+    }
+
+    this->repaint();
+}
 
 void HidraCodeEditor::disableLineHighlight()
 {
@@ -138,13 +163,24 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
     QPainter painter(lineNumberArea);
     painter.fillRect(event->rect(), QColor(240, 240, 240)); // Light gray
 
-
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
     int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
     int bottom = top + (int) blockBoundingRect(block).height();
 
-    while (block.isValid() && top <= event->rect().bottom()) {
+    // Iterate over all visible text blocks (lines)
+    while (block.isValid() && top <= event->rect().bottom())
+    {
+        // If on the same block as breakpoint block
+        if (blockNumber == breakpointBlock.blockNumber())
+        {
+            // If block is breakpoint's block, paint number area
+            if (block == breakpointBlock)
+                painter.fillRect(0, top, lineNumberArea->width(), bottom - top, QColor(255, 64, 64)); // Red
+            else
+                breakpointBlock = QTextBlock(); // Invalidate block
+        }
+
         if (block.isVisible() && bottom >= event->rect().top()) {
             QString number = QString::number(blockNumber + 1);
             painter.setPen(QColor(128, 128, 128)); // Dark gray
@@ -157,4 +193,19 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         bottom = top + (int) blockBoundingRect(block).height();
         ++blockNumber;
     }
+}
+
+LineNumberArea::LineNumberArea(HidraCodeEditor *editor) : QWidget(editor)
+{
+    codeEditor = editor;
+}
+
+QSize LineNumberArea::sizeHint() const
+{
+    return QSize(codeEditor->lineNumberAreaWidth(), 0);
+}
+
+void LineNumberArea::paintEvent(QPaintEvent *event)
+{
+    codeEditor->lineNumberAreaPaintEvent(event);
 }
