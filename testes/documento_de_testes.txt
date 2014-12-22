@@ -1,0 +1,40 @@
+Hidra - Documento de Testes
+
+1 Interface
+
+1.1 Erros que devem emitir avisos:
+
+- Montar sem salvar
+
+1.2 Testes para a Interface:
+
+- Troca entre simuladores
+- Rodar/passo sem montar (deve rodar memória vazia)
+
+2 Montador
+
+2.1 Erros que devem emitir avisos:
+
+- Label inexistente
+- Instrução inexistente
+- Endereço inexistente
+- Instrução sem endereço
+- ORG inválido
+- Programa não cabe na memória sem se sobrepor, ou atinge o fim da memória
+- Deve zerar memória antes de montar
+- Argumento inválido
+- Modo de endereçamento inválido
+- Número de argumentos inválido
+
+2.2 Testes para o Montador:
+
+- Instruções do Ahmes no Neander (deve emitir erro)
+- Instruções do Ramses no Ahmes (deve emitir erro)
+- Memória já ocupada
+
+3 Simulador
+
+3.1 Testes para cada simulador:
+
+- Neander: Montar e executar corretamente "neander_instructions.ndr"
+- Montar e executar programas reais escolhidos

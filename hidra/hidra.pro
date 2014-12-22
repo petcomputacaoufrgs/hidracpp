@@ -54,4 +54,4 @@ RESOURCES += \
     res.qrc
 
 OTHER_FILES += \
-    notes.txt
+    to-do.txt

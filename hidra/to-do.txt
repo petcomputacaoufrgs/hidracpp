@@ -1,0 +1,46 @@
+Hidra - To-do
+
+
+
+[ Hidra 1.0 ]
+
+Código
+
+- Contador de instruções e acessos
+- Mostrar valores da memória em binário na status bar
+- Criar tableViewMemoryData (ao lado de tableViewMemoryInstructions),
+  para visualizar a memória de dados (128 em diante, sem indicador de PC)
+
+Testes
+
+- Criar testes para Ahmes e Ramses a partir de neander_instructions.ndr
+
+Documentação
+
+- Quick reference pra uso do Hidra (1 ou 2 páginas)
+- Exemplo de cada máquina com cada instrução
+- Relatar um problema (mailto:pet??)
+- About
+
+
+
+[ Versões futuras ]
+
+Geral
+
+- Informar múltiplos erros de uma vez (Felipe)
+- Find/Replace
+
+Interface
+
+- Usar caminho e nome do arquivo anterior em SaveAs
+- Nome do arquivo no título da janela? Asterisco quando for modificado
+
+Breakpoints
+
+- Adicionar e remover com clique, além de F12
+
+Sugestões
+
+- Desabilitar edição enquanto executa (modos edição e execução, botão Montar vira Editar)
+- Disassembler de .mem

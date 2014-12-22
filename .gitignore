@@ -1,8 +1,3 @@
-#Hidra Specifica Files:
-*.mem
-*.ndr
-*.ahd
-
 # Qt Files
 
 *.user*
