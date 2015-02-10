@@ -72,6 +72,7 @@ RamsesMachine::RamsesMachine()
     instructions[14] = new Instruction("shr", 224, 1, 1);
     instructions[15] = new Instruction("hlt", 240, 0, 1);
 
+    clearCounters();
     running = false;
 }
 
@@ -139,7 +140,6 @@ void RamsesMachine::save(QString filename)
 
 void RamsesMachine::step()
 {
-    const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand = NULL; // Final operand byte
     int jumpAddress;
 
@@ -147,6 +147,11 @@ void RamsesMachine::step()
     int reg = (memory[PC->getValue()]->getValue() & 0b00001100) >> 2; // Bits 2 and 3 indicate register (A, B or X)
 
     bool updateFlags = false;
+
+    // Read first byte
+    const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    accessCount++;
+    instructionCount++;
 
     if (currentInstruction->getSize() == 2)
     {
@@ -161,12 +166,16 @@ void RamsesMachine::step()
                 operandAddress = currentByteValue;
                 operand = memory[operandAddress];
                 jumpAddress = operandAddress;
+                accessCount++;
                 break;
 
             case 0x01: // Indirect addressing mode
                 operandAddress = memory[currentByteValue]->getValue();
+                accessCount++;
+
                 operand = memory[operandAddress];
                 jumpAddress = operandAddress;
+                accessCount++;
                 break;
 
             case 0x02: // Immediate addressing mode
@@ -178,6 +187,7 @@ void RamsesMachine::step()
                 operandAddress = (currentByteValue + RX->getValue()) % MEM_SIZE;
                 operand = memory[operandAddress];
                 jumpAddress = operandAddress;
+                accessCount++;
                 break;
         }
     }
@@ -193,30 +203,35 @@ void RamsesMachine::step()
 
         case 0x10: // STR
             operand->setValue(registers[reg]->getValue());
+            accessCount++;
             break;
 
         case 0x20: // LDR
             registers[reg]->setValue(operand->getValue());
             C->setValue(false);
             updateFlags = true;
+            accessCount++;
             break;
 
         case 0x30: // ADD
             registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
             C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE); // Carry flag (unsigned)
             updateFlags = true;
+            accessCount++;
             break;
 
         case 0x40: // OR
             registers[reg]->setValue(registers[reg]->getValue() | operand->getValue());
             C->setValue(false);
             updateFlags = true;
+            accessCount++;
             break;
 
         case 0x50: // AND
             registers[reg]->setValue(registers[reg]->getValue() & operand->getValue());
             C->setValue(false);
             updateFlags = true;
+            accessCount++;
             break;
 
         case 0x60: // NOT
@@ -229,6 +244,7 @@ void RamsesMachine::step()
             registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
             C->setValue((registers[reg]->getValue() - operand->getValue()) < 0); // Carry flag (unsigned)
             updateFlags = true;
+            accessCount++;
             break;
 
         case 0x80: // JMP

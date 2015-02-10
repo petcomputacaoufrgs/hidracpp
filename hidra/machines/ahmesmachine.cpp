@@ -80,6 +80,7 @@ AhmesMachine::AhmesMachine()
     instructions[22] = new Instruction("rol", 227, 0, 1);
     instructions[23] = new Instruction("hlt", 240, 0, 1);
 
+    clearCounters();
     running = false;
 }
 
@@ -134,11 +135,15 @@ void AhmesMachine::save(QString filename)
 
 void AhmesMachine::step()
 {
-    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     Byte *operand = NULL;
     int jumpAddress;
 
     int previousAC = AC->getValue();
+
+    // Read first byte
+    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    accessCount++;
+    instructionCount++;
 
     if (currentInstruction->getSize() == 2)
     {
@@ -149,6 +154,7 @@ void AhmesMachine::step()
         currentByteValue = memory[PC->getValue()]->getValue(); // Read byte
         operand = memory[currentByteValue]; // Pointer to operand
         jumpAddress = currentByteValue; // Address to jump to
+        accessCount++;
     }
 
     PC->incrementValue(); // Prepare for the next step
@@ -162,10 +168,12 @@ void AhmesMachine::step()
 
         case 0x10: // STA
             operand->setValue(AC->getValue());
+            accessCount++;
             break;
 
         case 0x20: // LDA
             AC->setValue(operand->getValue());
+            accessCount++;
             break;
 
         case 0x30: // ADD
@@ -175,14 +183,17 @@ void AhmesMachine::step()
             // Signed overflow flag (true on incorrect result):
             V->setValue(getSignedInt(previousAC) + getSignedInt(operand->getValue()) != getSignedInt(AC->getValue()));
 
+            accessCount++;
             break;
 
         case 0x40: // OR
             AC->setValue(AC->getValue() | operand->getValue());
+            accessCount++;
             break;
 
         case 0x50: // AND
             AC->setValue(AC->getValue() & operand->getValue());
+            accessCount++;
             break;
 
         case 0x60: // NOT
@@ -196,6 +207,7 @@ void AhmesMachine::step()
             // Signed overflow flag (true on incorrect result):
             V->setValue(getSignedInt(previousAC) - getSignedInt(operand->getValue()) != getSignedInt(AC->getValue()));
 
+            accessCount++;
             break;
 
         case 0x80: // JMP

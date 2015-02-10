@@ -101,6 +101,22 @@ void Machine::setInstructions(const QVector<Instruction *> &value)
     instructions = value;
 }
 
+int Machine::getInstructionCount()
+{
+    return instructionCount;
+}
+
+int Machine::getAccessCount()
+{
+    return accessCount;
+}
+
+void Machine::clearCounters()
+{
+    instructionCount = 0;
+    accessCount = 0;
+}
+
 int Machine::getNumberOfFlags() const
 {
     return flags.count();
@@ -419,4 +435,5 @@ void Machine::assemble(QString sourceCode)
     copyAssemblerMemoryToMemory();
     clearRegisters();
     clearFlags();
+    clearCounters();
 }

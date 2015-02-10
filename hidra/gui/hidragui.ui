@@ -379,7 +379,7 @@
     <addaction name="actionRun"/>
     <addaction name="actionStep"/>
     <addaction name="separator"/>
-    <addaction name="actionClearRegisters"/>
+    <addaction name="actionResetRegisters"/>
     <addaction name="actionSetBreakpoint"/>
     <addaction name="separator"/>
     <addaction name="actionImportMemory"/>
@@ -471,7 +471,7 @@
     <string>Exportar memória...</string>
    </property>
   </action>
-  <action name="actionClearRegisters">
+  <action name="actionResetRegisters">
    <property name="text">
     <string>Zerar registradores</string>
    </property>

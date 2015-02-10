@@ -6,7 +6,6 @@ Hidra - To-do
 
 Código
 
-- Contador de instruções e acessos
 - Mostrar valores da memória em binário na status bar
 - Criar tableViewMemoryData (ao lado de tableViewMemoryInstructions),
   para visualizar a memória de dados (128 em diante, sem indicador de PC)
@@ -22,6 +21,10 @@ Documentação
 - Relatar um problema (mailto:pet??)
 - About
 
+Erros
+
+- Org não deve ser highlighted (ex: programa só com "org 10")
+- "Instruções | Acessos" some quando passa o mouse no menu
 
 
 [ Versões futuras ]

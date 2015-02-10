@@ -97,6 +97,10 @@ public:
     QVector<Instruction *> getInstructions() const;
     void setInstructions(const QVector<Instruction *> &value);
 
+    int getInstructionCount();
+    int getAccessCount();
+    void clearCounters();
+
     bool buildSuccessful;
 
 protected:
@@ -112,6 +116,8 @@ protected:
     QVector<Instruction*> instructions;
     bool running;
     int breakpoint;
+    int instructionCount;
+    int accessCount;
 
 signals:
     void buildErrorDetected(QString);

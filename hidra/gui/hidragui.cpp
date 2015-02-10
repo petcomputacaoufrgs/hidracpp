@@ -186,6 +186,7 @@ void HidraGui::updateMachineInterfaceComponents()
     updateRegisterWidgets();
     updateCodeEditor();
     updateButtons();
+    updateStatusBar();
 }
 
 void HidraGui::updateMemoryMap()
@@ -245,6 +246,14 @@ void HidraGui::updateButtons()
         ui->pushButtonRun->setText("Parar");
     else
         ui->pushButtonRun->setText("Rodar");
+}
+
+void HidraGui::updateStatusBar()
+{
+    QString message;
+    message  = "Instruções: " + QString::number(machine->getInstructionCount()) + " | ";
+    message += "Acessos: "    + QString::number(machine->getAccessCount());
+    ui->statusBar->showMessage(message);
 }
 
 
@@ -487,10 +496,11 @@ void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &i
     updateMachineInterface();
 }
 
-void HidraGui::on_actionClearRegisters_triggered()
+void HidraGui::on_actionResetRegisters_triggered()
 {
     machine->clearRegisters();
     machine->clearFlags();
+    machine->clearCounters();
     updateMachineInterface();
 }
 

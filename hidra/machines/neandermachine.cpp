@@ -64,6 +64,7 @@ NeanderMachine::NeanderMachine()
     instructions[9]  = new Instruction( "jz", 160, 1, 2);
     instructions[10] = new Instruction("hlt", 240, 0, 1);
 
+    clearCounters();
     running = false;
 }
 
@@ -119,9 +120,13 @@ void NeanderMachine::save(QString filename){
 
 void NeanderMachine::step()
 {
-    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
     int jumpAddress;
     Byte *operand = NULL;
+
+    // Read first byte
+    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+    accessCount++;
+    instructionCount++;
 
     if (currentInstruction->getSize() == 2)
     {
@@ -132,6 +137,8 @@ void NeanderMachine::step()
         currentByteValue = memory[PC->getValue()]->getValue(); // Read byte
         operand = memory[currentByteValue]; // Pointer to operand
         jumpAddress = currentByteValue; // Address to jump to
+
+        accessCount++;
     }
 
     PC->incrementValue(); // Prepare for the next step
@@ -145,22 +152,27 @@ void NeanderMachine::step()
 
         case 0x10: // STA
             operand->setValue(AC->getValue());
+            accessCount++;
             break;
 
         case 0x20: // LDA
             AC->setValue(operand->getValue());
+            accessCount++;
             break;
 
         case 0x30: // ADD
             AC->setValue((AC->getValue() + operand->getValue()) & MAX_VALUE);
+            accessCount++;
             break;
 
         case 0x40: // OR
             AC->setValue(AC->getValue() | operand->getValue());
+            accessCount++;
             break;
 
         case 0x50: // AND
             AC->setValue(AC->getValue() & operand->getValue());
+            accessCount++;
             break;
 
         case 0x60: // NOT
