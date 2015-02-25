@@ -1,6 +1,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Arquivo para teste das instruções da
-;; Máquina Neander no Hidra
+;; Arquivo 1 para teste das instruções da
+;; Máquina Ahmes no Hidra
 ;;
 ;; RESULTADO ESPERADO:
 ;; A partir de 200, cada teste deve escrever o
@@ -26,6 +26,9 @@ Test07:    DB    1
 Test08:    DB    1
 Test09:    DB    1
 Test10:    DB    1
+Test11:    DB    1
+Test12:    DB    1
+Test13:    DB    1
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Constantes:
@@ -34,18 +37,24 @@ Test10:    DB    1
     ORG    128
 
 Val000:    DB    0
-
+Val001:    DB    1    ; 0b00000001
+Val002:    DB    2
 Val007:    DB    7    ; 0b00000111
+Val014:    DB    14    ; 0b00001110
+Val027:    DB    27
 Val028:    DB    28    ; 0b00011100
 
 Val063:    DB    63
 Val121:    DB    121
 Val127:    DB    127
 Val128:    DB    128
+Val129:    DB    129
 Val224:    DB    224
 Val248:    DB    248    
 Val249:    DB    249
 Val251:    DB    251
+Val252:    DB    252
+Val254:    DB    254
 Val255:    DB    255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -107,55 +116,95 @@ Val255:    DB    255
     STA    Test06
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test07: NOP, JMP
-;; 4 Instruções, 9 Acessos / Total: 24 Instruções, 67 Acessos
+;; Test07: SUB (com underflow)
+;; 3 Instruções, 9 Acessos / Total: 23 Instruções, 67 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDA    Val248
+    SUB    Val249    ; 248 - 249 = 255 (underflow)
+    STA    Test07
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test08: NOP, JMP
+;; 4 Instruções, 9 Acessos / Total: 27 Instruções, 76 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     NOP
     LDA    Val255
-    JMP    Jump01    ; Pula próxima instrução
+    JMP    JumpJMP    ; Pula próxima instrução
     LDA    Val007    ; Nunca executada
 
-Jump01:    STA    Test07
+JumpJMP:    STA    Test08
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test08: JN
-;; 6 Instruções, 16 Acessos / Total: 30 Instruções, 83 Acessos
+;; Test09: JN
+;; 6 Instruções, 16 Acessos / Total: 33 Instruções,92 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDA    Val007
-    JN    Jump02    ; Jump ignorado
+    JN    JumpJN1    ; Jump ignorado
     ADD    Val121    ; 7 + 121 = 128 (negativo)
 
-Jump02:    JN    Jump03    ; Pula próxima instrução
+JumpJN1:    JN    JumpJN2    ; Pula próxima instrução
     LDA    Val028    ; Nunca executada
 
-Jump03:    ADD    Val127    ; 128 + 127 = 255
-    STA    Test08    ;
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test09: JZ
-;; 6 Instruções, 16 Acessos / Total: 36 Instruções, 99 Acessos
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-    LDA    Val007
-    JZ    Jump04    ; Jump ignorado
-    ADD    Val249    ; 7 + 249 = 0 (overflow)
-
-Jump04: JZ    Jump05    ; Pula próxima instrução
-    LDA    Val028    ; Nunca executada
-
-Jump05:    ADD    Val255    ; 0 + 255 = 255
+JumpJN2:    ADD    Val127    ; 128 + 127 = 255
     STA    Test09
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test10: JP
+;; 6 Instruções, 16 Acessos / Total: 39 Instruções, 108 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDA    Val128    ; (negativo)
+    JP    JumpJP1    ; Jump ignorado
+    ADD    Val255    ; 128 + 255 = 127
+
+JumpJP1:    JP    JumpJP2    ; Pula próxima instrução
+    LDA    Val028    ; Nunca executada
+
+JumpJP2:    ADD    Val128    ; 127 + 128 = 255
+    STA    Test10
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test10: HLT
-;; 3 Instruções, 7 Acessos / Total: 39 Instruções, 106 Acessos
+;; Test11: JV
+;; 7 Instruções, 19 Acessos / Total: 46 Instruções, 127 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDA    Val063
+    ADD    Val063    ; 63 + 63 = 126
+    JV    JumpJV1    ; Jump ignorado
+    ADD    Val127    ; 126 + 129 = -3 (253) (overflow)
+
+JumpJV1:    JV    JumpJV2    ; Pula próxima instrução
+    LDA    Val028    ; Nunca executada
+
+JumpJV2:    ADD    Val002    ; -3 + 2 = -1 (255)
+    STA    Test11
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test12: JNV
+;; 7 Instruções, 19 Acessos / Total: 53 Instruções, 146 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDA    Val063
+    ADD    Val127    ; 63 + 127 = -66 (190) (overflow)
+    JNV    JumpJNV1    ; Jump ignorado
+    ADD    Val063    ; 190 + 63 = 253
+
+JumpJNV1:    JNV    JumpJNV2    ; Pula próxima instrução
+    LDA    Val028    ; Nunca executada
+
+JumpJNV2:    ADD    Val002    ; 253 + 2 = 255
+    STA    Test12
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test13: HLT
+;; 3 Instruções, 7 Acessos / Total: 56 Instruções, 153 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDA    Val255
-    STA    Test10
+    STA    Test13
     HLT        ; O programa deve parar aqui
     LDA    Val007
-    STA    Test10
+    STA    Test13

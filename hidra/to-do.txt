@@ -25,6 +25,9 @@ Erros
 
 - Org não deve ser highlighted (ex: programa só com "org 10")
 - "Instruções | Acessos" some quando passa o mouse no menu
+- Falta avisar sobreposição de memória
+- Hidra salva os arquivos dos Ramses como .rms e o Daedalus como .rad
+- Não funciona passagem do valor do endereço por label. (Da erro quando tenta alocar um espaço de memória cujo valor é o endereço indicado por uma label)
 
 
 [ Versões futuras ]
@@ -33,6 +36,7 @@ Geral
 
 - Informar múltiplos erros de uma vez (Felipe)
 - Find/Replace
+- Atalho para comentar várias linhas de código de uma vez
 
 Interface
 
