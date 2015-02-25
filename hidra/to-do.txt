@@ -10,10 +10,6 @@ Código
 - Criar tableViewMemoryData (ao lado de tableViewMemoryInstructions),
   para visualizar a memória de dados (128 em diante, sem indicador de PC)
 
-Testes
-
-- Criar testes para Ahmes e Ramses a partir de neander_instructions.ndr
-
 Documentação
 
 - Quick reference pra uso do Hidra (1 ou 2 páginas)

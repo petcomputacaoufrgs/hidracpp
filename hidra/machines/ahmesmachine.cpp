@@ -74,7 +74,7 @@ AhmesMachine::AhmesMachine()
     instructions[16] = new Instruction("jnc", 180, 1, 2);
     instructions[17] = new Instruction( "jb", 184, 1, 2);
     instructions[18] = new Instruction("jnb", 188, 1, 2);
-    instructions[19] = new Instruction("shr", 225, 0, 1);
+    instructions[19] = new Instruction("shr", 224, 0, 1);
     instructions[20] = new Instruction("shl", 225, 0, 1);
     instructions[21] = new Instruction("ror", 226, 0, 1);
     instructions[22] = new Instruction("rol", 227, 0, 1);
@@ -178,7 +178,7 @@ void AhmesMachine::step()
 
         case 0x30: // ADD
             AC->setValue((AC->getValue() + operand->getValue()) & 0xFF);
-            C->setValue(AC->getValue() + operand->getValue() > MAX_VALUE); // Unsigned carry flag
+            C->setValue(previousAC + operand->getValue() > MAX_VALUE); // Unsigned carry flag
 
             // Signed overflow flag (true on incorrect result):
             V->setValue(getSignedInt(previousAC) + getSignedInt(operand->getValue()) != getSignedInt(AC->getValue()));
@@ -202,7 +202,7 @@ void AhmesMachine::step()
 
         case 0x70: // SUB
             AC->setValue((AC->getValue() - operand->getValue()) & 0xFF);
-            B->setValue(AC->getValue() - operand->getValue() < 0); // Unsigned borrow flag
+            B->setValue(previousAC - operand->getValue() < 0); // Unsigned borrow flag
 
             // Signed overflow flag (true on incorrect result):
             V->setValue(getSignedInt(previousAC) - getSignedInt(operand->getValue()) != getSignedInt(AC->getValue()));
@@ -271,11 +271,13 @@ void AhmesMachine::step()
 
         case 0xE1: // SHL
             AC->setValue(AC->getValue() << 1);
-            C->setValue((AC->getValue() & 0x80) != 0);
+            C->setValue((previousAC & 0x80) != 0);
             break;
 
         case 0xE2: // ROR
             AC->setValue((AC->getValue() >> 1) & 0xFF);
+            if (C->getValue())
+                AC->setValue(AC->getValue() | 0x80);
             C->setValue((previousAC & 0x01) != 0);
             break;
 
