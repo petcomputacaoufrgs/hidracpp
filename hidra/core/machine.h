@@ -49,7 +49,7 @@ public:
 
     // Assembly
     void assemble(QString sourceCode);
-    Machine::ErrorCode obeyDirective(QString mnemonic, QString arguments, bool reserveOnly);
+    Machine::ErrorCode obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory

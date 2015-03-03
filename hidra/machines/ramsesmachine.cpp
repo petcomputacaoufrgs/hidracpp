@@ -208,41 +208,37 @@ void RamsesMachine::step()
 
         case 0x20: // LDR
             registers[reg]->setValue(operand->getValue());
-            C->setValue(false);
             updateFlags = true;
             accessCount++;
             break;
 
         case 0x30: // ADD
-            registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
             C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE); // Carry flag (unsigned)
+            registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
             updateFlags = true;
             accessCount++;
             break;
 
         case 0x40: // OR
             registers[reg]->setValue(registers[reg]->getValue() | operand->getValue());
-            C->setValue(false);
             updateFlags = true;
             accessCount++;
             break;
 
         case 0x50: // AND
             registers[reg]->setValue(registers[reg]->getValue() & operand->getValue());
-            C->setValue(false);
             updateFlags = true;
             accessCount++;
             break;
 
         case 0x60: // NOT
             registers[reg]->setValue(~registers[reg]->getValue());
-            C->setValue(false);
             updateFlags = true;
             break;
 
         case 0x70: // SUB
-            registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
             C->setValue((registers[reg]->getValue() - operand->getValue()) < 0); // Carry flag (unsigned)
+            registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
             updateFlags = true;
             accessCount++;
             break;
@@ -267,7 +263,7 @@ void RamsesMachine::step()
             break;
 
         case 0xC0: // JSR
-            memory[operand->getValue()]->setValue(PC->getValue());
+            memory[jumpAddress]->setValue(PC->getValue());
             PC->setValue(jumpAddress + 1);
             break;
 

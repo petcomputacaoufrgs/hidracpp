@@ -247,6 +247,10 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
         errorString += "Label já definido.";
         break;
 
+    case memoryOverflow:
+        errorString += "Sobreposição de memória.";
+        break;
+
     case notImplemented:
         errorString += "Funcionalidade não implementada.";
         break;
@@ -259,7 +263,7 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
     emit buildErrorDetected(errorString);
 }
 
-Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly)
+Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap)
 {
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
     int numberOfArguments = argumentList.size();
@@ -279,16 +283,20 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
         if (numberOfArguments != 1)
             return wrongNumberOfArguments;
 
-        if (!isValidByteValue(argumentList.first()))
-            return invalidValue;
-
         if (reserveOnly)
         {
             return reserveAssemblerMemory(1); // Increments PC
         }
         else
         {
-            assemblerMemory[PC->getValue()]->setValue(argumentList.first().toInt(0));
+            if (!isValidByteValue(argumentList.first()))
+            {
+                if (labelPCMap.contains(argumentList.first()))
+                    assemblerMemory[PC->getValue()]->setValue(labelPCMap.value(argumentList.first()));
+                else
+                    return invalidValue;
+            } else
+                assemblerMemory[PC->getValue()]->setValue(argumentList.first().toInt(0));
             PC->incrementValue();
         }
     }
@@ -382,7 +390,7 @@ void Machine::assemble(QString sourceCode)
             else // Directive
             {
                 QString arguments = sourceLines[lineNumber].section(" ", 1); // Everything after mnemonic
-                errorCode = obeyDirective(mnemonic, arguments, true);
+                errorCode = obeyDirective(mnemonic, arguments, true, labelPCMap);
             }
 
             if (errorCode)
@@ -420,7 +428,7 @@ void Machine::assemble(QString sourceCode)
             else // Directive
             {
                 correspondingLine[PC->getValue()] = lineNumber;
-                errorCode = obeyDirective(mnemonic, arguments, false);
+                errorCode = obeyDirective(mnemonic, arguments, false, labelPCMap);
             }
 
             if (errorCode)
