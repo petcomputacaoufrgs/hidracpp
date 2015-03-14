@@ -87,6 +87,8 @@ void HidraHighlighter::initializeDirectivesHighlightRule()
     directivesPattern.append("\\b" + QString("org") + "\\b|");
     directivesPattern.append("\\b" + QString("db") + "\\b|");
     directivesPattern.append("\\b" + QString("dw") + "\\b|");
+    directivesPattern.append("\\b" + QString("dab") + "\\b|");
+    directivesPattern.append("\\b" + QString("daw") + "\\b|");
 
     directivesPattern.chop(1);
     directivesPattern.append(")");

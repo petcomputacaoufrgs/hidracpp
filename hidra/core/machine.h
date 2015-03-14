@@ -59,8 +59,11 @@ public:
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);
-    bool isValidByteValue(QString valueString);
+    bool isValidNBytesValue(QString valueString, int n);
     bool isValidAddress(QString addressString);
+
+    QStringList splitArguments(QString arguments);
+    int convertToUnsigned(int value, int numberOfBytes);
 
     virtual const Instruction* getInstructionFromValue(int) = 0;
     virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
