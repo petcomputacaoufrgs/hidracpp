@@ -234,7 +234,7 @@ QStringList Machine::splitArguments(QString arguments)
 
             // If there's only whitespaces, something is wrong
             if (position == argument.size())
-                throw;
+                throw 0;
 
             // If it starts with a single quote it's a string or a char
             if (argument.at(position) == '\'')
@@ -259,7 +259,7 @@ QStringList Machine::splitArguments(QString arguments)
                         argumentParts.append(argument.mid(position+1));
                         argumentCounter++;
                         if (argumentCounter >= partsQuantity)
-                            throw;
+                            throw 0;
 
                         argument = splitedArguments.at(argumentCounter);
                         position = -1;
@@ -293,7 +293,7 @@ QStringList Machine::splitArguments(QString arguments)
                     // & means it's a number of bytes/words to be alocated
                     argumentsByComma.append("&" + argument.mid(position+1, final-(position+1)));
                 else
-                    throw;
+                    throw 0;
             }
             else
             {
@@ -323,7 +323,7 @@ QStringList Machine::splitArguments(QString arguments)
             if (argument.at(position) == '\'')
             {
                 if (position+1 < argument.size())
-                    throw;
+                    throw 0;
 
                 finalArgumentsList.append("#'");
             }
@@ -333,7 +333,7 @@ QStringList Machine::splitArguments(QString arguments)
                 for (; position < argument.size(); position++)
                 {
                     if (argument.at(position) == '\'')
-                        throw;
+                        throw 0;
 
                     finalArgumentsList.append("#" + QString(argument.at(position)));
                 }
@@ -344,7 +344,7 @@ QStringList Machine::splitArguments(QString arguments)
             QRegExp validLabel("[a-z_][a-z0-9_]*");
             position++;
             if (!validLabel.exactMatch(argument.mid(position)))
-                throw;
+                throw 0;
 
             finalArgumentsList.append(argument.mid(position));
         }
@@ -353,7 +353,7 @@ QStringList Machine::splitArguments(QString arguments)
             QRegExp validNumber("\\d+");
             position++;
             if (!validNumber.exactMatch(argument.mid(position)))
-                throw;
+                throw 0;
 
             finalArgumentsList.append(argument);
         }
@@ -361,7 +361,7 @@ QStringList Machine::splitArguments(QString arguments)
         {
             QRegExp validNumber("-?\\d+");
             if (!validNumber.exactMatch(argument))
-                throw;
+                throw 0;
 
             finalArgumentsList.append(argument);
         }
@@ -496,17 +496,19 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
         {
             for (QString argument : argumentList)
             {
-                int value;
-                // If starts with a sharp it's a char
+                // If it starts with a sharp it's a char
                 if (argument.at(0) == '#')
                 {
                     if (QRegExp("da?w").exactMatch(mnemonic))
                          PC->incrementValue();
 
-                    value = argument.at(1).toLatin1();
+                    assemblerMemory[PC->getValue()]->setValue(argument.at(1).toLatin1());
+                    PC->incrementValue();
                 }
+                // Else if it starts with a letter or underline it's a label or a hexadecimal number
                 else if (argument.at(0) == '_' || argument.at(0).isLetter())
                 {
+                    int value;
                     if (QRegExp("d[bw]").exactMatch(mnemonic) && labelPCMap.contains(argument))
                     {
                         if (QRegExp("dw").exactMatch(mnemonic))
@@ -540,15 +542,19 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
                         else
                             return invalidLabel;
                     }
+                    assemblerMemory[PC->getValue()]->setValue(value);
+                    PC->incrementValue();
                 }
+                // If it starts with a & it's the number os bytes/words to be alocated
                 else if (argument.at(0) == '&')
                 {
-                    for (int i = 1; i < argument.mid(1).toInt()*bytesPerArgument; i++)
+                    for (int i = 0; i < argument.mid(1).toInt()*bytesPerArgument; i++)
                         PC->incrementValue();
-                    value = 0;
                 }
+                // Else it's a number
                 else
                 {
+                    int value;
                     if (!isValidNBytesValue(argument, bytesPerArgument))
                         return invalidValue;
 
@@ -562,10 +568,9 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
                         assemblerMemory[PC->getValue()]->setValue(mostSignificantBytes);
                         PC->incrementValue();
                     }
-
+                    assemblerMemory[PC->getValue()]->setValue(value);
+                    PC->incrementValue();
                 }
-                assemblerMemory[PC->getValue()]->setValue(value);
-                PC->incrementValue();
             }
         }
     }
