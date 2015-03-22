@@ -25,6 +25,9 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
     ui->tableViewMemoryInstructions->setEditTriggers(false);
 
+    //instructionAccessCounter.setStyleSheet("QLabel { color : gray; }");
+    ui->statusBar->addPermanentWidget(&instructionAccessCounter, 0.25);
+
     // Escolhe a máquina Neander e atualiza a interface
     selectMachine("Neander");
 
@@ -250,10 +253,10 @@ void HidraGui::updateButtons()
 
 void HidraGui::updateStatusBar()
 {
-    QString message;
-    message  = "Instruções: " + QString::number(machine->getInstructionCount()) + " | ";
-    message += "Acessos: "    + QString::number(machine->getAccessCount());
-    ui->statusBar->showMessage(message);
+    QString instructionAccessMessage;
+    instructionAccessMessage  = "Instruções: " + QString::number(machine->getInstructionCount()) + " | ";
+    instructionAccessMessage += "Acessos: "    + QString::number(machine->getAccessCount());
+    instructionAccessCounter.setText(instructionAccessMessage);
 }
 
 
@@ -488,7 +491,14 @@ void HidraGui::on_actionExportMemory_triggered()
     }
 }
 
-
+void HidraGui::on_tableViewMemoryInstructions_clicked(const QModelIndex &index)
+{
+    int value = machine->getMemoryValue(index.row());
+    ui->statusBar->showMessage(QString("Dec: %1 | Hex: %2 | Bin: %3")
+                                       .arg(value)
+                                       .arg(value, 2, 16, QChar('0'))
+                                       .arg(value, 8, 2, QChar('0')));
+}
 
 void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index)
 {
@@ -576,4 +586,3 @@ void HidraGui::closeEvent(QCloseEvent *event)
     else
         event->ignore();
 }
-

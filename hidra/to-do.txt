@@ -6,7 +6,6 @@ Hidra - To-do
 
 Código
 
-- Mostrar valores da memória em binário na status bar
 - Criar tableViewMemoryData (ao lado de tableViewMemoryInstructions),
   para visualizar a memória de dados (128 em diante, sem indicador de PC)
 

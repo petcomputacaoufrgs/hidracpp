@@ -7,6 +7,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QCheckBox>
+#include <QLabel>
 #include <QDebug>
 #include <QVector>
 
@@ -61,6 +62,7 @@ private slots:
     void on_actionImportMemory_triggered();
     void on_actionExportMemory_triggered();
 
+    void on_tableViewMemoryInstructions_clicked(const QModelIndex &index);
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_actionResetRegisters_triggered();
     void on_actionSetBreakpoint_triggered();
@@ -103,6 +105,8 @@ private:
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
     QString currentMachineName;
+
+    QLabel instructionAccessCounter;
 
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
