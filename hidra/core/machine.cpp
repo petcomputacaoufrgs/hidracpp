@@ -208,12 +208,122 @@ bool Machine::isValidAddress(QString addressString)
 
 QStringList Machine::splitArguments(QString arguments)
 {
+    QStringList finalArgumentList;
+
+    // Constants
+    QString ALLOCATE_SYMBOL = "&";
+    QString CHAR_SYMBOL = "#";
+    QChar   AMPERSAND = '\'';
+
+    // RegExes
+    QRegExp matchBrackets("\\[(\\d*)\\]"); // Digits between brackets
+    QRegExp matchSeparator("\\s|,"); // Whitespace or comma
+
+    arguments = arguments.trimmed(); // Trim whitespace
+
+
+
+    //////////////////////////////////////////////////
+    // Byte/Word allocation
+    //////////////////////////////////////////////////
+
+    if (matchBrackets.exactMatch(arguments))
+    {
+        finalArgumentList.append(ALLOCATE_SYMBOL + matchBrackets.cap(1));
+        return finalArgumentList;
+    }
+
+
+
+    //////////////////////////////////////////////////
+    // Process string char by char
+    //////////////////////////////////////////////////
+
+    QString numberString; // Incrementally add characters to this string until a separator/ampersand is found
+    int charCount = 0; // Char count of ASCII string
+
+    bool insideString = false;
+
+    for (QChar &c : arguments)
+    {
+        // NUMBER MODE:
+        if (insideString == false)
+        {
+            if (c == AMPERSAND)
+            {
+                // Add finished number argument list
+                if (numberString != "")
+                {
+                    finalArgumentList.append(numberString);
+                    numberString = "";
+                }
+
+                // Begin string
+                insideString = true;
+            }
+            else if (matchSeparator.exactMatch(c))
+            {
+                // Add finished number to argument list
+                if (numberString != "")
+                {
+                    finalArgumentList.append(numberString);
+                    numberString = "";
+                }
+            }
+            else
+            {
+                // Add character to number string
+                numberString += c;
+            }
+        }
+
+        // ASCII STRING MODE:
+        else // (insideString == true)
+        {
+            if (c == AMPERSAND && charCount > 0)
+            {
+                // Finish string and enter number mode
+                insideString = false;
+                charCount = 0;
+            }
+            else
+            {
+                // Add character to argument list
+                finalArgumentList.append(CHAR_SYMBOL + c);
+                charCount += 1;
+            }
+        }
+    }
+
+    // Add remaining number
+    if (numberString != "")
+    {
+        finalArgumentList.append(numberString);
+        numberString = "";
+    }
+
+    if (finalArgumentList.count() == 0)
+        throw wrongNumberOfArguments;
+    else if (insideString)
+        throw invalidValue;
+
+    return finalArgumentList;
+
+
+
+    /*
+    //////////////////////////////////////////////////
+    // ORIGINAL CODE
+    //////////////////////////////////////////////////
+
     QStringList argumentsByComma;
     QStringList finalArgumentsList;
 
     //////////////////////////////////////////////////
     // FIRST PASS: Divide by comma joining strings
     //////////////////////////////////////////////////
+
+
 
     {
         QStringList splitedArguments = arguments.split(",");
@@ -367,7 +477,7 @@ QStringList Machine::splitArguments(QString arguments)
         }
     }
 
-    return finalArgumentsList;
+    */
 }
 
 int Machine::convertToUnsigned(int value, int numberOfBytes)
@@ -466,9 +576,9 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
         {
             argumentList = splitArguments(arguments);
         }
-        catch (int e)
+        catch (ErrorCode errorCode)
         {
-            return invalidValue;
+            return errorCode;
         }
 
         int numberOfArguments = argumentList.size();
@@ -508,6 +618,8 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
                 // Else if it starts with a letter or underline it's a label or a hexadecimal number
                 else if (argument.at(0) == '_' || argument.at(0).isLetter())
                 {
+                    argument = argument.toLower(); // Convert to lowercase
+
                     int value;
                     if (QRegExp("d[bw]").exactMatch(mnemonic) && labelPCMap.contains(argument))
                     {
@@ -518,7 +630,7 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
                     }
                     else
                     {
-                        if (argument.at(0).toLower() == 'h')
+                        if (argument.at(0) == 'h')
                         {
                             bool ok;
                             value = argument.mid(1).toInt(&ok, 16);
@@ -540,7 +652,7 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
                             }
                         }
                         else
-                            return invalidLabel;
+                            return invalidValue;
                     }
                     assemblerMemory[PC->getValue()]->setValue(value);
                     PC->incrementValue();
