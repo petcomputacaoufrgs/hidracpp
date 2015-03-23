@@ -210,13 +210,8 @@ QStringList Machine::splitArguments(QString arguments)
 {
     QStringList finalArgumentList;
 
-    // Constants
-    QString ALLOCATE_SYMBOL = "&";
-    QString CHAR_SYMBOL = "#";
-    QChar   AMPERSAND = '\'';
-
     // RegExes
-    QRegExp matchBrackets("\\[(\\d*)\\]"); // Digits between brackets
+    QRegExp matchBrackets("\\[(\\d+)\\]"); // Digits between brackets
     QRegExp matchSeparator("\\s|,"); // Whitespace or comma
 
     arguments = arguments.trimmed(); // Trim whitespace
@@ -480,20 +475,6 @@ QStringList Machine::splitArguments(QString arguments)
     */
 }
 
-int Machine::convertToUnsigned(int value, int numberOfBytes)
-{
-    if (value >= 0)
-        return value;
-    else if (numberOfBytes == 1)
-    {
-        return 256+value;
-    }
-    else
-    {
-        return 65536+value;
-    }
-}
-
 void Machine::setRunning(bool running)
 {
     this->running = running;
@@ -584,105 +565,99 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
         int numberOfArguments = argumentList.size();
         int bytesPerArgument = QRegExp("da?b").exactMatch(mnemonic) ? 1 : 2;
 
-        if (QRegExp("d[bw]").exactMatch(mnemonic) && numberOfArguments != 1)
+        if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments > 1)
             return wrongNumberOfArguments;
+
+        if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments == 0)
+            argumentList.append("0"); // Default to argument 0 in case of DB and DW
+
+        // Memory allocation
+        if (argumentList.first().at(0) == ALLOCATE_SYMBOL)
+        {
+            if (mnemonic == "dab" || mnemonic == "daw")
+            {
+                return invalidArgument;
+            }
+            else if (reserveOnly)
+            {
+                return reserveAssemblerMemory(argumentList.first().mid(1).toInt() * bytesPerArgument);
+            }
+            else // Skip bytes
+            {
+                for (int i = 0; i < argumentList.first().mid(1).toInt()*bytesPerArgument; i++)
+                    PC->incrementValue();
+
+                return noError;
+            }
+        }
 
         if (reserveOnly)
         {
-            // If it's the number of bytes/words to reserve then verify the mnemonic and the number of arguments
-            if (argumentList.first().at(0) == '&')
-            {
-                if (numberOfArguments != 1)
-                    return wrongNumberOfArguments;
-                else if (!QRegExp("da[bw]").exactMatch(mnemonic))
-                    return invalidValue;
-                else
-                    return reserveAssemblerMemory(argumentList.first().mid(1).toInt() * bytesPerArgument);
-            }
-            else
-                return reserveAssemblerMemory(numberOfArguments * bytesPerArgument); // Increments PC
+            return reserveAssemblerMemory(numberOfArguments * bytesPerArgument); // Increments PC
         }
         else
         {
+            // Process each argument
             for (QString argument : argumentList)
             {
-                // If it starts with a sharp it's a char
-                if (argument.at(0) == '#')
+                int value = 0;
+
+                // Process character
+                if (argument.at(0) == CHAR_SYMBOL)
                 {
-                    if (QRegExp("da?w").exactMatch(mnemonic))
-                         PC->incrementValue();
-
-                    assemblerMemory[PC->getValue()]->setValue(argument.at(1).toLatin1());
-                    PC->incrementValue();
+                    value = argument.at(1).toLatin1();
                 }
-                // Else if it starts with a letter or underline it's a label or a hexadecimal number
-                else if (argument.at(0) == '_' || argument.at(0).isLetter())
+
+                // Process label
+                else if (labelPCMap.contains(argument.toLower()))
                 {
-                    argument = argument.toLower(); // Convert to lowercase
+                    if (mnemonic == "dab" || mnemonic == "daw")
+                        return invalidArgument;
 
-                    int value;
-                    if (QRegExp("d[bw]").exactMatch(mnemonic) && labelPCMap.contains(argument))
-                    {
-                        if (QRegExp("dw").exactMatch(mnemonic))
-                            PC->incrementValue();
-
-                        value = labelPCMap.value(argument);
-                    }
-                    else
-                    {
-                        if (argument.at(0) == 'h')
-                        {
-                            bool ok;
-                            value = argument.mid(1).toInt(&ok, 16);
-                            if (!ok || !isValidNBytesValue(QString::number(value), bytesPerArgument))
-                                return invalidValue;
-
-                            if (value > 255)
-                            {
-                                int mostSignificantBytes = value >> 8;
-                                value = value - (mostSignificantBytes << 8);
-                                assemblerMemory[PC->getValue()]->setValue(mostSignificantBytes);
-                                PC->incrementValue();
-                            }
-                            else if (bytesPerArgument == 2)
-                            {
-                                assemblerMemory[PC->getValue()]->setValue(value);
-                                PC->incrementValue();
-                                value = 0;
-                            }
-                        }
-                        else
-                            return invalidValue;
-                    }
-                    assemblerMemory[PC->getValue()]->setValue(value);
-                    PC->incrementValue();
+                    value = labelPCMap.value(argument.toLower());
                 }
-                // If it starts with a & it's the number os bytes/words to be alocated
-                else if (argument.at(0) == '&')
+
+                // Process hexadecimal number
+                else if (argument.at(0).toLower() == 'h')
                 {
-                    for (int i = 0; i < argument.mid(1).toInt()*bytesPerArgument; i++)
-                        PC->incrementValue();
+                    // Convert hexadecimal string to int
+                    bool ok;
+                    value = argument.mid(1).toInt(&ok, 16);
+
+                    // Check if invalid
+                    if (!ok)
+                        return invalidArgument;
+                    else if (!isValidNBytesValue(QString::number(value), bytesPerArgument) || value < 0)
+                        return invalidValue;
                 }
-                // Else it's a number
+
+                // Process decimal number
                 else
                 {
-                    int value;
-                    if (!isValidNBytesValue(argument, bytesPerArgument))
+                    // Convert decimal string to int
+                    bool ok;
+                    value = argument.toInt(&ok, 10);
+
+                    // Check if invalid
+                    if (!ok)
+                        return invalidArgument;
+                    else if (!isValidNBytesValue(argument, bytesPerArgument))
                         return invalidValue;
 
-                    value = argument.toInt();
-                    value = convertToUnsigned(value, bytesPerArgument);
+                    //value = convertToUnsigned(argument.toInt(), bytesPerArgument);
+                }
 
-                    if (bytesPerArgument == 2)
-                    {
-                        int mostSignificantBytes = value >> 8;
-                        value = value - (mostSignificantBytes << 8);
-                        assemblerMemory[PC->getValue()]->setValue(mostSignificantBytes);
-                        PC->incrementValue();
-                    }
-                    assemblerMemory[PC->getValue()]->setValue(value);
+
+
+                // Write final value
+                if (bytesPerArgument == 2)
+                {
+                    assemblerMemory[PC->getValue()]->setValue((value & 0xFF00) >> 8); // Big endian
                     PC->incrementValue();
                 }
+
+                assemblerMemory[PC->getValue()]->setValue(value & 0x00FF);
+                PC->incrementValue();
             }
         }
     }

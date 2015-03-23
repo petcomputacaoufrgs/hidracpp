@@ -34,6 +34,11 @@ public:
         notImplemented,
     };
 
+    // Constants
+    QString ALLOCATE_SYMBOL = "%";
+    QString CHAR_SYMBOL = "$";
+    QChar   AMPERSAND = '\'';
+
     explicit Machine(QObject *parent = 0);
 
     virtual void printStatusDebug() = 0;
@@ -59,7 +64,7 @@ public:
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);
-    bool isValidNBytesValue(QString valueString, int n);
+    bool isValidNBytesValue(QString valueString, int numberOfBytes);
     bool isValidAddress(QString addressString);
 
     QStringList splitArguments(QString arguments);
