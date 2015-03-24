@@ -339,7 +339,7 @@ void AhmesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<Q
 
         // Check if valid argument:
         if (!isValidAddress(argumentList[0]))
-            throw invalidArgument;
+            throw invalidAddress;
 
         // Write argument:
         assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
