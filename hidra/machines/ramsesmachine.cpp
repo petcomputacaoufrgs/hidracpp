@@ -357,9 +357,9 @@ void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<
         if (labelPCMap.contains(argumentList.last()))
             argumentList.last() = QString::number(labelPCMap.value(argumentList.last()));
 
-        // Check if valid address:
+        // Check if valid address/value:
         if (!isValidAddress(argumentList.last()))
-            throw invalidArgument;
+            throw invalidValue;
 
         // Write address argument:
         assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(NULL, 0));

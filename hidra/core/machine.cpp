@@ -491,6 +491,8 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
 
 void Machine::assemble(QString sourceCode)
 {
+    int errorCount = 0;
+
     running = false;
     buildSuccessful = false;
 
@@ -566,9 +568,12 @@ void Machine::assemble(QString sourceCode)
         catch (ErrorCode errorCode)
         {
             emitError(lineNumber, errorCode);
-            return;
+            errorCount += 1;
         }
     }
+
+    if (errorCount > 0)
+        return; // Abort compilation
 
 
 
@@ -606,9 +611,14 @@ void Machine::assemble(QString sourceCode)
         catch (ErrorCode errorCode)
         {
             emitError(lineNumber, errorCode);
-            return;
+            errorCount += 1;
         }
     }
+
+    if (errorCount > 0)
+        return; // Abort compilation
+
+
 
     buildSuccessful = true;
     copyAssemblerMemoryToMemory();
