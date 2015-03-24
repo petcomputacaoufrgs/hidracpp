@@ -16,7 +16,7 @@ public:
     virtual void step();
     //virtual void run();
 
-    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
+    virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);

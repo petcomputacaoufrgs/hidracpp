@@ -213,8 +213,7 @@ void NeanderMachine::step()
 //    }
 //}
 
-// Returns 0 if no error, otherwise returns error code
-Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+void NeanderMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
@@ -222,7 +221,7 @@ Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString ar
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
-        return wrongNumberOfArguments;
+        throw wrongNumberOfArguments;
 
     // Write instruction:
     assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
@@ -236,14 +235,12 @@ Machine::ErrorCode NeanderMachine::mountInstruction(QString mnemonic, QString ar
 
         // Check if valid argument:
         if (!isValidAddress(argumentList[0]))
-            return invalidAddress;
+            throw invalidArgument;
 
         // Write argument:
         assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
         PC->incrementValue();
     }
-
-    return noError;
 }
 
 Instruction* NeanderMachine::getInstructionFromValue(int value)

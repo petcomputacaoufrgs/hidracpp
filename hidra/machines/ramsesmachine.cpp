@@ -299,7 +299,7 @@ void RamsesMachine::step()
 //    }
 //}
 
-Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
@@ -310,7 +310,7 @@ Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arg
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
-        return wrongNumberOfArguments;
+        throw wrongNumberOfArguments;
 
     // If first argument is a register (every instruction that has arguments, except jumps):
     if (numberOfArguments > 0 && !(mnemonic.startsWith("j")))
@@ -322,7 +322,7 @@ Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arg
         else if (argumentList.first() == "x")
             registerID = 2;
         else
-            return invalidArgument;
+            throw invalidArgument;
     }
 
     // If last argument is an address (every two-byte instruction):
@@ -359,14 +359,12 @@ Machine::ErrorCode RamsesMachine::mountInstruction(QString mnemonic, QString arg
 
         // Check if valid address:
         if (!isValidAddress(argumentList.last()))
-            return invalidArgument;
+            throw invalidArgument;
 
         // Write address argument:
         assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(NULL, 0));
         PC->incrementValue();
     }
-
-    return noError;
 }
 
 Instruction* RamsesMachine::getInstructionFromValue(int value)

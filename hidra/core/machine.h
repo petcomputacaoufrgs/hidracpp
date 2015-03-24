@@ -27,17 +27,18 @@ public:
         invalidInstruction,
         invalidAddress,
         invalidValue,
+        invalidString,
         invalidLabel,
         invalidArgument,
         duplicatedLabel,
-        memoryOverflow,
+        memoryOverlap,
         notImplemented,
     };
 
     // Constants
     QString ALLOCATE_SYMBOL = "%";
     QString CHAR_SYMBOL = "$";
-    QChar   AMPERSAND = '\'';
+    QChar   SINGLE_QUOTE = '\'';
 
     explicit Machine(QObject *parent = 0);
 
@@ -50,17 +51,17 @@ public:
     //virtual void run() = 0;
 
     // Machine specific
-    virtual Machine::ErrorCode mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
+    virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
 
     // Assembly
     void assemble(QString sourceCode);
-    Machine::ErrorCode obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap);
+    void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
     void clearAssemblerMemory();
     void copyAssemblerMemoryToMemory();
-    Machine::ErrorCode reserveAssemblerMemory(int sizeToReserve);
+    void reserveAssemblerMemory(int sizeToReserve);
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);

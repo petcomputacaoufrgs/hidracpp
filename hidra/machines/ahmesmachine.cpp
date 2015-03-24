@@ -317,8 +317,7 @@ int AhmesMachine::getSignedInt(int eightBitValue)
 }
 
 // EXACT DUPLICATE OF NEANDER'S METHOD:
-// Returns 0 if no error, otherwise returns error code
-Machine::ErrorCode AhmesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+void AhmesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
@@ -326,7 +325,7 @@ Machine::ErrorCode AhmesMachine::mountInstruction(QString mnemonic, QString argu
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
-        return wrongNumberOfArguments;
+        throw wrongNumberOfArguments;
 
     // Write instruction:
     assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
@@ -340,14 +339,12 @@ Machine::ErrorCode AhmesMachine::mountInstruction(QString mnemonic, QString argu
 
         // Check if valid argument:
         if (!isValidAddress(argumentList[0]))
-            return invalidAddress;
+            throw invalidArgument;
 
         // Write argument:
         assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
         PC->incrementValue();
     }
-
-    return noError;
 }
 
 Instruction* AhmesMachine::getInstructionFromValue(int value)

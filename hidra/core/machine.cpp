@@ -160,8 +160,8 @@ void Machine::copyAssemblerMemoryToMemory()
         memory[i]->setValue(assemblerMemory[i]->getValue());
 }
 
-// Reserve 'sizeToReserve' bytes starting from PC. Returns ErrorCode 0 if successful
-Machine::ErrorCode Machine::reserveAssemblerMemory(int sizeToReserve)
+// Reserve 'sizeToReserve' bytes starting from PC. Throws exception on overlap.
+void Machine::reserveAssemblerMemory(int sizeToReserve)
 {
     while (sizeToReserve > 0)
     {
@@ -172,10 +172,8 @@ Machine::ErrorCode Machine::reserveAssemblerMemory(int sizeToReserve)
             sizeToReserve--;
         }
         else
-            return memoryOverflow; // Already reserved
+            throw memoryOverlap; // Memory already reserved
     }
-
-    return noError;
 }
 
 bool Machine::isValidValue(QString valueString, int min, int max)
@@ -210,7 +208,7 @@ QStringList Machine::splitArguments(QString arguments)
 {
     QStringList finalArgumentList;
 
-    // RegExes
+    // Regular expressions
     QRegExp matchBrackets("\\[(\\d+)\\]"); // Digits between brackets
     QRegExp matchSeparator("\\s|,"); // Whitespace or comma
 
@@ -235,7 +233,7 @@ QStringList Machine::splitArguments(QString arguments)
     //////////////////////////////////////////////////
 
     QString numberString; // Incrementally add characters to this string until a separator/ampersand is found
-    int charCount = 0; // Char count of ASCII string
+    int charCount = 0; // Char count of ASCII string (treats quote as literal char if count equals zero)
 
     bool insideString = false;
 
@@ -244,9 +242,9 @@ QStringList Machine::splitArguments(QString arguments)
         // NUMBER MODE:
         if (insideString == false)
         {
-            if (c == AMPERSAND)
+            if (c == SINGLE_QUOTE)
             {
-                // Add finished number argument list
+                // Add finished number to argument list
                 if (numberString != "")
                 {
                     finalArgumentList.append(numberString);
@@ -275,7 +273,7 @@ QStringList Machine::splitArguments(QString arguments)
         // ASCII STRING MODE:
         else // (insideString == true)
         {
-            if (c == AMPERSAND && charCount > 0)
+            if (c == SINGLE_QUOTE && charCount != 0)
             {
                 // Finish string and enter number mode
                 insideString = false;
@@ -300,179 +298,9 @@ QStringList Machine::splitArguments(QString arguments)
     if (finalArgumentList.count() == 0)
         throw wrongNumberOfArguments;
     else if (insideString)
-        throw invalidValue;
+        throw invalidString;
 
     return finalArgumentList;
-
-
-
-    /*
-    //////////////////////////////////////////////////
-    // ORIGINAL CODE
-    //////////////////////////////////////////////////
-
-    QStringList argumentsByComma;
-    QStringList finalArgumentsList;
-
-    //////////////////////////////////////////////////
-    // FIRST PASS: Divide by comma joining strings
-    //////////////////////////////////////////////////
-
-
-
-    {
-        QStringList splitedArguments = arguments.split(",");
-        int argumentCounter = 0;
-        int partsQuantity = splitedArguments.size();
-
-        QString argument;
-        bool isSingleQuote = false;
-
-        while (argumentCounter < partsQuantity)
-        {
-            argument = splitedArguments.at(argumentCounter);
-
-            // Remove whitespaces from the beginning
-            int position = 0;
-            while (position < argument.size() && QRegExp("\\s").exactMatch(argument.at(position)))
-                position++;
-
-            // If there's only whitespaces, something is wrong
-            if (position == argument.size())
-                throw 0;
-
-            // If it starts with a single quote it's a string or a char
-            if (argument.at(position) == '\'')
-            {
-                QStringList argumentParts;
-                do
-                {
-                    // Remove whitespaces from the end
-                    int final = argument.size() - 1;
-                    while (final >= 0 && QRegExp("\\s").exactMatch(argument.at(final)))
-                        final--;
-
-                    // If there's a sigle quote in the end and it's not the same as the one at the beginning then probably it's a correct string
-                    if (final != position && argument.at(final) == '\'')
-                    {
-                        argumentParts.append(argument.mid(position+1, final-(position+1)));
-                        isSingleQuote = false;
-                    }
-                    // Else if final reaches position then there's only whitespaces after the single quote, or if there isn't a single quote in the end then probably there was a comma in the string
-                    else
-                    {
-                        argumentParts.append(argument.mid(position+1));
-                        argumentCounter++;
-                        if (argumentCounter >= partsQuantity)
-                            throw 0;
-
-                        argument = splitedArguments.at(argumentCounter);
-                        position = -1;
-                        isSingleQuote = true;
-                    }
-                } while (isSingleQuote);
-
-                // # means it's a string
-                argumentsByComma.append("#" + argumentParts.join(","));
-            }
-            // Else if it starts with underline or a letter it's a label or hexadecimal number
-            else if (argument.at(position) == '_' || argument.at(position).isLetter())
-            {
-                // Remove whitespaces from the end
-                int final = argument.size() - 1;
-                while (final >= 0 && QRegExp("\\s").exactMatch(argument.at(final)))
-                    final--;
-
-                // $ means it's a label or hexadecimal number
-                argumentsByComma.append("$" + argument.mid(position, (final+1)-position).toLower());
-            }
-            // Else if it starts with a bracket it's the number os bytes/word to be alocated
-            else if (argument.at(position) == '[')
-            {
-                // Remove whitespaces from the end
-                int final = argument.size() - 1;
-                while (final >= 0 && QRegExp("\\s").exactMatch(argument.at(final)))
-                    final--;
-
-                if (argument.at(final) == ']')
-                    // & means it's a number of bytes/words to be alocated
-                    argumentsByComma.append("&" + argument.mid(position+1, final-(position+1)));
-                else
-                    throw 0;
-            }
-            else
-            {
-                // Remove whitespaces from the end
-                int final = argument.size() - 1;
-                while (final >= 0 && QRegExp("\\s").exactMatch(argument.at(final)))
-                    final--;
-
-                argumentsByComma.append(argument.mid(position, (final+1)-position));
-            }
-
-            argumentCounter++;
-        }
-    }
-    //////////////////////////////////////////////////
-    // SECOND PASS: Divide string into chars and validate data
-    //////////////////////////////////////////////////
-
-    for (QString &argument : argumentsByComma)
-    {
-        int position = 0;
-        // If it's a string divide into chars
-        if (argument.at(position) == '#')
-        {
-            position++;
-            // If it's a single quote check if there's another char after the quote
-            if (argument.at(position) == '\'')
-            {
-                if (position+1 < argument.size())
-                    throw 0;
-
-                finalArgumentsList.append("#'");
-            }
-            else
-            {
-                // If it's any char insert all into the final arguments list checking if there's a single quote inside the string
-                for (; position < argument.size(); position++)
-                {
-                    if (argument.at(position) == '\'')
-                        throw 0;
-
-                    finalArgumentsList.append("#" + QString(argument.at(position)));
-                }
-            }
-        }
-        else if (argument.at(position) == '$')
-        {
-            QRegExp validLabel("[a-z_][a-z0-9_]*");
-            position++;
-            if (!validLabel.exactMatch(argument.mid(position)))
-                throw 0;
-
-            finalArgumentsList.append(argument.mid(position));
-        }
-        else if (argument.at(position) == '&')
-        {
-            QRegExp validNumber("\\d+");
-            position++;
-            if (!validNumber.exactMatch(argument.mid(position)))
-                throw 0;
-
-            finalArgumentsList.append(argument);
-        }
-        else
-        {
-            QRegExp validNumber("-?\\d+");
-            if (!validNumber.exactMatch(argument))
-                throw 0;
-
-            finalArgumentsList.append(argument);
-        }
-    }
-
-    */
 }
 
 void Machine::setRunning(bool running)
@@ -507,6 +335,10 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
         errorString += "Valor inválido.";
         break;
 
+    case invalidString:
+        errorString += "String inválido.";
+        break;
+
     case invalidLabel:
         errorString += "Label inválido.";
         break;
@@ -519,7 +351,7 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
         errorString += "Label já definido.";
         break;
 
-    case memoryOverflow:
+    case memoryOverlap:
         errorString += "Sobreposição de memória.";
         break;
 
@@ -535,7 +367,7 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
     emit buildErrorDetected(errorString);
 }
 
-Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap)
+void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap)
 {
     if (mnemonic == "org")
     {
@@ -543,30 +375,22 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
         int numberOfArguments = argumentList.size();
 
         if (numberOfArguments != 1)
-            return wrongNumberOfArguments;
-
+            throw wrongNumberOfArguments;
         if (!isValidAddress(argumentList.first()))
-            return invalidAddress;
+            throw invalidAddress;
 
         PC->setValue(argumentList.first().toInt(0));
     }
     else if (QRegExp("da?[bw]").exactMatch(mnemonic))
     {
         QStringList argumentList;
-        try
-        {
-            argumentList = splitArguments(arguments);
-        }
-        catch (ErrorCode errorCode)
-        {
-            return errorCode;
-        }
+        argumentList = splitArguments(arguments);
 
         int numberOfArguments = argumentList.size();
         int bytesPerArgument = QRegExp("da?b").exactMatch(mnemonic) ? 1 : 2;
 
         if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments > 1)
-            return wrongNumberOfArguments;
+            throw wrongNumberOfArguments;
 
         if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments == 0)
             argumentList.append("0"); // Default to argument 0 in case of DB and DW
@@ -576,24 +400,22 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
         {
             if (mnemonic == "dab" || mnemonic == "daw")
             {
-                return invalidArgument;
+                throw invalidArgument;
             }
             else if (reserveOnly)
             {
-                return reserveAssemblerMemory(argumentList.first().mid(1).toInt() * bytesPerArgument);
+                reserveAssemblerMemory(argumentList.first().mid(1).toInt() * bytesPerArgument);
             }
             else // Skip bytes
             {
                 for (int i = 0; i < argumentList.first().mid(1).toInt()*bytesPerArgument; i++)
                     PC->incrementValue();
-
-                return noError;
             }
         }
 
         if (reserveOnly)
         {
-            return reserveAssemblerMemory(numberOfArguments * bytesPerArgument); // Increments PC
+            reserveAssemblerMemory(numberOfArguments * bytesPerArgument); // Increments PC
         }
         else
         {
@@ -612,7 +434,7 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
                 else if (labelPCMap.contains(argument.toLower()))
                 {
                     if (mnemonic == "dab" || mnemonic == "daw")
-                        return invalidArgument;
+                        throw invalidArgument;
 
                     value = labelPCMap.value(argument.toLower());
                 }
@@ -626,9 +448,9 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
 
                     // Check if invalid
                     if (!ok)
-                        return invalidArgument;
+                        throw invalidArgument;
                     else if (!isValidNBytesValue(QString::number(value), bytesPerArgument) || value < 0)
-                        return invalidValue;
+                        throw invalidValue;
                 }
 
                 // Process decimal number
@@ -640,9 +462,9 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
 
                     // Check if invalid
                     if (!ok)
-                        return invalidArgument;
+                        throw invalidArgument;
                     else if (!isValidNBytesValue(argument, bytesPerArgument))
-                        return invalidValue;
+                        throw invalidValue;
 
                     //value = convertToUnsigned(argument.toInt(), bytesPerArgument);
                 }
@@ -663,16 +485,12 @@ Machine::ErrorCode Machine::obeyDirective(QString mnemonic, QString arguments, b
     }
     else
     {
-        return invalidInstruction;
+        throw invalidInstruction;
     }
-
-    return noError;
 }
 
 void Machine::assemble(QString sourceCode)
 {
-    Machine::ErrorCode errorCode;
-
     running = false;
     buildSuccessful = false;
 
@@ -680,12 +498,12 @@ void Machine::assemble(QString sourceCode)
     // Simplify source code
     //////////////////////////////////////////////////
 
-    QStringList sourceLines = sourceCode.split("\n"); //separa o arquivo fonte por linhas de codigo
+    QStringList sourceLines = sourceCode.split("\n"); // Split source code to individual lines
 
-    // Strip comments and extra spaces:
+    // Strip comments and extra spaces
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
-        sourceLines[lineNumber] = sourceLines[lineNumber].section(";", 0, 0).trimmed(); //elimina os comentarios do codigo
+        sourceLines[lineNumber] = sourceLines[lineNumber].section(";", 0, 0).trimmed();
     }
 
 
@@ -703,58 +521,52 @@ void Machine::assemble(QString sourceCode)
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
-        //////////////////////////////////////////////////
-        // Read labels
-        //////////////////////////////////////////////////
-
-        if (sourceLines[lineNumber].contains(":")) // If getLabel found a label
+        try
         {
-            QString labelName = sourceLines[lineNumber].section(":", 0, 0);
+            //////////////////////////////////////////////////
+            // Read labels
+            //////////////////////////////////////////////////
 
-            // Check if label name is valid:
-            if (!validLabel.exactMatch(labelName.toLower()))
+            if (sourceLines[lineNumber].contains(":")) // If getLabel found a label
             {
-                emitError(lineNumber, invalidLabel);
-                return;
+                QString labelName = sourceLines[lineNumber].section(":", 0, 0);
+
+                // Check for invalid or duplicated label
+                if (!validLabel.exactMatch(labelName.toLower()))
+                    throw invalidLabel;
+                if (labelPCMap.contains(labelName.toLower()))
+                    throw duplicatedLabel;
+
+                labelPCMap.insert(labelName.toLower(), PC->getValue()); // Add to map
+                sourceLines[lineNumber] = sourceLines[lineNumber].replace(labelName + ":", "").trimmed(); // Remove label from sourceLines
             }
 
-            // Check for duplicated labels:
-            if (labelPCMap.contains(labelName.toLower()))
-            {
-                emitError(lineNumber, duplicatedLabel);
-                return;
-            }
 
-            labelPCMap.insert(labelName.toLower(), PC->getValue()); // Add to map
-            sourceLines[lineNumber] = sourceLines[lineNumber].replace(labelName + ":", "").trimmed(); // Remove label from sourceLines
+
+            //////////////////////////////////////////////////
+            // Reserve memory for instructions/directives
+            //////////////////////////////////////////////////
+
+            if (!sourceLines[lineNumber].isEmpty())
+            {
+                QString mnemonic = sourceLines[lineNumber].section(whitespaces, 0, 0).toLower();
+
+                const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+                if (instruction != NULL)
+                {
+                    reserveAssemblerMemory(instruction->getSize());
+                }
+                else // Directive
+                {
+                    QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
+                    obeyDirective(mnemonic, arguments, true, labelPCMap);
+                }
+            }
         }
-
-
-
-        //////////////////////////////////////////////////
-        // Reserve memory for instructions/directives
-        //////////////////////////////////////////////////
-
-        if (!sourceLines[lineNumber].isEmpty())
+        catch (ErrorCode errorCode)
         {
-            QString mnemonic = sourceLines[lineNumber].section(whitespaces, 0, 0).toLower();
-
-            const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-            if (instruction != NULL)
-            {
-                errorCode = reserveAssemblerMemory(instruction->getSize());
-            }
-            else // Directive
-            {
-                QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
-                errorCode = obeyDirective(mnemonic, arguments, true, labelPCMap);
-            }
-
-            if (errorCode)
-            {
-                emitError(lineNumber, errorCode);
-                return;
-            }
+            emitError(lineNumber, errorCode);
+            return;
         }
     }
 
@@ -769,30 +581,32 @@ void Machine::assemble(QString sourceCode)
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
-        correspondingAddress[lineNumber] = PC->getValue();
-
-        if (!sourceLines[lineNumber].isEmpty())
+        try
         {
-            QString mnemonic  = sourceLines[lineNumber].section(whitespaces, 0, 0).toLower();
-            QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
+            correspondingAddress[lineNumber] = PC->getValue();
 
-            const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-            if (instruction != NULL)
+            if (!sourceLines[lineNumber].isEmpty())
             {
-                correspondingLine[PC->getValue()] = lineNumber;
-                errorCode = mountInstruction(mnemonic, arguments.toLower(), labelPCMap);
-            }
-            else // Directive
-            {
-                correspondingLine[PC->getValue()] = lineNumber;
-                errorCode = obeyDirective(mnemonic, arguments, false, labelPCMap);
-            }
+                QString mnemonic  = sourceLines[lineNumber].section(whitespaces, 0, 0).toLower();
+                QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
 
-            if (errorCode)
-            {
-                emitError(lineNumber, errorCode);
-                return;
+                const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+                if (instruction != NULL)
+                {
+                    correspondingLine[PC->getValue()] = lineNumber;
+                    mountInstruction(mnemonic, arguments.toLower(), labelPCMap);
+                }
+                else // Directive
+                {
+                    correspondingLine[PC->getValue()] = lineNumber;
+                    obeyDirective(mnemonic, arguments, false, labelPCMap);
+                }
             }
+        }
+        catch (ErrorCode errorCode)
+        {
+            emitError(lineNumber, errorCode);
+            return;
         }
     }
 
