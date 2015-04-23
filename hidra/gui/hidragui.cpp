@@ -196,10 +196,12 @@ void HidraGui::updateMemoryTable()
     int base = showHexValues? 16 : 10;
 
     QModelIndex index;
+    int currentLine = machine->getPCCorrespondingLine();
 
     for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
     {
-        QColor lineColor;
+        QColor rowColor;
+        int value = machine->getMemoryValue(byteAddress);
 
         // Column 0: PC Arrow
         index = model.index(byteAddress, 0);
@@ -211,26 +213,22 @@ void HidraGui::updateMemoryTable()
 
         // Column 2: Byte value
         index = model.index(byteAddress, 2);
-        model.setData(index, QString::number(machine->getMemoryValue(byteAddress), base).toUpper());
+        model.setData(index, QString::number(value, base).toUpper());
 
         // Highlight current instruction's row
-        if (machine->getPCCorrespondingLine() == machine->getAddressCorrespondingLine(byteAddress) &&
-            machine->getPCCorrespondingLine() != -1)
-        {
-            lineColor = QColor(255, 240, 0); // Yellow
-        }
+        if (currentLine == machine->getAddressCorrespondingLine(byteAddress) && currentLine >= 0)
+            rowColor = QColor(255, 240, 0); // Yellow
         else
-        {
-            lineColor =  Qt::white;
-        }
+            rowColor =  Qt::white;
 
         for (int column=0; column<3; column++)
         {
-            model.item(byteAddress, column)->setBackground(lineColor);
+            model.item(byteAddress, column)->setBackground(rowColor);
         }
-    }
 
-    // TODO Binary tooltip/status bar
+        // Display binary tooltip
+        model.item(byteAddress, 2)->setToolTip(QString("%1").arg(value, 8, 2, QChar('0')));
+    }
 
     // Update all cells
     emit model.dataChanged(model.index(0, 0), model.index(memorySize, 0));

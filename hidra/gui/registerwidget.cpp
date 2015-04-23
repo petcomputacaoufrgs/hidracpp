@@ -18,6 +18,7 @@ RegisterWidget::~RegisterWidget()
 void RegisterWidget::setValue(int value)
 {
     ui->registerValue->display(value);
+    this->setToolTip(QString("%1").arg(value, 8, 2, QChar('0'))); // Update tooltip
 }
 
 void RegisterWidget::setMode(bool hexMode)
