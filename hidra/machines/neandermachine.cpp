@@ -23,7 +23,7 @@ NeanderMachine::NeanderMachine()
     assemblerMemory = QVector<Byte*>(MEM_SIZE);
     reserved = QVector<bool>(MEM_SIZE);
 
-    correspondingLine = QVector<int>(MEM_SIZE); // Each PC value can have its corresponding line of code
+    correspondingLine = QVector<int>(MEM_SIZE, -1); // Each PC value may be associated with a line of code
 
     for (int i=0; i<memory.size(); i++)
         memory[i] = new Byte();

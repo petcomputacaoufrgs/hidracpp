@@ -83,6 +83,14 @@ int Machine::getPCCorrespondingLine()
         return -1;
 }
 
+int Machine::getAddressCorrespondingLine(int address)
+{
+    if (!correspondingLine.isEmpty() && address >= 0 && address < correspondingLine.size())
+        return correspondingLine[address];
+    else
+        return -1;
+}
+
 int Machine::getLineCorrespondingAddress(int line)
 {
     if (line >= 0 && line < correspondingAddress.size())
@@ -598,11 +606,16 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
+                    // TODO: associateLine instead on FIRST PASS
                     correspondingLine[PC->getValue()] = lineNumber;
+                    if (instruction->getSize() == 2)
+                        correspondingLine[(PC->getValue() + 1) % 256] = lineNumber;
+
                     mountInstruction(mnemonic, arguments.toLower(), labelPCMap);
                 }
                 else // Directive
                 {
+                    // TODO: correspondingLine for arrays (DAB, DAW)
                     correspondingLine[PC->getValue()] = lineNumber;
                     obeyDirective(mnemonic, arguments, false, labelPCMap);
                 }

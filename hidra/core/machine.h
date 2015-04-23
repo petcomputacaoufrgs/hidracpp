@@ -101,6 +101,7 @@ public:
     void setPCValue(int value);
 
     int getPCCorrespondingLine();
+    int getAddressCorrespondingLine(int address);
     int getLineCorrespondingAddress(int line);
 
     QVector<Instruction *> getInstructions() const;
