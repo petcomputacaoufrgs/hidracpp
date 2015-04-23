@@ -303,9 +303,7 @@ QStringList Machine::splitArguments(QString arguments)
         numberString = "";
     }
 
-    if (finalArgumentList.count() == 0)
-        throw wrongNumberOfArguments;
-    else if (insideString)
+    if (insideString)
         throw invalidString;
 
     return finalArgumentList;
@@ -397,11 +395,14 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
         int numberOfArguments = argumentList.size();
         int bytesPerArgument = QRegExp("da?b").exactMatch(mnemonic) ? 1 : 2;
 
-        if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments > 1)
-            throw wrongNumberOfArguments;
-
         if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments == 0)
             argumentList.append("0"); // Default to argument 0 in case of DB and DW
+
+        if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments > 1) // Too much arguments
+            throw wrongNumberOfArguments;
+
+        if ((mnemonic == "dab" || mnemonic == "daw") && numberOfArguments < 1) // No arguments
+            throw wrongNumberOfArguments;
 
         // Memory allocation
         if (argumentList.first().at(0) == ALLOCATE_SYMBOL)
