@@ -86,7 +86,7 @@ private:
     void clearFlagWidgets();
 
     void updateMachineInterfaceComponents();
-    void updateMemoryMap();
+    void updateMemoryTable();
     void updateRegisterWidgets();
     void updateFlagWidgets();
     void updateCodeEditor();

@@ -181,7 +181,7 @@ void HidraGui::clearFlagWidgets()
 
 void HidraGui::updateMachineInterfaceComponents()
 {
-    updateMemoryMap();
+    updateMemoryTable();
     updateFlagWidgets();
     updateRegisterWidgets();
     updateCodeEditor();
@@ -189,7 +189,7 @@ void HidraGui::updateMachineInterfaceComponents()
     updateStatusBar();
 }
 
-void HidraGui::updateMemoryMap()
+void HidraGui::updateMemoryTable()
 {
     int memorySize = machine->getMemorySize();
     int pcValue = machine->getPCValue();
@@ -199,9 +199,12 @@ void HidraGui::updateMemoryMap()
 
     for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
     {
+        //QColor lineColor = byteAddress == pcValue ? QColor(255, 240, 0) : Qt::white; // Yellow / white
+
         // Column 0: PC Arrow
         index = model.index(byteAddress, 0);
         model.setData(index, byteAddress == pcValue ? QString::fromUtf8("\u2192") : ""); // Unicode arrow / blank
+        //model.item(byteAddress, 0)->setBackground(lineColor);
 
         // Column 1: Byte address
         index = model.index(byteAddress, 1);

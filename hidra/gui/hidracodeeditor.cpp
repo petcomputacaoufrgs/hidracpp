@@ -71,7 +71,7 @@ void HidraCodeEditor::highlightCurrentLine()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(QColor(240, 240, 240));
+        QColor lineColor = QColor(240, 240, 240);
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
