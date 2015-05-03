@@ -76,48 +76,6 @@ void NeanderMachine::printStatusDebug()
     std::cout << "Z: "  << (Z->getValue()? "1" : "0") << std::endl;
 }
 
-void NeanderMachine::load(QString filename)
-{
-    bool err = false;
-    QFile memFile(filename);
-    memFile.open(QFile::ReadOnly);
-    QDataStream stream(&memFile);
-    stream.setByteOrder(QDataStream::BigEndian);
-    unsigned char buffer;
-    unsigned char machineIdentifier[4] = {3, 'N', 'D', 'R'};    //machine identifier
-    int i;
-    for(i = 0; i < 4; i++) {
-        stream >> buffer;
-        if(buffer != machineIdentifier[i]) {
-            err = true;
-            break;
-        }
-    }
-    i = 0;
-    if(!err) {
-        while(!stream.atEnd()) {
-            stream >> buffer;
-            memory[i++]->setValue((unsigned char)buffer);
-            stream >> buffer;
-        }
-    }
-    memFile.close();
-}
-
-void NeanderMachine::save(QString filename){
-    QFile memFile(filename);
-    memFile.open(QFile::WriteOnly);
-    QDataStream stream(&memFile);
-    stream.setByteOrder(QDataStream::BigEndian);
-
-    stream << (unsigned char)3 << (unsigned char)'N' << (unsigned char)'D' << (unsigned char)'R'; //prefixo identificador da maquina (basicamente o que muda em cada maquina
-
-    foreach (Byte *byte, memory) {
-        stream << (unsigned char)byte->getValue() << (unsigned char)0;
-    }
-    memFile.close();
-}
-
 void NeanderMachine::step()
 {
     int jumpAddress;

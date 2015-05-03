@@ -10,11 +10,8 @@ public:
 
     virtual void printStatusDebug();
 
-    virtual void load(QString filename);
-    virtual void save(QString filename);
-
     virtual void step();
-    //virtual void run();
+    //virtual voiexportMemoryn();
 
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);

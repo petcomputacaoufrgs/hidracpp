@@ -84,60 +84,6 @@ void RamsesMachine::printStatusDebug()
     std::cout << "RX: " << (int)RX->getValue() << std::endl;;
 }
 
-void RamsesMachine::load(QString filename)
-{
-    bool err = false;
-    QFile memFile(filename);
-    memFile.open(QFile::ReadOnly);
-    QDataStream stream(&memFile);
-    stream.setByteOrder(QDataStream::BigEndian);
-    unsigned char buffer;
-    unsigned char IDBuffer[4];
-    unsigned char olderMachineIdentifier[4] = {3, 'N', 'D', 'R'};    //Ramses is code-compatible with Neander
-    unsigned char machineIdentifier[4] = {3, 'R', 'M', 'S'};    //machine identifier
-    stream >> IDBuffer[0];
-    stream >> IDBuffer[1];
-    stream >> IDBuffer[2];
-    stream >> IDBuffer[3];
-    int i;
-    for(i = 0; i < 4; i++) {
-        if(IDBuffer[i] != machineIdentifier[i]) {
-            err = true;
-            break;
-        }
-    }
-    for(i = 0; i < 4; i++) {
-        if(IDBuffer[i] != olderMachineIdentifier[i]) {
-            err = true;
-            break;
-        }
-    }
-    i = 0;
-    if(!err) {
-        while(!stream.atEnd()) {
-            stream >> buffer;
-            memory[i++]->setValue((unsigned char)buffer);
-            stream >> buffer;
-        }
-    }
-    memFile.close();
-}
-
-void RamsesMachine::save(QString filename)
-{
-    QFile memFile(filename);
-    memFile.open(QFile::WriteOnly);
-    QDataStream stream(&memFile);
-    stream.setByteOrder(QDataStream::BigEndian);
-
-    stream << (unsigned char)3 << (unsigned char)'R' << (unsigned char)'M' << (unsigned char)'S'; //prefixo identificador da maquina (basicamente o que muda em cada maquina
-
-    foreach (Byte *byte, memory) {
-        stream << (unsigned char)byte->getValue() << (unsigned char)0;
-    }
-    memFile.close();
-}
-
 void RamsesMachine::step()
 {
     Byte *operand = NULL; // Final operand byte

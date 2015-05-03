@@ -5,6 +5,76 @@ Machine::Machine(QObject *parent) :
 {
 }
 
+// Returns true if successful
+FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
+{
+    char byte;
+
+    // Open file
+    memFile.open(QFile::ReadOnly);
+
+    if (memFile.size() != 1 + identifier.length() + memory.size() * 2)
+        return FileErrorCode::incorrectSize;
+
+    // Read identifier length
+    memFile.getChar(&byte);
+    if (byte != identifier.length())
+        return FileErrorCode::invalidIdentifier; // Incorrect identifier length
+
+    // Read identifier
+    for (int i = 0; i < identifier.length(); i++)
+    {
+        memFile.getChar(&byte);
+
+        if (byte != identifier[i].toLatin1())
+            return FileErrorCode::invalidIdentifier; // Wrong character
+    }
+
+    // Read memory
+    for (int index = 0; index < memory.length(); index++)
+    {
+        memFile.getChar(&byte);
+        memory[index]->setValue(byte);
+        memFile.getChar(&byte); // Skip byte
+    }
+
+    // Return error status
+    if (memFile.error() != QFileDevice::NoError)
+        return FileErrorCode::inputOutput;
+    else
+        return FileErrorCode::noError;
+}
+
+// Returns true if successful
+FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
+{
+
+    // Open file
+    memFile.open(QFile::WriteOnly);
+
+    // Write identifier length
+    memFile.putChar((unsigned char)identifier.length());
+
+    // Write identifier
+    for (int i = 0; i < identifier.length(); i++)
+    {
+        memFile.putChar(identifier.at(i).toLatin1());
+    }
+
+    // Write memory bytes
+    foreach (Byte *byte, memory)
+    {
+        memFile.putChar(byte->getValue());
+        memFile.putChar(0);
+    }
+
+    // Return error status
+    if (memFile.error() != QFileDevice::NoError)
+        return FileErrorCode::inputOutput;
+    else
+        return FileErrorCode::noError;
+}
+
 int Machine::getBreakpoint() const
 {
     return breakpoint;

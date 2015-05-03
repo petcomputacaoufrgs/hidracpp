@@ -304,7 +304,7 @@ void HidraGui::saveAs()
     if (currentMachineName == "Ahmes")
         extension = "Fonte do Ahmes (*.ahd)";
     else if (currentMachineName == "Ramses")
-        extension = "Fonte do Ramses (*.rms)";
+        extension = "Fonte do Ramses (*.rad)";
 
     QString filename = QFileDialog::getSaveFileName(this,
                                                    "Salvar código-fonte", "",
@@ -456,7 +456,7 @@ void HidraGui::on_actionOpen_triggered()
             selectMachine("Neander");
         else if (extension == "ahd")
             selectMachine("Ahmes");
-        else if (extension == "rms")
+        else if (extension == "rad")
             selectMachine("Ramses");
 
         modifiedFile = false;
@@ -487,9 +487,35 @@ void HidraGui::on_actionImportMemory_triggered()
 
     if (!filename.isEmpty())
     {
-        // Load memory
-        machine->load(filename);
+        QString errorMessage;
+
+        switch (machine->importMemory(filename))
+        {
+            case FileErrorCode::noError:
+                break;
+
+            case FileErrorCode::inputOutput:
+                errorMessage = "Erro na leitura do arquivo.";
+                break;
+
+            case FileErrorCode::incorrectSize:
+                errorMessage = "Arquivo de tamanho incorreto.";
+                break;
+
+            case Filea::invalidIdentifier:
+                errorMessage = "Arquivo incompatível com a máquina selecionada.";
+                break;
+
+            default:
+                errorMessage = "Erro não especificado.";
+                break;
+        }
+
+        if (!errorMessage.isEmpty())
+            QMessageBox::information(this, "Erro ao importar memória.", errorMessage);
     }
+
+    updateMachineInterface();
 }
 
 void HidraGui::on_actionExportMemory_triggered()
@@ -500,8 +526,8 @@ void HidraGui::on_actionExportMemory_triggered()
 
     if (!filename.isEmpty())
     {
-        // Save memory
-        machine->save(filename);
+        if (machine->exportMemory(filename) != FileErrorCode::noError)
+            QMessageBox::information(this, "Erro ao exportar memória.", "Erro ao exportar memória.");
     }
 }
 

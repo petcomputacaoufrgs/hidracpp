@@ -15,6 +15,17 @@
 #include "register.h"
 #include "instruction.h"
 
+namespace FileErrorCode
+{
+    enum FileErrorCode
+    {
+        noError = 0,
+        inputOutput,
+        incorrectSize,
+        invalidIdentifier,
+    };
+}
+
 class Machine : public QObject
 {
     Q_OBJECT
@@ -44,8 +55,8 @@ public:
 
     virtual void printStatusDebug() = 0;
 
-    virtual void load(QString filename) = 0;
-    virtual void save(QString filename) = 0;
+    FileErrorCode::FileErrorCode importMemory(QString filename);
+    FileErrorCode::FileErrorCode exportMemory(QString filename);
 
     virtual void step() = 0;
     //virtual void run() = 0;
