@@ -3,10 +3,20 @@
 HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
     // Set font to Courier (monospaced)
-    this->setFont(QFont("Courier", 10));
+    QFont font;
+    font.setFamily("Courier");
+    font.setStyleHint(QFont::Monospace);
+    font.setFixedPitch(true);
+    font.setPointSize(10);
+
+    // Set TAB size to 8 space characters
+    QFontMetrics metrics(font);
+    this->setTabStopWidth(8 * metrics.width(' '));
+
+    this->setFont(font);
 
     lineNumberArea = new LineNumberArea(this);
-    lineNumberArea->setFont(QFont("Courier", 10));
+    lineNumberArea->setFont(font);
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));

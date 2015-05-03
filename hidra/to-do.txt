@@ -6,8 +6,8 @@ Hidra - To-do
 
 Código
 
-- Criar tableViewMemoryData (ao lado de tableViewMemoryInstructions),
-  para visualizar a memória de dados (128 em diante, sem indicador de PC)
+- Criar um .ini para lembar "exibir hexa, memória auxiliar" e último local carregado/salvo
+- Arquivo de recuperação criado de 3 em 3 minutos para evitar frustração (?)
 
 Documentação
 
