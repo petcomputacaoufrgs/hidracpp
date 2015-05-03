@@ -9,6 +9,7 @@ Machine::Machine(QObject *parent) :
 FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
 {
     char byte;
+    QFile memFile(filename); // Implicitly closed
 
     // Open file
     memFile.open(QFile::ReadOnly);
@@ -48,6 +49,7 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
 // Returns true if successful
 FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
 {
+    QFile memFile(filename); // Implicitly closed
 
     // Open file
     memFile.open(QFile::WriteOnly);

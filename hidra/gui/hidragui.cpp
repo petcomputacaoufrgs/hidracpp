@@ -23,7 +23,10 @@ HidraGui::HidraGui(QWidget *parent) :
 
     ui->layoutRegisters->setAlignment(Qt::AlignTop);
     ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
+
     ui->tableViewMemoryInstructions->setEditTriggers(false);
+    ui->tableViewMemoryData->setEditTriggers(false);
+    ui->tableViewMemoryData->setVisible(false);
 
     //instructionAccessCounter.setStyleSheet("QLabel { color : gray; }");
     ui->statusBar->addPermanentWidget(&instructionAccessCounter, 0.25);
@@ -99,21 +102,43 @@ void HidraGui::initializeMachineInterfaceComponents()
 
 void HidraGui::initializeMemoryTable()
 {
-    ui->tableViewMemoryInstructions->setModel(&model);
+    ui->tableViewMemoryInstructions->setModel(&instructionsTableModel);
+    ui->tableViewMemoryData->setModel(&dataTableModel);
 
     // Set table size
-    model.setRowCount(machine->getMemorySize());
-    model.setColumnCount(3);
+    instructionsTableModel.setRowCount(machine->getMemorySize());
+    instructionsTableModel.setColumnCount(3);
+    dataTableModel.setRowCount(machine->getMemorySize());
+    dataTableModel.setColumnCount(2);
+
+    // Initialize items
+    for (int row = 0; row < machine->getMemorySize(); row++)
+    {
+        instructionsTableModel.setData(instructionsTableModel.index(row, 0), "");
+        instructionsTableModel.setData(instructionsTableModel.index(row, 1), "");
+        instructionsTableModel.setData(instructionsTableModel.index(row, 2), "");
+        dataTableModel.setData(dataTableModel.index(row, 0), "");
+        dataTableModel.setData(dataTableModel.index(row, 1), "");
+    }
 
     // Set table headers
-    model.setHeaderData(0, Qt::Horizontal, " ");
-    model.setHeaderData(1, Qt::Horizontal, "End");
-    model.setHeaderData(2, Qt::Horizontal, "Valor");
+    instructionsTableModel.setHeaderData(0, Qt::Horizontal, " ");
+    instructionsTableModel.setHeaderData(1, Qt::Horizontal, "End  ");
+    instructionsTableModel.setHeaderData(2, Qt::Horizontal, "Valor");
+    dataTableModel.setHeaderData(0, Qt::Horizontal, "End  ");
+    dataTableModel.setHeaderData(1, Qt::Horizontal, "Valor");
 
     // Adjust table settings
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryInstructions->resizeRowsToContents();
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
+    ui->tableViewMemoryData->resizeColumnsToContents();
+    ui->tableViewMemoryData->resizeRowsToContents();
+    ui->tableViewMemoryData->verticalHeader()->hide();
+
+    // Scroll to appropriate position
+    ui->tableViewMemoryInstructions->scrollTo(instructionsTableModel.index(0, 0));
+    ui->tableViewMemoryData->scrollTo(dataTableModel.index(128, 0));
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -157,7 +182,8 @@ void HidraGui::clearMachineInterfaceComponents()
 
 void HidraGui::clearMemoryTable()
 {
-    model.clear();
+    instructionsTableModel.clear();
+    dataTableModel.clear();
 }
 
 void HidraGui::clearRegisterWidgets()
@@ -206,17 +232,16 @@ void HidraGui::updateMemoryTable()
         QColor rowColor;
         int value = machine->getMemoryValue(byteAddress);
 
-        // Column 0: PC Arrow
-        index = model.index(byteAddress, 0);
-        model.setData(index, byteAddress == pcValue ? QString::fromUtf8("\u2192") : ""); // Unicode arrow / blank
+        // Column 0: PC Arrow (instructions only)
+        instructionsTableModel.item(byteAddress, 0)->setText(byteAddress == pcValue ? QString::fromUtf8("\u2192") : ""); // Unicode arrow / blank
 
         // Column 1: Byte address
-        index = model.index(byteAddress, 1);
-        model.setData(index, QString::number(byteAddress, base).toUpper());
+        instructionsTableModel.item(byteAddress, 1)->setText(QString::number(byteAddress, base).toUpper());
+        dataTableModel.item(        byteAddress, 0)->setText(QString::number(byteAddress, base).toUpper());
 
         // Column 2: Byte value
-        index = model.index(byteAddress, 2);
-        model.setData(index, QString::number(value, base).toUpper());
+        instructionsTableModel.item(byteAddress, 2)->setText(QString::number(value, base).toUpper());
+        dataTableModel.item(        byteAddress, 1)->setText(QString::number(value, base).toUpper());
 
         // Highlight current instruction's row
         if (currentLine == machine->getAddressCorrespondingLine(byteAddress) && currentLine >= 0)
@@ -224,17 +249,20 @@ void HidraGui::updateMemoryTable()
         else
             rowColor =  Qt::white;
 
+        // Set yellow background (instructions only)
         for (int column=0; column<3; column++)
         {
-            model.item(byteAddress, column)->setBackground(rowColor);
+            instructionsTableModel.item(byteAddress, column)->setBackground(rowColor);
         }
 
-        // Display binary tooltip
-        model.item(byteAddress, 2)->setToolTip(QString("%1").arg(value, 8, 2, QChar('0')));
+        // Set binary tooltip
+        instructionsTableModel.item(byteAddress, 2)->setToolTip(QString("%1").arg(value, 8, 2, QChar('0')));
+        dataTableModel.item(byteAddress, 1)->setToolTip(QString("%1").arg(value, 8, 2, QChar('0')));
     }
 
     // Update all cells
-    emit model.dataChanged(model.index(0, 0), model.index(memorySize, 0));
+    emit instructionsTableModel.dataChanged(instructionsTableModel.index(0, 0), instructionsTableModel.index(memorySize, 0));
+    emit dataTableModel.dataChanged(dataTableModel.index(0, 0), dataTableModel.index(memorySize, 0));
 }
 
 void HidraGui::updateRegisterWidgets()
@@ -502,7 +530,7 @@ void HidraGui::on_actionImportMemory_triggered()
                 errorMessage = "Arquivo de tamanho incorreto.";
                 break;
 
-            case Filea::invalidIdentifier:
+            case FileErrorCode::invalidIdentifier:
                 errorMessage = "Arquivo incompatível com a máquina selecionada.";
                 break;
 
@@ -546,6 +574,15 @@ void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &i
     updateMachineInterface();
 }
 
+void HidraGui::on_tableViewMemoryData_clicked(const QModelIndex &index)
+{
+    int value = machine->getMemoryValue(index.row());
+    ui->statusBar->showMessage(QString("Dec: %1 | Hex: %2 | Bin: %3")
+                                       .arg(value)
+                                       .arg(value, 2, 16, QChar('0'))
+                                       .arg(value, 8, 2, QChar('0')));
+}
+
 void HidraGui::on_actionResetRegisters_triggered()
 {
     machine->clearRegisters();
@@ -572,6 +609,12 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
         registerWidgets.at(i)->setMode(showHexValues);
 
     updateMachineInterface();
+}
+
+
+void HidraGui::on_actionDisplayDataTable_toggled(bool checked)
+{
+    ui->tableViewMemoryData->setVisible(checked);
 }
 
 void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
@@ -626,3 +669,4 @@ void HidraGui::closeEvent(QCloseEvent *event)
     else
         event->ignore();
 }
+

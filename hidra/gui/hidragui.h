@@ -64,6 +64,8 @@ private slots:
 
     void on_tableViewMemoryInstructions_clicked(const QModelIndex &index);
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
+    void on_tableViewMemoryData_clicked(const QModelIndex &index);
+
     void on_actionResetRegisters_triggered();
     void on_actionSetBreakpoint_triggered();
     void on_actionHexadecimalMode_toggled(bool checked);
@@ -73,6 +75,8 @@ private slots:
     void on_actionReportProblem_triggered();
     void on_actionClose_triggered();
     void closeEvent(QCloseEvent *event);
+
+    void on_actionDisplayDataTable_toggled(bool checked);
 
 private:
 
@@ -101,7 +105,7 @@ private:
     bool modifiedFile, sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
     bool forceSaveAs; // Set to true when Save should trigger SaveAs
     bool showHexValues;
-    QStandardItemModel model;
+    QStandardItemModel instructionsTableModel, dataTableModel;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
     QString currentMachineName;

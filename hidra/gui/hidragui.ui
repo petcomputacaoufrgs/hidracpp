@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>774</width>
-    <height>388</height>
+    <width>797</width>
+    <height>412</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -115,6 +115,40 @@
      </widget>
     </item>
     <item>
+     <widget class="QTableView" name="tableViewMemoryData">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::SingleSelection</enum>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QWidget" name="areaSimulator" native="true">
       <property name="minimumSize">
        <size>
@@ -186,7 +220,7 @@
                <x>0</x>
                <y>0</y>
                <width>279</width>
-               <height>197</height>
+               <height>221</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -343,13 +377,14 @@
    <zorder>areaEditor</zorder>
    <zorder>areaSimulator</zorder>
    <zorder>tableViewMemoryInstructions</zorder>
+   <zorder>tableViewMemoryData</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>774</width>
+     <width>797</width>
      <height>21</height>
     </rect>
    </property>
@@ -385,6 +420,7 @@
     <addaction name="actionImportMemory"/>
     <addaction name="actionExportMemory"/>
     <addaction name="separator"/>
+    <addaction name="actionDisplayDataTable"/>
     <addaction name="actionHexadecimalMode"/>
    </widget>
    <addaction name="menuProgram"/>
@@ -490,6 +526,14 @@
    </property>
    <property name="shortcut">
     <string>F12</string>
+   </property>
+  </action>
+  <action name="actionDisplayDataTable">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Exibir tabela de dados</string>
    </property>
   </action>
  </widget>
