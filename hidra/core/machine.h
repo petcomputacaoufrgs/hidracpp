@@ -52,6 +52,7 @@ public:
     QChar   SINGLE_QUOTE = '\'';
 
     explicit Machine(QObject *parent = 0);
+    ~Machine();
 
     virtual void printStatusDebug() = 0;
 

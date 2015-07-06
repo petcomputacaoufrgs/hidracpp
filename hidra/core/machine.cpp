@@ -5,6 +5,15 @@ Machine::Machine(QObject *parent) :
 {
 }
 
+Machine::~Machine()
+{
+    qDeleteAll(memory);
+    qDeleteAll(assemblerMemory);
+    qDeleteAll(registers);
+    qDeleteAll(flags);
+    qDeleteAll(instructions);
+}
+
 // Returns true if successful
 FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
 {

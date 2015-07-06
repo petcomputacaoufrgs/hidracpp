@@ -53,6 +53,8 @@ void HidraGui::selectMachine(QString machineName)
 {
     if (currentMachineName != machineName)
     {
+        delete machine;
+
         if (machineName == "Ahmes")
             machine = new AhmesMachine();
         else if (machineName == "Ramses")
