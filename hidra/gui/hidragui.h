@@ -85,11 +85,13 @@ private:
     void initializeRegisterWidgets();
     void initializeFlagWidgets();
     void initializeHighlighter();
+    void initializeInstructionsList();
 
     void clearMachineInterfaceComponents();
     void clearMemoryTable();
     void clearRegisterWidgets();
     void clearFlagWidgets();
+    void clearInstructionsList();
 
     void updateMachineInterfaceComponents();
     void updateMemoryTable();

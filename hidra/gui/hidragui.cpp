@@ -100,6 +100,7 @@ void HidraGui::initializeMachineInterfaceComponents()
     initializeFlagWidgets();
     initializeRegisterWidgets();
     initializeHighlighter();
+    initializeInstructionsList();
 }
 
 void HidraGui::initializeMemoryTable()
@@ -169,6 +170,20 @@ void HidraGui::initializeHighlighter()
     highlighter->rehighlight();
 }
 
+void HidraGui::initializeInstructionsList()
+{
+    int i = 0;
+
+    foreach (Instruction *instruction, machine->getInstructions())
+    {
+        QLabel *instructionText = new QLabel(this);
+        instructionText->setText(instruction->getMnemonic().toUpper());
+        instructionText->setEnabled(false);
+        ui->layoutInstructions->addWidget(instructionText, i/6, i%6);
+        i += 1;
+    }
+}
+
 
 
 //////////////////////////////////////////////////
@@ -180,6 +195,7 @@ void HidraGui::clearMachineInterfaceComponents()
     clearMemoryTable();
     clearRegisterWidgets();
     clearFlagWidgets();
+    clearInstructionsList();
 }
 
 void HidraGui::clearMemoryTable()
@@ -202,6 +218,12 @@ void HidraGui::clearFlagWidgets()
         delete ui->layoutFlags->takeAt(0)->widget();
 
     flagWidgets.clear();
+}
+
+void HidraGui::clearInstructionsList()
+{
+    while(ui->layoutInstructions->count() > 0)
+        delete ui->layoutInstructions->takeAt(0)->widget();
 }
 
 
