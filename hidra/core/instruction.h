@@ -14,8 +14,8 @@ public:
         NOP,
         STR, LDR,
         ADD, OR, AND, NOT, SUB,
-        JMP, JN, JZ, JC, JSR,
-        NEG, SHR,
+        JMP, JN, JP, JV, JNV, JZ, JNZ, JC, JNC, JB, JNB, JSR,
+        NEG, SHR, SHL, ROR, ROL,
         HLT,
     };
 

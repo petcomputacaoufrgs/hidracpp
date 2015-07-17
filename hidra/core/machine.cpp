@@ -143,6 +143,17 @@ void Machine::executeInstruction(Instruction *&instruction, int registerId, int 
     case Instruction::NOP:
         break;
 
+    case Instruction::LDR:
+        result = memoryRead(operandAddress);
+        setRegisterValue(registerId, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::STR:
+        result = getRegisterValue(registerId);
+        memoryWrite(operandAddress, result);
+        break;
+
     case Instruction::ADD:
         value1 = getRegisterValue(registerId);
         value2 = memoryRead(operandAddress);
@@ -154,9 +165,142 @@ void Machine::executeInstruction(Instruction *&instruction, int registerId, int 
         updateFlags(result);
         break;
 
+    case Instruction::OR:
+        value1 = getRegisterValue(registerId);
+        value2 = memoryRead(operandAddress);
+        result = (value1 | value2);
+
+        setRegisterValue(registerId, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::AND:
+        value1 = getRegisterValue(registerId);
+        value2 = memoryRead(operandAddress);
+        result = (value1 & value2);
+
+        setRegisterValue(registerId, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::NOT:
+        value1 = getRegisterValue(registerId);
+        result = ~value1 & 0xFF;
+
+        setRegisterValue(registerId, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::SUB:
+        value1 = getRegisterValue(registerId);
+        value2 = memoryRead(operandAddress);
+        result = (value1 - value2) & 0xFF;
+
+        setRegisterValue(registerId, result);
+        // FALTA SETAR OVERFLOW, BORROW E CARRY
+        break;
+
+    case Instruction::JMP:
+        setPCValue(operandAddress);
+        break;
+
     case Instruction::JN:
         if (getFlagValue("N") == true)
             setPCValue(operandAddress);
+        break;
+
+    case Instruction::JP:
+        if (getFlagValue("N") == false)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JV:
+        if (getFlagValue("V") == true)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JNV:
+        if (getFlagValue("V") == false)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JZ:
+        if (getFlagValue("Z") == true)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JNZ:
+        if (getFlagValue("Z") == false)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JC:
+        if (getFlagValue("C") == true)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JNC:
+        if (getFlagValue("C") == false)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JB:
+        if (getFlagValue("B") == true)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JNB:
+        if (getFlagValue("B") == false)
+            setPCValue(operandAddress);
+        break;
+
+    case Instruction::JSR:
+        memoryWrite(operandAddress, getPCValue());
+        setPCValue(operandAddress+1);
+        break;
+
+    case Instruction::NEG:
+        value1 = getRegisterValue(registerId);
+        result = (-value1) & 0xFF;
+
+        setRegisterValue(registerId, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::SHR:
+        value1 = getRegisterValue(registerId);
+        result = (value1 >> 1) & 0xFF;
+
+        setRegisterValue(registerId, result);
+        setCarry(value1 & 0x01);
+        break;
+
+    case Instruction::SHL:
+        value1 = getRegisterValue(registerId);
+        result = (value1 << 1) & 0xFF;
+
+        setRegisterValue(registerId, result);
+        setCarry((value1 & 0x80) ? 1 : 0);
+        break;
+
+    case Instruction::ROR:
+        value1 = getRegisterValue(registerId);
+        result = ((value1 >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
+
+        setRegisterValue(registerId, result);
+        setCarry(value1 & 0x01);
+        break;
+
+    case Instruction::ROL:
+        value1 = getRegisterValue(registerId);
+        result = ((value1 << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
+
+        setRegisterValue(registerId, result);
+        setCarry((value1 & 0x80) ? 1 : 0);
+        break;
+
+    case Instruction::HLT:
+        setRunning(false);
         break;
 
     default:
@@ -226,8 +370,7 @@ void Machine::memoryWrite(int address, int value)
 int Machine::memoryReadNext()
 {
     int value = memoryRead(getPCValue());
-    setPCValue(getPCValue() + 1);
-    accessCount++;
+    incrementPCValue();
     return value;
 }
 
@@ -245,7 +388,7 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode addres
             return immediateAddress;
 
         case AddressingMode::INDEXED: // Indexed addressing mode
-            return memoryRead((memoryRead(immediateAddress) + getRegisterValue("X")) % getMemorySize());
+            return (memoryRead(immediateAddress) + getRegisterValue("X")) % getMemorySize();
     }
 
     return 0;

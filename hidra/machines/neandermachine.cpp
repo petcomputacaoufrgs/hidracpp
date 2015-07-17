@@ -60,7 +60,7 @@ NeanderMachine::NeanderMachine()
     instructions.append(new Instruction(2, "1000....", Instruction::JMP, "jmp a"));
     instructions.append(new Instruction(2, "1001....", Instruction::JN,  "jn a"));
     instructions.append(new Instruction(2, "1010....", Instruction::JZ,  "jz a"));
-    instructions.append(new Instruction(2, "1111....", Instruction::HLT, "hlt a"));
+    instructions.append(new Instruction(1, "1111....", Instruction::HLT, "hlt"));
 
 //    instructions = QVector<Instruction*>(11);
 

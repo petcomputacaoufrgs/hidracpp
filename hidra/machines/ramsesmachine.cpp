@@ -64,9 +64,9 @@ RamsesMachine::RamsesMachine()
     instructions.append(new Instruction(2, "1010....", Instruction::JZ,  "jz a"));
     instructions.append(new Instruction(2, "1011....", Instruction::JC,  "jc a"));
     instructions.append(new Instruction(2, "1100....", Instruction::JSR, "jsr a"));
-    instructions.append(new Instruction(2, "1101....", Instruction::NEG, "neg a"));
-    instructions.append(new Instruction(2, "1110....", Instruction::SHR, "shr a"));
-    instructions.append(new Instruction(2, "1111....", Instruction::HLT, "hlt a"));
+    instructions.append(new Instruction(1, "1101....", Instruction::NEG, "neg r"));
+    instructions.append(new Instruction(1, "1110....", Instruction::SHR, "shr r"));
+    instructions.append(new Instruction(1, "1111....", Instruction::HLT, "hlt"));
 
     clearCounters();
     running = false;
