@@ -8,23 +8,17 @@ class RamsesMachine : public Machine
 public:
     RamsesMachine();
 
-    virtual void printStatusDebug();
-
-    virtual void step();
-    //virtual voiexportMemoryn();
-
     virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
-    virtual Instruction* getInstructionFromValue(int);
-    virtual Instruction* getInstructionFromMnemonic(QString);
+    virtual AddressingMode extractAddressingMode(int byteArray[]);
+    virtual int extractRegisterId(int byteArray[]);
+
+    virtual void setCarry(bool state);
+    virtual void setBorrowOrCarry(bool state);
 
     static const int MEM_SIZE = 256;
-    static const int MAX_VALUE = 255;
+    static const int MAX_VALUE = 255; // Maximum value allowed (inclusive)
     static const int MAX_SIGNED_VALUE = 127; // Maximum positive number for 8-bits in two's complement
-
-private:
-    Register *RA, *RB, *RX;
-    Flag *N, *Z, *C;
 };
 
 #endif // RAMSESMACHINE_H

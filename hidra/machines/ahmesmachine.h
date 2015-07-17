@@ -8,19 +8,15 @@ class AhmesMachine : public Machine
 public:
     AhmesMachine();
 
-    virtual void printStatusDebug();
-
-    virtual void step();
-    //virtual voiexportMemoryn();
-
-    virtual Instruction* getInstructionFromValue(int);
-    virtual Instruction* getInstructionFromMnemonic(QString);
-
     virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     static const int MEM_SIZE = 256;
     static const int MAX_VALUE = 255;
     static const int MAX_SIGNED_VALUE = 127; // Maximum positive number for 8-bits in two's complement
+
+    void setCarry(bool state);
+    void setBorrowOrCarry(bool state);
+    void setOverflow(bool state);
 
 
 private:

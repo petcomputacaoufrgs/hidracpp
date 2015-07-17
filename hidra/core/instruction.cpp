@@ -1,15 +1,27 @@
 #include "instruction.h"
+#include "byte.h"
 
 Instruction::Instruction()
 {
 }
 
-Instruction::Instruction(QString mnemonic, int value, int arguments, int size)
+Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat)
 {
-    this->mnemonic = mnemonic;
-    this->value = value;
-    this->numberOfArguments = arguments;
-    this->size = size;
+    this->numBytes = numBytes;
+    this->bitPattern = bitPattern;
+    this->byteRegExp = QRegExp(bitPattern);
+    this->instructionCode = instructionCode;
+
+    QStringList assemblyFormatList = assemblyFormat.split(" ");
+
+    this->mnemonic = assemblyFormatList.first();
+    assemblyFormatList.removeFirst();
+    this->arguments = assemblyFormatList; // Mnemonic not included
+}
+
+bool Instruction::matchByte(int byte)
+{
+    return byteRegExp.exactMatch(Byte(byte).toString());
 }
 
 QString Instruction::getMnemonic() const
@@ -17,36 +29,29 @@ QString Instruction::getMnemonic() const
     return mnemonic;
 }
 
-void Instruction::setMnemonic(const QString &value)
+QStringList Instruction::getArguments() const
 {
-    this->mnemonic = value;
-}
-int Instruction::getValue() const
-{
-    return value;
+    return arguments;
 }
 
-void Instruction::setValue(int value)
+int Instruction::getByteValue()
 {
-    this->value = value;
+    return Byte(bitPattern).getValue();
 }
 
-int Instruction::getNumberOfArguments() const
+int Instruction::getNumBytes() const
 {
-    return numberOfArguments;
+    return numBytes;
 }
 
-void Instruction::setNumberOfArguments(int value)
+Instruction::InstructionCode Instruction::getInstructionCode() const
 {
-    this->numberOfArguments = value;
+    return instructionCode;
 }
 
-int Instruction::getSize() const
+QString Instruction::getBytePattern() const
 {
-    return size;
+    return bitPattern;
 }
 
-void Instruction::setSize(int size)
-{
-    this->size = size;
-}
+

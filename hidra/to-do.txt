@@ -8,6 +8,8 @@ Código
 
 - Criar um .ini para lembar "exibir hexa, memória auxiliar" e último local carregado/salvo
 - Arquivo de recuperação criado de 3 em 3 minutos para evitar frustração (?)
+- RAMSES: Quarto registrador, instrução deve virar NOP.
+- NEANDER e AHMES: JN etc. sempre devem contar 2 acessos.
 
 Documentação
 

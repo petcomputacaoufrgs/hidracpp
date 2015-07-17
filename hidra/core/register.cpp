@@ -19,12 +19,12 @@ int Register::getValue() const
 
 void Register::setValue(int value)
 {
-    this->value = value  % (1 << numOfBits);
+    this->value = value & ((1 << numOfBits) - 1);
 }
 
 void Register::incrementValue()
 {
-    this->value = (value + 1)  % (1 << numOfBits);
+    setValue(value + 1);
 }
 
 int Register::getNumOfBits() const

@@ -320,6 +320,9 @@
        </item>
        <item>
         <widget class="QGroupBox" name="areaInstructions">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -459,6 +462,7 @@
     <addaction name="actionManual"/>
     <addaction name="separator"/>
     <addaction name="actionReportProblem"/>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuMemory">
     <property name="title">
@@ -473,12 +477,17 @@
     <addaction name="separator"/>
     <addaction name="actionImportMemory"/>
     <addaction name="actionExportMemory"/>
-    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>Exibir</string>
+    </property>
     <addaction name="actionDisplayDataTable"/>
     <addaction name="actionHexadecimalMode"/>
    </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuMemory"/>
+   <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -587,7 +596,12 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Exibir tabela de dados</string>
+    <string>Tabela de dados</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>Sobre</string>
    </property>
   </action>
  </widget>

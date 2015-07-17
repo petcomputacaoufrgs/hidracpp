@@ -8,12 +8,12 @@ RamsesMachine::RamsesMachine()
     // Initialize registers
     //////////////////////////////////////////////////
 
-    registers = QVector<Register*>(4);
+    registers.append(new Register( "A", 8));
+    registers.append(new Register( "B", 8));
+    registers.append(new Register( "X", 8));
+    registers.append(new Register("PC", 8));
 
-    RA = registers[0] = new Register( "A", 8);
-    RB = registers[1] = new Register( "B", 8);
-    RX = registers[2] = new Register( "X", 8);
-    PC = registers[3] = new Register("PC", 8);
+    PC = registers.last();
 
 
 
@@ -41,11 +41,9 @@ RamsesMachine::RamsesMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags = QVector<Flag*>(3);
-
-    N = flags[0] = new Flag("N");
-    Z = flags[1] = new Flag("Z", true);
-    C = flags[2] = new Flag("C");
+    flags.append(new Flag("N"));
+    flags.append(new Flag("Z", true));
+    flags.append(new Flag("C"));
 
 
 
@@ -53,203 +51,65 @@ RamsesMachine::RamsesMachine()
     // Initialize instructions
     //////////////////////////////////////////////////
 
-    instructions = QVector<Instruction*>(16);
-
-    instructions[0]  = new Instruction("nop",   0, 0, 1);
-    instructions[1]  = new Instruction("str",  16, 2, 2);
-    instructions[2]  = new Instruction("ldr",  32, 2, 2);
-    instructions[3]  = new Instruction("add",  48, 2, 2);
-    instructions[4]  = new Instruction( "or",  64, 2, 2);
-    instructions[5]  = new Instruction("and",  80, 2, 2);
-    instructions[6]  = new Instruction("not",  96, 1, 1);
-    instructions[7]  = new Instruction("sub", 112, 2, 2);
-    instructions[8]  = new Instruction("jmp", 128, 1, 2);
-    instructions[9]  = new Instruction( "jn", 144, 1, 2);
-    instructions[10] = new Instruction( "jz", 160, 1, 2);
-    instructions[11] = new Instruction( "jc", 176, 1, 2);
-    instructions[12] = new Instruction("jsr", 192, 1, 2);
-    instructions[13] = new Instruction("neg", 208, 1, 1);
-    instructions[14] = new Instruction("shr", 224, 1, 1);
-    instructions[15] = new Instruction("hlt", 240, 0, 1);
+    instructions.append(new Instruction(1, "0000....", Instruction::NOP, "nop"));
+    instructions.append(new Instruction(1, "0001....", Instruction::STR, "str r"));
+    instructions.append(new Instruction(2, "0010....", Instruction::LDR, "ldr r a"));
+    instructions.append(new Instruction(2, "0011....", Instruction::ADD, "add r a"));
+    instructions.append(new Instruction(2, "0100....", Instruction::OR,  "or r a"));
+    instructions.append(new Instruction(2, "0101....", Instruction::AND, "and r a"));
+    instructions.append(new Instruction(1, "0110....", Instruction::NOT, "not r"));
+    instructions.append(new Instruction(2, "0111....", Instruction::SUB, "sub r a"));
+    instructions.append(new Instruction(2, "1000....", Instruction::JMP, "jmp a"));
+    instructions.append(new Instruction(2, "1001....", Instruction::JN,  "jn a"));
+    instructions.append(new Instruction(2, "1010....", Instruction::JZ,  "jz a"));
+    instructions.append(new Instruction(2, "1011....", Instruction::JC,  "jc a"));
+    instructions.append(new Instruction(2, "1100....", Instruction::JSR, "jsr a"));
+    instructions.append(new Instruction(2, "1101....", Instruction::NEG, "neg a"));
+    instructions.append(new Instruction(2, "1110....", Instruction::SHR, "shr a"));
+    instructions.append(new Instruction(2, "1111....", Instruction::HLT, "hlt a"));
 
     clearCounters();
     running = false;
 }
 
-void RamsesMachine::printStatusDebug()
+Machine::AddressingMode RamsesMachine::extractAddressingMode(int byteArray[])
 {
-    std::cout << std::endl;
-    std::cout << "RA: " << (int)RA->getValue() << std::endl;;
-    std::cout << "RB: " << (int)RB->getValue() << std::endl;;
-    std::cout << "RX: " << (int)RX->getValue() << std::endl;;
-}
-
-void RamsesMachine::step()
-{
-    Byte *operand = NULL; // Final operand byte
-    int jumpAddress;
-
-    int addressingMode = memory[PC->getValue()]->getValue() & 0b00000011; // Extract last two bits
-    int reg = (memory[PC->getValue()]->getValue() & 0b00001100) >> 2; // Bits 2 and 3 indicate register (A, B or X)
-
-    bool updateFlags = false;
-
-    // Read first byte
-    const Instruction *currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
-    accessCount++;
-    instructionCount++;
-
-    if (currentInstruction->getSize() == 2)
+    switch (byteArray[0] & 0b00000011) // Extract last two bits
     {
-        int operandAddress, currentByteValue;
+        case 0x01:
+            return AddressingMode::INDIRECT;
 
-        PC->incrementValue(); // Go to next byte
-        currentByteValue = memory[PC->getValue()]->getValue();
+        case 0x02:
+            return AddressingMode::IMMEDIATE;
 
-        switch (addressingMode)
-        {
-            case 0x00: // Direct addressing mode
-                operandAddress = currentByteValue;
-                operand = memory[operandAddress];
-                jumpAddress = operandAddress;
-                accessCount++;
-                break;
+        case 0x03:
+            return AddressingMode::INDEXED;
 
-            case 0x01: // Indirect addressing mode
-                operandAddress = memory[currentByteValue]->getValue();
-                accessCount++;
-
-                operand = memory[operandAddress];
-                jumpAddress = operandAddress;
-                accessCount++;
-                break;
-
-            case 0x02: // Immediate addressing mode
-                operand = memory[PC->getValue()];
-                jumpAddress = (PC->getValue()+1) % MEM_SIZE; // Invalid, jump to next byte (ignore jump)
-                break;
-
-            case 0x03: // Indexed addressing mode
-                operandAddress = (currentByteValue + RX->getValue()) % MEM_SIZE;
-                operand = memory[operandAddress];
-                jumpAddress = operandAddress;
-                accessCount++;
-                break;
-        }
-    }
-
-    PC->incrementValue(); // Prepare for the next step
-    if (PC->getValue() == breakpoint)
-        this->running = false;
-
-    switch (currentInstruction->getValue())
-    {
-        case 0x00: // NOP
-            break;
-
-        case 0x10: // STR
-            operand->setValue(registers[reg]->getValue());
-            accessCount++;
-            break;
-
-        case 0x20: // LDR
-            registers[reg]->setValue(operand->getValue());
-            updateFlags = true;
-            accessCount++;
-            break;
-
-        case 0x30: // ADD
-            C->setValue((registers[reg]->getValue() + operand->getValue()) > MAX_VALUE); // Carry flag (unsigned)
-            registers[reg]->setValue((operand->getValue() + registers[reg]->getValue()) & MAX_VALUE);
-            updateFlags = true;
-            accessCount++;
-            break;
-
-        case 0x40: // OR
-            registers[reg]->setValue(registers[reg]->getValue() | operand->getValue());
-            updateFlags = true;
-            accessCount++;
-            break;
-
-        case 0x50: // AND
-            registers[reg]->setValue(registers[reg]->getValue() & operand->getValue());
-            updateFlags = true;
-            accessCount++;
-            break;
-
-        case 0x60: // NOT
-            registers[reg]->setValue(~registers[reg]->getValue());
-            updateFlags = true;
-            break;
-
-        case 0x70: // SUB
-            C->setValue((registers[reg]->getValue() - operand->getValue()) < 0); // Carry flag (unsigned)
-            registers[reg]->setValue((registers[reg]->getValue() - operand->getValue()) & MAX_VALUE);
-            updateFlags = true;
-            accessCount++;
-            break;
-
-        case 0x80: // JMP
-            PC->setValue(jumpAddress);
-            break;
-
-        case 0x90: // JN
-            if (N->getValue())
-                PC->setValue(jumpAddress);
-            break;
-
-        case 0xA0: // JZ
-            if (Z->getValue())
-                PC->setValue(jumpAddress);
-            break;
-
-        case 0xB0: // JC
-            if (C->getValue())
-                PC->setValue(jumpAddress);
-            break;
-
-        case 0xC0: // JSR
-            memory[jumpAddress]->setValue(PC->getValue());
-            PC->setValue(jumpAddress + 1);
-            break;
-
-        case 0xD0: // NEG
-            registers[reg]->setValue(~registers[reg]->getValue() + 1);
-            updateFlags = true;
-            break;
-
-        case 0xE0: // SHR
-            C->setValue((registers[reg]->getValue() & 0x01) == 1);
-            registers[reg]->setValue(registers[reg]->getValue() >> 1);
-            updateFlags = true;
-            break;
-
-        case 0xF0: // HLT
-            this->running = false;
-            break;
-    }
-
-    // Update flags:
-    if (updateFlags)
-    {
-        N->setValue(registers[reg]->getValue() > MAX_SIGNED_VALUE);
-        Z->setValue(registers[reg]->getValue() == 0);
+        default:
+            return AddressingMode::DIRECT;
     }
 }
 
-//void RamsesMachine::run()
-//{
-//    this->running = true;
-//    while (this->running) {
-//        this->step();
-//    }
-//}
+int RamsesMachine::extractRegisterId(int byteArray[])
+{
+    return ((byteArray[0] & 0b00001100) >> 2) % 3; // Bits 2 and 3 indicate register (A, B or X)
+}
+
+void RamsesMachine::setCarry(bool state)
+{
+    setFlagValue("C", state);
+}
+
+void RamsesMachine::setBorrowOrCarry(bool borrowState)
+{
+    setFlagValue("C", !borrowState); // Use carry as not borrow
+}
 
 void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getNumberOfArguments();
+    int numberOfArguments = instruction->getArguments().size();
 
     int registerID = 0;
     int addressingMode = 0;
@@ -258,8 +118,8 @@ void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<
     if (argumentList.size() != numberOfArguments)
         throw wrongNumberOfArguments;
 
-    // If first argument is a register (every instruction that has arguments, except jumps):
-    if (numberOfArguments > 0 && !(mnemonic.startsWith("j")))
+    // If first argument is a register:
+    if (numberOfArguments > 0 && instruction->getArguments().first() == "r")
     {
         if (argumentList.first() == "a")
             registerID = 0;
@@ -271,8 +131,8 @@ void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<
             throw invalidArgument;
     }
 
-    // If last argument is an address (every two-byte instruction):
-    if (instruction->getSize() == 2)
+    // If last argument is an address:
+    if (numberOfArguments > 0 && instruction->getArguments().last() == "a")
     {
         // Extract and remove addressing mode:
         if (argumentList.last().endsWith(",i"))
@@ -293,11 +153,11 @@ void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<
     }
 
     // Write first byte (instruction with register and addressing mode):
-    assemblerMemory[PC->getValue()]->setValue(instruction->getValue() + (registerID << 2) + addressingMode);
+    assemblerMemory[PC->getValue()]->setValue(instruction->getByteValue() + (registerID << 2) + addressingMode);
     PC->incrementValue();
 
     // If instruction has two bytes, write second byte:
-    if (instruction->getSize() > 1)
+    if (instruction->getNumBytes() > 1)
     {
         // Convert possible label to number:
         if (labelPCMap.contains(argumentList.last()))
@@ -313,26 +173,4 @@ void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<
     }
 }
 
-Instruction* RamsesMachine::getInstructionFromValue(int value)
-{
-    QVector<Instruction*>::iterator i;
-    value &= 0b11110000; // Filter bits
 
-    for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getValue() == value) {
-            return (*i);
-        }
-    }
-    return NULL;
-}
-
-Instruction* RamsesMachine::getInstructionFromMnemonic(QString desiredInstruction)
-{
-    QVector<Instruction*>::iterator i;
-    for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getMnemonic() == desiredInstruction) {
-            return (*i);
-        }
-    }
-    return NULL;
-}

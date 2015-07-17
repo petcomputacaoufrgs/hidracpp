@@ -28,8 +28,7 @@ SOURCES += \
     core/register.cpp \
     machines/ahmesmachine.cpp \
     machines/neandermachine.cpp \
-    machines/ramsesmachine.cpp \
-    gui/hidracli.cpp
+    machines/ramsesmachine.cpp
 
 HEADERS  += \
     gui/flagwidget.h \
@@ -44,8 +43,7 @@ HEADERS  += \
     core/register.h \
     machines/ahmesmachine.h \
     machines/neandermachine.h \
-    machines/ramsesmachine.h \
-    gui/hidracli.h
+    machines/ramsesmachine.h
 
 FORMS    += \
     gui/flagwidget.ui \

@@ -50,119 +50,111 @@ NeanderMachine::NeanderMachine()
     // Initialize instructions
     //////////////////////////////////////////////////
 
-    instructions = QVector<Instruction*>(11);
+//    instructions = QVector<Instruction*>(11);
 
-    instructions[0]  = new Instruction("nop",   0, 0, 1);
-    instructions[1]  = new Instruction("sta",  16, 1, 2);
-    instructions[2]  = new Instruction("lda",  32, 1, 2);
-    instructions[3]  = new Instruction("add",  48, 1, 2);
-    instructions[4]  = new Instruction( "or",  64, 1, 2);
-    instructions[5]  = new Instruction("and",  80, 1, 2);
-    instructions[6]  = new Instruction("not",  96, 0, 1);
-    instructions[7]  = new Instruction("jmp", 128, 1, 2);
-    instructions[8]  = new Instruction( "jn", 144, 1, 2);
-    instructions[9]  = new Instruction( "jz", 160, 1, 2);
-    instructions[10] = new Instruction("hlt", 240, 0, 1);
+//    instructions[0]  = new Instruction("nop",   0, 0, 1);
+//    instructions[1]  = new Instruction("sta",  16, 1, 2);
+//    instructions[2]  = new Instruction("lda",  32, 1, 2);
+//    instructions[3]  = new Instruction("add",  48, 1, 2);
+//    instructions[4]  = new Instruction( "or",  64, 1, 2);
+//    instructions[5]  = new Instruction("and",  80, 1, 2);
+//    instructions[6]  = new Instruction("not",  96, 0, 1);
+//    instructions[7]  = new Instruction("jmp", 128, 1, 2);
+//    instructions[8]  = new Instruction( "jn", 144, 1, 2);
+//    instructions[9]  = new Instruction( "jz", 160, 1, 2);
+//    instructions[10] = new Instruction("hlt", 240, 0, 1);
 
     clearCounters();
     running = false;
 }
 
-void NeanderMachine::printStatusDebug()
-{
-    std::cout << "PC: " << PC->getValue() << std::endl;
-    std::cout << "AC: " << AC->getValue() << std::endl;
-    std::cout << "N: "  << (N->getValue()? "1" : "0") << "\t";
-    std::cout << "Z: "  << (Z->getValue()? "1" : "0") << std::endl;
-}
+//void NeanderMachine::step()
+//{
+//    int jumpAddress;
+//    Byte *operand = NULL;
 
-void NeanderMachine::step()
-{
-    int jumpAddress;
-    Byte *operand = NULL;
+//    // Read first byte
+//    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
+//    accessCount++;
+//    instructionCount++;
 
-    // Read first byte
-    const Instruction* currentInstruction = getInstructionFromValue(memory[PC->getValue()]->getValue());
-    accessCount++;
-    instructionCount++;
+//    if (currentInstruction->getNumBytes() == 2)
+//    {
+//        // Read second byte, which contains either the operand's address (ALU, load and store) or the jump's destination address:
+//        int currentByteValue;
 
-    if (currentInstruction->getSize() == 2)
-    {
-        // Read second byte, which contains either the operand's address (ALU, load and store) or the jump's destination address:
-        int currentByteValue;
+//        PC->incrementValue(); // Go to next byte
+//        currentByteValue = memory[PC->getValue()]->getValue(); // Read byte
+//        operand = memory[currentByteValue]; // Pointer to operand
+//        jumpAddress = currentByteValue; // Address to jump to
 
-        PC->incrementValue(); // Go to next byte
-        currentByteValue = memory[PC->getValue()]->getValue(); // Read byte
-        operand = memory[currentByteValue]; // Pointer to operand
-        jumpAddress = currentByteValue; // Address to jump to
+//        accessCount++;
+//    }
 
-        accessCount++;
-    }
+//    PC->incrementValue(); // Prepare for the next step
+//    if (PC->getValue() == breakpoint)
+//        this->running = false;
 
-    PC->incrementValue(); // Prepare for the next step
-    if (PC->getValue() == breakpoint)
-        this->running = false;
+//    switch (currentInstruction->getValue())
+//    {
+//        case 0x00: // NOP
+//            break;
 
-    switch (currentInstruction->getValue())
-    {
-        case 0x00: // NOP
-            break;
+//        case 0x10: // STA
+//            operand->setValue(AC->getValue());
+//            accessCount++;
+//            break;
 
-        case 0x10: // STA
-            operand->setValue(AC->getValue());
-            accessCount++;
-            break;
+//        case 0x20: // LDA
+//            AC->setValue(operand->getValue());
+//            accessCount++;
+//            break;
 
-        case 0x20: // LDA
-            AC->setValue(operand->getValue());
-            accessCount++;
-            break;
+//        case 0x30: // ADD
+//            AC->setValue((AC->getValue() + operand->getValue()) & MAX_VALUE);
+//            accessCount++;
+//            break;
 
-        case 0x30: // ADD
-            AC->setValue((AC->getValue() + operand->getValue()) & MAX_VALUE);
-            accessCount++;
-            break;
+//        case 0x40: // OR
+//            AC->setValue(AC->getValue() | operand->getValue());
+//            accessCount++;
+//            break;
 
-        case 0x40: // OR
-            AC->setValue(AC->getValue() | operand->getValue());
-            accessCount++;
-            break;
+//        case 0x50: // AND
+//            AC->setValue(AC->getValue() & operand->getValue());
+//            accessCount++;
+//            break;
 
-        case 0x50: // AND
-            AC->setValue(AC->getValue() & operand->getValue());
-            accessCount++;
-            break;
+//        case 0x60: // NOT
+//            AC->setValue(AC->getValue() ^ 0xFF);
+//            break;
 
-        case 0x60: // NOT
-            AC->setValue(AC->getValue() ^ 0xFF);
-            break;
+//        case 0x80: // JMP
+//            PC->setValue(jumpAddress);
+//            break;
 
-        case 0x80: // JMP
-            PC->setValue(jumpAddress);
-            break;
+//        case 0x90: // JN
+//            if (N->getValue())
+//                PC->setValue(jumpAddress);
+//            break;
 
-        case 0x90: // JN
-            if (N->getValue())
-                PC->setValue(jumpAddress);
-            break;
+//        case 0xA0: // JZ
+//            if (Z->getValue())
+//                PC->setValue(jumpAddress);
+//            break;
 
-        case 0xA0: // JZ
-            if (Z->getValue())
-                PC->setValue(jumpAddress);
-            break;
+//        case 0xF0: // HLT
+//            this->running = false;
+//            break;
 
-        case 0xF0: // HLT
-            this->running = false;
-            break;
+//        default:
+//            break;
+//    }
 
-        default:
-            break;
-    }
-
-    // Update flags:
-    N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
-    Z->setValue(AC->getValue() == 0);
-}
+//    // Update flags:
+//    N->setValue(AC->getValue() > MAX_SIGNED_VALUE);
+//    Z->setValue(AC->getValue() == 0);
+//}
 
 //void NeanderMachine::run() {
 //    this->running = true;
@@ -173,54 +165,31 @@ void NeanderMachine::step()
 
 void NeanderMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
-    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getNumberOfArguments();
+//    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+//    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+//    int numberOfArguments = instruction->getNumberOfArguments();
 
-    // Check if correct number of arguments:
-    if (argumentList.size() != numberOfArguments)
-        throw wrongNumberOfArguments;
+//    // Check if correct number of arguments:
+//    if (argumentList.size() != numberOfArguments)
+//        throw wrongNumberOfArguments;
 
-    // Write instruction:
-    assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
-    PC->incrementValue();
+//    // Write instruction:
+//    assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
+//    PC->incrementValue();
 
-    if (numberOfArguments == 1)
-    {
-        // Convert possible label to number:
-        if (labelPCMap.contains(argumentList[0]))
-            argumentList[0] = QString::number(labelPCMap.value(argumentList[0]));
+//    if (numberOfArguments == 1)
+//    {
+//        // Convert possible label to number:
+//        if (labelPCMap.contains(argumentList[0]))
+//            argumentList[0] = QString::number(labelPCMap.value(argumentList[0]));
 
-        // Check if valid argument:
-        if (!isValidAddress(argumentList[0]))
-            throw invalidAddress;
+//        // Check if valid argument:
+//        if (!isValidAddress(argumentList[0]))
+//            throw invalidAddress;
 
-        // Write argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
-        PC->incrementValue();
-    }
+//        // Write argument:
+//        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
+//        PC->incrementValue();
+//    }
 }
 
-Instruction* NeanderMachine::getInstructionFromValue(int value)
-{
-    QVector<Instruction*>::iterator i;
-    value &= 0xf0; // Filter "don't care" bits
-
-    for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getValue() == value) {
-            return (*i);
-        }
-    }
-    return NULL;
-}
-
-Instruction* NeanderMachine::getInstructionFromMnemonic(QString desiredInstruction)
-{
-    QVector<Instruction*>::iterator i;
-    for( i = instructions.begin(); i != instructions.end(); i++) {
-        if((*i)->getMnemonic() == desiredInstruction) {
-            return (*i);
-        }
-    }
-    return NULL;
-}

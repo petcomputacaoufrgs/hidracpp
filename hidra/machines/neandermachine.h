@@ -8,14 +8,6 @@ class NeanderMachine : public Machine
 public:
     NeanderMachine();
 
-    virtual void printStatusDebug();
-
-    virtual void step();
-    //virtual voiexportMemoryn();
-
-    virtual Instruction* getInstructionFromValue(int);
-    virtual Instruction* getInstructionFromMnemonic(QString);
-
     virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
 
     static const int MEM_SIZE = 256;

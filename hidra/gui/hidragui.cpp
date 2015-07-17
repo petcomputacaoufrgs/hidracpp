@@ -473,11 +473,17 @@ void HidraGui::on_actionRun_triggered()
 
 void HidraGui::on_actionStep_triggered()
 {
-    machine->step();
+    try
+    {
+        machine->step();
+    }
+    catch (QString error)
+    {
+        QMessageBox::information(this, tr("Error"), error);
+    }
+
     updateMachineInterface();
 }
-
-
 
 void HidraGui::on_actionOpen_triggered()
 {

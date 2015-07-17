@@ -44,6 +44,12 @@ public:
         duplicatedLabel,
         memoryOverlap,
         notImplemented,
+        undefinedError,
+    };
+
+    enum AddressingMode
+    {
+        DIRECT, INDIRECT, IMMEDIATE, INDEXED,
     };
 
     // Constants
@@ -54,15 +60,52 @@ public:
     explicit Machine(QObject *parent = 0);
     ~Machine();
 
-    virtual void printStatusDebug() = 0;
+
+
+    //////////////////////////////////////////////////
+    // Import/Export memory
+    //////////////////////////////////////////////////
 
     FileErrorCode::FileErrorCode importMemory(QString filename);
     FileErrorCode::FileErrorCode exportMemory(QString filename);
 
-    virtual void step() = 0;
-    //virtual void run() = 0;
 
-    // Machine specific
+
+    //////////////////////////////////////////////////
+    // Step
+    //////////////////////////////////////////////////
+
+    virtual void step();
+    virtual void fetchInstruction(int byteArray[], Instruction *&instruction);
+    virtual void decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode &addressingMode, int &registerId, int &operandAddress);
+    virtual void executeInstruction(Instruction *&instruction, int registerId, int operandAddress);
+
+    virtual AddressingMode extractAddressingMode(int byteArray[]);
+    virtual int extractRegisterId(int byteArray[]);
+
+    virtual void setOverflow(bool state);
+    virtual void setCarry(bool state);
+    virtual void setBorrowOrCarry(bool borrowState); // Some machines use carry as not borrow
+    virtual void updateFlags(int value); // Updates N and Z
+    int toSigned(int unsignedByte);
+
+
+    //////////////////////////////////////////////////
+    // Memory read/write with access count
+    //////////////////////////////////////////////////
+
+    int memoryRead(int address); // Increments accessCount
+    void memoryWrite(int address, int value); // Increments accessCount
+    int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
+    int memoryGetOperandAddress(int immediateAddress, AddressingMode addressingMode); // incrementsAccessCount
+
+
+
+    //////////////////////////////////////////////////
+    // Assembly
+    //////////////////////////////////////////////////
+
+    // Mount (machine specific)
     virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
 
     // Assembly
@@ -80,11 +123,15 @@ public:
     bool isValidNBytesValue(QString valueString, int numberOfBytes);
     bool isValidAddress(QString addressString);
 
+    // Auxiliary methods
     QStringList splitArguments(QString arguments);
     int convertToUnsigned(int value, int numberOfBytes);
 
-    virtual const Instruction* getInstructionFromValue(int) = 0;
-    virtual const Instruction* getInstructionFromMnemonic(QString) = 0;
+
+
+    //////////////////////////////////////////////////
+    // Getters/setters, clear
+    //////////////////////////////////////////////////
 
     bool isRunning() const;
     void setRunning(bool running);
@@ -101,23 +148,29 @@ public:
     QString getFlagName(int id) const;
     int  getFlagValue(int id) const;
     void setFlagValue(int id, int value);
+    int  getFlagValue(QString flagName) const;
+    void setFlagValue(QString flagName, int value);
     void clearFlags();
 
     int getNumberOfRegisters() const;
     QString getRegisterName(int id) const;
     int  getRegisterValue(int id) const;
     void setRegisterValue(int id, int value);
+    int  getRegisterValue(QString registerName) const;
+    void setRegisterValue(QString registerName, int value);
     void clearRegisters();
 
     int getPCValue() const;
     void setPCValue(int value);
+    void incrementPCValue();
 
     int getPCCorrespondingLine();
     int getAddressCorrespondingLine(int address);
     int getLineCorrespondingAddress(int line);
 
     QVector<Instruction *> getInstructions() const;
-    void setInstructions(const QVector<Instruction *> &value);
+    virtual Instruction* getInstructionFromValue(int);
+    virtual Instruction* getInstructionFromMnemonic(QString);
 
     int getInstructionCount();
     int getAccessCount();
