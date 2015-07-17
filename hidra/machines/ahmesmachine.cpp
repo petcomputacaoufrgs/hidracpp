@@ -260,18 +260,18 @@ AhmesMachine::AhmesMachine()
 //}
 
 // EXACT DUPLICATE OF NEANDER'S METHOD:
-void AhmesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
-{/*
+void AhmesMachine::buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+{
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getNumberOfArguments();
+    int numberOfArguments = instruction->getArguments().size();
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
         throw wrongNumberOfArguments;
 
     // Write instruction:
-    assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
+    assemblerMemory[getPCValue()]->setValue(instruction->getByteValue());
     PC->incrementValue();
 
     if (numberOfArguments == 1)
@@ -287,7 +287,7 @@ void AhmesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<Q
         // Write argument:
         assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
         PC->incrementValue();
-    }*/
+    }
 }
 
 void AhmesMachine::setCarry(bool state)

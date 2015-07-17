@@ -52,7 +52,7 @@ RamsesMachine::RamsesMachine()
     //////////////////////////////////////////////////
 
     instructions.append(new Instruction(1, "0000....", Instruction::NOP, "nop"));
-    instructions.append(new Instruction(1, "0001....", Instruction::STR, "str r"));
+    instructions.append(new Instruction(2, "0001....", Instruction::STR, "str r a"));
     instructions.append(new Instruction(2, "0010....", Instruction::LDR, "ldr r a"));
     instructions.append(new Instruction(2, "0011....", Instruction::ADD, "add r a"));
     instructions.append(new Instruction(2, "0100....", Instruction::OR,  "or r a"));
@@ -105,7 +105,7 @@ void RamsesMachine::setBorrowOrCarry(bool borrowState)
     setFlagValue("C", !borrowState); // Use carry as not borrow
 }
 
-void RamsesMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+void RamsesMachine::buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);

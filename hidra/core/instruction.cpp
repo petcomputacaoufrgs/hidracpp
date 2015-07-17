@@ -49,7 +49,7 @@ Instruction::InstructionCode Instruction::getInstructionCode() const
     return instructionCode;
 }
 
-QString Instruction::getBytePattern() const
+QString Instruction::getBitPattern() const
 {
     return bitPattern;
 }

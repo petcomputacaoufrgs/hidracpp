@@ -105,8 +105,8 @@ public:
     // Assembly
     //////////////////////////////////////////////////
 
-    // Mount (machine specific)
-    virtual void mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
+    // Build (machine specific)
+    virtual void buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
 
     // Assembly
     void assemble(QString sourceCode);

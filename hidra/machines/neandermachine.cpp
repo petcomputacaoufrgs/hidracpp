@@ -50,6 +50,18 @@ NeanderMachine::NeanderMachine()
     // Initialize instructions
     //////////////////////////////////////////////////
 
+    instructions.append(new Instruction(1, "0000....", Instruction::NOP, "nop"));
+    instructions.append(new Instruction(2, "0001....", Instruction::STR, "sta a"));
+    instructions.append(new Instruction(2, "0010....", Instruction::LDR, "lda a"));
+    instructions.append(new Instruction(2, "0011....", Instruction::ADD, "add a"));
+    instructions.append(new Instruction(2, "0100....", Instruction::OR,  "or a"));
+    instructions.append(new Instruction(2, "0101....", Instruction::AND, "and a"));
+    instructions.append(new Instruction(1, "0110....", Instruction::NOT, "not"));
+    instructions.append(new Instruction(2, "1000....", Instruction::JMP, "jmp a"));
+    instructions.append(new Instruction(2, "1001....", Instruction::JN,  "jn a"));
+    instructions.append(new Instruction(2, "1010....", Instruction::JZ,  "jz a"));
+    instructions.append(new Instruction(2, "1111....", Instruction::HLT, "hlt a"));
+
 //    instructions = QVector<Instruction*>(11);
 
 //    instructions[0]  = new Instruction("nop",   0, 0, 1);
@@ -163,33 +175,33 @@ NeanderMachine::NeanderMachine()
 //    }
 //}
 
-void NeanderMachine::mountInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
+void NeanderMachine::buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
 {
-//    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-//    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
-//    int numberOfArguments = instruction->getNumberOfArguments();
+    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+    int numberOfArguments = instruction->getArguments().size();
 
-//    // Check if correct number of arguments:
-//    if (argumentList.size() != numberOfArguments)
-//        throw wrongNumberOfArguments;
+    // Check if correct number of arguments:
+    if (argumentList.size() != numberOfArguments)
+        throw wrongNumberOfArguments;
 
-//    // Write instruction:
-//    assemblerMemory[PC->getValue()]->setValue(instruction->getValue());
-//    PC->incrementValue();
+    // Write instruction:
+    assemblerMemory[getPCValue()]->setValue(instruction->getByteValue());
+    PC->incrementValue();
 
-//    if (numberOfArguments == 1)
-//    {
-//        // Convert possible label to number:
-//        if (labelPCMap.contains(argumentList[0]))
-//            argumentList[0] = QString::number(labelPCMap.value(argumentList[0]));
+    if (numberOfArguments == 1)
+    {
+        // Convert possible label to number:
+        if (labelPCMap.contains(argumentList[0]))
+            argumentList[0] = QString::number(labelPCMap.value(argumentList[0]));
 
-//        // Check if valid argument:
-//        if (!isValidAddress(argumentList[0]))
-//            throw invalidAddress;
+        // Check if valid argument:
+        if (!isValidAddress(argumentList[0]))
+            throw invalidAddress;
 
-//        // Write argument:
-//        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
-//        PC->incrementValue();
-//    }
+        // Write argument:
+        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
+        PC->incrementValue();
+    }
 }
 

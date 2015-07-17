@@ -29,7 +29,7 @@ public:
     int getNumBytes() const;
 
     InstructionCode getInstructionCode() const;
-    QString getBytePattern() const;
+    QString getBitPattern() const;
 
 private:
     int numBytes;

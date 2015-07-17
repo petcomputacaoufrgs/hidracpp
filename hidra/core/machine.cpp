@@ -124,7 +124,7 @@ void Machine::decodeInstruction(int byteArray[], Instruction *&instruction, Addr
     addressingMode = extractAddressingMode(byteArray);
     registerId = extractRegisterId(byteArray);
 
-    if (instruction->getNumBytes() == 2)
+    if (instruction && instruction->getNumBytes() == 2)
     {
         int immediateAddress = getPCValue();
         operandAddress = memoryGetOperandAddress(immediateAddress, addressingMode);
@@ -135,8 +135,10 @@ void Machine::decodeInstruction(int byteArray[], Instruction *&instruction, Addr
 void Machine::executeInstruction(Instruction *&instruction, int registerId, int operandAddress)
 {
     int value1, value2, result;
+    Instruction::InstructionCode instructionCode;
+    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
 
-    switch (instruction->getInstructionCode())
+    switch (instructionCode)
     {
     case Instruction::NOP:
         break;
@@ -344,7 +346,7 @@ void Machine::assemble(QString sourceCode)
 
 
     //////////////////////////////////////////////////
-    // SECOND PASS: Mount instructions/defines
+    // SECOND PASS: Build instructions/defines
     //////////////////////////////////////////////////
 
     correspondingAddress = QVector<int>(sourceLines.size());
@@ -369,7 +371,7 @@ void Machine::assemble(QString sourceCode)
                     if (instruction->getNumBytes() == 2)
                         correspondingLine[(PC->getValue() + 1) % 256] = lineNumber;
 
-                    mountInstruction(mnemonic, arguments.toLower(), labelPCMap);
+                    buildInstruction(mnemonic, arguments.toLower(), labelPCMap);
                 }
                 else // Directive
                 {
@@ -918,7 +920,7 @@ Instruction* Machine::getInstructionFromValue(int value)
             return instruction;
     }
 
-    throw QString("Invalid instruction value: %1").arg(value);
+    return nullptr;
 }
 
 Instruction* Machine::getInstructionFromMnemonic(QString mnemonic)
