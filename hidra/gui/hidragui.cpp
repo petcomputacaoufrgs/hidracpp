@@ -487,7 +487,7 @@ void HidraGui::on_actionStep_triggered()
 
 void HidraGui::on_actionOpen_triggered()
 {
-    QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rms)";
+    QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rad)";
 
     currentFilename = QFileDialog::getOpenFileName(this,
                                                "Abrir código-fonte", "",

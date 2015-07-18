@@ -197,7 +197,8 @@ void Machine::executeInstruction(Instruction *&instruction, int registerId, int 
         result = (value1 - value2) & 0xFF;
 
         setRegisterValue(registerId, result);
-        // FALTA SETAR OVERFLOW, BORROW E CARRY
+        setBorrowOrCarry(value1 < value2);
+        setOverflow(toSigned(value1) - toSigned(value2) != toSigned(result));
         break;
 
     case Instruction::JMP:
