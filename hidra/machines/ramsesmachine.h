@@ -8,8 +8,6 @@ class RamsesMachine : public Machine
 public:
     RamsesMachine();
 
-    virtual void buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap);
-
     virtual AddressingMode extractAddressingMode(int byteArray[]);
     virtual int extractRegisterId(int byteArray[]);
 

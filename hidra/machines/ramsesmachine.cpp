@@ -8,10 +8,10 @@ RamsesMachine::RamsesMachine()
     // Initialize registers
     //////////////////////////////////////////////////
 
-    registers.append(new Register( "A", 8));
-    registers.append(new Register( "B", 8));
-    registers.append(new Register( "X", 8));
-    registers.append(new Register("PC", 8));
+    registers.append(new Register( "A", "....00..", 8));
+    registers.append(new Register( "B", "....01..", 8));
+    registers.append(new Register( "X", "....10..", 8));
+    registers.append(new Register("PC", "", 8));
 
     PC = registers.last();
 
@@ -68,6 +68,17 @@ RamsesMachine::RamsesMachine()
     instructions.append(new Instruction(1, "1110....", Instruction::SHR, "shr r"));
     instructions.append(new Instruction(1, "1111....", Instruction::HLT, "hlt"));
 
+
+
+    //////////////////////////////////////////////////
+    // Initialize addressing modes
+    //////////////////////////////////////////////////
+
+    addressingModes.append(DIRECT);
+    addressingModes.append(INDIRECT);
+    addressingModes.append(IMMEDIATE);
+    addressingModes.append(INDEXED);
+
     clearCounters();
     running = false;
 }
@@ -105,72 +116,5 @@ void RamsesMachine::setBorrowOrCarry(bool borrowState)
     setFlagValue("C", !borrowState); // Use carry as not borrow
 }
 
-void RamsesMachine::buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
-{
-    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getArguments().size();
-
-    int registerID = 0;
-    int addressingMode = 0;
-
-    // Check if correct number of arguments:
-    if (argumentList.size() != numberOfArguments)
-        throw wrongNumberOfArguments;
-
-    // If first argument is a register:
-    if (numberOfArguments > 0 && instruction->getArguments().first() == "r")
-    {
-        if (argumentList.first() == "a")
-            registerID = 0;
-        else if (argumentList.first() == "b")
-            registerID = 1;
-        else if (argumentList.first() == "x")
-            registerID = 2;
-        else
-            throw invalidArgument;
-    }
-
-    // If last argument is an address:
-    if (numberOfArguments > 0 && instruction->getArguments().last() == "a")
-    {
-        // Extract and remove addressing mode:
-        if (argumentList.last().endsWith(",i"))
-        {
-            argumentList.last() = argumentList.last().replace(",i", "");
-            addressingMode = 1; // Direct
-        }
-        else if (argumentList.last().startsWith("#"))
-        {
-            argumentList.last() = argumentList.last().replace("#", "");
-            addressingMode = 2; // Indirect
-        }
-        else if (argumentList.last().endsWith(",x"))
-        {
-            argumentList.last() = argumentList.last().replace(",x", "");
-            addressingMode = 3; // Indexed
-        }
-    }
-
-    // Write first byte (instruction with register and addressing mode):
-    assemblerMemory[PC->getValue()]->setValue(instruction->getByteValue() + (registerID << 2) + addressingMode);
-    PC->incrementValue();
-
-    // If instruction has two bytes, write second byte:
-    if (instruction->getNumBytes() > 1)
-    {
-        // Convert possible label to number:
-        if (labelPCMap.contains(argumentList.last()))
-            argumentList.last() = QString::number(labelPCMap.value(argumentList.last()));
-
-        // Check if valid address/value:
-        if (!isValidAddress(argumentList.last()))
-            throw invalidValue;
-
-        // Write address argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(NULL, 0));
-        PC->incrementValue();
-    }
-}
 
 

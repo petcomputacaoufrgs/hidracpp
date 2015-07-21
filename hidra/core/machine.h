@@ -105,12 +105,12 @@ public:
     // Assembly
     //////////////////////////////////////////////////
 
-    // Build (machine specific)
-    virtual void buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap) = 0;
+    // Build
+    virtual void buildInstruction(QString mnemonic, QString arguments);
 
     // Assembly
     void assemble(QString sourceCode);
-    void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap);
+    void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
@@ -153,6 +153,7 @@ public:
     void clearFlags();
 
     int getNumberOfRegisters() const;
+    int getRegisterBitCode(QString registerName) const; // -1 if no code
     QString getRegisterName(int id) const;
     int  getRegisterValue(int id) const;
     void setRegisterValue(int id, int value);
@@ -189,6 +190,8 @@ protected:
     QVector<int> correspondingLine, correspondingAddress;
     QVector<Flag*> flags;
     QVector<Instruction*> instructions;
+    QVector<AddressingMode> addressingModes;
+    QHash<QString, int> labelPCMap;
     bool running;
     int breakpoint;
     int instructionCount;

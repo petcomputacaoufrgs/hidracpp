@@ -8,10 +8,10 @@ NeanderMachine::NeanderMachine()
     // Initialize registers
     //////////////////////////////////////////////////
 
-    registers = QVector<Register*>(2);
+    registers.append(new Register("AC", "........", 8));
+    registers.append(new Register("PC", "", 8));
 
-    AC = registers[0] = new Register("AC", 8);
-    PC = registers[1] = new Register("PC", 8);
+    PC = registers.last();
 
 
 
@@ -39,10 +39,8 @@ NeanderMachine::NeanderMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags = QVector<Flag*>(2);
-
-    N = flags[0] = new Flag("N");
-    Z = flags[1] = new Flag("Z", true);
+    flags.append(new Flag("N"));
+    flags.append(new Flag("Z", true));
 
 
 
@@ -62,37 +60,14 @@ NeanderMachine::NeanderMachine()
     instructions.append(new Instruction(2, "1010....", Instruction::JZ,  "jz a"));
     instructions.append(new Instruction(1, "1111....", Instruction::HLT, "hlt"));
 
+
+
+    //////////////////////////////////////////////////
+    // Initialize addressing modes
+    //////////////////////////////////////////////////
+
+    addressingModes.append(DIRECT);
+
     clearCounters();
     running = false;
 }
-
-void NeanderMachine::buildInstruction(QString mnemonic, QString arguments, QHash<QString, int> &labelPCMap)
-{
-    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getArguments().size();
-
-    // Check if correct number of arguments:
-    if (argumentList.size() != numberOfArguments)
-        throw wrongNumberOfArguments;
-
-    // Write instruction:
-    assemblerMemory[getPCValue()]->setValue(instruction->getByteValue());
-    PC->incrementValue();
-
-    if (numberOfArguments == 1)
-    {
-        // Convert possible label to number:
-        if (labelPCMap.contains(argumentList[0]))
-            argumentList[0] = QString::number(labelPCMap.value(argumentList[0]));
-
-        // Check if valid argument:
-        if (!isValidAddress(argumentList[0]))
-            throw invalidAddress;
-
-        // Write argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList[0].toInt(NULL, 0));
-        PC->incrementValue();
-    }
-}
-

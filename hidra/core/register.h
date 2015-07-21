@@ -8,18 +8,20 @@
 class Register
 {
 public:
-    Register(QString name, int numOfBits);
+    Register(QString name, QString bitPattern, int numOfBits);
 
     QString getName() const;
+    QString getBitPattern() const;
+    int getBitCode() const; // -1 if no bit code (not accessible)
     int getValue() const;
     void setValue(int value);
     void incrementValue();
 
     int getNumOfBits() const;
-    void setNumOfBits(int value);
 
 private:
     QString name;
+    QString bitPattern; // Empty string if not directly accessible
 
     int value;
     int numOfBits;

@@ -426,7 +426,7 @@ void Machine::assemble(QString sourceCode)
     // FIRST PASS: Read labels, reserve memory
     //////////////////////////////////////////////////
 
-    QHash<QString, int> labelPCMap;
+    labelPCMap.clear();
     clearAssemblerMemory();
     PC->setValue(0);
 
@@ -473,7 +473,7 @@ void Machine::assemble(QString sourceCode)
                 else // Directive
                 {
                     QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
-                    obeyDirective(mnemonic, arguments, true, labelPCMap);
+                    obeyDirective(mnemonic, arguments, true);
                 }
             }
         }
@@ -515,13 +515,13 @@ void Machine::assemble(QString sourceCode)
                     if (instruction->getNumBytes() == 2)
                         correspondingLine[(PC->getValue() + 1) % 256] = lineNumber;
 
-                    buildInstruction(mnemonic, arguments.toLower(), labelPCMap);
+                    buildInstruction(mnemonic, arguments.toLower());
                 }
                 else // Directive
                 {
                     // TODO: correspondingLine for arrays (DAB, DAW)
                     correspondingLine[PC->getValue()] = lineNumber;
-                    obeyDirective(mnemonic, arguments, false, labelPCMap);
+                    obeyDirective(mnemonic, arguments, false);
                 }
             }
         }
@@ -544,7 +544,7 @@ void Machine::assemble(QString sourceCode)
     clearCounters();
 }
 
-void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, QHash<QString, int> &labelPCMap)
+void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly)
 {
     if (mnemonic == "org")
     {
@@ -666,6 +666,71 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
     else
     {
         throw invalidInstruction;
+    }
+}
+
+void Machine::buildInstruction(QString mnemonic, QString arguments)
+{
+    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+    int numberOfArguments = instruction->getArguments().size();
+
+    int registerBitCode = 0b00000000;
+    int addressingModeBitCode = 0b00000000;
+    //AddressingMode addressingMode = DIRECT;
+
+    // Check if correct number of arguments:
+    if (argumentList.size() != numberOfArguments)
+        throw wrongNumberOfArguments;
+
+    // If first argument is a register:
+    if (numberOfArguments > 0 && instruction->getArguments().first() == "r")
+    {
+        registerBitCode = getRegisterBitCode(argumentList.first());
+
+        if (registerBitCode == -1)
+            throw invalidArgument; // Hidden register/invalid register name
+    }
+
+    // If last argument is an address:
+    if (numberOfArguments > 0 && instruction->getArguments().last() == "a")
+    {
+        // Extract and remove addressing mode:
+        if (addressingModes.contains(INDIRECT) && argumentList.last().endsWith(",i"))
+        {
+            argumentList.last() = argumentList.last().replace(",i", "");
+            addressingModeBitCode = 0b00000001; // TODO: Make this more generic (Hard coded Ramses values)
+        }
+        else if (addressingModes.contains(IMMEDIATE) && argumentList.last().startsWith("#"))
+        {
+            argumentList.last() = argumentList.last().replace("#", "");
+            addressingModeBitCode = 0b00000010;
+        }
+        else if (addressingModes.contains(INDEXED) && argumentList.last().endsWith(",x"))
+        {
+            argumentList.last() = argumentList.last().replace(",x", "");
+            addressingModeBitCode = 0b00000011;
+        }
+    }
+
+    // Write first byte (instruction with register and addressing mode):
+    assemblerMemory[PC->getValue()]->setValue(instruction->getByteValue() | registerBitCode | addressingModeBitCode);
+    PC->incrementValue();
+
+    // If instruction has two bytes, write second byte:
+    if (instruction->getNumBytes() > 1)
+    {
+        // Convert possible label to number:
+        if (labelPCMap.contains(argumentList.last()))
+            argumentList.last() = QString::number(labelPCMap.value(argumentList.last()));
+
+        // Check if valid address/value:
+        if (!isValidAddress(argumentList.last()))
+            throw invalidValue;
+
+        // Write address argument:
+        assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(NULL, 0));
+        PC->incrementValue();
     }
 }
 
@@ -961,6 +1026,17 @@ int Machine::getNumberOfRegisters() const
     return registers.count();
 }
 
+int Machine::getRegisterBitCode(QString registerName) const
+{
+    foreach (Register *reg, registers)
+    {
+        if (reg->getName().toLower() == registerName.toLower())
+            return reg->getBitCode();
+    }
+
+    return -1; // Register not found, no bit code
+}
+
 QString Machine::getRegisterName(int id) const
 {
     QString name = registers[id]->getName();
@@ -980,7 +1056,7 @@ int Machine::getRegisterValue(QString registerName) const
 {
     foreach (Register *reg, registers)
     {
-        if (reg->getName() == registerName)
+        if (reg->getName() == registerName.toLower())
             return reg->getValue();
     }
 
@@ -996,7 +1072,7 @@ void Machine::setRegisterValue(QString registerName, int value)
 {
     foreach (Register *reg, registers)
     {
-        if (reg->getName() == registerName)
+        if (reg->getName() == registerName.toLower())
         {
             reg->setValue(value);
             return;

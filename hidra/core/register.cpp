@@ -1,15 +1,32 @@
 #include "register.h"
 
-Register::Register(QString name, int numOfBits)
+#include "byte.h"
+
+Register::Register(QString name, QString bitPattern, int numOfBits)
 {
     this->name = name;
-    this->value = 0;
+    this->bitPattern = bitPattern;
+
     this->numOfBits = numOfBits;
+    this->value = 0;
 }
 
 QString Register::getName() const
 {
     return name;
+}
+
+QString Register::getBitPattern() const
+{
+    return bitPattern;
+}
+
+int Register::getBitCode() const
+{
+    if (bitPattern == "")
+        return -1; // No bit code
+    else
+        return Byte(bitPattern).getValue();
 }
 
 int Register::getValue() const
@@ -31,10 +48,3 @@ int Register::getNumOfBits() const
 {
     return numOfBits;
 }
-
-void Register::setNumOfBits(int value)
-{
-    this->numOfBits = value;
-}
-
-
