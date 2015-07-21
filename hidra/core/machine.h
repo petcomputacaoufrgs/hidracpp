@@ -177,6 +177,9 @@ public:
     int getAccessCount();
     void clearCounters();
 
+    virtual void generateDescriptions();
+    QString getDescription(QString assemblyFormat);
+
     bool buildSuccessful;
 
 protected:
@@ -192,6 +195,7 @@ protected:
     QVector<Instruction*> instructions;
     QVector<AddressingMode> addressingModes;
     QHash<QString, int> labelPCMap;
+    QHash<QString, QString> descriptions;
     bool running;
     int breakpoint;
     int instructionCount;

@@ -1169,3 +1169,54 @@ void Machine::clearCounters()
     instructionCount = 0;
     accessCount = 0;
 }
+
+void Machine::generateDescriptions()
+{
+    // Neander
+    descriptions["nop"]   = "Nenhuma operação.";
+    descriptions["sta a"] = "Armazena o valor do acumulador no endereço 'a'.";
+    descriptions["lda a"] = "Carrega o valor no endereço 'a' para o acumulador.";
+    descriptions["add a"] = "Adiciona o valor no endereço 'a' ao acumulador.";
+    descriptions["or a"]  = "Realiza um 'ou' lógico entre o valor no endereço 'a' e o valor do acumulador.";
+    descriptions["and a"] = "Realiza um 'e' lógico entre o valor no endereço 'a' e o valor do acumulador.";
+    descriptions["not"]   = "Inverte (complementa) o valor dos bits do acumulador.";
+    descriptions["jmp a"] = "Desvia a execução para o endereço 'a' (desvio incondicional).";
+    descriptions["jn a"]  = "Se a flag N estiver ativada (acumulador negativo), desvia a execução para o endereço 'a'.";
+    descriptions["jz a"]  = "Se a flag Z estiver ativada (acumulador zerado), desvia a execução para o endereço 'a'.";
+    descriptions["hlt"]   = "Termina a execução.";
+
+    // Ahmes
+    descriptions["sub a"] = "Subtrai o valor no endereço 'a' do acumulador.";
+    descriptions["jp a"]  = "Se as flags N e Z estiverem desativadas (acumulador positivo), desvia a execução para o endereço 'a'.";
+    descriptions["jv a"]  = "Se a flag V estiver ativada (overflow), desvia a execução para o endereço 'a'.";
+    descriptions["jnv a"] = "Se a flag V estiver desativada (not overflow), desvia a execução para o endereço 'a'.";
+    descriptions["jnz a"] = "Se a flag Z estiver desativada (acumulador diferente de zero), desvia a execução para o endereço 'a'.";
+    descriptions["jc a"]  = "Se a flag C estiver ativada (carry), desvia a execução para o endereço 'a'.";
+    descriptions["jnc a"] = "Se a flag C estiver desativada (not carry), desvia a execução para o endereço 'a'.";
+    descriptions["jb a"]  = "Se a flag B estiver ativada (borrow), desvia a execução para o endereço 'a'.";
+    descriptions["jnb a"] = "Se a flag B estiver desativada (not borrow), desvia a execução para o endereço 'a'.";
+    descriptions["shr"]   = "Reliza shift lógico dos bits do acumulador para a direita, passando o estado do bit menos significativo para a flag C (carry).";
+    descriptions["shl"]   = "Reliza shift lógico dos bits do acumulador para a esquerda, passando o estado do bit mais significativo para a flag C (carry).";
+    descriptions["ror"]   = "Realiza rotação para a esquerda dos bits do acumulador, incluindo a flag C (carry) como um bit.";
+    descriptions["rol"]   = "Realiza rotação para a direita dos bits do acumulador, incluindo a flag C (carry) como um bit.";
+
+    // Ramses
+    descriptions["str r a"] = "Armazena o valor do registrador 'r' no endereço 'a'.";
+    descriptions["ldr r a"] = "Carrega o valor no endereço 'a' para o registrador 'r'.";
+    descriptions["add r a"] = "Adiciona o valor no endereço 'a' ao registrador 'r'.";
+    descriptions["or r a"]  = "Realiza um 'ou' lógico entre o valor no endereço 'a' e o valor do registrador 'r'.";
+    descriptions["and r a"] = "Realiza um 'e' lógico entre o valor no endereço 'a' e o valor do registrador 'r'.";
+    descriptions["not r"]   = "Inverte (complementa) o valor dos bits do registrador 'r'.";
+    descriptions["sub r a"] = "Subtrai o valor no endereço 'a' do registrador 'r'.";
+    descriptions["jsr a"]   = "Desvia para subrotina, armazenando o valor atual de PC em 'a' e desviando a execução para o endereço 'a' + 1.";
+    descriptions["neg r"]   = "Troca o sinal do valor em complemento de 2 do registrador 'r' de positivo para negativo e vice-versa.";
+    descriptions["shr r"]   = "Reliza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry).";
+}
+
+QString Machine::getDescription(QString assemblyFormat)
+{
+    if (descriptions.contains(assemblyFormat))
+        return descriptions[assemblyFormat];
+    else
+        return "";
+}
