@@ -14,6 +14,7 @@
 #include "flag.h"
 #include "register.h"
 #include "instruction.h"
+#include "addressingmode.h"
 
 namespace FileErrorCode
 {
@@ -47,11 +48,6 @@ public:
         undefinedError,
     };
 
-    enum AddressingMode
-    {
-        DIRECT, INDIRECT, IMMEDIATE, INDEXED,
-    };
-
     // Constants
     QString ALLOCATE_SYMBOL = "%";
     QString CHAR_SYMBOL = "$";
@@ -77,11 +73,11 @@ public:
 
     virtual void step();
     virtual void fetchInstruction(int byteArray[], Instruction *&instruction);
-    virtual void decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode &addressingMode, int &registerId, int &operandAddress);
-    virtual void executeInstruction(Instruction *&instruction, int registerId, int operandAddress);
+    virtual void decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &operandAddress);
+    virtual void executeInstruction(Instruction *&instruction, QString registerName, int operandAddress);
 
-    virtual AddressingMode extractAddressingMode(int byteArray[]);
-    virtual int extractRegisterId(int byteArray[]);
+    virtual AddressingMode::AddressingModeCode extractAddressingModeCode(int byteArray[]);
+    virtual QString extractRegisterName(int byteArray[]);
 
     virtual void setOverflow(bool state);
     virtual void setCarry(bool state);
@@ -97,7 +93,7 @@ public:
     int memoryRead(int address); // Increments accessCount
     void memoryWrite(int address, int value); // Increments accessCount
     int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
-    int memoryGetOperandAddress(int immediateAddress, AddressingMode addressingMode); // incrementsAccessCount
+    int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // incrementsAccessCount
 
 
 
@@ -125,6 +121,7 @@ public:
 
     // Auxiliary methods
     QStringList splitArguments(QString arguments);
+    void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
 
 
@@ -173,6 +170,9 @@ public:
     virtual Instruction* getInstructionFromValue(int);
     virtual Instruction* getInstructionFromMnemonic(QString);
 
+    AddressingMode::AddressingModeCode getDefaultAddressingModeCode();
+    int getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode);
+
     int getInstructionCount();
     int getAccessCount();
     void clearCounters();
@@ -193,7 +193,7 @@ protected:
     QVector<int> correspondingLine, correspondingAddress;
     QVector<Flag*> flags;
     QVector<Instruction*> instructions;
-    QVector<AddressingMode> addressingModes;
+    QVector<AddressingMode*> addressingModes;
     QHash<QString, int> labelPCMap;
     QHash<QString, QString> descriptions;
     bool running;

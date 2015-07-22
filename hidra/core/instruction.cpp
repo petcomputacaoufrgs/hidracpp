@@ -59,5 +59,3 @@ QString Instruction::getBitPattern() const
 {
     return bitPattern;
 }
-
-

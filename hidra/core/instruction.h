@@ -8,7 +8,6 @@
 class Instruction
 {
 public:
-
     enum InstructionCode
     {
         NOP,

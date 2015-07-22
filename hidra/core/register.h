@@ -18,6 +18,7 @@ public:
     int getValue() const;
     void setValue(int value);
     void incrementValue();
+    bool matchByte(int byte);
 
     int getNumOfBits() const;
 

@@ -6,6 +6,9 @@
 Machine::Machine(QObject *parent) :
     QObject(parent)
 {
+    clearCounters();
+    setBreakpoint(0);
+    setRunning(false);
 }
 
 Machine::~Machine()
@@ -15,6 +18,7 @@ Machine::~Machine()
     qDeleteAll(registers);
     qDeleteAll(flags);
     qDeleteAll(instructions);
+    qDeleteAll(addressingModes);
 }
 
 
@@ -103,13 +107,14 @@ FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
 
 void Machine::step()
 {
-    int byteArray[4], registerId, operandAddress;
-    AddressingMode addressingMode;
+    int byteArray[4], operandAddress;
+    QString registerName;
+    AddressingMode::AddressingModeCode addressingModeCode;
     Instruction *instruction = nullptr;
 
     fetchInstruction(byteArray, instruction);
-    decodeInstruction(byteArray, instruction, addressingMode, registerId, operandAddress);
-    executeInstruction(instruction, registerId, operandAddress);
+    decodeInstruction(byteArray, instruction, addressingModeCode, registerName, operandAddress);
+    executeInstruction(instruction, registerName, operandAddress);
 }
 
 void Machine::fetchInstruction(int byteArray[], Instruction *&instruction)
@@ -119,20 +124,20 @@ void Machine::fetchInstruction(int byteArray[], Instruction *&instruction)
     instruction = getInstructionFromValue(byteArray[0]);
 }
 
-void Machine::decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode &addressingMode, int &registerId, int &operandAddress)
+void Machine::decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &operandAddress)
 {
-    addressingMode = extractAddressingMode(byteArray);
-    registerId = extractRegisterId(byteArray);
+    addressingModeCode = extractAddressingModeCode(byteArray);
+    registerName = extractRegisterName(byteArray);
 
     if (instruction && instruction->getNumBytes() == 2)
     {
         int immediateAddress = getPCValue();
-        operandAddress = memoryGetOperandAddress(immediateAddress, addressingMode);
+        operandAddress = memoryGetOperandAddress(immediateAddress, addressingModeCode);
         incrementPCValue();
     }
 }
 
-void Machine::executeInstruction(Instruction *&instruction, int registerId, int operandAddress)
+void Machine::executeInstruction(Instruction *&instruction, QString registerName, int operandAddress)
 {
     int value1, value2, result;
     Instruction::InstructionCode instructionCode;
@@ -145,58 +150,58 @@ void Machine::executeInstruction(Instruction *&instruction, int registerId, int 
 
     case Instruction::LDR:
         result = memoryRead(operandAddress);
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::STR:
-        result = getRegisterValue(registerId);
+        result = getRegisterValue(registerName);
         memoryWrite(operandAddress, result);
         break;
 
     case Instruction::ADD:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         value2 = memoryRead(operandAddress);
         result = (value1 + value2) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         setCarry(value1 + value2 > 0xFF);
         setOverflow(toSigned(value1) + toSigned(value2) != toSigned(result));
         updateFlags(result);
         break;
 
     case Instruction::OR:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         value2 = memoryRead(operandAddress);
         result = (value1 | value2);
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::AND:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         value2 = memoryRead(operandAddress);
         result = (value1 & value2);
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::NOT:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         result = ~value1 & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::SUB:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         value2 = memoryRead(operandAddress);
         result = (value1 - value2) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         setBorrowOrCarry(value1 < value2);
         setOverflow(toSigned(value1) - toSigned(value2) != toSigned(result));
         break;
@@ -261,42 +266,42 @@ void Machine::executeInstruction(Instruction *&instruction, int registerId, int 
         break;
 
     case Instruction::NEG:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         result = (-value1) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::SHR:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         result = (value1 >> 1) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         setCarry(value1 & 0x01);
         break;
 
     case Instruction::SHL:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         result = (value1 << 1) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         setCarry((value1 & 0x80) ? 1 : 0);
         break;
 
     case Instruction::ROR:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         result = ((value1 >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         setCarry(value1 & 0x01);
         break;
 
     case Instruction::ROL:
-        value1 = getRegisterValue(registerId);
+        value1 = getRegisterValue(registerName);
         result = ((value1 << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
 
-        setRegisterValue(registerId, result);
+        setRegisterValue(registerName, result);
         setCarry((value1 & 0x80) ? 1 : 0);
         break;
 
@@ -311,14 +316,28 @@ void Machine::executeInstruction(Instruction *&instruction, int registerId, int 
     instructionCount++;
 }
 
-Machine::AddressingMode Machine::extractAddressingMode(int[])
+AddressingMode::AddressingModeCode Machine::extractAddressingModeCode(int byteArray[])
 {
-    return AddressingMode::DIRECT;
+    foreach (AddressingMode *addressingMode, addressingModes)
+    {
+        QRegExp matchAddressingMode(addressingMode->getBitPattern());
+
+        if (matchAddressingMode.exactMatch(Byte(byteArray[0]).toString()))
+            return addressingMode->getAddressingModeCode();
+    }
+
+    throw QString("Addressing mode not found.");
 }
 
-int Machine::extractRegisterId(int[])
+QString Machine::extractRegisterName(int byteArray[])
 {
-    return 0;
+    foreach (Register *reg, registers)
+    {
+        if (reg->matchByte(byteArray[0]))
+            return reg->getName();
+    }
+
+    throw QString("Register not found.");
 }
 
 void Machine::setOverflow(bool)
@@ -375,9 +394,9 @@ int Machine::memoryReadNext()
     return value;
 }
 
-int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode addressingMode)
+int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
 {
-    switch (addressingMode)
+    switch (addressingModeCode)
     {
         case AddressingMode::DIRECT:
             return memoryRead(immediateAddress);
@@ -388,8 +407,11 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode addres
         case AddressingMode::IMMEDIATE: // Immediate addressing mode
             return immediateAddress;
 
-        case AddressingMode::INDEXED: // Indexed addressing mode
+        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
             return (memoryRead(immediateAddress) + getRegisterValue("X")) % getMemorySize();
+
+        case AddressingMode::INDEXED_BY_PC:
+            return (memoryRead(immediateAddress) + getRegisterValue("PC")) % getMemorySize();
     }
 
     return 0;
@@ -677,7 +699,6 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
 
     int registerBitCode = 0b00000000;
     int addressingModeBitCode = 0b00000000;
-    //AddressingMode addressingMode = DIRECT;
 
     // Check if correct number of arguments:
     if (argumentList.size() != numberOfArguments)
@@ -695,22 +716,9 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     // If last argument is an address:
     if (numberOfArguments > 0 && instruction->getArguments().last() == "a")
     {
-        // Extract and remove addressing mode:
-        if (addressingModes.contains(INDIRECT) && argumentList.last().endsWith(",i"))
-        {
-            argumentList.last() = argumentList.last().replace(",i", "");
-            addressingModeBitCode = 0b00000001; // TODO: Make this more generic (Hard coded Ramses values)
-        }
-        else if (addressingModes.contains(IMMEDIATE) && argumentList.last().startsWith("#"))
-        {
-            argumentList.last() = argumentList.last().replace("#", "");
-            addressingModeBitCode = 0b00000010;
-        }
-        else if (addressingModes.contains(INDEXED) && argumentList.last().endsWith(",x"))
-        {
-            argumentList.last() = argumentList.last().replace(",x", "");
-            addressingModeBitCode = 0b00000011;
-        }
+        AddressingMode::AddressingModeCode addressingModeCode;
+        extractArgumentAddressingModeCode(argumentList.last(), addressingModeCode); // Removes addressing mode from argument
+        addressingModeBitCode = getAddressingModeBitCode(addressingModeCode);
     }
 
     // Write first byte (instruction with register and addressing mode):
@@ -919,6 +927,22 @@ QStringList Machine::splitArguments(QString arguments)
     return finalArgumentList;
 }
 
+void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode)
+{
+    addressingModeCode = getDefaultAddressingModeCode();
+
+    foreach (AddressingMode *addressingMode, addressingModes)
+    {
+        QRegExp matchAddressingMode(addressingMode->getAssemblyPattern());
+
+        if (matchAddressingMode.exactMatch(argument))
+        {
+            argument = matchAddressingMode.cap(1); // Remove addressing mode
+            addressingModeCode = addressingMode->getAddressingModeCode();
+            return;
+        }
+    }
+}
 
 
 
@@ -1030,8 +1054,10 @@ int Machine::getRegisterBitCode(QString registerName) const
 {
     foreach (Register *reg, registers)
     {
-        if (reg->getName().toLower() == registerName.toLower())
+        if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
+        {
             return reg->getBitCode();
+        }
     }
 
     return Register::NO_BIT_CODE; // Register not found
@@ -1056,7 +1082,7 @@ int Machine::getRegisterValue(QString registerName) const
 {
     foreach (Register *reg, registers)
     {
-        if (reg->getName() == registerName.toLower())
+        if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
             return reg->getValue();
     }
 
@@ -1072,7 +1098,7 @@ void Machine::setRegisterValue(QString registerName, int value)
 {
     foreach (Register *reg, registers)
     {
-        if (reg->getName() == registerName.toLower())
+        if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
         {
             reg->setValue(value);
             return;
@@ -1152,6 +1178,28 @@ Instruction* Machine::getInstructionFromMnemonic(QString mnemonic)
     }
 
     return nullptr;
+}
+
+AddressingMode::AddressingModeCode Machine::getDefaultAddressingModeCode()
+{
+    foreach (AddressingMode *addressingMode, addressingModes)
+    {
+        if (addressingMode->getAssemblyPattern() == AddressingMode::NO_PATTERN)
+            return addressingMode->getAddressingModeCode();
+    }
+
+    throw QString("Error defining default addressing mode.");
+}
+
+int Machine::getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode)
+{
+    foreach (AddressingMode *addressingMode, addressingModes)
+    {
+        if (addressingMode->getAddressingModeCode() == addressingModeCode)
+            return Byte(addressingMode->getBitPattern()).getValue();
+    }
+
+    throw QString("Invalid addressing mode code.");
 }
 
 int Machine::getInstructionCount()

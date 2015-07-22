@@ -44,6 +44,12 @@ void Register::incrementValue()
     setValue(value + 1);
 }
 
+bool Register::matchByte(int byte)
+{
+    QRegExp bitPatternRegExp(bitPattern);
+    return bitPatternRegExp.exactMatch(Byte(byte).toString());
+}
+
 int Register::getNumOfBits() const
 {
     return numOfBits;

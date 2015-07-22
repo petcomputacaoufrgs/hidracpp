@@ -8,9 +8,6 @@ class RamsesMachine : public Machine
 public:
     RamsesMachine();
 
-    virtual AddressingMode extractAddressingMode(int byteArray[]);
-    virtual int extractRegisterId(int byteArray[]);
-
     virtual void setCarry(bool state);
     virtual void setBorrowOrCarry(bool state);
 

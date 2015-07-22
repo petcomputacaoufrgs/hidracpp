@@ -33,8 +33,6 @@ RamsesMachine::RamsesMachine()
     for (int i=0; i<assemblerMemory.size(); i++)
         assemblerMemory[i] = new Byte();
 
-    setBreakpoint(0); // Reset breakpoint
-
 
 
     //////////////////////////////////////////////////
@@ -74,36 +72,10 @@ RamsesMachine::RamsesMachine()
     // Initialize addressing modes
     //////////////////////////////////////////////////
 
-    addressingModes.append(DIRECT);
-    addressingModes.append(INDIRECT);
-    addressingModes.append(IMMEDIATE);
-    addressingModes.append(INDEXED);
-
-    clearCounters();
-    running = false;
-}
-
-Machine::AddressingMode RamsesMachine::extractAddressingMode(int byteArray[])
-{
-    switch (byteArray[0] & 0b00000011) // Extract last two bits
-    {
-        case 0x01:
-            return AddressingMode::INDIRECT;
-
-        case 0x02:
-            return AddressingMode::IMMEDIATE;
-
-        case 0x03:
-            return AddressingMode::INDEXED;
-
-        default:
-            return AddressingMode::DIRECT;
-    }
-}
-
-int RamsesMachine::extractRegisterId(int byteArray[])
-{
-    return ((byteArray[0] & 0b00001100) >> 2) % 3; // Bits 2 and 3 indicate register (A, B or X)
+    addressingModes.append(new AddressingMode("......00", AddressingMode::DIRECT,       AddressingMode::NO_PATTERN));
+    addressingModes.append(new AddressingMode("......01", AddressingMode::INDIRECT,     "(.*),i"));
+    addressingModes.append(new AddressingMode("......10", AddressingMode::IMMEDIATE,    "#(.*)"));
+    addressingModes.append(new AddressingMode("......11", AddressingMode::INDEXED_BY_X, "(.*),x"));
 }
 
 void RamsesMachine::setCarry(bool state)
@@ -115,6 +87,3 @@ void RamsesMachine::setBorrowOrCarry(bool borrowState)
 {
     setFlagValue("C", !borrowState); // Use carry as not borrow
 }
-
-
-

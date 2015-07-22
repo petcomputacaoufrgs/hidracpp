@@ -31,8 +31,6 @@ AhmesMachine::AhmesMachine()
     for (int i=0; i<assemblerMemory.size(); i++)
         assemblerMemory[i] = new Byte();
 
-    setBreakpoint(0); // Reset breakpoint
-
 
 
     //////////////////////////////////////////////////
@@ -82,10 +80,7 @@ AhmesMachine::AhmesMachine()
     // Initialize addressing modes
     //////////////////////////////////////////////////
 
-    addressingModes.append(DIRECT);
-
-    clearCounters();
-    running = false;
+    addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN));
 }
 
 void AhmesMachine::setCarry(bool state)
