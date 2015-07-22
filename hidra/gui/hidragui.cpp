@@ -178,7 +178,16 @@ void HidraGui::initializeInstructionsList()
     {
         QLabel *instructionText = new QLabel(this);
         instructionText->setText(instruction->getMnemonic().toUpper());
-        instructionText->setEnabled(false);
+        instructionText->setTextFormat(Qt::RichText);
+
+        // Description in tooltip
+        QString toolTip;
+        toolTip += "<b>" + instruction->getMnemonic().toUpper() + "</b> ";
+        toolTip += instruction->getArguments().join(" ") + "<br>";
+        toolTip += machine->getDescription(instruction->getAssemblyFormat());
+        instructionText->setToolTip(toolTip);
+
+        instructionText->setEnabled(false); // Grayed out
         ui->layoutInstructions->addWidget(instructionText, i/6, i%6);
         i += 1;
     }

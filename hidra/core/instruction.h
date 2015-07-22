@@ -25,6 +25,7 @@ public:
 
     QString getMnemonic() const;
     QStringList getArguments() const;
+    QString getAssemblyFormat() const;
     int getByteValue();
     int getNumBytes() const;
 
@@ -37,6 +38,7 @@ private:
     QString bitPattern;
     QRegExp byteRegExp;
     QString mnemonic;
+    QString assemblyFormat;
     QStringList arguments;
 
     InstructionCode instructionCode;

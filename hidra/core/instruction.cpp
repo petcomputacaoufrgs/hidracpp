@@ -17,6 +17,7 @@ Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instr
     this->mnemonic = assemblyFormatList.first();
     assemblyFormatList.removeFirst();
     this->arguments = assemblyFormatList; // Mnemonic not included
+    this->assemblyFormat = assemblyFormat;
 }
 
 bool Instruction::matchByte(int byte)
@@ -32,6 +33,11 @@ QString Instruction::getMnemonic() const
 QStringList Instruction::getArguments() const
 {
     return arguments;
+}
+
+QString Instruction::getAssemblyFormat() const
+{
+    return assemblyFormat;
 }
 
 int Instruction::getByteValue()

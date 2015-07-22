@@ -24,7 +24,7 @@ QString Register::getBitPattern() const
 int Register::getBitCode() const
 {
     if (bitPattern == "")
-        return -1; // No bit code
+        return NO_BIT_CODE;
     else
         return Byte(bitPattern).getValue();
 }

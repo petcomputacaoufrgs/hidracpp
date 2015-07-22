@@ -688,7 +688,7 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     {
         registerBitCode = getRegisterBitCode(argumentList.first());
 
-        if (registerBitCode == -1)
+        if (registerBitCode == Register::NO_BIT_CODE)
             throw invalidArgument; // Hidden register/invalid register name
     }
 
@@ -1034,7 +1034,7 @@ int Machine::getRegisterBitCode(QString registerName) const
             return reg->getBitCode();
     }
 
-    return -1; // Register not found, no bit code
+    return Register::NO_BIT_CODE; // Register not found
 }
 
 QString Machine::getRegisterName(int id) const
@@ -1195,8 +1195,8 @@ void Machine::generateDescriptions()
     descriptions["jnc a"] = "Se a flag C estiver desativada (not carry), desvia a execução para o endereço 'a'.";
     descriptions["jb a"]  = "Se a flag B estiver ativada (borrow), desvia a execução para o endereço 'a'.";
     descriptions["jnb a"] = "Se a flag B estiver desativada (not borrow), desvia a execução para o endereço 'a'.";
-    descriptions["shr"]   = "Reliza shift lógico dos bits do acumulador para a direita, passando o estado do bit menos significativo para a flag C (carry).";
-    descriptions["shl"]   = "Reliza shift lógico dos bits do acumulador para a esquerda, passando o estado do bit mais significativo para a flag C (carry).";
+    descriptions["shr"]   = "Reliza shift lógico dos bits do acumulador para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
+    descriptions["shl"]   = "Reliza shift lógico dos bits do acumulador para a esquerda, passando o estado do bit mais significativo para a flag C (carry) e preenchendo o bit menos significativo com 0.";
     descriptions["ror"]   = "Realiza rotação para a esquerda dos bits do acumulador, incluindo a flag C (carry) como um bit.";
     descriptions["rol"]   = "Realiza rotação para a direita dos bits do acumulador, incluindo a flag C (carry) como um bit.";
 
@@ -1210,11 +1210,15 @@ void Machine::generateDescriptions()
     descriptions["sub r a"] = "Subtrai o valor no endereço 'a' do registrador 'r'.";
     descriptions["jsr a"]   = "Desvia para subrotina, armazenando o valor atual de PC em 'a' e desviando a execução para o endereço 'a' + 1.";
     descriptions["neg r"]   = "Troca o sinal do valor em complemento de 2 do registrador 'r' de positivo para negativo e vice-versa.";
-    descriptions["shr r"]   = "Reliza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry).";
+    descriptions["shr r"]   = "Reliza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
 }
 
 QString Machine::getDescription(QString assemblyFormat)
 {
+    // Initialize descriptions
+    if (descriptions.isEmpty())
+        generateDescriptions();
+
     if (descriptions.contains(assemblyFormat))
         return descriptions[assemblyFormat];
     else

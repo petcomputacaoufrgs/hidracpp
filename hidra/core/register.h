@@ -8,11 +8,13 @@
 class Register
 {
 public:
+    static const int NO_BIT_CODE = -1;
+
     Register(QString name, QString bitPattern, int numOfBits);
 
     QString getName() const;
     QString getBitPattern() const;
-    int getBitCode() const; // -1 if no bit code (not accessible)
+    int getBitCode() const; // Returns NO_BIT_CODE if register isn't directly accessible
     int getValue() const;
     void setValue(int value);
     void incrementValue();
