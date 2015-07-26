@@ -6,15 +6,23 @@
 class Flag
 {
 public:
-    Flag(QString name);
-    Flag(QString name, bool defaultValue);
+    enum FlagCode
+    {
+        NEGATIVE, ZERO, CARRY, BORROW, OVERFLOW, CARRY_NOT_BORROW
+    };
 
+    Flag();
+    Flag(FlagCode flagCode, QString name);
+    Flag(FlagCode flagCode, QString name, bool defaultValue);
+
+    FlagCode getFlagCode() const;
     QString getName() const;
     bool getValue() const;
     void setValue(bool value);
     void resetValue();
 
 private:
+    FlagCode flagCode;
     QString name;
     bool value;
     bool defaultValue;

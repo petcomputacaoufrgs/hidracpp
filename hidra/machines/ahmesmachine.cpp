@@ -19,11 +19,13 @@ AhmesMachine::AhmesMachine()
     // Initialize memory
     //////////////////////////////////////////////////
 
-    memory = QVector<Byte*>(MEM_SIZE);
-    assemblerMemory = QVector<Byte*>(MEM_SIZE);
-    reserved = QVector<bool>(MEM_SIZE);
+    int MEMORY_SIZE = 256;
 
-    correspondingLine = QVector<int>(MEM_SIZE, -1); // Each PC value may be associated with a line of code
+    memory = QVector<Byte*>(MEMORY_SIZE);
+    assemblerMemory = QVector<Byte*>(MEMORY_SIZE);
+    reserved = QVector<bool>(MEMORY_SIZE);
+
+    correspondingLine = QVector<int>(MEMORY_SIZE, -1); // Each PC value may be associated with a line of code
 
     for (int i=0; i<memory.size(); i++)
         memory[i] = new Byte();
@@ -37,11 +39,11 @@ AhmesMachine::AhmesMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags.append(new Flag("N"));
-    flags.append(new Flag("Z", true));
-    flags.append(new Flag("V"));
-    flags.append(new Flag("C"));
-    flags.append(new Flag("B"));
+    flags.append(new Flag(Flag::NEGATIVE, "N"));
+    flags.append(new Flag(Flag::ZERO, "Z", true));
+    flags.append(new Flag(Flag::OVERFLOW, "V"));
+    flags.append(new Flag(Flag::CARRY, "C"));
+    flags.append(new Flag(Flag::BORROW, "B"));
 
 
 
@@ -81,19 +83,4 @@ AhmesMachine::AhmesMachine()
     //////////////////////////////////////////////////
 
     addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN));
-}
-
-void AhmesMachine::setCarry(bool state)
-{
-    setFlagValue("C", state);
-}
-
-void AhmesMachine::setBorrowOrCarry(bool state)
-{
-    setFlagValue("B", state);
-}
-
-void AhmesMachine::setOverflow(bool state)
-{
-    setFlagValue("V", state);
 }

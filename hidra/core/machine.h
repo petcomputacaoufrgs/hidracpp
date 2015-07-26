@@ -71,18 +71,18 @@ public:
     // Step
     //////////////////////////////////////////////////
 
-    virtual void step();
-    virtual void fetchInstruction(int byteArray[], Instruction *&instruction);
-    virtual void decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &operandAddress);
-    virtual void executeInstruction(Instruction *&instruction, QString registerName, int operandAddress);
+    void step();
+    void fetchInstruction(int byteArray[], Instruction *&instruction);
+    void decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &operandAddress);
+    void executeInstruction(Instruction *&instruction, QString registerName, int operandAddress);
 
-    virtual AddressingMode::AddressingModeCode extractAddressingModeCode(int byteArray[]);
-    virtual QString extractRegisterName(int byteArray[]);
+    AddressingMode::AddressingModeCode extractAddressingModeCode(int byteArray[]);
+    QString extractRegisterName(int byteArray[]);
 
-    virtual void setOverflow(bool state);
-    virtual void setCarry(bool state);
-    virtual void setBorrowOrCarry(bool borrowState); // Some machines use carry as not borrow
-    virtual void updateFlags(int value); // Updates N and Z
+    void setOverflow(bool state);
+    void setCarry(bool state);
+    void setBorrowOrCarry(bool borrowState); // Some machines use carry as not borrow
+    void updateFlags(int value); // Updates N and Z
     int toSigned(int unsignedByte);
 
 
@@ -102,7 +102,7 @@ public:
     //////////////////////////////////////////////////
 
     // Build
-    virtual void buildInstruction(QString mnemonic, QString arguments);
+    void buildInstruction(QString mnemonic, QString arguments);
 
     // Assembly
     void assemble(QString sourceCode);
@@ -147,6 +147,7 @@ public:
     void setFlagValue(int id, int value);
     int  getFlagValue(QString flagName) const;
     void setFlagValue(QString flagName, int value);
+    void setFlagValue(Flag::FlagCode flagCode, int value);
     void clearFlags();
 
     int getNumberOfRegisters() const;
@@ -167,8 +168,8 @@ public:
     int getLineCorrespondingAddress(int line);
 
     QVector<Instruction *> getInstructions() const;
-    virtual Instruction* getInstructionFromValue(int);
-    virtual Instruction* getInstructionFromMnemonic(QString);
+    Instruction* getInstructionFromValue(int);
+    Instruction* getInstructionFromMnemonic(QString);
 
     AddressingMode::AddressingModeCode getDefaultAddressingModeCode();
     int getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode);
@@ -177,7 +178,7 @@ public:
     int getAccessCount();
     void clearCounters();
 
-    virtual void generateDescriptions();
+    void generateDescriptions();
     QString getDescription(QString assemblyFormat);
 
     bool buildSuccessful;

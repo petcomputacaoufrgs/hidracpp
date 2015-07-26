@@ -340,19 +340,25 @@ QString Machine::extractRegisterName(int byteArray[])
     throw QString("Register not found.");
 }
 
-void Machine::setOverflow(bool)
+void Machine::setOverflow(bool state)
 {
-    return;
+    foreach (Flag *flag, flags)
+    {
+        if (flag->getFlagCode() == Flag::OVERFLOW)
+            flag->setValue(state);
+    }
 }
 
-void Machine::setCarry(bool)
+void Machine::setCarry(bool state)
 {
-    return;
+    setFlagValue(Flag::CARRY, state);
+    setFlagValue(Flag::CARRY_NOT_BORROW, state);
 }
 
-void Machine::setBorrowOrCarry(bool)
+void Machine::setBorrowOrCarry(bool borrowState)
 {
-    return;
+    setFlagValue(Flag::BORROW, borrowState);
+    setFlagValue(Flag::CARRY_NOT_BORROW, !(borrowState));
 }
 
 void Machine::updateFlags(int value)
@@ -1037,6 +1043,15 @@ void Machine::setFlagValue(QString flagName, int value)
     }
 
     throw QString("Invalid flag name: ") + flagName;
+}
+
+void Machine::setFlagValue(Flag::FlagCode flagCode, int value)
+{
+    foreach (Flag *flag, flags)
+    {
+        if (flag->getFlagCode() == flagCode)
+            flag->setValue(value);
+    }
 }
 
 void Machine::clearFlags()

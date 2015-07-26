@@ -21,11 +21,13 @@ RamsesMachine::RamsesMachine()
     // Initialize memory
     //////////////////////////////////////////////////
 
-    memory = QVector<Byte*>(MEM_SIZE);
-    assemblerMemory = QVector<Byte*>(MEM_SIZE);
-    reserved = QVector<bool>(MEM_SIZE);
+    int MEMORY_SIZE = 256;
 
-    correspondingLine = QVector<int>(MEM_SIZE, -1); // Each PC value may be associated with a line of code
+    memory = QVector<Byte*>(MEMORY_SIZE);
+    assemblerMemory = QVector<Byte*>(MEMORY_SIZE);
+    reserved = QVector<bool>(MEMORY_SIZE);
+
+    correspondingLine = QVector<int>(MEMORY_SIZE, -1); // Each PC value may be associated with a line of code
 
     for (int i=0; i<memory.size(); i++)
         memory[i] = new Byte();
@@ -39,9 +41,9 @@ RamsesMachine::RamsesMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags.append(new Flag("N"));
-    flags.append(new Flag("Z", true));
-    flags.append(new Flag("C"));
+    flags.append(new Flag(Flag::NEGATIVE, "N"));
+    flags.append(new Flag(Flag::ZERO, "Z", true));
+    flags.append(new Flag(Flag::CARRY_NOT_BORROW, "C"));
 
 
 
@@ -76,14 +78,4 @@ RamsesMachine::RamsesMachine()
     addressingModes.append(new AddressingMode("......01", AddressingMode::INDIRECT,     "(.*),i"));
     addressingModes.append(new AddressingMode("......10", AddressingMode::IMMEDIATE,    "#(.*)"));
     addressingModes.append(new AddressingMode("......11", AddressingMode::INDEXED_BY_X, "(.*),x"));
-}
-
-void RamsesMachine::setCarry(bool state)
-{
-    setFlagValue("C", state);
-}
-
-void RamsesMachine::setBorrowOrCarry(bool borrowState)
-{
-    setFlagValue("C", !borrowState); // Use carry as not borrow
 }

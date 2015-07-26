@@ -19,11 +19,13 @@ NeanderMachine::NeanderMachine()
     // Initialize memory
     //////////////////////////////////////////////////
 
-    memory = QVector<Byte*>(MEM_SIZE);
-    assemblerMemory = QVector<Byte*>(MEM_SIZE);
-    reserved = QVector<bool>(MEM_SIZE);
+    int MEMORY_SIZE = 256;
 
-    correspondingLine = QVector<int>(MEM_SIZE, -1); // Each PC value may be associated with a line of code
+    memory = QVector<Byte*>(MEMORY_SIZE);
+    assemblerMemory = QVector<Byte*>(MEMORY_SIZE);
+    reserved = QVector<bool>(MEMORY_SIZE);
+
+    correspondingLine = QVector<int>(MEMORY_SIZE, -1); // Each PC value may be associated with a line of code
 
     for (int i=0; i<memory.size(); i++)
         memory[i] = new Byte();
@@ -37,8 +39,8 @@ NeanderMachine::NeanderMachine()
     // Initialize flags
     //////////////////////////////////////////////////
 
-    flags.append(new Flag("N"));
-    flags.append(new Flag("Z", true));
+    flags.append(new Flag(Flag::NEGATIVE, "N"));
+    flags.append(new Flag(Flag::ZERO, "Z", true));
 
 
 
