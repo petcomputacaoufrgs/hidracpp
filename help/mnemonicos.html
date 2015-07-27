@@ -1,0 +1,277 @@
+<html>
+<!-- FORNECE EXPLICAÇÕES SOBRE OS MNEMÔNICOS E SUAS RESPECTIVAS INSTRUÇÕES !-->
+<head>
+	<title>GUIA DE USO HIDRA - MNEM&Ocirc;NICOS E OPER&Ccedil;ÕES</title>
+</head>
+<body>
+
+
+	<div id ="intro_topico">
+		<h1>O QUE S&Atilde;O MNEM&Ocirc;NICOS:</h1><br/>
+
+
+		As instru&ccedil;&otilde;es na program&ccedil;&atilde;o de baixo nivel s&atilde;o representadas por n&uacute;meros, os OP CODES. 
+		Para o programador os OP CODES n&atilde;o s&atilde;o intuitivos, por isso quando estamos escrevendo o c&oacute;digo assembly existe o recurso de usar mnem&ocirc;nicos,
+		abrevia&ccedil;&otilde;es de palavras que remetem ao sentido 	da express&atilde;o, que ser&atilde;o transformadas em seus respectivos OP CODES pelo montador(assembler)
+		na hora de gerar o c&oacute;digo em linguagem de m&aacute;quina.
+	</div>
+	
+	<!-- MENU QUE REDIRECIONA PARA PARTE DA PÁGINA RELATIVA A CADA INSTRUÇÃO!-->
+	<h1>OPERA&Ccedil;&Otilde;ES NEANDER/AHMES</h1>
+	<ul>
+		<li><a href="#nop">0 - NOP</a></li>
+
+
+		<li><a href="#sta">16 - STA</a></li>
+
+
+		<li><a href="#lda">32 - LDA</a></li>
+
+		
+		<li><a href="#add">48 - ADD</a></li>
+
+
+		<li><a href="#or">64 - OR</a></li>
+
+
+		<li><a href="#and">80 - AND</a></li>
+
+
+		<li><a href="#not">96 - NOT</a></li>
+
+
+		<li><a href="#sub">112 - SUB</a></li>
+
+
+		<li><a href="#jmp">128 - JMP</a></li>
+
+
+		<li><a href="#jn">144 - JN</a></li>
+
+
+		<li><a href="#jp">148 - JP</a></li>
+
+
+		<li><a href="#jv">152 - JV</a></li>
+
+
+		<li><a href="#jnv">156 - JNV</a></li>
+
+		
+		<li><a href="#jz">160 - JZ</a></li>
+
+		
+		<li><a href="#jnz">164 - JNZ</a></li>
+
+
+		<li><a href="#jc">176 -JC </a></li>
+
+
+		<li><a href="#jnc">180 - JNC </a></li>
+
+
+		<li><a href="#jb">184 - JB </a></li>
+
+
+		<li><a href="#jnb">188 -JNB </a></li>
+
+
+		<li><a href="#shr">224 -SHR</a></li>
+
+
+		<li><a href="#shl">225 -SHL</a></li>
+
+
+		<li><a href="#ror">226 -ROR</a></li>
+
+
+		<li><a href="#rol">227 -ROL</a></li>
+
+
+		<li><a href="#hlt">240 -HLT </a></li>
+
+	</ul>
+	<!--------------------------------------------------------------------!-->
+	<!--------------------------------------------------------------------!-->
+	<!-- DESCRIÇÃO DA CADA UMA DAS INSTRUÇÕES DO AHMES/NEANDER!-->
+	<!--------------------------------------------------------------------!-->
+	<!--------------------------------------------------------------------!-->
+	
+	
+	<!-- INSTRUÇÃO NOP !-->
+	
+	
+	<div class="op_info">
+		<h2 id = "nop" align = "center">0 - NOP(No Operator)</h2><br/>
+		A instru&ccedil;&atilde;o 0-NO OPERATOR n&atilde;o realiza nenhuma opera&ccedil;&atilde;o apenas indica a falta de dados ou 			instru&ccedil;&otilde;es em um endere&ccedil;o. Por default todos os endere&ccedil;os no arquivo em branco valem NOP.<br/><br>
+	</div>
+
+
+	<!-- INSTRUÇÃO STA!-->
+	
+
+	<div class = "op_info">
+		<h2 id = "sta" align = "center">16 - STA(Store Adress)</h2><br/>
+		A instru&ccedil;&atilde;o 16 - STORE ADRESS e deve ter o formato: <div class="exemplo">STA endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o armazenar o valor do acumulador no endere&ccedil;o de memoria fornecido sobrescrevendo qualquer valor antes contido no endere&ccedil;o. A instru&ccedil;&atilde;o n&atilde;o altera o valor 			do acumulador.<br/><br>
+	</div>	
+
+
+	<!-- INSTRUÇÃO LDA!-->
+	
+
+	<div class = "op_info">
+		<h2 id = "lda" align = "center">32 - LDA(Load Adress)</h2><br/>
+		A instru&ccedil;&atilde;o 32 - LOAD ADRESS e deve ter o formato: <div class="exemplo">LDA endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o buscar o valor armazenado no endere&ccedil;o e carrega-la no acumulador, sobrescrevendo qualquer valor anterior ali contido.<br/><br>
+	</div>
+
+
+	<!-- INSTRUÇÃO ADD!-->
+	
+
+	<div class = "op_info">
+		<h2 id = "add" align = "center">48 - ADD(Adi&ccedil;&atilde;o)</h2><br/>
+		A instru&ccedil;&atilde;o 48 - ADI&Ccedil;&Atilde;O deve ter o formato: <div class="exemplo">ADD endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o fazer a soma bit a bit do n&uacute;mero contido no endere&ccedil;o de mem&oacute;ria com o acumulador e salvar o resultado no acumulador.<br/> <br/><br/>
+
+		<div class = "cuidado">
+			CUIDADO!NA M&Aacute;QUINA NEANDER A SOMA BIT A BIT N&Atilde;O CUIDA SE O RESULTADO ULTRAPASSA A FAIXA DE REPRESENTA&Ccedil;&Atilde;O OU SE H&Aacute; ESTOURO E NA M&Aacute;QUINA AHMES AS FLAGS
+			<a href = "">B(BORROW)</a> <a href = "">V(OVERFLOW)</a> <a href = "">C(CARRY)</a>
+			AVISAR&Atilde;O CASO OCORRA, MAS FAR&Atilde;O A SOMA BIT A BIT IDEPENDENTE DISSO.
+		<br/><br></div>
+	</div>
+
+	<!-- INSTRUÇÃO OR!-->
+	
+
+	<div class = "op_info">
+		<h2 id = "or" align = "center">64 - OR(Ou L&oacute;gico)</h2><br/>
+		A instru&ccedil;&atilde;o 64 - OU L&Oacute;GICO deve ter o formato: <div class="exemplo">OR endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o fazer o "ou l&oacute;gico" bit a bit do n&uacute;mero contido no endere&ccedil;o de mem&oacute;ria com o acumulador e salvar o resultado no acumulador.<br/> 
+	<br/><br>
+	</div>
+
+	
+	<!-- INSTRUÇÃO AND !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "and" align = "center">80 - AND(E L&oacute;gico)</h2><br/>
+		A instru&ccedil;&atilde;o 80 - E L&Oacute;GICO deve ter o formato: <div class="exemplo">AND endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o fazer o "e l&oacute;gico" bit a bit do n&uacute;mero contido no endere&ccedil;o de mem&oacute;ria com o acumulador e salvar o resultado no acumulador.<br/> 
+	<br/><br>
+	</div>
+
+
+	<!-- INSTRUÇÃO NOT !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "not" align = "center">96 - NOT(Nega&ccedil;&atilde;o)</h2>.<br/>
+		A instru&ccedil;&atilde;o 96 - nega&ccedil;&atilde;o deve ter o formato: <div class="exemplo">NOT</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o fazer a nega&ccedil;&atilde;o l&oacute;gica bit a bit do acumulador e salvar o resultado no acumulador.
+	<br/><br>
+	</div>
+	
+	
+		<!-- INSTRUÇÃO SUB !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "sub" align = "center">112 - SUB(Subtra&ccedil;&atilde;o)</h2>.<br/>
+		A instru&ccedil;&atilde;o 112 - subtra&ccedil;&atilde;o deve ter o formato: <div class="exemplo">SUB endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o fazer a subtração bit a bit do n&uacute;mero contido no endere&ccedil;o de mem&oacute;ria com o acumulador e salvar o resultado no acumulador.<br/> <br/><br/>
+		<br/><br>
+		<div class = "cuidado">
+			CUIDADO!NA M&Aacute;QUINA AHMES AS FLAGS
+			<a href = "">B(BORROW)</a> <a href = "">V(OVERFLOW)</a> <a href = "">C(CARRY)</a>
+			AVISAR&Atilde;O CASO OCORRA, MAS FAR&Atilde;O A SUBTRA&Ccedil;&Atilde;O BIT A BIT IDEPENDENTE DISSO.
+		<br/><br></div>
+	</div>
+	
+	</div>
+	
+	
+	
+			<!-- INSTRUÇÃO JMP !-->
+
+
+	<div class = "op_info">
+			<h2 id = "jmp" align = "center">128 - JMP(Jump)</h2>.<br/>
+		A instru&ccedil;&atilde;o 128 - jump deve ter o formato: <div class="exemplo">JMP endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar incondicionalmente a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido.
+	<br/><br>
+	</div>
+	
+	
+				<!-- INSTRUÇÃO JN !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "jn" align = "center">144 - JN(Jump On Negative)</h2>.<br/>
+		A instru&ccedil;&atilde;o 144 - jump on negative deve ter o formato: <div class="exemplo">JN endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar  a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido, se, e somente se o valor do acumulador for negativo na hora da execu&ccedil;&atilde;o da instru&ccedil;&atilde;o.
+	<br/><br>
+	</div>
+	
+	
+	
+					<!-- INSTRUÇÃO JP !-->
+
+
+	<div class = "op_info">
+		<h2 id = "jp" align = "center">148 - JN(Jump On Positive)</h2>.<br/>
+		A instru&ccedil;&atilde;o 148 - jump on positive deve ter o formato: <div class="exemplo">JP endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar  a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido, se, e somente se o valor do acumulador for positivo na hora da execu&ccedil;&atilde;o da instru&ccedil;&atilde;o.
+	<br/><br>
+	</div>
+
+	
+	
+					<!-- INSTRUÇÃO JV !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "jv" align = "center">152 - JV(Jump On Overflow)</h2>.<br/>
+		A instru&ccedil;&atilde;o 152 - jump on overflow deve ter o formato: <div class="exemplo">JV endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar  a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido, se, e somente se a <a href = "">V(OVERFLOW)</a> estiver acesa na hora da execu&ccedil;&atilde;o da instru&ccedil;&atilde;o.
+	<br/><br>
+	</div>
+	
+	
+	
+						<!-- INSTRUÇÃO JNV !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "jnv" align = "center">156 - JNV(Jump On Not Overflow)</h2>.<br/>
+		A instru&ccedil;&atilde;o 156 - jump on not overflow deve ter o formato: <div class="exemplo">JNV endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar  a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido, se, e somente se a <a href = "">V(OVERFLOW)</a> estiver apagada na hora da execu&ccedil;&atilde;o da instru&ccedil;&atilde;o.
+	<br/><br>
+	</div>
+
+
+					<!-- INSTRUÇÃO JZ !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "jz" align = "center">160 - JZ(Jump On Zero)</h2>.<br/>
+		A instru&ccedil;&atilde;o 160 - jump on zero deve ter o formato: <div class="exemplo">JZ endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar  a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido, se, e somente se o valor do acumulador for zero na hora da execu&ccedil;&atilde;o da instru&ccedil;&atilde;o.
+	<br/><br>
+	</div>
+	
+	
+						<!-- INSTRUÇÃO JNZ !-->
+	
+
+	<div class = "op_info">
+		<h2 id = "jnz" align = "center">164 - JNZ(Jump On Not Zero)</h2>.<br/>
+		A instru&ccedil;&atilde;o 164 - jump on not zero deve ter o formato: <div class="exemplo">JNZ endere&ccedil;o</div>
+		A instru&ccedil;&atilde;o tem como fun&ccedil;&atilde;o desviar  a execu&ccedil;&atilde;o para uma certa &aacute;rea de mem&oacute;ria mudando o valor do Program Counter para o endere&ccedil;o fornecido, se, e somente se o valor do acumulador for diferente de zero na hora da execu&ccedil;&atilde;o da instru&ccedil;&atilde;o.
+	<br/><br>
+	</div>
+	<div align = "center"><a href="help.html">IN&Iacute;CIO</a></div>
+</body>
+</html>
