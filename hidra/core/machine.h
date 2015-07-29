@@ -86,6 +86,7 @@ public:
     int toSigned(int unsignedByte);
 
 
+
     //////////////////////////////////////////////////
     // Memory read/write with access count
     //////////////////////////////////////////////////
@@ -110,7 +111,7 @@ public:
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
-    void clearAssemblerMemory();
+    void clearAssemblerData();
     void copyAssemblerMemoryToMemory();
     void reserveAssemblerMemory(int sizeToReserve);
 
@@ -177,6 +178,8 @@ public:
     int getInstructionCount();
     int getAccessCount();
     void clearCounters();
+
+    void clear();
 
     void generateDescriptions();
     QString getDescription(QString assemblyFormat);

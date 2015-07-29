@@ -7,7 +7,7 @@ Machine::Machine(QObject *parent) :
     QObject(parent)
 {
     clearCounters();
-    setBreakpoint(0);
+    setBreakpoint(-1);
     setRunning(false);
 }
 
@@ -115,6 +115,9 @@ void Machine::step()
     fetchInstruction(byteArray, instruction);
     decodeInstruction(byteArray, instruction, addressingModeCode, registerName, operandAddress);
     executeInstruction(instruction, registerName, operandAddress);
+
+    if (getPCValue() == getBreakpoint())
+        setRunning(false);
 }
 
 void Machine::fetchInstruction(int byteArray[], Instruction *&instruction)
@@ -455,7 +458,7 @@ void Machine::assemble(QString sourceCode)
     //////////////////////////////////////////////////
 
     labelPCMap.clear();
-    clearAssemblerMemory();
+    clearAssemblerData();
     PC->setValue(0);
 
     QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
@@ -541,7 +544,7 @@ void Machine::assemble(QString sourceCode)
                     // TODO: associateLine instead on FIRST PASS
                     correspondingLine[PC->getValue()] = lineNumber;
                     if (instruction->getNumBytes() == 2)
-                        correspondingLine[(PC->getValue() + 1) % 256] = lineNumber;
+                        correspondingLine[(PC->getValue() + 1) & 0xFF] = lineNumber;
 
                     buildInstruction(mnemonic, arguments.toLower());
                 }
@@ -775,7 +778,7 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
 }
 
 
-void Machine::clearAssemblerMemory()
+void Machine::clearAssemblerData()
 {
     for (int i=0; i<assemblerMemory.size(); i++)
     {
@@ -783,6 +786,8 @@ void Machine::clearAssemblerMemory()
         reserved[i] = false;
         correspondingLine[i] = -1;
     }
+
+    correspondingAddress.clear();
 }
 
 // Copies assemblerMemory to machine's memory
@@ -973,8 +978,8 @@ int Machine::getBreakpoint() const
 
 void Machine::setBreakpoint(int value)
 {
-    if (value > memory.size() || value < 0)
-        breakpoint = 0;
+    if (value >= memory.size() || value < 0)
+        breakpoint = -1;
     else
         breakpoint = value;
 }
@@ -1165,7 +1170,7 @@ int Machine::getLineCorrespondingAddress(int line)
     if (line >= 0 && line < correspondingAddress.size())
         return correspondingAddress[line];
     else
-        return 0;
+        return -1;
 }
 
 QVector<Instruction *> Machine::getInstructions() const
@@ -1231,6 +1236,19 @@ void Machine::clearCounters()
 {
     instructionCount = 0;
     accessCount = 0;
+}
+
+void Machine::clear()
+{
+    clearMemory();
+    clearRegisters();
+    clearFlags();
+    clearCounters();
+    clearAssemblerData();
+
+    setPCValue(0);
+    setBreakpoint(-1);
+    setRunning(false);
 }
 
 void Machine::generateDescriptions()

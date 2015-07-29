@@ -55,6 +55,7 @@ private slots:
     void on_actionRun_triggered();
     void on_actionStep_triggered();
 
+    void on_actionNew_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
     void on_actionSaveAs_triggered();

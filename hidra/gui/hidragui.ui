@@ -449,6 +449,7 @@
     <property name="title">
      <string>Arquivo</string>
     </property>
+    <addaction name="actionNew"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSaveAs"/>
@@ -602,6 +603,14 @@
   <action name="actionAbout">
    <property name="text">
     <string>Sobre</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>Novo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

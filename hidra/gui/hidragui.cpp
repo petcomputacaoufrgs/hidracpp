@@ -205,6 +205,7 @@ void HidraGui::clearMachineInterfaceComponents()
     clearRegisterWidgets();
     clearFlagWidgets();
     clearInstructionsList();
+    clearErrorsField();
 }
 
 void HidraGui::clearMemoryTable()
@@ -430,11 +431,13 @@ void HidraGui::on_pushButtonBuild_clicked()
     ui->actionBuild->trigger();
 }
 
-void HidraGui::on_pushButtonRun_clicked(){
+void HidraGui::on_pushButtonRun_clicked()
+{
     ui->actionRun->trigger();
 }
 
-void HidraGui::on_pushButtonStep_clicked(){
+void HidraGui::on_pushButtonStep_clicked()
+{
     ui->actionStep->trigger();
 }
 
@@ -492,6 +495,39 @@ void HidraGui::on_actionStep_triggered()
     }
 
     updateMachineInterface();
+}
+
+void HidraGui::on_actionNew_triggered()
+{
+    bool cancelled = false;
+
+    // Se o arquivo foi modificado, oferece para salvar alterações
+    if (modifiedFile)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Hidra",
+                                      "Deseja salvar as alterações feitas?",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            cancelled = true;
+
+        if (reply == QMessageBox::Yes)
+        {
+            ui->actionSave->trigger();
+
+            if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
+                cancelled = true;
+        }
+    }
+
+    // Se não foi cancelado, cria um novo arquivo
+    if (!cancelled)
+    {
+        codeEditor->clear();
+        machine->clear();
+        initializeMachineInterface();
+    }
 }
 
 void HidraGui::on_actionOpen_triggered()
