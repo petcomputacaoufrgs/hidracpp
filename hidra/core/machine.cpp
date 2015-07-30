@@ -54,10 +54,10 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
     }
 
     // Read memory
-    for (int index = 0; index < memory.length(); index++)
+    for (int address = 0; address < memory.size(); address++)
     {
         memFile.getChar(&byte);
-        memory[index]->setValue(byte);
+        setMemoryValue(address, byte);
         memFile.getChar(&byte); // Skip byte
     }
 
@@ -794,7 +794,11 @@ void Machine::clearAssemblerData()
 void Machine::copyAssemblerMemoryToMemory()
 {
     for (int i=0; i<memory.size(); i++)
-        memory[i]->setValue(assemblerMemory[i]->getValue());
+    {
+        // Copy only different values to avoid marking bytes as changed
+        if (getMemoryValue(i) != assemblerMemory[i]->getValue())
+            setMemoryValue(i, assemblerMemory[i]->getValue());
+    }
 }
 
 // Reserve 'sizeToReserve' bytes starting from PC. Throws exception on overlap.
@@ -971,6 +975,11 @@ void Machine::setRunning(bool running)
     this->running = running;
 }
 
+bool Machine::getBuildSuccessful()
+{
+    return buildSuccessful;
+}
+
 int Machine::getBreakpoint() const
 {
     return breakpoint;
@@ -989,20 +998,49 @@ int Machine::getMemorySize() const
     return memory.size();
 }
 
+void Machine::setMemorySize(int size)
+{
+    memory.fill(nullptr, size);
+    assemblerMemory.fill(nullptr, size);
+    reserved.fill(false, size);
+    changed.fill(true, size);
+    correspondingLine.fill(-1, size); // Each address may be associated with a line of code
+
+    for (int i=0; i<memory.size(); i++)
+    {
+        memory[i] = new Byte();
+        assemblerMemory[i] = new Byte();
+    }
+}
+
 int Machine::getMemoryValue(int address) const
 {
-    return memory.at(address)->getValue();
+    return memory[address]->getValue();
 }
 
 void Machine::setMemoryValue(int address, int value)
 {
-    memory.at(address)->setValue(value);
+    memory[address]->setValue(value);
+    changed[address] = true;
+}
+
+bool Machine::hasByteChanged(int address)
+{
+    if (changed[address])
+    {
+        changed[address] = false;
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
 void Machine::clearMemory()
 {
     for (int i=0; i<memory.size(); i++)
-        memory[i]->setValue(0);
+        setMemoryValue(i, 0);
 }
 
 int Machine::getNumberOfFlags() const
@@ -1300,8 +1338,5 @@ QString Machine::getDescription(QString assemblyFormat)
     if (descriptions.isEmpty())
         generateDescriptions();
 
-    if (descriptions.contains(assemblyFormat))
-        return descriptions[assemblyFormat];
-    else
-        return "";
+    return descriptions.value(assemblyFormat, "");
 }

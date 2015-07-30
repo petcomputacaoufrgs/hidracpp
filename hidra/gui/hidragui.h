@@ -63,9 +63,7 @@ private slots:
     void on_actionImportMemory_triggered();
     void on_actionExportMemory_triggered();
 
-    void on_tableViewMemoryInstructions_clicked(const QModelIndex &index);
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
-    void on_tableViewMemoryData_clicked(const QModelIndex &index);
 
     void on_actionResetRegisters_triggered();
     void on_actionSetBreakpoint_triggered();
@@ -95,13 +93,16 @@ private:
     void clearInstructionsList();
 
     void updateMachineInterfaceComponents();
-    void updateMemoryTable();
+    void updateMemoryTable(bool force);
     void updateRegisterWidgets();
     void updateFlagWidgets();
     void updateCodeEditor();
     void updateButtons();
     void updateStatusBar();
 
+    QString getValueDescription(int value);
+
+    int lastPCValue;
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFilename;

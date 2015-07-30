@@ -134,12 +134,16 @@ public:
     bool isRunning() const;
     void setRunning(bool running);
 
+    bool getBuildSuccessful();
+
     int getBreakpoint() const;
     void setBreakpoint(int value);
 
     int getMemorySize() const;
+    void setMemorySize(int size);
     int getMemoryValue(int address) const;
     void setMemoryValue(int address, int value);
+    bool hasByteChanged(int address); // Since last look-up
     void clearMemory();
 
     int getNumberOfFlags() const;
@@ -184,8 +188,6 @@ public:
     void generateDescriptions();
     QString getDescription(QString assemblyFormat);
 
-    bool buildSuccessful;
-
 protected:
 
     QString identifier;
@@ -194,12 +196,14 @@ protected:
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
-    QVector<int> correspondingLine, correspondingAddress;
+    QVector<int> correspondingLine, correspondingAddress; // Each address may be associated with a line of code
+    QVector<bool> changed;
     QVector<Flag*> flags;
     QVector<Instruction*> instructions;
     QVector<AddressingMode*> addressingModes;
     QHash<QString, int> labelPCMap;
     QHash<QString, QString> descriptions;
+    bool buildSuccessful;
     bool running;
     int breakpoint;
     int instructionCount;

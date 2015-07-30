@@ -19,19 +19,7 @@ NeanderMachine::NeanderMachine()
     // Initialize memory
     //////////////////////////////////////////////////
 
-    int MEMORY_SIZE = 256;
-
-    memory = QVector<Byte*>(MEMORY_SIZE);
-    assemblerMemory = QVector<Byte*>(MEMORY_SIZE);
-    reserved = QVector<bool>(MEMORY_SIZE);
-
-    correspondingLine = QVector<int>(MEMORY_SIZE, -1); // Each PC value may be associated with a line of code
-
-    for (int i=0; i<memory.size(); i++)
-        memory[i] = new Byte();
-
-    for (int i=0; i<assemblerMemory.size(); i++)
-        assemblerMemory[i] = new Byte();
+    setMemorySize(256);
 
 
 
