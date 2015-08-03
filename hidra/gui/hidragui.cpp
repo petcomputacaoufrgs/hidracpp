@@ -35,6 +35,9 @@ HidraGui::HidraGui(QWidget *parent) :
     // Escolhe a máquina Neander e atualiza a interface
     selectMachine("Neander");
 
+    // Exibe tabela de dados
+    ui->actionDisplayDataTable->trigger();
+
     modifiedFile = false;
     forceSaveAs = true;
 }
@@ -81,12 +84,12 @@ void HidraGui::initializeMachineInterface()
 {
     clearMachineInterfaceComponents();
     initializeMachineInterfaceComponents();
-    updateMachineInterfaceComponents();
+    updateMachineInterfaceComponents(true);
 }
 
-void HidraGui::updateMachineInterface()
+void HidraGui::updateMachineInterface(bool force)
 {
-    updateMachineInterfaceComponents();
+    updateMachineInterfaceComponents(force);
 }
 
 
@@ -245,9 +248,9 @@ void HidraGui::clearInstructionsList()
 // Updating internal methods
 //////////////////////////////////////////////////
 
-void HidraGui::updateMachineInterfaceComponents()
+void HidraGui::updateMachineInterfaceComponents(bool force)
 {
-    updateMemoryTable(false);
+    updateMemoryTable(force);
     updateFlagWidgets();
     updateRegisterWidgets();
     updateCodeEditor();
@@ -271,6 +274,24 @@ void HidraGui::updateMemoryTable(bool force)
     for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
     {
         QColor rowColor;
+
+        // Highlight current instruction's row
+        if (currentLine == machine->getAddressCorrespondingLine(byteAddress) && currentLine >= 0)
+            rowColor = QColor(255, 240, 0); // Yellow
+        else
+            rowColor = Qt::white;
+
+        // Set yellow background (instructions only)
+        for (int column=0; column<3; column++)
+        {
+
+            if (instructionsTableModel.item(byteAddress, column)->background() != QBrush(rowColor))
+                instructionsTableModel.item(byteAddress, column)->setBackground(rowColor);
+        }
+    }
+
+    for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
+    {
         int value = machine->getMemoryValue(byteAddress);
 
         // Only update cell if byte has changed
@@ -283,16 +304,6 @@ void HidraGui::updateMemoryTable(bool force)
             // Column 2: Byte value
             instructionsTableModel.item(byteAddress, 2)->setText(QString::number(value, base).toUpper());
             dataTableModel.item(        byteAddress, 1)->setText(QString::number(value, base).toUpper());
-
-            // Highlight current instruction's row
-            if (currentLine == machine->getAddressCorrespondingLine(byteAddress) && currentLine >= 0)
-                rowColor = QColor(255, 240, 0); // Yellow
-            else
-                rowColor =  Qt::white;
-
-            // Set yellow background (instructions only)
-            for (int column=0; column<3; column++)
-                instructionsTableModel.item(byteAddress, column)->setBackground(rowColor);
 
             // Set statustip:
             QString statusTip = getValueDescription(value);
@@ -348,8 +359,6 @@ void HidraGui::updateStatusBar()
 
 QString HidraGui::getValueDescription(int value)
 {
-    if (value == 0)
-        return QString("");
     return QString("Dec: %1 | Hex: %2 | Bin: %3")
       .arg(value)
       .arg(value, 2, 16, QChar('0'))
@@ -474,7 +483,7 @@ void HidraGui::on_actionBuild_triggered()
 
     machine->setPCValue(0);
 
-    updateMachineInterface();
+    updateMachineInterface(false);
 }
 
 void HidraGui::on_actionRun_triggered()
@@ -484,7 +493,7 @@ void HidraGui::on_actionRun_triggered()
     {
         // Stop
         machine->setRunning(false);
-        updateMachineInterface();
+        updateMachineInterface(false);
     }
     else
     {
@@ -515,7 +524,7 @@ void HidraGui::on_actionStep_triggered()
         QMessageBox::information(this, tr("Error"), error);
     }
 
-    updateMachineInterface();
+    updateMachineInterface(false);
 }
 
 void HidraGui::on_actionNew_triggered()
@@ -639,7 +648,7 @@ void HidraGui::on_actionImportMemory_triggered()
             QMessageBox::information(this, "Erro ao importar memória.", errorMessage);
     }
 
-    updateMachineInterface();
+    updateMachineInterface(false);
 }
 
 void HidraGui::on_actionExportMemory_triggered()
@@ -658,7 +667,7 @@ void HidraGui::on_actionExportMemory_triggered()
 void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index)
 {
     machine->setPCValue(index.row());
-    updateMachineInterface();
+    updateMachineInterface(false);
 }
 
 void HidraGui::on_actionResetRegisters_triggered()
@@ -666,7 +675,7 @@ void HidraGui::on_actionResetRegisters_triggered()
     machine->clearRegisters();
     machine->clearFlags();
     machine->clearCounters();
-    updateMachineInterface();
+    updateMachineInterface(false);
 }
 
 void HidraGui::on_actionSetBreakpoint_triggered()
@@ -686,8 +695,7 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
     for (int i=0; i<registerWidgets.count(); i++)
         registerWidgets.at(i)->setMode(showHexValues);
 
-    updateMachineInterface();
-    updateMemoryTable(true);
+    updateMachineInterface(true);
 }
 
 
@@ -749,3 +757,11 @@ void HidraGui::closeEvent(QCloseEvent *event)
         event->ignore();
 }
 
+
+void HidraGui::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "Sobre o Hidra",
+                       "<p align='center'>Hidra 1.0.0 (" + QString(__DATE__) + ")<br><br>"
+                       "Desenvolvido pelo grupo Pet Computação.<br><br>"
+                       "Máquinas teóricas criadas pelos professores<br>Dr. Raul Fernando Weber e Dra. Taisy Silva Weber.</p>");
+}

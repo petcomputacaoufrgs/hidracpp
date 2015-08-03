@@ -12,6 +12,8 @@ Código
 - NEANDER e AHMES: JN etc. sempre devem contar 2 acessos.
 - Em erros deve parar a máquina (try/catch).
 - Otimizar regexes
+- Abrir ahmes_testes_1 -> memória some
+- Fazer o halt parar
 
 Documentação
 

@@ -43,7 +43,7 @@ public slots:
 
     void selectMachine(QString machineName);
     void initializeMachineInterface();
-    void updateMachineInterface();
+    void updateMachineInterface(bool force);
 
     void clearErrorsField();
     void addError(QString);
@@ -77,6 +77,8 @@ private slots:
 
     void on_actionDisplayDataTable_toggled(bool checked);
 
+    void on_actionAbout_triggered();
+
 private:
 
     void initializeMachineInterfaceComponents();
@@ -92,7 +94,7 @@ private:
     void clearFlagWidgets();
     void clearInstructionsList();
 
-    void updateMachineInterfaceComponents();
+    void updateMachineInterfaceComponents(bool force);
     void updateMemoryTable(bool force);
     void updateRegisterWidgets();
     void updateFlagWidgets();
