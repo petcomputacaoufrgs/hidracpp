@@ -19,7 +19,7 @@ NeanderMachine::NeanderMachine()
     // Initialize memory
     //////////////////////////////////////////////////
 
-    setMemorySize(500000);
+    setMemorySize(256);
 
 
 

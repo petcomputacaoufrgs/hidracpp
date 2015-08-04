@@ -10,6 +10,7 @@
 #include <QLabel>
 #include <QDebug>
 #include <QVector>
+#include <QColor>
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
@@ -104,7 +105,7 @@ private:
 
     QString getValueDescription(int value);
 
-    int lastPCValue;
+    int previousPCValue;
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFilename;
@@ -120,6 +121,7 @@ private:
 
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
+    QVector<QColor> rowPreviousColor;
 };
 
 #endif // HIDRAGUI_H

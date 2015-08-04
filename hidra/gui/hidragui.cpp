@@ -17,7 +17,7 @@ HidraGui::HidraGui(QWidget *parent) :
 
     buildSuccessful = true;
     showHexValues = false;
-    lastPCValue = 0;
+    previousPCValue = 0;
 
     sourceAndMemoryInSync = false;
     machine = NULL;
@@ -118,6 +118,8 @@ void HidraGui::initializeMemoryTable()
     dataTableModel.setRowCount(machine->getMemorySize());
     dataTableModel.setColumnCount(2);
 
+    rowPreviousColor = QVector<QColor>(machine->getMemorySize());
+
     // Initialize items
     for (int row = 0; row < machine->getMemorySize(); row++)
     {
@@ -126,6 +128,8 @@ void HidraGui::initializeMemoryTable()
         instructionsTableModel.setData(instructionsTableModel.index(row, 2), "");
         dataTableModel.setData(dataTableModel.index(row, 0), "");
         dataTableModel.setData(dataTableModel.index(row, 1), "");
+
+        rowPreviousColor[row] = Qt::white;
     }
 
     // Set table headers
@@ -146,8 +150,8 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryData->setMouseTracking(true);
 
     // Scroll to appropriate position
-    ui->tableViewMemoryInstructions->scrollTo(instructionsTableModel.index(0, 0));
-    ui->tableViewMemoryData->scrollTo(dataTableModel.index(128, 0));
+    ui->tableViewMemoryInstructions->scrollTo(instructionsTableModel.index(0, 0), QAbstractItemView::PositionAtTop);
+    ui->tableViewMemoryData->scrollTo(dataTableModel.index(128, 0), QAbstractItemView::PositionAtTop);
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -266,50 +270,54 @@ void HidraGui::updateMemoryTable(bool force)
     int currentLine = machine->getPCCorrespondingLine();
 
     // Column 0: PC Value
-    if (instructionsTableModel.hasIndex(lastPCValue, 0))
-        instructionsTableModel.item(lastPCValue, 0)->setText(""); // Clear last PC Value's arrow
+    if (instructionsTableModel.hasIndex(previousPCValue, 0))
+        instructionsTableModel.item(previousPCValue, 0)->setText(""); // Clear last PC Value's arrow
     instructionsTableModel.item(machine->getPCValue(), 0)->setText("\u2192"); // Show arrow on current PC value
-    lastPCValue = machine->getPCValue(); // Update last PC value
+    previousPCValue = machine->getPCValue(); // Update last PC value
 
-    for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
+    for (int row=0; row<memorySize; row++)
     {
-        QColor rowColor;
-
-        // Highlight current instruction's row
-        if (currentLine == machine->getAddressCorrespondingLine(byteAddress) && currentLine >= 0)
-            rowColor = QColor(255, 240, 0); // Yellow
-        else
-            rowColor = Qt::white;
-
-        // Set yellow background (instructions only)
-        for (int column=0; column<3; column++)
-        {
-
-            if (instructionsTableModel.item(byteAddress, column)->background() != QBrush(rowColor))
-                instructionsTableModel.item(byteAddress, column)->setBackground(rowColor);
-        }
-    }
-
-    for (int byteAddress=0; byteAddress<memorySize; byteAddress++)
-    {
+        int byteAddress = row;
         int value = machine->getMemoryValue(byteAddress);
 
         // Only update cell if byte has changed
         if (machine->hasByteChanged(byteAddress) || force)
         {
             // Column 1: Byte address
-            instructionsTableModel.item(byteAddress, 1)->setText(QString::number(byteAddress, base).toUpper());
-            dataTableModel.item(        byteAddress, 0)->setText(QString::number(byteAddress, base).toUpper());
+            instructionsTableModel.item(row, 1)->setText(QString::number(byteAddress, base).toUpper());
+            dataTableModel.item(        row, 0)->setText(QString::number(byteAddress, base).toUpper());
 
             // Column 2: Byte value
-            instructionsTableModel.item(byteAddress, 2)->setText(QString::number(value, base).toUpper());
-            dataTableModel.item(        byteAddress, 1)->setText(QString::number(value, base).toUpper());
+            instructionsTableModel.item(row, 2)->setText(QString::number(value, base).toUpper());
+            dataTableModel.item(        row, 1)->setText(QString::number(value, base).toUpper());
 
             // Set statustip:
             QString statusTip = getValueDescription(value);
-            instructionsTableModel.item(byteAddress, 2)->setStatusTip(statusTip);
-            dataTableModel.item(byteAddress, 1)->setStatusTip(statusTip);
+            instructionsTableModel.item(row, 2)->setStatusTip(statusTip);
+            dataTableModel.item(row, 1)->setStatusTip(statusTip);
         }
+    }
+
+    // Row color (highlight current instruction)
+    for (int row=0; row<memorySize; row++)
+    {
+        QColor rowColor;
+
+        // Get new color
+        if (currentLine == machine->getAddressCorrespondingLine(row) && currentLine >= 0)
+            rowColor = QColor(255, 240, 0); // Yellow
+        else
+            rowColor = Qt::white;
+
+        // Update color if needed
+        if (rowPreviousColor[row] != rowColor)
+        {
+            instructionsTableModel.item(row, 0)->setBackground(rowColor);
+            instructionsTableModel.item(row, 1)->setBackground(rowColor);
+            instructionsTableModel.item(row, 2)->setBackground(rowColor);
+        }
+
+        rowPreviousColor[row] = rowColor;
     }
 
     // Update all cells
@@ -521,6 +529,7 @@ void HidraGui::on_actionStep_triggered()
     }
     catch (QString error)
     {
+        machine->setRunning(false);
         QMessageBox::information(this, tr("Error"), error);
     }
 
