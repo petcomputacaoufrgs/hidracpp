@@ -269,12 +269,13 @@ void HidraGui::updateMemoryTable(bool force)
 
     int currentLine = machine->getPCCorrespondingLine();
 
-    // Column 0: PC Value
+    // Column 0: PC arrow
     if (instructionsTableModel.hasIndex(previousPCValue, 0))
         instructionsTableModel.item(previousPCValue, 0)->setText(""); // Clear last PC Value's arrow
     instructionsTableModel.item(machine->getPCValue(), 0)->setText("\u2192"); // Show arrow on current PC value
     previousPCValue = machine->getPCValue(); // Update last PC value
 
+    // Columns 1 and 2: Byte address and value
     for (int row=0; row<memorySize; row++)
     {
         int byteAddress = row;

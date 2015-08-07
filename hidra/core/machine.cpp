@@ -340,7 +340,7 @@ QString Machine::extractRegisterName(int byteArray[])
             return reg->getName();
     }
 
-    throw QString("Register not found.");
+    return ""; // Undefined register
 }
 
 void Machine::setOverflow(bool state)
@@ -524,7 +524,7 @@ void Machine::assemble(QString sourceCode)
     // SECOND PASS: Build instructions/defines
     //////////////////////////////////////////////////
 
-    correspondingAddress = QVector<int>(sourceLines.size());
+    correspondingAddress.fill(-1, sourceLines.size());
     PC->setValue(0);
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
@@ -551,7 +551,8 @@ void Machine::assemble(QString sourceCode)
                 else // Directive
                 {
                     // TODO: correspondingLine for arrays (DAB, DAW)
-                    correspondingLine[PC->getValue()] = lineNumber;
+                    if (mnemonic != "org")
+                        correspondingLine[PC->getValue()] = lineNumber;
                     obeyDirective(mnemonic, arguments, false);
                 }
             }
@@ -1138,6 +1139,9 @@ int Machine::getRegisterValue(int id) const
 
 int Machine::getRegisterValue(QString registerName) const
 {
+    if (registerName == "") // Undefined register
+        return 0;
+
     foreach (Register *reg, registers)
     {
         if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
@@ -1154,6 +1158,9 @@ void Machine::setRegisterValue(int id, int value)
 
 void Machine::setRegisterValue(QString registerName, int value)
 {
+    if (registerName == "") // Undefined register
+        return;
+
     foreach (Register *reg, registers)
     {
         if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
