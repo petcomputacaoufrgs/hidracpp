@@ -8,16 +8,16 @@ Código
 
 - Criar um .ini para lembar "exibir hexa, memória auxiliar" e último local carregado/salvo
 - Arquivo de recuperação criado de 3 em 3 minutos para evitar frustração (?)
-- RAMSES: Jump imediato deve virar NOP
 - NEANDER e AHMES: JN etc. sempre devem contar 2 acessos.
 - Otimizar regexes
+- DB [12]
 
 Documentação
 
 - Quick reference pra uso do Hidra (1 ou 2 páginas)
 - Exemplo de cada máquina com cada instrução
 - Relatar um problema (mailto:pet??)
-- About
+- Colocar site do hidra no about
 
 Erros
 

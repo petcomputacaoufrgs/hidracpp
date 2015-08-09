@@ -112,9 +112,9 @@ void Machine::step()
     AddressingMode::AddressingModeCode addressingModeCode;
     Instruction *instruction = nullptr;
 
-    fetchInstruction(byteArray, instruction);
-    decodeInstruction(byteArray, instruction, addressingModeCode, registerName, operandAddress);
-    executeInstruction(instruction, registerName, operandAddress);
+    fetchInstruction(byteArray, instruction); // Outputs bytes read and corresponding instruction
+    decodeInstruction(byteArray, instruction, addressingModeCode, registerName, operandAddress); // Outputs addressing mode, register and operand address
+    executeInstruction(instruction, addressingModeCode, registerName, operandAddress);
 
     if (getPCValue() == getBreakpoint())
         setRunning(false);
@@ -140,11 +140,12 @@ void Machine::decodeInstruction(int byteArray[], Instruction *&instruction, Addr
     }
 }
 
-void Machine::executeInstruction(Instruction *&instruction, QString registerName, int operandAddress)
+void Machine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int operandAddress)
 {
     int value1, value2, result;
     Instruction::InstructionCode instructionCode;
     instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
+    bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE); // Invalidate immediate jumps
 
     switch (instructionCode)
     {
@@ -210,62 +211,66 @@ void Machine::executeInstruction(Instruction *&instruction, QString registerName
         break;
 
     case Instruction::JMP:
-        setPCValue(operandAddress);
+        if (!isImmediate) // Invalidate immediate jumps
+            setPCValue(operandAddress);
         break;
 
     case Instruction::JN:
-        if (getFlagValue("N") == true)
+        if (getFlagValue("N") == true && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JP:
-        if (getFlagValue("N") == false)
+        if (getFlagValue("N") == false && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JV:
-        if (getFlagValue("V") == true)
+        if (getFlagValue("V") == true && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JNV:
-        if (getFlagValue("V") == false)
+        if (getFlagValue("V") == false && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JZ:
-        if (getFlagValue("Z") == true)
+        if (getFlagValue("Z") == true && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JNZ:
-        if (getFlagValue("Z") == false)
+        if (getFlagValue("Z") == false && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JC:
-        if (getFlagValue("C") == true)
+        if (getFlagValue("C") == true && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JNC:
-        if (getFlagValue("C") == false)
+        if (getFlagValue("C") == false && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JB:
-        if (getFlagValue("B") == true)
+        if (getFlagValue("B") == true && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JNB:
-        if (getFlagValue("B") == false)
+        if (getFlagValue("B") == false && !isImmediate)
             setPCValue(operandAddress);
         break;
 
     case Instruction::JSR:
-        memoryWrite(operandAddress, getPCValue());
-        setPCValue(operandAddress+1);
+        if (!isImmediate)
+        {
+            memoryWrite(operandAddress, getPCValue());
+            setPCValue(operandAddress+1);
+        }
         break;
 
     case Instruction::NEG:
