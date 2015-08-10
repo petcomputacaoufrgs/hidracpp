@@ -169,12 +169,13 @@ public:
     void incrementPCValue();
 
     int getPCCorrespondingLine();
-    int getAddressCorrespondingLine(int address);
     int getLineCorrespondingAddress(int line);
+    int getAddressCorrespondingLine(int address);
+    QString getAddressCorrespondingLabel(int address);
 
     QVector<Instruction *> getInstructions() const;
-    Instruction* getInstructionFromValue(int);
-    Instruction* getInstructionFromMnemonic(QString);
+    Instruction* getInstructionFromValue(int value);
+    Instruction* getInstructionFromMnemonic(QString mnemonic);
 
     AddressingMode::AddressingModeCode getDefaultAddressingModeCode();
     int getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode);
@@ -196,7 +197,8 @@ protected:
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
-    QVector<int> correspondingLine, correspondingAddress; // Each address may be associated with a line of code
+    QVector<int> addressCorrespondingLine, lineCorrespondingAddress; // Each address may be associated with a line of code
+    QVector<QString> addressCorrespondingLabel;
     QVector<bool> changed;
     QVector<Flag*> flags;
     QVector<Instruction*> instructions;

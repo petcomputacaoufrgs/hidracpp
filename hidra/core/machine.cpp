@@ -318,6 +318,8 @@ void Machine::assemble(QString sourceCode)
     running = false;
     buildSuccessful = false;
 
+
+
     //////////////////////////////////////////////////
     // Simplify source code
     //////////////////////////////////////////////////
@@ -336,7 +338,6 @@ void Machine::assemble(QString sourceCode)
     // FIRST PASS: Read labels, reserve memory
     //////////////////////////////////////////////////
 
-    labelPCMap.clear();
     clearAssemblerData();
     PC->setValue(0);
 
@@ -362,10 +363,9 @@ void Machine::assemble(QString sourceCode)
                     throw duplicatedLabel;
 
                 labelPCMap.insert(labelName.toLower(), PC->getValue()); // Add to map
+                addressCorrespondingLabel[PC->getValue()] = labelName;
                 sourceLines[lineNumber] = sourceLines[lineNumber].replace(labelName + ":", "").trimmed(); // Remove label from sourceLines
             }
-
-
 
             //////////////////////////////////////////////////
             // Reserve memory for instructions/directives
@@ -403,14 +403,14 @@ void Machine::assemble(QString sourceCode)
     // SECOND PASS: Build instructions/defines
     //////////////////////////////////////////////////
 
-    correspondingAddress.fill(-1, sourceLines.size());
+    lineCorrespondingAddress.fill(-1, sourceLines.size());
     PC->setValue(0);
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
         try
         {
-            correspondingAddress[lineNumber] = PC->getValue();
+            lineCorrespondingAddress[lineNumber] = PC->getValue();
 
             if (!sourceLines[lineNumber].isEmpty())
             {
@@ -421,17 +421,17 @@ void Machine::assemble(QString sourceCode)
                 if (instruction != NULL)
                 {
                     // TODO: associateLine instead on FIRST PASS
-                    correspondingLine[PC->getValue()] = lineNumber;
+                    addressCorrespondingLine[PC->getValue()] = lineNumber;
                     if (instruction->getNumBytes() == 2)
-                        correspondingLine[(PC->getValue() + 1) & 0xFF] = lineNumber;
+                        addressCorrespondingLine[(PC->getValue() + 1) & 0xFF] = lineNumber;
 
                     buildInstruction(mnemonic, arguments.toLower());
                 }
                 else // Directive
                 {
-                    // TODO: correspondingLine for arrays (DAB, DAW)
+                    // TODO: addressCorrespondingLine for arrays (DAB, DAW)
                     if (mnemonic != "org")
-                        correspondingLine[PC->getValue()] = lineNumber;
+                        addressCorrespondingLine[PC->getValue()] = lineNumber;
                     obeyDirective(mnemonic, arguments, false);
                 }
             }
@@ -478,8 +478,11 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
         int bytesPerArgument = (mnemonic == "db" || mnemonic == "dab") ? 1 : 2;
         bool isArray = (mnemonic == "dab" || mnemonic == "daw") ? true : false;
 
-        if (isArray && numberOfArguments == 0)
+        if (bytesPerArgument == 1 && numberOfArguments == 0)
+        {
             argumentList.append("0"); // Default to argument 0 in case of DB and DW
+            numberOfArguments = 1;
+        }
 
         if (isArray && numberOfArguments > 1) // Too many arguments
             throw wrongNumberOfArguments;
@@ -663,10 +666,12 @@ void Machine::clearAssemblerData()
     {
         assemblerMemory[i]->setValue(0);
         reserved[i] = false;
-        correspondingLine[i] = -1;
+        addressCorrespondingLine[i] = -1;
+        addressCorrespondingLabel[i] = "";
     }
 
-    correspondingAddress.clear();
+    lineCorrespondingAddress.clear();
+    labelPCMap.clear();
 }
 
 // Copies assemblerMemory to machine's memory
@@ -1009,7 +1014,8 @@ void Machine::setMemorySize(int size)
     assemblerMemory.fill(nullptr, size);
     reserved.fill(false, size);
     changed.fill(true, size);
-    correspondingLine.fill(-1, size); // Each address may be associated with a line of code
+    addressCorrespondingLine.fill(-1, size);
+    addressCorrespondingLabel.fill("", size);
 
     for (int i=0; i<memory.size(); i++)
     {
@@ -1200,26 +1206,22 @@ void Machine::incrementPCValue()
 
 int Machine::getPCCorrespondingLine()
 {
-    if (!correspondingLine.isEmpty())
-        return correspondingLine[PC->getValue()];
-    else
-        return -1;
+    return addressCorrespondingLine.value(PC->getValue(), -1);
 }
 
 int Machine::getAddressCorrespondingLine(int address)
 {
-    if (!correspondingLine.isEmpty() && address >= 0 && address < correspondingLine.size())
-        return correspondingLine[address];
-    else
-        return -1;
+    return (buildSuccessful) ? addressCorrespondingLine.value(address, -1) : -1;
 }
 
 int Machine::getLineCorrespondingAddress(int line)
 {
-    if (line >= 0 && line < correspondingAddress.size())
-        return correspondingAddress[line];
-    else
-        return -1;
+    return (buildSuccessful) ? lineCorrespondingAddress.value(line, -1) : -1;
+}
+
+QString Machine::getAddressCorrespondingLabel(int address)
+{
+    return (buildSuccessful) ? addressCorrespondingLabel.value(address) : "";
 }
 
 QVector<Instruction *> Machine::getInstructions() const

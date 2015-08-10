@@ -106,6 +106,9 @@ private:
     QString getValueDescription(int value);
 
     int previousPCValue;
+    QVector<QString> previousLabel;
+    QVector<QColor> previousRowColor;
+
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFilename;
@@ -121,7 +124,6 @@ private:
 
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
-    QVector<QColor> rowPreviousColor;
 };
 
 #endif // HIDRAGUI_H
