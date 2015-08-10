@@ -469,27 +469,28 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
 
         PC->setValue(argumentList.first().toInt(0));
     }
-    else if (QRegExp("da?[bw]").exactMatch(mnemonic))
+    else if (QRegExp("db|dw|dab|daw").exactMatch(mnemonic))
     {
         QStringList argumentList;
         argumentList = splitArguments(arguments);
 
         int numberOfArguments = argumentList.size();
-        int bytesPerArgument = QRegExp("da?b").exactMatch(mnemonic) ? 1 : 2;
+        int bytesPerArgument = (mnemonic == "db" || mnemonic == "dab") ? 1 : 2;
+        bool isArray = (mnemonic == "dab" || mnemonic == "daw") ? true : false;
 
-        if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments == 0)
+        if (isArray && numberOfArguments == 0)
             argumentList.append("0"); // Default to argument 0 in case of DB and DW
 
-        if ((mnemonic == "db" || mnemonic == "dw") && numberOfArguments > 1) // Too much arguments
+        if (isArray && numberOfArguments > 1) // Too many arguments
             throw wrongNumberOfArguments;
 
-        if ((mnemonic == "dab" || mnemonic == "daw") && numberOfArguments < 1) // No arguments
+        if (isArray && numberOfArguments < 1) // No arguments
             throw wrongNumberOfArguments;
 
         // Memory allocation
         if (argumentList.first().at(0) == ALLOCATE_SYMBOL)
         {
-            if (mnemonic == "dab" || mnemonic == "daw")
+            if (mnemonic != "dab" && mnemonic != "daw")
             {
                 throw invalidArgument;
             }
@@ -503,8 +504,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
                     PC->incrementValue();
             }
         }
-
-        if (reserveOnly)
+        else if (reserveOnly)
         {
             reserveAssemblerMemory(numberOfArguments * bytesPerArgument); // Increments PC
         }
@@ -514,6 +514,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
             for (QString argument : argumentList)
             {
                 int value = 0;
+                bool ok;
 
                 // Process character
                 if (argument.at(0) == CHAR_SYMBOL)
@@ -534,7 +535,6 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
                 else if (argument.at(0).toLower() == 'h')
                 {
                     // Convert hexadecimal string to int
-                    bool ok;
                     value = argument.mid(1).toInt(&ok, 16);
 
                     // Check if invalid
@@ -548,7 +548,6 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
                 else
                 {
                     // Convert decimal string to int
-                    bool ok;
                     value = argument.toInt(&ok, 10);
 
                     // Check if invalid
