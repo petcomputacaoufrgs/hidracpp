@@ -63,12 +63,12 @@ public:
     //////////////////////////////////////////////////
 
     void step();
-    void fetchInstruction(int byteArray[], Instruction *&instruction);
-    void decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &operandAddress);
+    void fetchInstruction(int &fetchedValue, Instruction *&instruction);
+    void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &operandAddress);
     void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int operandAddress);
 
-    AddressingMode::AddressingModeCode extractAddressingModeCode(int byteArray[]);
-    QString extractRegisterName(int byteArray[]);
+    AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
+    QString extractRegisterName(int fetchedValue);
 
     void setOverflow(bool state);
     void setCarry(bool state);

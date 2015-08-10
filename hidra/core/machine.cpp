@@ -29,30 +29,30 @@ Machine::~Machine()
 
 void Machine::step()
 {
-    int byteArray[4], operandAddress;
+    int fetchedValue, operandAddress;
     QString registerName;
     AddressingMode::AddressingModeCode addressingModeCode;
     Instruction *instruction = nullptr;
 
-    fetchInstruction(byteArray, instruction); // Outputs bytes read and corresponding instruction
-    decodeInstruction(byteArray, instruction, addressingModeCode, registerName, operandAddress); // Outputs addressing mode, register and operand address
+    fetchInstruction(fetchedValue, instruction); // Outputs fetched value (byte or word) and corresponding instruction
+    decodeInstruction(fetchedValue, instruction, addressingModeCode, registerName, operandAddress); // Outputs addressing mode, register and operand address
     executeInstruction(instruction, addressingModeCode, registerName, operandAddress);
 
     if (getPCValue() == getBreakpoint())
         setRunning(false);
 }
 
-void Machine::fetchInstruction(int byteArray[], Instruction *&instruction)
+void Machine::fetchInstruction(int &fetchedValue, Instruction *&instruction)
 {
     // Read first byte
-    byteArray[0] = memoryReadNext();
-    instruction = getInstructionFromValue(byteArray[0]);
+    fetchedValue = memoryReadNext();
+    instruction = getInstructionFromValue(fetchedValue);
 }
 
-void Machine::decodeInstruction(int byteArray[], Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &operandAddress)
+void Machine::decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &operandAddress)
 {
-    addressingModeCode = extractAddressingModeCode(byteArray);
-    registerName = extractRegisterName(byteArray);
+    addressingModeCode = extractAddressingModeCode(fetchedValue);
+    registerName = extractRegisterName(fetchedValue);
 
     if (instruction && instruction->getNumBytes() == 2)
     {
@@ -246,24 +246,24 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
     instructionCount++;
 }
 
-AddressingMode::AddressingModeCode Machine::extractAddressingModeCode(int byteArray[])
+AddressingMode::AddressingModeCode Machine::extractAddressingModeCode(int fetchedValue)
 {
     foreach (AddressingMode *addressingMode, addressingModes)
     {
         QRegExp matchAddressingMode(addressingMode->getBitPattern());
 
-        if (matchAddressingMode.exactMatch(Byte(byteArray[0]).toString()))
+        if (matchAddressingMode.exactMatch(Byte(fetchedValue).toString()))
             return addressingMode->getAddressingModeCode();
     }
 
     throw QString("Addressing mode not found.");
 }
 
-QString Machine::extractRegisterName(int byteArray[])
+QString Machine::extractRegisterName(int fetchedValue)
 {
     foreach (Register *reg, registers)
     {
-        if (reg->matchByte(byteArray[0]))
+        if (reg->matchByte(fetchedValue))
             return reg->getName();
     }
 
