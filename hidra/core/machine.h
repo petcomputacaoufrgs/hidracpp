@@ -59,15 +59,6 @@ public:
 
 
     //////////////////////////////////////////////////
-    // Import/Export memory
-    //////////////////////////////////////////////////
-
-    FileErrorCode::FileErrorCode importMemory(QString filename);
-    FileErrorCode::FileErrorCode exportMemory(QString filename);
-
-
-
-    //////////////////////////////////////////////////
     // Step
     //////////////////////////////////////////////////
 
@@ -88,18 +79,7 @@ public:
 
 
     //////////////////////////////////////////////////
-    // Memory read/write with access count
-    //////////////////////////////////////////////////
-
-    int memoryRead(int address); // Increments accessCount
-    void memoryWrite(int address, int value); // Increments accessCount
-    int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
-    int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
-
-
-
-    //////////////////////////////////////////////////
-    // Assembly
+    // Assembler
     //////////////////////////////////////////////////
 
     // Build
@@ -124,6 +104,26 @@ public:
     QStringList splitArguments(QString arguments);
     void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
+
+
+
+    //////////////////////////////////////////////////
+    // Memory read/write with access count
+    //////////////////////////////////////////////////
+
+    int memoryRead(int address); // Increments accessCount
+    void memoryWrite(int address, int value); // Increments accessCount
+    int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
+    int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+
+
+
+    //////////////////////////////////////////////////
+    // Import/Export memory
+    //////////////////////////////////////////////////
+
+    FileErrorCode::FileErrorCode importMemory(QString filename);
+    FileErrorCode::FileErrorCode exportMemory(QString filename);
 
 
 

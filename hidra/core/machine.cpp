@@ -24,84 +24,6 @@ Machine::~Machine()
 
 
 //////////////////////////////////////////////////
-// Import/Export memory
-//////////////////////////////////////////////////
-
-// Returns true if successful
-FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
-{
-    char byte;
-    QFile memFile(filename); // Implicitly closed
-
-    // Open file
-    memFile.open(QFile::ReadOnly);
-
-    if (memFile.size() != 1 + identifier.length() + memory.size() * 2)
-        return FileErrorCode::incorrectSize;
-
-    // Read identifier length
-    memFile.getChar(&byte);
-    if (byte != identifier.length())
-        return FileErrorCode::invalidIdentifier; // Incorrect identifier length
-
-    // Read identifier
-    for (int i = 0; i < identifier.length(); i++)
-    {
-        memFile.getChar(&byte);
-
-        if (byte != identifier[i].toLatin1())
-            return FileErrorCode::invalidIdentifier; // Wrong character
-    }
-
-    // Read memory
-    for (int address = 0; address < memory.size(); address++)
-    {
-        memFile.getChar(&byte);
-        setMemoryValue(address, byte);
-        memFile.getChar(&byte); // Skip byte
-    }
-
-    // Return error status
-    if (memFile.error() != QFileDevice::NoError)
-        return FileErrorCode::inputOutput;
-    else
-        return FileErrorCode::noError;
-}
-
-// Returns true if successful
-FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
-{
-    QFile memFile(filename); // Implicitly closed
-
-    // Open file
-    memFile.open(QFile::WriteOnly);
-
-    // Write identifier length
-    memFile.putChar((unsigned char)identifier.length());
-
-    // Write identifier
-    for (int i = 0; i < identifier.length(); i++)
-    {
-        memFile.putChar(identifier.at(i).toLatin1());
-    }
-
-    // Write memory bytes
-    foreach (Byte *byte, memory)
-    {
-        memFile.putChar(byte->getValue());
-        memFile.putChar(0);
-    }
-
-    // Return error status
-    if (memFile.error() != QFileDevice::NoError)
-        return FileErrorCode::inputOutput;
-    else
-        return FileErrorCode::noError;
-}
-
-
-
-//////////////////////////////////////////////////
 // Step
 //////////////////////////////////////////////////
 
@@ -386,55 +308,7 @@ int Machine::toSigned(int unsignedByte)
 
 
 //////////////////////////////////////////////////
-// Memory read/write with access count
-//////////////////////////////////////////////////
-
-int Machine::memoryRead(int address)
-{
-    accessCount++;
-    return getMemoryValue(address);
-}
-
-void Machine::memoryWrite(int address, int value)
-{
-    accessCount++;
-    setMemoryValue(address, value);
-}
-
-int Machine::memoryReadNext()
-{
-    int value = memoryRead(getPCValue());
-    incrementPCValue();
-    return value;
-}
-
-int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
-{
-    switch (addressingModeCode)
-    {
-        case AddressingMode::DIRECT:
-            return memoryRead(immediateAddress);
-
-        case AddressingMode::INDIRECT:
-            return memoryRead(memoryRead(immediateAddress));
-
-        case AddressingMode::IMMEDIATE: // Immediate addressing mode
-            return immediateAddress;
-
-        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
-            return (memoryRead(immediateAddress) + getRegisterValue("X")) % getMemorySize();
-
-        case AddressingMode::INDEXED_BY_PC:
-            return (memoryRead(immediateAddress) + getRegisterValue("PC")) % getMemorySize();
-    }
-
-    return 0;
-}
-
-
-
-//////////////////////////////////////////////////
-// Assembly
+// Assembler
 //////////////////////////////////////////////////
 
 void Machine::assemble(QString sourceCode)
@@ -963,6 +837,132 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
             return;
         }
     }
+}
+
+
+
+//////////////////////////////////////////////////
+// Memory read/write with access count
+//////////////////////////////////////////////////
+
+int Machine::memoryRead(int address)
+{
+    accessCount++;
+    return getMemoryValue(address);
+}
+
+void Machine::memoryWrite(int address, int value)
+{
+    accessCount++;
+    setMemoryValue(address, value);
+}
+
+int Machine::memoryReadNext()
+{
+    int value = memoryRead(getPCValue());
+    incrementPCValue();
+    return value;
+}
+
+int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+{
+    switch (addressingModeCode)
+    {
+        case AddressingMode::DIRECT:
+            return memoryRead(immediateAddress);
+
+        case AddressingMode::INDIRECT:
+            return memoryRead(memoryRead(immediateAddress));
+
+        case AddressingMode::IMMEDIATE: // Immediate addressing mode
+            return immediateAddress;
+
+        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
+            return (memoryRead(immediateAddress) + getRegisterValue("X")) % getMemorySize();
+
+        case AddressingMode::INDEXED_BY_PC:
+            return (memoryRead(immediateAddress) + getRegisterValue("PC")) % getMemorySize();
+    }
+
+    return 0;
+}
+
+
+
+//////////////////////////////////////////////////
+// Import/Export memory
+//////////////////////////////////////////////////
+
+// Returns true if successful
+FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
+{
+    char byte;
+    QFile memFile(filename); // Implicitly closed
+
+    // Open file
+    memFile.open(QFile::ReadOnly);
+
+    if (memFile.size() != 1 + identifier.length() + memory.size() * 2)
+        return FileErrorCode::incorrectSize;
+
+    // Read identifier length
+    memFile.getChar(&byte);
+    if (byte != identifier.length())
+        return FileErrorCode::invalidIdentifier; // Incorrect identifier length
+
+    // Read identifier
+    for (int i = 0; i < identifier.length(); i++)
+    {
+        memFile.getChar(&byte);
+
+        if (byte != identifier[i].toLatin1())
+            return FileErrorCode::invalidIdentifier; // Wrong character
+    }
+
+    // Read memory
+    for (int address = 0; address < memory.size(); address++)
+    {
+        memFile.getChar(&byte);
+        setMemoryValue(address, byte);
+        memFile.getChar(&byte); // Skip byte
+    }
+
+    // Return error status
+    if (memFile.error() != QFileDevice::NoError)
+        return FileErrorCode::inputOutput;
+    else
+        return FileErrorCode::noError;
+}
+
+// Returns true if successful
+FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
+{
+    QFile memFile(filename); // Implicitly closed
+
+    // Open file
+    memFile.open(QFile::WriteOnly);
+
+    // Write identifier length
+    memFile.putChar((unsigned char)identifier.length());
+
+    // Write identifier
+    for (int i = 0; i < identifier.length(); i++)
+    {
+        memFile.putChar(identifier.at(i).toLatin1());
+    }
+
+    // Write memory bytes
+    foreach (Byte *byte, memory)
+    {
+        memFile.putChar(byte->getValue());
+        memFile.putChar(0);
+    }
+
+    // Return error status
+    if (memFile.error() != QFileDevice::NoError)
+        return FileErrorCode::inputOutput;
+    else
+        return FileErrorCode::noError;
 }
 
 
