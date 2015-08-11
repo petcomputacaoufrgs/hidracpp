@@ -8,12 +8,14 @@ HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     font.setStyleHint(QFont::Monospace);
     font.setFixedPitch(true);
     font.setPointSize(10);
+    setFont(font);
 
     // Set TAB size to 8 space characters
     QFontMetrics metrics(font);
-    this->setTabStopWidth(8 * metrics.width(' '));
+    setTabStopWidth(8 * metrics.width(' '));
 
-    this->setFont(font);
+    // Disable word wrap
+    setWordWrapMode(QTextOption::NoWrap);
 
     lineNumberArea = new LineNumberArea(this);
     lineNumberArea->setFont(font);
@@ -161,11 +163,7 @@ void HidraCodeEditor::setCurrentLine(int line)
     if (line < 0)
         return;
 
-    QTextCursor cursor = textCursor();
-
-    cursor.setPosition(0);
-    cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, line);
-
+    QTextCursor cursor(document()->findBlockByNumber(line));
     setTextCursor(cursor);
     centerCursor();
     setFocus();
