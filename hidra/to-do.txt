@@ -7,12 +7,12 @@ Hidra - To-do
 Código
 
 - Criar um .ini para lembar "exibir hexa, memória auxiliar" e último local carregado/salvo
-- Arquivo de recuperação criado de 3 em 3 minutos para evitar frustração (?)
 - NEANDER e AHMES: JN etc. sempre devem contar 2 acessos.
 - Otimizar regexes
 - Dois cliques em dados para ir para variável
 - Follow PC
-- Tirar opção de visualizar área de dados (trocar por tabela única?)
+- Tirar opção de visualizar área de dados (opção de tabela unificada?)
+- Tirar highlight das instruções (opcional? atrapalha)
 
 Documentação
 
