@@ -44,14 +44,14 @@ HidraGui::HidraGui(QWidget *parent) :
     forceSaveAs = true;
 
     // Open recovery file (if existing)
-    if (QFile::exists("__Recovery__.txt"))
+    /*if (QFile::exists("__Recovery__.txt"))
     {
         load("__Recovery__.txt");
         modifiedFile = true;
-    }
+    }*/ // TODO: Automatic loading only if single instance
 
     // Set backup timer
-    backupTimer.setInterval(60000); // Save backup every minute
+    backupTimer.setInterval(3*60000); // Save backup every N minutes
     connect(&backupTimer, SIGNAL(timeout()), this, SLOT(saveBackup()));
     backupTimer.start();
 }
