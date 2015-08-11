@@ -10,7 +10,9 @@ Código
 - Arquivo de recuperação criado de 3 em 3 minutos para evitar frustração (?)
 - NEANDER e AHMES: JN etc. sempre devem contar 2 acessos.
 - Otimizar regexes
-- DB [12]
+- Dois cliques em dados para ir para variável
+- Follow PC
+- Tirar opção de visualizar área de dados (trocar por tabela única?)
 
 Documentação
 
