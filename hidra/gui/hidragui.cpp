@@ -33,14 +33,27 @@ HidraGui::HidraGui(QWidget *parent) :
     //instructionAccessCounter.setStyleSheet("QLabel { color : gray; }");
     ui->statusBar->addPermanentWidget(&instructionAccessCounter, 0.25);
 
-    // Escolhe a máquina Neander e atualiza a interface
+    // Select Neander machine and update interface
     selectMachine("Neander");
 
-    // Exibe tabela de dados
+    // Show data table
     ui->actionDisplayDataTable->trigger();
 
     modifiedFile = false;
+    modifiedSinceBackup = false;
     forceSaveAs = true;
+
+    // Open recovery file (if existing)
+    if (QFile::exists("__Recovery__.txt"))
+    {
+        load("__Recovery__.txt");
+        modifiedFile = true;
+    }
+
+    // Set backup timer
+    backupTimer.setInterval(60000); // Save backup every minute
+    connect(&backupTimer, SIGNAL(timeout()), this, SLOT(saveBackup()));
+    backupTimer.start();
 }
 
 HidraGui::~HidraGui()
@@ -432,7 +445,6 @@ void HidraGui::save(QString filename)
     QTextStream out(&file);
 
     out << codeEditor->toPlainText();
-    file.close();
 
     currentFilename = filename;
     modifiedFile = false;
@@ -454,6 +466,35 @@ void HidraGui::saveAs()
 
     if (!filename.isEmpty())
         save(filename); // Resets fileModified to false if successful
+}
+
+void HidraGui::load(QString filename)
+{
+    QFile file(filename);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QMessageBox::information(this, tr("Erro ao abrir arquivo"),
+                                 file.errorString());
+        return;
+    }
+
+    QTextStream in(&file);
+    codeEditor->setPlainText(in.readAll());
+
+    QString extension = filename.section(".", -1);
+
+    if (extension == "ndr")
+        selectMachine("Neander");
+    else if (extension == "ahd")
+        selectMachine("Ahmes");
+    else if (extension == "rad")
+        selectMachine("Ramses");
+
+    currentFilename = filename;
+
+    modifiedFile = false;
+    forceSaveAs = false;
 }
 
 
@@ -492,11 +533,30 @@ bool HidraGui::eventFilter(QObject *obj, QEvent *event)
 void HidraGui::sourceCodeChanged()
 {
     modifiedFile = true;
+    modifiedSinceBackup = true;
 
     if (sourceAndMemoryInSync)
     {
         sourceAndMemoryInSync = false;
         codeEditor->disableLineHighlight();
+    }
+}
+
+void HidraGui::saveBackup()
+{
+    if (modifiedFile && modifiedSinceBackup)
+    {
+        QFile file("__Recovery__.txt");
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+            return; // Ignore errors
+
+        QTextStream out(&file);
+        out << tr(";; ARQUIVO RECUPERADO. Selecione a máquina novamente.\n")
+            << tr(";; --------------------------------------------------\n")
+            << codeEditor->toPlainText();
+
+        modifiedSinceBackup = false;
     }
 }
 
@@ -614,38 +674,14 @@ void HidraGui::on_actionNew_triggered()
 void HidraGui::on_actionOpen_triggered()
 {
     QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rad)";
+    QString filename;
 
-    currentFilename = QFileDialog::getOpenFileName(this,
+    filename = QFileDialog::getOpenFileName(this,
                                                "Abrir código-fonte", "",
                                                allExtensions);
 
-    if (!currentFilename.isEmpty())
-    {
-        QFile file(currentFilename);
-
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        {
-            QMessageBox::information(this, tr("Erro ao abrir arquivo"),
-                                     file.errorString());
-            return;
-        }
-
-        QTextStream in(&file);
-        codeEditor->setPlainText(in.readAll());
-        file.close();
-
-        QString extension = currentFilename.section(".", -1);
-
-        if (extension == "ndr")
-            selectMachine("Neander");
-        else if (extension == "ahd")
-            selectMachine("Ahmes");
-        else if (extension == "rad")
-            selectMachine("Ramses");
-
-        modifiedFile = false;
-        forceSaveAs = false;
-    }
+    if (!filename.isEmpty())
+        load(filename);
 }
 
 void HidraGui::on_actionSave_triggered()
@@ -800,6 +836,12 @@ void HidraGui::closeEvent(QCloseEvent *event)
             if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
                 cancelled = true;
         }
+    }
+
+    // Exclui arquivo de backup
+    if (!cancelled)
+    {
+        QFile::remove("__Recovery__.txt");
     }
 
     // Aceita ou rejeita o evento que fecha a janela

@@ -36,6 +36,7 @@ public:
 
     void save(QString filename);
     void saveAs();
+    void load(QString filename);
 
 public slots:
     void on_pushButtonBuild_clicked();
@@ -51,6 +52,7 @@ public slots:
 
 private slots:
     void sourceCodeChanged();
+    void saveBackup();
 
     void on_actionBuild_triggered();
     void on_actionRun_triggered();
@@ -103,6 +105,8 @@ private:
     void updateButtons();
     void updateStatusBar();
 
+    QTimer backupTimer;
+
     QString getValueDescription(int value);
 
     int previousPCValue;
@@ -112,7 +116,8 @@ private:
     Ui::HidraGui *ui;
     Machine *machine;
     QString currentFilename;
-    bool modifiedFile, sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
+    bool modifiedFile, modifiedSinceBackup;
+    bool sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
     bool forceSaveAs; // Set to true when Save should trigger SaveAs
     bool showHexValues;
     QStandardItemModel instructionsTableModel, dataTableModel;
