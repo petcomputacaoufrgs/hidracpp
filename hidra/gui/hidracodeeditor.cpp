@@ -26,8 +26,6 @@ HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
     //highlightCurrentLine();
 }
 
-
-
 int HidraCodeEditor::lineNumberAreaWidth()
 {
     int digits = 1;
@@ -42,14 +40,10 @@ int HidraCodeEditor::lineNumberAreaWidth()
     return space;
 }
 
-
-
 void HidraCodeEditor::updateLineNumberAreaWidth(int /* newBlockCount */)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
-
-
 
 void HidraCodeEditor::updateLineNumberArea(const QRect &rect, int dy)
 {
@@ -62,8 +56,6 @@ void HidraCodeEditor::updateLineNumberArea(const QRect &rect, int dy)
         updateLineNumberAreaWidth(0);
 }
 
-
-
 void HidraCodeEditor::resizeEvent(QResizeEvent *e)
 {
     QPlainTextEdit::resizeEvent(e);
@@ -71,8 +63,6 @@ void HidraCodeEditor::resizeEvent(QResizeEvent *e)
     QRect cr = contentsRect();
     lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
-
-
 
 void HidraCodeEditor::highlightCurrentLine()
 {
@@ -92,8 +82,6 @@ void HidraCodeEditor::highlightCurrentLine()
 
     setExtraSelections(extraSelections);
 }
-
-
 
 void HidraCodeEditor::highlightPCLine(int pcLine)
 {
@@ -166,6 +154,21 @@ void HidraCodeEditor::disableLineHighlight()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;
     setExtraSelections(extraSelections);
+}
+
+void HidraCodeEditor::setCurrentLine(int line)
+{
+    if (line < 0)
+        return;
+
+    QTextCursor cursor = textCursor();
+
+    cursor.setPosition(0);
+    cursor.movePosition(QTextCursor::Down, QTextCursor::MoveAnchor, line);
+
+    setTextCursor(cursor);
+    centerCursor();
+    setFocus();
 }
 
 void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)

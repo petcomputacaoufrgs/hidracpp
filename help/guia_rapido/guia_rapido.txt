@@ -1,61 +1,62 @@
-—— Guia rápido ——
+ï»¿â€”â€” Guia rÃ¡pido â€”â€”
 
 [Menu Arquivo]
-Contém opções para criar, abrir e salvar códigos-fonte.
+ContÃ©m opÃ§Ãµes para criar, abrir e salvar cÃ³digos-fonte.
 
-[Menu Máquina]
-Montar: Compila o código-fonte para a memória da máquina.
-Rodar: Executa o programa em memória a partir da posição atual de PC.
-Passo: Executa apenas a instrução indicada por PC.
+[Menu MÃ¡quina]
+Montar: Compila o cÃ³digo-fonte para a memÃ³ria da mÃ¡quina.
+Rodar: Executa o programa em memÃ³ria a partir da posiÃ§Ã£o atual de PC.
+Passo: Executa apenas a instruÃ§Ã£o indicada por PC.
 
-Zerar registradores: Reinicia registradores, flags para valores-padrão, zera contadores de instruções e acessos.
-Inserir/Remover breakpoint: Insere um ponto de parada na linha atual do código-fonte.
+Zerar registradores: Reinicia registradores, flags para valores-padrÃ£o, zera contadores de instruÃ§Ãµes e acessos.
+Inserir/Remover breakpoint: Insere um ponto de parada na linha atual do cÃ³digo-fonte.
 
-Importar/exportar memória: Carrega e exporta arquivos .mem contendo apenas o conteúdo da memória (sem código-fonte).
+Importar/exportar memÃ³ria: Carrega e exporta arquivos .mem contendo apenas o conteÃºdo da memÃ³ria (sem cÃ³digo-fonte).
 
 [Menu Exibir]
-Modo hexadecimal: Exibe endereços e valores em modo hexadecimal.
+Modo hexadecimal: Exibe endereÃ§os e valores em modo hexadecimal.
 
-[Área de código]
-Área em que o código-fonte do programa deve ser digitado.
-Roxo: Instruções reconhecidas
+[Ãrea de cÃ³digo]
+Ãrea em que o cÃ³digo-fonte do programa deve ser digitado.
+Roxo: InstruÃ§Ãµes reconhecidas
 Azul: Diretivas de montagem (ORG, DB, DW, DAB e DAW)
-Verde: Comentários (iniciados por ";")
+Verde: ComentÃ¡rios (iniciados por ";")
 
-Highlight amarelo: Após a montagem, mostra em amarelo a linha correspondente à instrução atual (apontada por PC).
-F12: Cria um breakpoint na posição do cursor (remove se já existente).
+Highlight amarelo: ApÃ³s a montagem, mostra em amarelo a linha correspondente Ã  instruÃ§Ã£o atual (apontada por PC).
+F12: Cria um breakpoint na posiÃ§Ã£o do cursor (remove se jÃ¡ existente).
 
 [Mensagens]
 Exibe erros de montagem, indicando a linha e o tipo de erro.
 
-[Tabelas de memória]
-A interface exibe duas visualizações para a memória (única), uma destinada a instruções (esquerda) e outra a dados (direita).
+[Tabelas de memÃ³ria]
+A interface exibe duas visualizaÃ§Ãµes para a memÃ³ria (Ãºnica), uma destinada a instruÃ§Ãµes (esquerda) e outra a dados (direita).
 
-Coluna PC: Indica a posição da execução (instrução atual).
-Coluna End: Endereço da memória.
-Coluna Valor: Valor do byte no endereço da memória.
-Coluna Label: Label associado ao endereço de memória (nomes de variáveis, por exemplo).
+Coluna PC: Indica a posiÃ§Ã£o da execuÃ§Ã£o (instruÃ§Ã£o atual).
+Coluna End: EndereÃ§o da memÃ³ria.
+Coluna Valor: Valor do byte no endereÃ§o da memÃ³ria.
+Coluna Label: Label associado ao endereÃ§o de memÃ³ria (ex: nomes de variÃ¡veis).
 
-Mouse-over em Valor: Mostra na status-bar o valor em decimal, hexadecimal e binário do valor sob o mouse.
-Duplo-clique (instruções): Altera a execução (posição de PC) para o endereço selecionado.
+Mouse-over em Valor: Mostra na status-bar o valor em decimal, hexadecimal e binÃ¡rio do valor sob o mouse.
+Duplo-clique (instruÃ§Ãµes): Altera a execuÃ§Ã£o (posiÃ§Ã£o de PC) para o endereÃ§o selecionado.
+Duplo-clique (dados): Localiza no cÃ³digo-fonte a posiÃ§Ã£o de memÃ³ria clicada (ex: definiÃ§Ã£o de variÃ¡vel).
 
-[Seletor de máquina]
-Escolhe a máquina que será usada para exibição, montagem e execução, entre as máquinas teóricas disponíveis.
+[Seletor de mÃ¡quina]
+Escolhe a mÃ¡quina que serÃ¡ usada para exibiÃ§Ã£o, montagem e execuÃ§Ã£o, entre as mÃ¡quinas teÃ³ricas disponÃ­veis.
 
 [Registradores]
-Exibe os registradores da máquina em decimal ou hexadecimal (de acordo com opção de exibição).
+Exibe os registradores da mÃ¡quina em decimal ou hexadecimal (de acordo com opÃ§Ã£o de exibiÃ§Ã£o).
 
-Mouse-over: Mostra na status-bar o valor em decimal, hexadecimal e binário do valor sob o mouse.
+Mouse-over: Mostra na status-bar o valor em decimal, hexadecimal e binÃ¡rio do valor sob o mouse.
 
 [Flags]
-Exibe as flags da máquina, através de LEDs acesos para estado verdadeiro, e desligados para falso.
+Exibe as flags da mÃ¡quina, atravÃ©s de LEDs acesos para estado verdadeiro, e desligados para falso.
 
-[Instruções]
-Exibe todas as instruções para a máquina selecionada.
+[InstruÃ§Ãµes]
+Exibe todas as instruÃ§Ãµes para a mÃ¡quina selecionada.
 
-Mouse-over: Mostra sintaxe e breve descrição da instrução selecionada em um tooltip.
+Mouse-over: Mostra sintaxe e breve descriÃ§Ã£o da instruÃ§Ã£o selecionada em um tooltip.
 
 [Status bar]
-Contador de instruções/acessos: Mostra quantidade de instruções e acessos à memória realizados desde a última montagem ou reinício.
+Contador de instruÃ§Ãµes/acessos: Mostra quantidade de instruÃ§Ãµes e acessos Ã  memÃ³ria realizados desde a Ãºltima montagem ou reinÃ­cio.
 
-Mouse-over em valores: Mostra o valor em decimal, hexadecimal e binário.
+Mouse-over em valores: Mostra o valor em decimal, hexadecimal e binÃ¡rio.

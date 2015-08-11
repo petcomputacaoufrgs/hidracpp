@@ -67,6 +67,7 @@ private slots:
     void on_actionExportMemory_triggered();
 
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
+    void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
     void on_actionResetRegisters_triggered();
     void on_actionSetBreakpoint_triggered();

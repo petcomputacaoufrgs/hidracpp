@@ -24,6 +24,7 @@ public:
     int getBreakpointLine();
     void toggleBreakpointOnCursor();
     void disableLineHighlight();
+    void setCurrentLine(int line);
 
 public slots:
 

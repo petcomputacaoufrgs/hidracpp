@@ -135,6 +135,7 @@ public:
     void setRunning(bool running);
 
     bool getBuildSuccessful();
+    int getFirstErrorLine();
 
     int getBreakpoint() const;
     void setBreakpoint(int value);
@@ -207,6 +208,7 @@ protected:
     QHash<QString, QString> descriptions;
     bool buildSuccessful;
     bool running;
+    int firstErrorLine;
     int breakpoint;
     int instructionCount;
     int accessCount;

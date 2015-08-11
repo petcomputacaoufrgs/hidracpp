@@ -317,6 +317,7 @@ void Machine::assemble(QString sourceCode)
 
     running = false;
     buildSuccessful = false;
+    firstErrorLine = -1;
 
 
 
@@ -389,6 +390,8 @@ void Machine::assemble(QString sourceCode)
         }
         catch (ErrorCode errorCode)
         {
+            if (firstErrorLine == -1)
+                firstErrorLine = lineNumber;
             emitError(lineNumber, errorCode);
             errorCount += 1;
         }
@@ -438,6 +441,8 @@ void Machine::assemble(QString sourceCode)
         }
         catch (ErrorCode errorCode)
         {
+            if (firstErrorLine == -1)
+                firstErrorLine = lineNumber;
             emitError(lineNumber, errorCode);
             errorCount += 1;
         }
@@ -988,6 +993,11 @@ void Machine::setRunning(bool running)
 bool Machine::getBuildSuccessful()
 {
     return buildSuccessful;
+}
+
+int Machine::getFirstErrorLine()
+{
+    return firstErrorLine;
 }
 
 int Machine::getBreakpoint() const

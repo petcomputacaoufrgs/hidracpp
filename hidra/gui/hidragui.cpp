@@ -161,11 +161,10 @@ void HidraGui::initializeMemoryTable()
 
     // Adjust table settings
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
-    ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryInstructions->resizeRowsToContents();
+    ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryInstructions->setMouseTracking(true);
     ui->tableViewMemoryData->verticalHeader()->hide();
-    ui->tableViewMemoryData->resizeColumnsToContents();
     ui->tableViewMemoryData->resizeRowsToContents();
     ui->tableViewMemoryData->setMouseTracking(true);
 
@@ -590,6 +589,8 @@ void HidraGui::on_actionBuild_triggered()
 
     if (machine->getBuildSuccessful())
         sourceAndMemoryInSync = true;
+    else
+        codeEditor->setCurrentLine(machine->getFirstErrorLine());
 
     machine->setPCValue(0);
 
@@ -758,6 +759,14 @@ void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &i
     updateMachineInterface(false);
 }
 
+void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
+{
+    int addressCorrespondingLine = machine->getAddressCorrespondingLine(index.row());
+
+    if (addressCorrespondingLine != -1)
+        codeEditor->setCurrentLine(addressCorrespondingLine);
+}
+
 void HidraGui::on_actionResetRegisters_triggered()
 {
     machine->clearRegisters();
@@ -859,3 +868,4 @@ void HidraGui::on_actionAbout_triggered()
                        "Desenvolvido pelo grupo Pet Computação.<br><br>"
                        "Máquinas teóricas criadas pelos professores<br>Dr. Raul Fernando Weber e Dra. Taisy Silva Weber.</p>");
 }
+

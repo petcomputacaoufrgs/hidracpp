@@ -9,10 +9,10 @@ Código
 - Criar um .ini para lembar "exibir hexa, memória auxiliar" e último local carregado/salvo
 - NEANDER e AHMES: JN etc. sempre devem contar 2 acessos.
 - Otimizar regexes
-- Dois cliques em dados para ir para variável
-- Follow PC
-- Tirar opção de visualizar área de dados (opção de tabela unificada?)
-- Tirar highlight das instruções (opcional? atrapalha)
+- Follow PC (center if outside view)
+- Tirar opção de visualizar área de dados (opção de unificar tabelas?)
+- Tirar highlight das instruções (ou opcional, porque atrapalha)
+- Tirar line-wrap
 
 Documentação
 
@@ -23,9 +23,8 @@ Documentação
 
 Erros
 
-- Org não deve ser highlighted (ex: programa só com "org 10")
-- Não funciona passagem do valor do endereço por label. (Da erro quando tenta alocar um espaço de memória cujo valor é o endereço indicado por uma label)
-
+- Se abre duas instâncias, ele recupera arquivo! [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
+- setCurrentLine deve ignorar wrap text
 
 [ Versões futuras ]
 
