@@ -156,8 +156,8 @@ void HidraGui::initializeMemoryTable()
     instructionsTableModel.setHeaderData(2, Qt::Horizontal, "Valor");
 
     dataTableModel.setHeaderData(0, Qt::Horizontal, " End ");
-    dataTableModel.setHeaderData(1, Qt::Horizontal, "  Label  ");
-    dataTableModel.setHeaderData(2, Qt::Horizontal, "Valor");
+    dataTableModel.setHeaderData(1, Qt::Horizontal, "Valor");
+    dataTableModel.setHeaderData(2, Qt::Horizontal, "  Label  ");
 
     // Adjust table settings
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
@@ -307,40 +307,42 @@ void HidraGui::updateMemoryTable(bool force)
         int value = machine->getMemoryValue(byteAddress);
 
         //////////////////////////////////////////////////
-        // Column 1 or 0 (instr./data tables): Address
+        // Column 1/0: Address
         //////////////////////////////////////////////////
 
         if (force)
         {
+            instructionsTableModel.item(row, 1)->setEnabled(false);
+            dataTableModel.item(row, 0)->setEnabled(false);
             instructionsTableModel.item(row, 1)->setText(QString::number(byteAddress, base).toUpper());
-            dataTableModel.item(        row, 0)->setText(QString::number(byteAddress, base).toUpper());
+            dataTableModel.item(row, 0)->setText(QString::number(byteAddress, base).toUpper());
         }
 
         //////////////////////////////////////////////////
-        // Column 1 (data table): Label
+        // Column 2/1: Byte value
+        //////////////////////////////////////////////////
+
+        if (machine->hasByteChanged(byteAddress) || force) // Only update cell if byte value has changed
+        {
+            instructionsTableModel.item(row, 2)->setText(QString::number(value, base).toUpper());
+            dataTableModel.item(row, 1)->setText(QString::number(value, base).toUpper());
+
+            // Status bar tip on mouse hover
+            QString statusTip = getValueDescription(value);
+            instructionsTableModel.item(row, 2)->setStatusTip(statusTip);
+            dataTableModel.item(row, 1)->setStatusTip(statusTip);
+        }
+
+        //////////////////////////////////////////////////
+        // Column 2 (data table): Label
         //////////////////////////////////////////////////
 
         if ((sourceAndMemoryInSync &&
              machine->getAddressCorrespondingLabel(byteAddress) != previousLabel[byteAddress]) || force) // Only update on change
         {
             QString labelName = machine->getAddressCorrespondingLabel(byteAddress);
-            dataTableModel.item(row, 1)->setText(labelName);
+            dataTableModel.item(row, 2)->setText(labelName);
             previousLabel[byteAddress] = labelName; // Update previousLabel
-        }
-
-        //////////////////////////////////////////////////
-        // Column 2: Byte value
-        //////////////////////////////////////////////////
-
-        if (machine->hasByteChanged(byteAddress) || force) // Only update cell if byte value has changed
-        {
-            instructionsTableModel.item(row, 2)->setText(QString::number(value, base).toUpper());
-            dataTableModel.item(        row, 2)->setText(QString::number(value, base).toUpper());
-
-            // Status bar tip on mouse hover
-            QString statusTip = getValueDescription(value);
-            instructionsTableModel.item(row, 2)->setStatusTip(statusTip);
-            dataTableModel.item(row, 2)->setStatusTip(statusTip);
         }
     }
 
