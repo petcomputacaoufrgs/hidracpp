@@ -26,6 +26,8 @@ public:
     void disableLineHighlight();
     void setCurrentLine(int line);
 
+    void wheelEvent(QWheelEvent *e);
+
 public slots:
 
 protected:

@@ -169,6 +169,25 @@ void HidraCodeEditor::setCurrentLine(int line)
     setFocus();
 }
 
+void HidraCodeEditor::wheelEvent(QWheelEvent *e)
+{
+    if (e->modifiers() & Qt::ControlModifier)
+    {
+        int delta = e->delta();
+
+        if (delta < 0)
+            zoomOut();
+        else if (delta > 0)
+            zoomIn();
+
+        // Set TAB size to 8 space characters
+        QFontMetrics metrics(font());
+        setTabStopWidth(8 * metrics.width(' '));
+
+        return;
+    }
+}
+
 void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
