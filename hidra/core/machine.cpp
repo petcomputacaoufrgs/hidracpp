@@ -489,7 +489,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
             numberOfArguments = 1;
         }
 
-        if (isArray && numberOfArguments > 1) // Too many arguments
+        if (!isArray && numberOfArguments > 1) // Too many arguments
             throw wrongNumberOfArguments;
 
         if (isArray && numberOfArguments < 1) // No arguments
@@ -543,7 +543,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
                 else if (argument.at(0).toLower() == 'h')
                 {
                     // Convert hexadecimal string to int
-                    value = argument.mid(1).toInt(&ok, 16);
+                    value = argument.mid(1).toInt(&ok, 16); // Remove H
 
                     // Check if invalid
                     if (!ok)
@@ -633,7 +633,7 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
             throw invalidValue;
 
         // Write address argument:
-        assemblerMemory[PC->getValue()]->setValue(argumentList.last().toInt(NULL, 0));
+        assemblerMemory[PC->getValue()]->setValue(stringToInt(argumentList.last()));
         PC->incrementValue();
     }
 }
@@ -709,7 +709,12 @@ void Machine::reserveAssemblerMemory(int sizeToReserve)
 bool Machine::isValidValue(QString valueString, int min, int max)
 {
     bool ok;
-    int value = valueString.toInt(&ok, 0);
+    int value;
+
+    if (valueString.left(1) == "h")
+        value = valueString.mid(1).toInt(&ok, 16); // Remove "h"
+    else
+        value = valueString.toInt(&ok, 10);
 
     // Returns true if conversion ok and value between min and max
     return (ok && value >= min && value <= max);
@@ -846,6 +851,14 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
             return;
         }
     }
+}
+
+int Machine::stringToInt(QString valueString)
+{
+    if (valueString.left(1).toLower() == "h") // Remove H
+        return valueString.mid(1).toInt(NULL, 16);
+    else
+        return valueString.toInt(NULL, 10);
 }
 
 
@@ -1319,8 +1332,8 @@ void Machine::generateDescriptions()
     descriptions["sta a"] = "Armazena o valor do acumulador no endereço 'a'.";
     descriptions["lda a"] = "Carrega o valor no endereço 'a' para o acumulador.";
     descriptions["add a"] = "Adiciona o valor no endereço 'a' ao acumulador.";
-    descriptions["or a"]  = "Realiza um 'ou' lógico entre o valor no endereço 'a' e o valor do acumulador.";
-    descriptions["and a"] = "Realiza um 'e' lógico entre o valor no endereço 'a' e o valor do acumulador.";
+    descriptions["or a"]  = "Realiza um 'ou' lógico entre cada bit de 'a' e o bit correspondente no acumulador.";
+    descriptions["and a"] = "Realiza um 'e' lógico entre cada bit de 'a' e o bit correspondente no acumulador.";
     descriptions["not"]   = "Inverte (complementa) o valor dos bits do acumulador.";
     descriptions["jmp a"] = "Desvia a execução para o endereço 'a' (desvio incondicional).";
     descriptions["jn a"]  = "Se a flag N estiver ativada (acumulador negativo), desvia a execução para o endereço 'a'.";
@@ -1346,13 +1359,13 @@ void Machine::generateDescriptions()
     descriptions["str r a"] = "Armazena o valor do registrador 'r' no endereço 'a'.";
     descriptions["ldr r a"] = "Carrega o valor no endereço 'a' para o registrador 'r'.";
     descriptions["add r a"] = "Adiciona o valor no endereço 'a' ao registrador 'r'.";
-    descriptions["or r a"]  = "Realiza um 'ou' lógico entre o valor no endereço 'a' e o valor do registrador 'r'.";
-    descriptions["and r a"] = "Realiza um 'e' lógico entre o valor no endereço 'a' e o valor do registrador 'r'.";
+    descriptions["or r a"]  = "Realiza um 'ou' lógico entre cada bit de 'a' e o bit correspondente no registrador 'r'.";
+    descriptions["and r a"] = "Realiza um 'ou' lógico entre cada bit de 'a' e o bit correspondente no registrador 'r'.";
     descriptions["not r"]   = "Inverte (complementa) o valor dos bits do registrador 'r'.";
     descriptions["sub r a"] = "Subtrai o valor no endereço 'a' do registrador 'r'.";
     descriptions["jsr a"]   = "Desvia para subrotina, armazenando o valor atual de PC em 'a' e desviando a execução para o endereço 'a' + 1.";
     descriptions["neg r"]   = "Troca o sinal do valor em complemento de 2 do registrador 'r' de positivo para negativo e vice-versa.";
-    descriptions["shr r"]   = "Reliza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
+    descriptions["shr r"]   = "Realiza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
 }
 
 QString Machine::getDescription(QString assemblyFormat)

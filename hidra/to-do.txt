@@ -9,6 +9,8 @@ Código
 - Follow PC (center if outside view)
 - Tirar opção de visualizar área de dados (opção de unificar tabelas?)
 - Highlight de endereço apontado
+- "HLT atingido" para passo-a-passo.
+- Zerar registradores: zerar máquina?
 
 Código (baixa prioridade)
 
@@ -29,7 +31,8 @@ Documentação
 
 Erros
 
--
+- Hexadecimal deve ser hNÚMERO e não 0xNÚMERO [fixed]
+- String não aceita ;
 
 [ Versões futuras ]
 

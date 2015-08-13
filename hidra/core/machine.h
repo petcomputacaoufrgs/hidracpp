@@ -104,6 +104,7 @@ public:
     QStringList splitArguments(QString arguments);
     void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
+    int stringToInt(QString valueString);
 
 
 
