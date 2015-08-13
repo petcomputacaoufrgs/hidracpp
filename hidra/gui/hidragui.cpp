@@ -797,7 +797,6 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
     updateMachineInterface(true);
 }
 
-
 void HidraGui::on_actionDisplayDataTable_toggled(bool checked)
 {
     ui->tableViewMemoryData->setVisible(checked);
@@ -806,18 +805,6 @@ void HidraGui::on_actionDisplayDataTable_toggled(bool checked)
 void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
 {
     selectMachine(machineName);
-}
-
-
-
-void HidraGui::on_actionReportProblem_triggered()
-{
-
-}
-
-void HidraGui::on_actionManual_triggered()
-{
-
 }
 
 void HidraGui::on_actionClose_triggered()
@@ -862,12 +849,20 @@ void HidraGui::closeEvent(QCloseEvent *event)
         event->ignore();
 }
 
-
 void HidraGui::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "Sobre o Hidra",
-                       "<p align='center'>Hidra 1.0.0 (" + QString(__DATE__) + ")<br><br>"
+                       "<p align='center'>Hidra (Versão " + QString(__DATE__) + ")<br><br>"
                        "Desenvolvido pelo grupo Pet Computação.<br><br>"
                        "Máquinas teóricas criadas pelos professores<br>Dr. Raul Fernando Weber e Dra. Taisy Silva Weber.</p>");
 }
 
+void HidraGui::on_actionQuickGuide_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_GuiaRapido.pdf"));
+}
+
+void HidraGui::on_actionReference_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_Referencia.pdf"));
+}

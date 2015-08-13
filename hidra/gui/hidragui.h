@@ -74,13 +74,13 @@ private slots:
     void on_actionHexadecimalMode_toggled(bool checked);
     void on_comboBoxMachine_currentIndexChanged(const QString machineName);
 
-    void on_actionManual_triggered();
-    void on_actionReportProblem_triggered();
     void on_actionClose_triggered();
     void closeEvent(QCloseEvent *event);
 
     void on_actionDisplayDataTable_toggled(bool checked);
 
+    void on_actionQuickGuide_triggered();
+    void on_actionReference_triggered();
     void on_actionAbout_triggered();
 
 private:

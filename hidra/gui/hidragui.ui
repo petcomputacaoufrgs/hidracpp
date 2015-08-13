@@ -460,20 +460,21 @@
     <property name="title">
      <string>Ajuda</string>
     </property>
-    <addaction name="actionManual"/>
+    <addaction name="actionQuickGuide"/>
+    <addaction name="actionReference"/>
     <addaction name="separator"/>
-    <addaction name="actionReportProblem"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuMemory">
     <property name="title">
      <string>Máquina</string>
     </property>
+    <addaction name="actionResetRegisters"/>
+    <addaction name="separator"/>
     <addaction name="actionBuild"/>
     <addaction name="actionRun"/>
     <addaction name="actionStep"/>
     <addaction name="separator"/>
-    <addaction name="actionResetRegisters"/>
     <addaction name="actionSetBreakpoint"/>
     <addaction name="separator"/>
     <addaction name="actionImportMemory"/>
@@ -483,7 +484,6 @@
     <property name="title">
      <string>Exibir</string>
     </property>
-    <addaction name="actionDisplayDataTable"/>
     <addaction name="actionHexadecimalMode"/>
    </widget>
    <addaction name="menuProgram"/>
@@ -497,7 +497,7 @@
     <string>Montar</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+B</string>
+    <string>F6</string>
    </property>
   </action>
   <action name="actionStep">
@@ -513,7 +513,7 @@
     <string>Rodar</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+R</string>
+    <string>F7</string>
    </property>
   </action>
   <action name="actionSaveAs">
@@ -524,9 +524,9 @@
     <string>Ctrl+Shift+S</string>
    </property>
   </action>
-  <action name="actionManual">
+  <action name="actionQuickGuide">
    <property name="text">
-    <string>Manual</string>
+    <string>Guia rápido</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -539,7 +539,10 @@
   </action>
   <action name="actionClose">
    <property name="text">
-    <string>Fechar</string>
+    <string>Sair</string>
+   </property>
+   <property name="toolTip">
+    <string>Sair</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -575,6 +578,9 @@
    <property name="text">
     <string>Zerar registradores</string>
    </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
   </action>
   <action name="actionHexadecimalMode">
    <property name="checkable">
@@ -582,6 +588,9 @@
    </property>
    <property name="text">
     <string>Modo hexadecimal</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="actionSetBreakpoint">
@@ -611,6 +620,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionReference">
+   <property name="text">
+    <string>Referência de uso</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
   </action>
  </widget>
