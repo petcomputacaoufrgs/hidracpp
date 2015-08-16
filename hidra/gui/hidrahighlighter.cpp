@@ -9,6 +9,7 @@
 HighlightRule::HighlightRule(QString pattern, QTextCharFormat format)
 {
     this->regExp = QRegExp(pattern);
+    this->regExp.setCaseSensitivity(Qt::CaseInsensitive);
     this->format = format;
 }
 
@@ -39,11 +40,9 @@ HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
 
 }
 
-void HidraHighlighter::highlightBlock(const QString &textOriginal)
+void HidraHighlighter::highlightBlock(const QString &text)
 {
-    QString text = textOriginal.toLower();
-
-    foreach(HighlightRule highlightRule, highlightRulesList)
+    foreach (HighlightRule highlightRule, highlightRulesList)
     {
         QRegExp regExp = highlightRule.getRegExp();
 
@@ -127,4 +126,3 @@ void HidraHighlighter::initializeHighlighter(Machine &machine)
     initializeDirectivesHighlightRule();
     initializeCommentsHighlightRule();
 }
-

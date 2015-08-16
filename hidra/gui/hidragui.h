@@ -104,7 +104,7 @@ private:
     void updateFlagWidgets();
     void updateCodeEditor();
     void updateButtons();
-    void updateStatusBar();
+    void updateInformation();
 
     QTimer backupTimer;
 
@@ -125,8 +125,6 @@ private:
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
     QString currentMachineName;
-
-    QLabel instructionAccessCounter;
 
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;

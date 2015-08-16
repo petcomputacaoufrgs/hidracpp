@@ -25,13 +25,11 @@ HidraGui::HidraGui(QWidget *parent) :
 
     ui->layoutRegisters->setAlignment(Qt::AlignTop);
     ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
+    ui->scrollAreaRegisters->setWidgetResizable(true);
 
     ui->tableViewMemoryInstructions->setEditTriggers(false);
     ui->tableViewMemoryData->setEditTriggers(false);
     ui->tableViewMemoryData->setVisible(false);
-
-    //instructionAccessCounter.setStyleSheet("QLabel { color : gray; }");
-    ui->statusBar->addPermanentWidget(&instructionAccessCounter, 0.25);
 
     // Select Neander machine and update interface
     selectMachine("Neander");
@@ -278,7 +276,7 @@ void HidraGui::updateMachineInterfaceComponents(bool force)
     updateRegisterWidgets();
     updateCodeEditor();
     updateButtons();
-    updateStatusBar();
+    updateInformation();
 }
 
 void HidraGui::updateMemoryTable(bool force)
@@ -412,12 +410,11 @@ void HidraGui::updateButtons()
         ui->pushButtonRun->setText("Rodar");
 }
 
-void HidraGui::updateStatusBar()
+void HidraGui::updateInformation()
 {
-    QString instructionAccessMessage;
-    instructionAccessMessage  = "Instruções: " + QString::number(machine->getInstructionCount()) + " | ";
-    instructionAccessMessage += "Acessos: "    + QString::number(machine->getAccessCount());
-    instructionAccessCounter.setText(instructionAccessMessage);
+    QString informationString  = "Instruções: " + QString::number(machine->getInstructionCount()) + " | "
+                               + "Acessos: "    + QString::number(machine->getAccessCount());
+    ui->textInformation->setText(informationString);
 }
 
 QString HidraGui::getValueDescription(int value)
