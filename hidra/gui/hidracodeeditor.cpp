@@ -186,6 +186,8 @@ void HidraCodeEditor::wheelEvent(QWheelEvent *e)
 
         return;
     }
+
+    QPlainTextEdit::wheelEvent(e);
 }
 
 void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)

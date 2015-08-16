@@ -412,8 +412,8 @@ void HidraGui::updateButtons()
 
 void HidraGui::updateInformation()
 {
-    QString informationString  = "Instruções: " + QString::number(machine->getInstructionCount()) + " | "
-                               + "Acessos: "    + QString::number(machine->getAccessCount());
+    QString informationString = "Instruções: " + QString::number(machine->getInstructionCount()) + " | "
+                              + "Acessos: "    + QString::number(machine->getAccessCount());
     ui->textInformation->setText(informationString);
 }
 

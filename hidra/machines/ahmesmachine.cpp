@@ -2,7 +2,7 @@
 
 AhmesMachine::AhmesMachine()
 {
-    identifier = "AHD";
+    identifier = "AHM";
 
     //////////////////////////////////////////////////
     // Initialize registers

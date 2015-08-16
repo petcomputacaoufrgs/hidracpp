@@ -2,7 +2,7 @@
 
 RamsesMachine::RamsesMachine()
 {
-    identifier = "RAD";
+    identifier = "RMS";
 
     //////////////////////////////////////////////////
     // Initialize registers

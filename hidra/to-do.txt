@@ -11,11 +11,11 @@ Código
 - Highlight de endereço apontado
 - "HLT atingido" para passo-a-passo.
 - Zerar registradores: zerar máquina?
+- Identificadores, verificar se trocaram
 
 Código (baixa prioridade)
 
-- Criar um .ini para lembar "exibir hexa, memória auxiliar" e último local carregado/salvo
-- NEANDER e AHMES: JN etc. sempre devem contar 2 acessos. [opcional]
+- Criar um .ini para lembar "exibir hexa" e último local carregado/salvo
 - Otimizar regexes
 - Tirar highlight das instruções (ou opcional, porque atrapalha)
 
