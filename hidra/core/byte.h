@@ -3,14 +3,17 @@
 
 #include <QString>
 
+namespace Conversion
+{
+    int stringToValue(QString valueString);
+    QString valueToString(int value);
+}
+
 class Byte
 {
 public:
     Byte();
     Byte(int value);
-    Byte(QString valueString);
-
-    QString toString() const;
 
     int getValue() const;
     void setValue(int value);

@@ -121,7 +121,7 @@ private:
     bool sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
     bool forceSaveAs; // Set to true when Save should trigger SaveAs
     bool showHexValues;
-    QStandardItemModel instructionsTableModel, dataTableModel;
+    QStandardItemModel memoryModel;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
     QString currentMachineName;

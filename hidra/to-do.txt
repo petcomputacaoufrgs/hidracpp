@@ -7,22 +7,14 @@ Hidra - To-do
 Código
 
 - Follow PC (center if outside view)
-- Tirar opção de visualizar área de dados (opção de unificar tabelas?)
 - "HLT atingido" para passo-a-passo.
 - JN conta acessos desnecessários
-
-Código (baixa prioridade)
-
 - Criar um .ini para lembar "exibir hexa" e último local carregado/salvo
-- Otimizar regexes
-- Tirar highlight das instruções (ou opcional, porque atrapalha)
-
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
-
-Documentação
-
 - Colocar site do hidra no about
+
+
 
 [ Versões futuras ]
 

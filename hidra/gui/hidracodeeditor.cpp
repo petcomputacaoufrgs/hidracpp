@@ -108,7 +108,7 @@ void HidraCodeEditor::highlightPCLine(int pcLine)
         {
             QTextEdit::ExtraSelection selection;
 
-            QColor lineColor = QColor(255, 240, 0); // Yellow
+            QColor lineColor = QColor(255, 244, 64); // Yellow
 
             selection.format.setBackground(lineColor);
             selection.format.setProperty(QTextFormat::FullWidthSelection, true);

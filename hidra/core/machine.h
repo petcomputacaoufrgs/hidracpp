@@ -141,6 +141,8 @@ public:
     int getBreakpoint() const;
     void setBreakpoint(int value);
 
+    void getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress);
+
     int getMemorySize() const;
     void setMemorySize(int size);
     int getMemoryValue(int address) const;

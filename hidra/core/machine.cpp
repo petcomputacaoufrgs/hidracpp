@@ -252,7 +252,7 @@ AddressingMode::AddressingModeCode Machine::extractAddressingModeCode(int fetche
     {
         QRegExp matchAddressingMode(addressingMode->getBitPattern());
 
-        if (matchAddressingMode.exactMatch(Byte(fetchedValue).toString()))
+        if (matchAddressingMode.exactMatch(Conversion::valueToString(fetchedValue)))
             return addressingMode->getAddressingModeCode();
     }
 
@@ -326,15 +326,15 @@ void Machine::assemble(QString sourceCode)
     //////////////////////////////////////////////////
 
     // Regular expression to capture comments
-    const QString CHARS_EXCEPT_QUOTE_SEMICOLON = "[^';]*";
-    const QString STRING = "(?:'[^']*')";
-    const QString COMMENT = "(;.*)$";
+    static QString CHARS_EXCEPT_QUOTE_SEMICOLON = "[^';]*";
+    static QString STRING = "(?:'[^']*')";
+    static QString COMMENT = "(;.*)$";
 
-    const QString commentsPattern = "^(?:" + CHARS_EXCEPT_QUOTE_SEMICOLON + STRING + "?)*" + COMMENT;
-    const QRegExp matchComments(commentsPattern);
+    static QString commentsPattern = "^(?:" + CHARS_EXCEPT_QUOTE_SEMICOLON + STRING + "?)*" + COMMENT;
+    static QRegExp matchComments(commentsPattern);
 
-    const QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
-    const QRegExp whitespaces("\\s+");
+    static QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
+    static QRegExp whitespaces("\\s+");
 
 
 
@@ -773,14 +773,14 @@ QStringList Machine::splitArguments(QString arguments)
     QStringList finalArgumentList;
 
     // Regular expressions
-    QRegExp matchBrackets("\\[(\\d+)\\]"); // Digits between brackets
+    static QRegExp matchBrackets("\\[(\\d+)\\]"); // Digits between brackets
 
-    const QString VALUE = "([^'\\s,]+)";
-    const QString STRING = "('[^']+')";
-    const QString SEPARATOR = "([,\\s]*|$)";
+    static QString VALUE = "([^'\\s,]+)";
+    static QString STRING = "('[^']+')";
+    static QString SEPARATOR = "([,\\s]*|$)";
 
-    QString matchArgumentString = "(" + VALUE + "|" + STRING + ")" + SEPARATOR;
-    QRegExp matchArgument(matchArgumentString);
+    static QString matchArgumentString = "(" + VALUE + "|" + STRING + ")" + SEPARATOR;
+    static QRegExp matchArgument(matchArgumentString);
 
     arguments = arguments.trimmed(); // Trim whitespace
 
@@ -840,7 +840,7 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
 
     foreach (AddressingMode *addressingMode, addressingModes)
     {
-        QRegExp matchAddressingMode(addressingMode->getAssemblyPattern());
+        QRegExp matchAddressingMode = addressingMode->getAssemblyRegExp();
 
         if (matchAddressingMode.exactMatch(argument))
         {
@@ -1022,6 +1022,46 @@ void Machine::setBreakpoint(int value)
         breakpoint = -1;
     else
         breakpoint = value;
+}
+
+void Machine::getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress)
+{
+    int fetchedValue = getMemoryValue(PC->getValue());
+    Instruction *instruction = getInstructionFromValue(fetchedValue);
+    AddressingMode::AddressingModeCode addressingModeCode = extractAddressingModeCode(fetchedValue);
+    int immediateAddress;
+
+    intermediateAddress = -1;
+    finalOperandAddress = -1;
+
+    if (instruction->getNumBytes() != 2)
+        return;
+
+    immediateAddress = (PC->getValue() + 1) % getMemorySize();
+
+    switch (addressingModeCode)
+    {
+        case AddressingMode::DIRECT:
+            finalOperandAddress = getMemoryValue(immediateAddress);
+            break;
+
+        case AddressingMode::INDIRECT:
+            intermediateAddress = getMemoryValue(immediateAddress);
+            finalOperandAddress = getMemoryValue(getMemoryValue(immediateAddress));
+            break;
+
+        case AddressingMode::IMMEDIATE: // Immediate addressing mode
+            finalOperandAddress = immediateAddress;
+            break;
+
+        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
+            finalOperandAddress = (getMemoryValue(immediateAddress) + getRegisterValue("X")) % getMemorySize();
+            break;
+
+        case AddressingMode::INDEXED_BY_PC:
+            finalOperandAddress = (getMemoryValue(immediateAddress) + getRegisterValue("PC")) % getMemorySize();
+            break;
+    }
 }
 
 int Machine::getMemorySize() const
@@ -1288,7 +1328,7 @@ int Machine::getAddressingModeBitCode(AddressingMode::AddressingModeCode address
     foreach (AddressingMode *addressingMode, addressingModes)
     {
         if (addressingMode->getAddressingModeCode() == addressingModeCode)
-            return Byte(addressingMode->getBitPattern()).getValue();
+            return Conversion::stringToValue(addressingMode->getBitPattern());
     }
 
     throw QString("Invalid addressing mode code.");

@@ -22,7 +22,7 @@ Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instr
 
 bool Instruction::matchByte(int byte)
 {
-    return byteRegExp.exactMatch(Byte(byte).toString());
+    return byteRegExp.exactMatch(Conversion::valueToString(byte));
 }
 
 QString Instruction::getMnemonic() const
@@ -42,7 +42,7 @@ QString Instruction::getAssemblyFormat() const
 
 int Instruction::getByteValue()
 {
-    return Byte(bitPattern).getValue();
+    return Conversion::stringToValue(bitPattern);
 }
 
 int Instruction::getNumBytes() const

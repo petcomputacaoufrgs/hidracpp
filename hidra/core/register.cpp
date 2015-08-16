@@ -26,7 +26,7 @@ int Register::getBitCode() const
     if (bitPattern == "")
         return NO_BIT_CODE;
     else
-        return Byte(bitPattern).getValue();
+        return Conversion::stringToValue(bitPattern);
 }
 
 int Register::getValue() const
@@ -47,7 +47,7 @@ void Register::incrementValue()
 bool Register::matchByte(int byte)
 {
     QRegExp bitPatternRegExp(bitPattern);
-    return bitPatternRegExp.exactMatch(Byte(byte).toString());
+    return bitPatternRegExp.exactMatch(Conversion::valueToString(byte));
 }
 
 int Register::getNumOfBits() const

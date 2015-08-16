@@ -2,6 +2,7 @@
 #define ADDRESSINGMODE_H
 
 #include <QString>
+#include <QRegExp>
 
 class AddressingMode
 {
@@ -17,13 +18,16 @@ public:
     AddressingMode(QString bitPattern, AddressingModeCode addressingModeCode, QString assemblyPattern);
 
     QString getBitPattern() const;
+    int getBitCode() const;
     AddressingModeCode getAddressingModeCode() const;
     QString getAssemblyPattern() const;
+    QRegExp getAssemblyRegExp() const;
 
 private:
     QString bitPattern;
     AddressingModeCode addressingModeCode;
     QString assemblyPattern;
+    QRegExp assemblyRegExp;
 };
 
 #endif // ADDRESSINGMODE_H
