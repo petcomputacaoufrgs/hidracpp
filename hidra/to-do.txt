@@ -8,11 +8,12 @@ Código
 
 - Follow PC (center if outside view)
 - "HLT atingido" para passo-a-passo.
-- JN conta acessos desnecessários
 - Criar um .ini para lembar "exibir hexa" e último local carregado/salvo
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
 - Colocar site do hidra no about
+- StatusTip para comandos (ver guia rápido)
+- Mostrar valor do byte em informações
 
 
 

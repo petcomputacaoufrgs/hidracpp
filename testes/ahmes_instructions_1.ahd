@@ -1,4 +1,4 @@
-﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Arquivo 1 para teste das instruções da
 ;; Máquina Ahmes no Hidra
 ;;
@@ -40,9 +40,9 @@ Val000:    DB    0
 Val001:    DB    1    ; 0b00000001
 Val002:    DB    2
 Val007:    DB    7    ; 0b00000111
-Val014:    DB    14    ; 0b00001110
+Val014:    DB    14   ; 0b00001110
 Val027:    DB    27
-Val028:    DB    28    ; 0b00011100
+Val028:    DB    28   ; 0b00011100
 
 Val063:    DB    63
 Val121:    DB    121
@@ -91,7 +91,7 @@ Val255:    DB    255
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDA    Val007
-    OR    Val028    ; 7 bitor 28 = 31
+    OR     Val028    ; 7 bitor 28 = 31
     ADD    Val224    ; 31 + 224 = 255
     STA    Test04
 
@@ -111,7 +111,7 @@ Val255:    DB    255
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDA    Val007
-    NOT        ; bitnot 7 = 248
+    NOT              ; bitnot 7 = 248
     ADD    Val007    ; 248 + 7 = 255
     STA    Test06
 
@@ -131,10 +131,11 @@ Val255:    DB    255
 
     NOP
     LDA    Val255
-    JMP    JumpJMP    ; Pula próxima instrução
+    JMP    JumpJMP   ; Pula próxima instrução
     LDA    Val007    ; Nunca executada
 
-JumpJMP:    STA    Test08
+JumpJMP:
+    STA    Test08
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test09: JN
@@ -145,10 +146,12 @@ JumpJMP:    STA    Test08
     JN    JumpJN1    ; Jump ignorado
     ADD    Val121    ; 7 + 121 = 128 (negativo)
 
-JumpJN1:    JN    JumpJN2    ; Pula próxima instrução
+JumpJN1:
+    JN    JumpJN2    ; Pula próxima instrução
     LDA    Val028    ; Nunca executada
 
-JumpJN2:    ADD    Val127    ; 128 + 127 = 255
+JumpJN2:
+    ADD    Val127    ; 128 + 127 = 255
     STA    Test09
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -160,10 +163,12 @@ JumpJN2:    ADD    Val127    ; 128 + 127 = 255
     JP    JumpJP1    ; Jump ignorado
     ADD    Val255    ; 128 + 255 = 127
 
-JumpJP1:    JP    JumpJP2    ; Pula próxima instrução
+JumpJP1:
+    JP    JumpJP2    ; Pula próxima instrução
     LDA    Val028    ; Nunca executada
 
-JumpJP2:    ADD    Val128    ; 127 + 128 = 255
+JumpJP2:
+    ADD    Val128    ; 127 + 128 = 255
     STA    Test10
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -176,10 +181,12 @@ JumpJP2:    ADD    Val128    ; 127 + 128 = 255
     JV    JumpJV1    ; Jump ignorado
     ADD    Val127    ; 126 + 129 = -3 (253) (overflow)
 
-JumpJV1:    JV    JumpJV2    ; Pula próxima instrução
+JumpJV1:
+    JV    JumpJV2    ; Pula próxima instrução
     LDA    Val028    ; Nunca executada
 
-JumpJV2:    ADD    Val002    ; -3 + 2 = -1 (255)
+JumpJV2:
+    ADD    Val002    ; -3 + 2 = -1 (255)
     STA    Test11
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -189,13 +196,15 @@ JumpJV2:    ADD    Val002    ; -3 + 2 = -1 (255)
 
     LDA    Val063
     ADD    Val127    ; 63 + 127 = -66 (190) (overflow)
-    JNV    JumpJNV1    ; Jump ignorado
+    JNV    JumpJNV1  ; Jump ignorado
     ADD    Val063    ; 190 + 63 = 253
 
-JumpJNV1:    JNV    JumpJNV2    ; Pula próxima instrução
+JumpJNV1:
+    JNV    JumpJNV2  ; Pula próxima instrução
     LDA    Val028    ; Nunca executada
 
-JumpJNV2:    ADD    Val002    ; 253 + 2 = 255
+JumpJNV2:
+    ADD    Val002    ; 253 + 2 = 255
     STA    Test12
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -205,6 +214,6 @@ JumpJNV2:    ADD    Val002    ; 253 + 2 = 255
 
     LDA    Val255
     STA    Test13
-    HLT        ; O programa deve parar aqui
+    HLT    ; O programa deve parar aqui
     LDA    Val007
     STA    Test13

@@ -64,8 +64,8 @@ public:
 
     void step();
     void fetchInstruction(int &fetchedValue, Instruction *&instruction);
-    void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &operandAddress);
-    void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int operandAddress);
+    void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &immediateAddress);
+    void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
 
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
     QString extractRegisterName(int fetchedValue);
@@ -116,6 +116,8 @@ public:
     void memoryWrite(int address, int value); // Increments accessCount
     int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
     int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    inline int memoryGetOperandValue(  int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    inline int memoryGetJumpAddress(   int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
 
 
 
