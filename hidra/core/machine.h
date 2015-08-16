@@ -51,7 +51,7 @@ public:
     // Constants
     QString ALLOCATE_SYMBOL = "%";
     QString CHAR_SYMBOL = "$";
-    QChar   SINGLE_QUOTE = '\'';
+    QString QUOTE_SYMBOL = "¢";
 
     explicit Machine(QObject *parent = 0);
     ~Machine();

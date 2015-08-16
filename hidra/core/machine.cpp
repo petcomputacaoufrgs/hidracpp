@@ -322,6 +322,23 @@ void Machine::assemble(QString sourceCode)
 
 
     //////////////////////////////////////////////////
+    // Regular expressions
+    //////////////////////////////////////////////////
+
+    // Regular expression to capture comments
+    const QString CHARS_EXCEPT_QUOTE_SEMICOLON = "[^';]*";
+    const QString STRING = "(?:'[^']*')";
+    const QString COMMENT = "(;.*)$";
+
+    const QString commentsPattern = "^(?:" + CHARS_EXCEPT_QUOTE_SEMICOLON + STRING + "?)*" + COMMENT;
+    const QRegExp matchComments(commentsPattern);
+
+    const QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
+    const QRegExp whitespaces("\\s+");
+
+
+
+    //////////////////////////////////////////////////
     // Simplify source code
     //////////////////////////////////////////////////
 
@@ -330,7 +347,16 @@ void Machine::assemble(QString sourceCode)
     // Strip comments and extra spaces
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
-        sourceLines[lineNumber] = sourceLines[lineNumber].section(";", 0, 0).trimmed();
+        // Convert literal quotes to special symbol
+        sourceLines[lineNumber].replace("''''", "'" + QUOTE_SYMBOL); // '''' -> 'QUOTE_SYMBOL
+        sourceLines[lineNumber].replace("'''", QUOTE_SYMBOL); // ''' -> QUOTE_SYMBOL
+
+        // Remove comments
+        if (matchComments.exactMatch(sourceLines[lineNumber]))
+            sourceLines[lineNumber].replace(matchComments.cap(1), "");
+
+        // Trim whitespace
+        sourceLines[lineNumber] = sourceLines[lineNumber].trimmed();
     }
 
 
@@ -341,9 +367,6 @@ void Machine::assemble(QString sourceCode)
 
     clearAssemblerData();
     PC->setValue(0);
-
-    QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
-    QRegExp whitespaces("\\s+");
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
@@ -524,8 +547,14 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
                 int value = 0;
                 bool ok;
 
+                // Process literal quote
+                if (argument.contains(QUOTE_SYMBOL))
+                {
+                    value = '\'';
+                }
+
                 // Process character
-                if (argument.at(0) == CHAR_SYMBOL)
+                else if (argument.at(0) == CHAR_SYMBOL)
                 {
                     value = argument.at(1).toLatin1();
                 }
@@ -745,7 +774,13 @@ QStringList Machine::splitArguments(QString arguments)
 
     // Regular expressions
     QRegExp matchBrackets("\\[(\\d+)\\]"); // Digits between brackets
-    QRegExp matchSeparator("\\s|,"); // Whitespace or comma
+
+    const QString VALUE = "([^'\\s,]+)";
+    const QString STRING = "('[^']+')";
+    const QString SEPARATOR = "([,\\s]*|$)";
+
+    QString matchArgumentString = "(" + VALUE + "|" + STRING + ")" + SEPARATOR;
+    QRegExp matchArgument(matchArgumentString);
 
     arguments = arguments.trimmed(); // Trim whitespace
 
@@ -764,73 +799,36 @@ QStringList Machine::splitArguments(QString arguments)
 
 
     //////////////////////////////////////////////////
-    // Process string char by char
+    // Process string
     //////////////////////////////////////////////////
 
-    QString numberString; // Incrementally add characters to this string until a separator/ampersand is found
-    int charCount = 0; // Char count of ASCII string (treats quote as literal char if count equals zero)
+    int index = arguments.indexOf(matchArgument); // Match first argument
+    int totalMatchedLength = 0;
 
-    bool insideString = false;
-
-    for (QChar &c : arguments)
+    while (index >= 0) // While there are arguments
     {
-        // NUMBER MODE:
-        if (insideString == false)
-        {
-            if (c == SINGLE_QUOTE)
-            {
-                // Add finished number to argument list
-                if (numberString != "")
-                {
-                    finalArgumentList.append(numberString);
-                    numberString = "";
-                }
+        QString argument = matchArgument.cap(1);
 
-                // Begin string
-                insideString = true;
-            }
-            else if (matchSeparator.exactMatch(c))
-            {
-                // Add finished number to argument list
-                if (numberString != "")
-                {
-                    finalArgumentList.append(numberString);
-                    numberString = "";
-                }
-            }
-            else
-            {
-                // Add character to number string
-                numberString += c;
-            }
-        }
-
-        // ASCII STRING MODE:
-        else // (insideString == true)
+        // Ascii string
+        if (argument.contains("'"))
         {
-            if (c == SINGLE_QUOTE && charCount != 0)
+            argument.replace("'", "");
+            foreach (QChar c, argument)
             {
-                // Finish string and enter number mode
-                insideString = false;
-                charCount = 0;
-            }
-            else
-            {
-                // Add character to argument list
                 finalArgumentList.append(CHAR_SYMBOL + c);
-                charCount += 1;
             }
         }
+        else // Value
+        {
+            finalArgumentList.append(argument);
+        }
+
+        totalMatchedLength += matchArgument.matchedLength();
+
+        index = arguments.indexOf(matchArgument, index + matchArgument.matchedLength());
     }
 
-    // Add remaining number
-    if (numberString != "")
-    {
-        finalArgumentList.append(numberString);
-        numberString = "";
-    }
-
-    if (insideString)
+    if (totalMatchedLength != arguments.length()) // If not fully matched, an error occurred
         throw invalidString;
 
     return finalArgumentList;

@@ -1,6 +1,7 @@
 #include "hidrahighlighter.h"
 
-
+#define DEBUG_INT(value) qDebug(QString::number(value).toStdString().c_str());
+#define DEBUG_STRING(value) qDebug(value.toStdString().c_str());
 
 //////////////////////////////////////////////////
 // HighlightRule methods
@@ -40,8 +41,11 @@ HidraHighlighter::HidraHighlighter(QTextDocument *parent) :
 
 }
 
-void HidraHighlighter::highlightBlock(const QString &text)
+void HidraHighlighter::highlightBlock(const QString &originalText)
 {
+    QString text = originalText;
+    text.replace("'''", "___"); // Remove literal quotes before applying rules
+
     foreach (HighlightRule highlightRule, highlightRulesList)
     {
         QRegExp regExp = highlightRule.getRegExp();
@@ -50,9 +54,9 @@ void HidraHighlighter::highlightBlock(const QString &text)
 
         while (index >= 0) // While there are occurrences of pattern
         {
-            int length = regExp.matchedLength();
-            setFormat(index, length, highlightRule.getFormat()); // Set text format
-            index = text.indexOf(regExp, index + length); // Search next occurrence
+            int length = regExp.cap(1).length();
+            setFormat(regExp.pos(1), length, highlightRule.getFormat()); // Set text format
+            index = text.indexOf(regExp, index + regExp.matchedLength()); // Search next occurrence
         }
     }
 }
@@ -104,8 +108,14 @@ void HidraHighlighter::initializeDirectivesHighlightRule()
 
 void HidraHighlighter::initializeCommentsHighlightRule()
 {
+    const QString CHARS_EXCEPT_QUOTE_SEMICOLON = "[^';]*";
+    const QString STRING = "(?:'[^']*')";
+    const QString COMMENT = "(;.*)$";
+
+    QString commentsPattern = "^(?:" + CHARS_EXCEPT_QUOTE_SEMICOLON + STRING + "?)*" + COMMENT;
+
     // Create new regular expression pattern
-    QString commentsPattern = ";.*";
+    //QString commentsPattern = "(;.*)";
 
     // Set corresponding format
     QTextCharFormat commentsFormat;
