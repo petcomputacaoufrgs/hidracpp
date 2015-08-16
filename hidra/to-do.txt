@@ -8,10 +8,8 @@ Código
 
 - Follow PC (center if outside view)
 - Tirar opção de visualizar área de dados (opção de unificar tabelas?)
-- Highlight de endereço apontado
 - "HLT atingido" para passo-a-passo.
-- Zerar registradores: zerar máquina?
-- Identificadores, verificar se trocaram
+- JN conta acessos desnecessários
 
 Código (baixa prioridade)
 
@@ -24,15 +22,7 @@ Código (baixa prioridade)
 
 Documentação
 
-- Quick reference, passar para HTML
-- Linkar interface com help
-- Relatar um problema (mailto:pet??)
 - Colocar site do hidra no about
-
-Erros
-
-- Hexadecimal deve ser hNÚMERO e não 0xNÚMERO [fixed]
-- String não aceita ;
 
 [ Versões futuras ]
 
