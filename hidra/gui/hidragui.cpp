@@ -433,13 +433,13 @@ QString HidraGui::getValueDescription(int value)
 
 void HidraGui::newFile()
 {
-    currentFilename = "";
-    modifiedFile = false;
 
     codeEditor->clear();
     machine->clear();
     initializeMachineInterface();
 
+    modifiedFile = false;
+    currentFilename = "";
     setWindowTitle("Hidra - PET Computação");
 }
 
