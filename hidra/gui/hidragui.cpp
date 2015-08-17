@@ -18,6 +18,7 @@ HidraGui::HidraGui(QWidget *parent) :
     connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
 
     currentFilename = "";
+    setWindowTitle("Hidra - PET Computação");
 
     buildSuccessful = true;
     showHexValues = false;
@@ -432,9 +433,14 @@ QString HidraGui::getValueDescription(int value)
 
 void HidraGui::newFile()
 {
+    currentFilename = "";
+    modifiedFile = false;
+
     codeEditor->clear();
     machine->clear();
     initializeMachineInterface();
+
+    setWindowTitle("Hidra - PET Computação");
 }
 
 void HidraGui::save(QString filename)
@@ -451,6 +457,10 @@ void HidraGui::save(QString filename)
     out << codeEditor->toPlainText();
 
     currentFilename = filename;
+
+    QFileInfo fileInfo(currentFilename);
+    setWindowTitle(fileInfo.fileName() + " - Hidra - PET Computação");
+
     modifiedFile = false;
     forceSaveAs = false;
 }
@@ -521,6 +531,9 @@ void HidraGui::load(QString filename)
         selectMachine("Ramses");
 
     currentFilename = filename;
+
+    QFileInfo fileInfo(currentFilename);
+    setWindowTitle(fileInfo.fileName() + " - Hidra - PET Computação");
 
     modifiedFile = false;
     forceSaveAs = false;
