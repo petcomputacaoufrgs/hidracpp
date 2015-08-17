@@ -324,8 +324,9 @@ void HidraGui::updateMemoryTable(bool force)
         {
             memoryModel.item(row, 2)->setText(QString::number(value, base).toUpper());
 
-            // Status bar tip on mouse hover
-            QString statusTip = getValueDescription(value);
+            // On mouse-over, sends value to statusbar (with "#" prefix)
+            // The information box then obtains the value and displays it in dec/hex/bin
+            QString statusTip = "#" + QString::number(machine->getMemoryValue(byteAddress));
             memoryModel.item(row, 2)->setStatusTip(statusTip);
         }
 
@@ -386,7 +387,7 @@ void HidraGui::updateRegisterWidgets()
     {
         int value = machine->getRegisterValue(i);
         registerWidgets.at(i)->setValue(value);
-        registerWidgets.at(i)->setStatusTip(getValueDescription(value));
+        registerWidgets.at(i)->setStatusTip("#" + QString::number(value));
     }
 }
 
@@ -412,11 +413,16 @@ void HidraGui::updateButtons()
         ui->pushButtonRun->setText("Rodar");
 }
 
-void HidraGui::updateInformation()
+void HidraGui::updateInformation() // Show counters
 {
     QString informationString = "Instruções: " + QString::number(machine->getInstructionCount()) + "  |  "
                               + "Acessos: "    + QString::number(machine->getAccessCount());
     ui->textInformation->setText(informationString);
+}
+
+void HidraGui::updateInformation(int value) // Show value in dec/hex/bin
+{
+    ui->textInformation->setText(getValueDescription(value));
 }
 
 QString HidraGui::getValueDescription(int value)
@@ -487,8 +493,8 @@ void HidraGui::saveChangesDialog(bool &cancelled)
 {
     cancelled = false;
 
-    // If modified, offer to save changes
-    if (modifiedFile)
+    // If modified and not empty, offer to save changes
+    if (modifiedFile && !codeEditor->document()->isEmpty())
     {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(this, "Hidra",
@@ -861,17 +867,17 @@ void HidraGui::on_actionAbout_triggered()
 
 void HidraGui::statusBarMessageChanged(QString newMessage)
 {
-    if (newMessage == " ") // Ignore self-change
+    if (newMessage == " ") // Ignore self-triggered change
         return;
 
-    if (newMessage.startsWith("Dec: ")) // Steal message from statusbar
+    if (newMessage.startsWith("#")) // Steal prefixed value from statusbar
     {
+        updateInformation(newMessage.remove("#").toInt()); // Display dec/hex/bin
         statusBar()->showMessage(" ");
-        ui->textInformation->setText(newMessage);
     }
     else
     {
-        updateInformation();
+        updateInformation(); // Restore information to counters
     }
 }
 

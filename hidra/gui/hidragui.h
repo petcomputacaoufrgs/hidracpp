@@ -108,7 +108,8 @@ private:
     void updateFlagWidgets();
     void updateCodeEditor();
     void updateButtons();
-    void updateInformation();
+    void updateInformation(); // Show counters
+    void updateInformation(int value); // Show value in dec/hex/bin
 
     QTimer backupTimer;
 
