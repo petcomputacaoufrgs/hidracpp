@@ -17,6 +17,8 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
     connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
 
+    connect(ui->statusBar, SIGNAL(messageChanged(QString)), this, SLOT(statusBarMessageChanged(QString)));
+
     currentFilename = "";
     setWindowTitle("Hidra - PET Computação");
 
@@ -160,7 +162,7 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryInstructions->setMouseTracking(true);
     ui->tableViewMemoryData->verticalHeader()->hide();
     ui->tableViewMemoryData->resizeRowsToContents();
-    ui->tableViewMemoryInstructions->resizeColumnsToContents();
+    ui->tableViewMemoryData->resizeColumnsToContents();
     ui->tableViewMemoryData->setMouseTracking(true);
 
     // Hide columns
@@ -384,7 +386,7 @@ void HidraGui::updateRegisterWidgets()
     {
         int value = machine->getRegisterValue(i);
         registerWidgets.at(i)->setValue(value);
-        //registerWidgets.at(i)->setStatusTip(getValueDescription(value));
+        registerWidgets.at(i)->setStatusTip(getValueDescription(value));
     }
 }
 
@@ -433,7 +435,6 @@ QString HidraGui::getValueDescription(int value)
 
 void HidraGui::newFile()
 {
-
     codeEditor->clear();
     machine->clear();
     initializeMachineInterface();
@@ -841,9 +842,7 @@ void HidraGui::closeEvent(QCloseEvent *event)
 
     // Delete backup file
     if (!cancelled)
-    {
         QFile::remove("__Recovery__.txt");
-    }
 
     // Accept/reject window close event
     if (!cancelled)
@@ -856,8 +855,24 @@ void HidraGui::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "Sobre o Hidra",
                        "<p align='center'>Hidra v0.9 (" + QString(__DATE__) + ")<br><br>"
-                       "Desenvolvido pelo grupo Pet Computação.<br><br>"
+                       "Desenvolvido pelo grupo PET Computação.<br><br>"
                        "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.</p>");
+}
+
+void HidraGui::statusBarMessageChanged(QString newMessage)
+{
+    if (newMessage == " ") // Ignore self-change
+        return;
+
+    if (newMessage.startsWith("Dec: ")) // Steal message from statusbar
+    {
+        statusBar()->showMessage(" ");
+        ui->textInformation->setText(newMessage);
+    }
+    else
+    {
+        updateInformation();
+    }
 }
 
 void HidraGui::on_actionQuickGuide_triggered()

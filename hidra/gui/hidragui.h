@@ -85,6 +85,8 @@ private slots:
     void on_actionReference_triggered();
     void on_actionAbout_triggered();
 
+    void statusBarMessageChanged(QString newMessage);
+
 private:
 
     void initializeMachineInterfaceComponents();
