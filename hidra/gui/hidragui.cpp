@@ -430,6 +430,13 @@ QString HidraGui::getValueDescription(int value)
 // Saving/loading
 //////////////////////////////////////////////////
 
+void HidraGui::newFile()
+{
+    codeEditor->clear();
+    machine->clear();
+    initializeMachineInterface();
+}
+
 void HidraGui::save(QString filename)
 {
     QFile file(filename);
@@ -463,6 +470,31 @@ void HidraGui::saveAs()
 
     if (!filename.isEmpty())
         save(filename); // Resets fileModified to false if successful
+}
+
+void HidraGui::saveChangesDialog(bool &cancelled)
+{
+    cancelled = false;
+
+    // If modified, offer to save changes
+    if (modifiedFile)
+    {
+        QMessageBox::StandardButton reply;
+        reply = QMessageBox::question(this, "Hidra",
+                                      "Deseja salvar as alterações feitas?",
+                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Cancel)
+            cancelled = true;
+
+        if (reply == QMessageBox::Yes)
+        {
+            ui->actionSave->trigger();
+
+            if (modifiedFile) // If modifiedFile is still true, user has cancelled
+                cancelled = true;
+        }
+    }
 }
 
 void HidraGui::load(QString filename)
@@ -640,34 +672,11 @@ void HidraGui::on_actionStep_triggered()
 void HidraGui::on_actionNew_triggered()
 {
     bool cancelled = false;
-
-    // Se o arquivo foi modificado, oferece para salvar alterações
-    if (modifiedFile)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Hidra",
-                                      "Deseja salvar as alterações feitas?",
-                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-
-        if (reply == QMessageBox::Cancel)
-            cancelled = true;
-
-        if (reply == QMessageBox::Yes)
-        {
-            ui->actionSave->trigger();
-
-            if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
-                cancelled = true;
-        }
-    }
+    saveChangesDialog(cancelled);
 
     // Se não foi cancelado, cria um novo arquivo
     if (!cancelled)
-    {
-        codeEditor->clear();
-        machine->clear();
-        initializeMachineInterface();
-    }
+        newFile();
 }
 
 void HidraGui::on_actionOpen_triggered()
@@ -675,21 +684,24 @@ void HidraGui::on_actionOpen_triggered()
     QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rad)";
     QString filename;
 
-    filename = QFileDialog::getOpenFileName(this,
-                                               "Abrir código-fonte", "",
-                                               allExtensions);
+    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", "", allExtensions);
 
     if (!filename.isEmpty())
-        load(filename);
+    {
+        bool cancelled;
+        saveChangesDialog(cancelled);
+
+        if (!cancelled)
+            load(filename);
+    }
 }
 
 void HidraGui::on_actionSave_triggered()
 {
-    if(currentFilename == "" || forceSaveAs) {
+    if(currentFilename == "" || forceSaveAs)
         saveAs();
-    } else {
+    else
         save(currentFilename);
-    }
 }
 
 void HidraGui::on_actionSaveAs_triggered()
@@ -810,35 +822,16 @@ void HidraGui::on_actionClose_triggered()
 
 void HidraGui::closeEvent(QCloseEvent *event)
 {
-    bool cancelled = false;
+    bool cancelled;
+    saveChangesDialog(cancelled);
 
-    // Se o arquivo foi modificado, oferece para salvar alterações
-    if (modifiedFile)
-    {
-        QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Hidra",
-                                      "Deseja salvar as alterações feitas?",
-                                      QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
-
-        if (reply == QMessageBox::Cancel)
-            cancelled = true;
-
-        if (reply == QMessageBox::Yes)
-        {
-            ui->actionSave->trigger();
-
-            if (modifiedFile) // Se o arquivo não foi salvo no diálogo (ainda está modificado), cancela
-                cancelled = true;
-        }
-    }
-
-    // Exclui arquivo de backup
+    // Delete backup file
     if (!cancelled)
     {
         QFile::remove("__Recovery__.txt");
     }
 
-    // Aceita ou rejeita o evento que fecha a janela
+    // Accept/reject window close event
     if (!cancelled)
         event->accept();
     else

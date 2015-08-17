@@ -34,8 +34,10 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *event);
 
+    void newFile();
     void save(QString filename);
     void saveAs();
+    void saveChangesDialog(bool &cancelled);
     void load(QString filename);
 
 public slots:
