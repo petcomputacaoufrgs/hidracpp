@@ -383,7 +383,7 @@ void HidraGui::updateRegisterWidgets()
     {
         int value = machine->getRegisterValue(i);
         registerWidgets.at(i)->setValue(value);
-        registerWidgets.at(i)->setStatusTip(getValueDescription(value));
+        //registerWidgets.at(i)->setStatusTip(getValueDescription(value));
     }
 }
 
@@ -779,6 +779,7 @@ void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
 
 void HidraGui::on_actionResetRegisters_triggered()
 {
+    machine->setRunning(false);
     machine->clearRegisters();
     machine->clearFlags();
     machine->clearCounters();
@@ -841,9 +842,9 @@ void HidraGui::closeEvent(QCloseEvent *event)
 void HidraGui::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "Sobre o Hidra",
-                       "<p align='center'>Hidra (Versão " + QString(__DATE__) + ")<br><br>"
+                       "<p align='center'>Hidra v0.9 (" + QString(__DATE__) + ")<br><br>"
                        "Desenvolvido pelo grupo Pet Computação.<br><br>"
-                       "Máquinas teóricas criadas pelos professores<br>Dr. Raul Fernando Weber e Dra. Taisy Silva Weber.</p>");
+                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.</p>");
 }
 
 void HidraGui::on_actionQuickGuide_triggered()
