@@ -22,7 +22,7 @@
 *.lib
 
 # Executables
-*.exe
+# *.exe
 *.out
 *.app
 hidra-build*/
