@@ -1,10 +1,10 @@
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Arquivo para teste das instruções da
-;; Máquina Ramses no Hidra
+ï»¿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Arquivo para teste das instruÃ§Ãµes da
+;; MÃ¡quina Ramses no Hidra
 ;;
 ;; RESULTADO ESPERADO:
 ;; A partir de 200, cada teste deve escrever o
-;; valor 255 (0xFF) na memória.
+;; valor 255 (0xFF) na memÃ³ria.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -55,26 +55,26 @@ JumpJSR:
 TestJSR:    DB    0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test01: LDR, STR, endereçamento direto, registrador RA
-;; 2 Instruções, 6 Acessos
+;; Test01: LDR, STR, endereÃ§amento direto, registrador RA
+;; 2 InstruÃ§Ãµes, 6 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     ORG    0
     
-    LDR    A    200    ; (Endereço de Test00)
+    LDR    A    200    ; (EndereÃ§o de Test00)
     STR    A    201    ; Copia o valOR    A 255 de Test00 para Test01
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test02: Labels
-;; 2 Instruções, 6 Acessos / Total: 4 Instruções, 12 Acessos
+;; 2 InstruÃ§Ãµes, 6 Acessos / Total: 4 InstruÃ§Ãµes, 12 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    Val255
     STR    A    Test02    ; Copia o valOR    A 255 para Test02
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test03: Endereçamento indireto, registrador RB
-;; 3 Instruções, 10 Acessos / Total: 7 Instruções, 22 Acessos
+;; Test03: EndereÃ§amento indireto, registrador RB
+;; 3 InstruÃ§Ãµes, 10 Acessos / Total: 7 InstruÃ§Ãµes, 22 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    B    Val000
@@ -82,8 +82,8 @@ TestJSR:    DB    0
     STR    B    Test03
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test04: Endereçamento imediato
-;; 3 Instruções, 8 Acessos / Total: 10 Instruções, 30 Acessos
+;; Test04: EndereÃ§amento imediato
+;; 3 InstruÃ§Ãµes, 8 Acessos / Total: 10 InstruÃ§Ãµes, 30 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    B    Val000
@@ -91,17 +91,17 @@ TestJSR:    DB    0
     STR    B    Test04
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test05: Endereçamento indexado, registrador RX
-;; 3 Instruções, 7 Acessos / Total: 13 Instruções, 37 Acessos
+;; Test05: EndereÃ§amento indexado, registrador RX
+;; 3 InstruÃ§Ãµes, 7 Acessos / Total: 13 InstruÃ§Ãµes, 37 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    X    #200
     LDR    B    #255
-    STR    B    5,X    ; Guarda 255 na posição 200+5 (posição do Test05)
+    STR    B    5,X    ; Guarda 255 na posiÃ§Ã£o 200+5 (posiÃ§Ã£o do Test05)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test06: ADD (com overflow)
-;; 4 Instruções, 9 Acessos / Total: 17 Instruções, 46 Acessos
+;; 4 InstruÃ§Ãµes, 9 Acessos / Total: 17 InstruÃ§Ãµes, 46 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #224
@@ -111,7 +111,7 @@ TestJSR:    DB    0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test07: OR
-;; 4 Instruções, 9 Acessos / Total: 21 Instruções, 55 Acessos
+;; 4 InstruÃ§Ãµes, 9 Acessos / Total: 21 InstruÃ§Ãµes, 55 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #7    ; 7 = 0b00000111
@@ -121,7 +121,7 @@ TestJSR:    DB    0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test08: AND
-;; 4 Instruções, 9 Acessos / Total: 25 Instruções, 64 Acessos
+;; 4 InstruÃ§Ãµes, 9 Acessos / Total: 25 InstruÃ§Ãµes, 64 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #7    ; 7 = 0b00000111
@@ -131,7 +131,7 @@ TestJSR:    DB    0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test09: NOT
-;; 4 Instruções, 8 Acessos / Total: 29 Instruções, 72 Acessos
+;; 4 InstruÃ§Ãµes, 8 Acessos / Total: 29 InstruÃ§Ãµes, 72 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #7    ; 7 = 0b00000111
@@ -141,7 +141,7 @@ TestJSR:    DB    0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test10: SUB (com underflow)
-;; 3 Instruções, 7 Acessos / Total: 32 Instruções, 79 Acessos
+;; 3 InstruÃ§Ãµes, 7 Acessos / Total: 32 InstruÃ§Ãµes, 79 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #248
@@ -150,26 +150,26 @@ TestJSR:    DB    0
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test11: NOP, JMP
-;; 4 Instruções, 8 Acessos / Total: 36 Instruções, 87 Acessos
+;; 4 InstruÃ§Ãµes, 8 Acessos / Total: 36 InstruÃ§Ãµes, 87 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     NOP
     LDR    A    #255
-    JMP    JumpJMP    ; Pula próxima instrução
+    JMP    JumpJMP    ; Pula prÃ³xima instruÃ§Ã£o
     LDR    A    #7    ; Nunca executada
 
 JumpJMP:    STR    A    Test11
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test12: JN
-;; 6 Instruções, 13 Acessos / Total: 42 Instruções, 100/99 Acessos
+;; 6 InstruÃ§Ãµes, 13 Acessos / Total: 42 InstruÃ§Ãµes, 100/99 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #7
     JN    JumpJN1    ; Jump ignorado
     ADD    A    #121    ; 7 + 121 = 128 (negativo)
 
-JumpJN1:    JN    JumpJN2    ; Pula próxima instrução
+JumpJN1:    JN    JumpJN2    ; Pula prÃ³xima instruÃ§Ã£o
     LDR    A    #7    ; Nunca executada
 
 JumpJN2:    ADD    A    #127    ; 128 + 127 = 255
@@ -177,14 +177,14 @@ JumpJN2:    ADD    A    #127    ; 128 + 127 = 255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test13: JZ
-;; 6 Instruções, 13 Acessos / Total: 48 Instruções, 113/111 Acessos
+;; 6 InstruÃ§Ãµes, 13 Acessos / Total: 48 InstruÃ§Ãµes, 113/111 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #7
     JZ    JumpJZ1    ; Jump ignorado
     ADD    A    #249    ; 7 + 249 = 0 (overflow)
 
-JumpJZ1: JZ    JumpJZ2    ; Pula próxima instrução
+JumpJZ1: JZ    JumpJZ2    ; Pula prÃ³xima instruÃ§Ã£o
     LDR    A    #7    ; Nunca executada
 
 JumpJZ2:    ADD    A    #255    ; 0 + 255 = 255
@@ -192,7 +192,7 @@ JumpJZ2:    ADD    A    #255    ; 0 + 255 = 255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test14: JC
-;; 7 Instruções, 15 Acessos / Total: 55 Instruções, 128/125 Acessos
+;; 7 InstruÃ§Ãµes, 15 Acessos / Total: 55 InstruÃ§Ãµes, 128/125 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #127
@@ -200,7 +200,7 @@ JumpJZ2:    ADD    A    #255    ; 0 + 255 = 255
     JC    JumpJC1    ; Jump ignorado
     ADD    A    #128    ; 255 + 128 = 127 (carry)
 
-JumpJC1:    JC    JumpJC2    ; Pula próxima instrução
+JumpJC1:    JC    JumpJC2    ; Pula prÃ³xima instruÃ§Ã£o
     LDR    A    #28    ; Nunca executada
 
 JumpJC2:    ADD    A    #128    ; 127 + 128 = 255
@@ -208,7 +208,7 @@ JumpJC2:    ADD    A    #128    ; 127 + 128 = 255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test15: JSR
-;; 7 Instruções, 19 Acessos / Total: 62 Instruções, 147/144 Acessos
+;; 7 InstruÃ§Ãµes, 19 Acessos / Total: 62 InstruÃ§Ãµes, 147/144 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     JSR    JumpJSR
@@ -217,7 +217,7 @@ JumpJC2:    ADD    A    #128    ; 127 + 128 = 255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test16: NEG
-;; 8 Instruções, 14 Acessos / Total: 70 Instruções, 161/158 Acessos
+;; 8 InstruÃ§Ãµes, 14 Acessos / Total: 70 InstruÃ§Ãµes, 161/158 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #128
@@ -231,7 +231,7 @@ JumpJC2:    ADD    A    #128    ; 127 + 128 = 255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test17: SHR
-;; 7 Instruções, 13 Acessos / Total: 77 Instruções, 173/170 Acessos
+;; 7 InstruÃ§Ãµes, 13 Acessos / Total: 77 InstruÃ§Ãµes, 173/170 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #14
@@ -239,7 +239,7 @@ JumpJC2:    ADD    A    #128    ; 127 + 128 = 255
     JC    JumpSHR1    ; Jump ignorado
     SHR    A        ; shr(7) = 3 (carry = 1)
 
-JumpSHR1: JC    JumpSHR2    ; Pula próxima instrução
+JumpSHR1: JC    JumpSHR2    ; Pula prÃ³xima instruÃ§Ã£o
     LDR    A    #28    ; Nunca executada
 
 JumpSHR2: ADD    A    #252    ; 3 + 252 = 255
@@ -247,7 +247,7 @@ JumpSHR2: ADD    A    #252    ; 3 + 252 = 255
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Test18: HLT
-;; 3 Instruções, 6 Acessos / Total: 80 Instruções, 179/176 Acessos
+;; 3 InstruÃ§Ãµes, 6 Acessos / Total: 80 InstruÃ§Ãµes, 179/176 Acessos
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
     LDR    A    #255
