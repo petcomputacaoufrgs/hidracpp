@@ -1,7 +1,0 @@
-<RCC>
-    <qresource prefix="/">
-        <file>resources/led_off.png</file>
-        <file>resources/led_on.png</file>
-        <file>resources/cesar.jpg</file>
-    </qresource>
-</RCC>

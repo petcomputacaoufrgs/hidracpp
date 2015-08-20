@@ -52,8 +52,7 @@ FORMS    += \
     gui/hidragui.ui \
     gui/registerwidget.ui
 
-RESOURCES += \
-    res.qrc
+RESOURCES +=
 
 OTHER_FILES += \
     to-do.txt
