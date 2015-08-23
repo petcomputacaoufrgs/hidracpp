@@ -13,6 +13,7 @@ Código
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
 - StatusTip para comandos (ver guia rápido)
 - Licença e site no About
+- Testar upper/lowercase [testado invertendo case]
 
 
 

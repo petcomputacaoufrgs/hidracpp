@@ -454,7 +454,7 @@ void Machine::assemble(QString sourceCode)
                     if (instruction->getNumBytes() == 2)
                         addressCorrespondingLine[(PC->getValue() + 1) & 0xFF] = lineNumber;
 
-                    buildInstruction(mnemonic, arguments.toLower());
+                    buildInstruction(mnemonic, arguments);
                 }
                 else // Directive
                 {
@@ -624,6 +624,9 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
     int numberOfArguments = instruction->getArguments().size();
+    AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT;
+
+    static QRegExp matchChar("'.'");
 
     int registerBitCode = 0b00000000;
     int addressingModeBitCode = 0b00000000;
@@ -644,7 +647,6 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     // If last argument is an address:
     if (numberOfArguments > 0 && instruction->getArguments().last() == "a")
     {
-        AddressingMode::AddressingModeCode addressingModeCode;
         extractArgumentAddressingModeCode(argumentList.last(), addressingModeCode); // Removes addressing mode from argument
         addressingModeBitCode = getAddressingModeBitCode(addressingModeCode);
     }
@@ -656,16 +658,26 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     // If instruction has two bytes, write second byte:
     if (instruction->getNumBytes() > 1)
     {
+        QString argument = argumentList.last();
+
         // Convert possible label to number:
-        if (labelPCMap.contains(argumentList.last()))
-            argumentList.last() = QString::number(labelPCMap.value(argumentList.last()));
+        if (labelPCMap.contains(argument.toLower()))
+            argument = QString::number(labelPCMap.value(argument.toLower()));
+
+        // Convert literal quote back
+        if (argument == QUOTE_SYMBOL)
+            argument = "'''";
+
+        // If immediate addressing mode, check for char between single quotes
+        if (addressingModeCode == AddressingMode::IMMEDIATE && matchChar.exactMatch(argument))
+            argument = QString::number(argument.at(1).toLatin1());
 
         // Check if valid address/value:
-        if (!isValidAddress(argumentList.last()))
+        if (!isValidAddress(argument)) // TODO: Distinguish address/value sizes
             throw invalidValue;
 
         // Write address argument:
-        assemblerMemory[PC->getValue()]->setValue(stringToInt(argumentList.last()));
+        assemblerMemory[PC->getValue()]->setValue(stringToInt(argument));
         PC->incrementValue();
     }
 }
@@ -844,6 +856,7 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
     foreach (AddressingMode *addressingMode, addressingModes)
     {
         QRegExp matchAddressingMode = addressingMode->getAssemblyRegExp();
+        matchAddressingMode.setCaseSensitivity(Qt::CaseInsensitive);
 
         if (matchAddressingMode.exactMatch(argument))
         {
