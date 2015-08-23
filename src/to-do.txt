@@ -12,7 +12,6 @@ Código
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
 - StatusTip para comandos (ver guia rápido)
-- Mostrar valor do byte em informações
 - Licença e site no About
 
 

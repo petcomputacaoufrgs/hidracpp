@@ -362,7 +362,7 @@ void HidraGui::updateMemoryTable(bool force)
         else if (sourceAndMemoryInSync && row == intermediateAddress)
             rowColor = QColor(255, 228, 148); // Orange
         else if (sourceAndMemoryInSync && currentLine == machine->getAddressCorrespondingLine(row) && currentLine >= 0)
-            rowColor = QColor(255, 244,  64); // Yellow
+            rowColor = QColor(255, 244, 128); // Yellow
         else
             rowColor = Qt::white;
 

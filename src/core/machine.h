@@ -199,7 +199,7 @@ protected:
 
     QString identifier;
     QVector<Register*> registers;
-    Register* PC;
+    Register *PC, *SP;
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
