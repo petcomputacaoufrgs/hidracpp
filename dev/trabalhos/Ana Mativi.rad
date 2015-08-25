@@ -1,0 +1,112 @@
+ORG 184
+SubX:		DB	0
+SomaY:		DB	0
+Flag:		DB	0
+ParcialMSB:	DB	0
+ParcialLSB:	DB	0
+NumVertices:	DB	0
+VetPontos:	DAB	[64]
+ORG 254
+AreaMSB:	DB	0
+AreaLSB:	DB	0
+
+ORG 0					;Começo do programa, zera as variáveis nescessárias
+		LDR X	#0
+		STR X	AreaMSB
+		STR X	AreaLSB	
+		STR B	ParcialMSB
+Inicio:		LDR B 	190,X		;Carrega os valores de X e realiza a subtração
+		SUB B	192,X
+		JZ	EhZero
+		JSR	NegaNum
+		STR B	SubX
+StaX:		LDR A	191,X		;Soma Y e salva
+		ADD A	193,X
+		STR A	SomaY
+		JZ	EhZero
+Mult:		LDR A	SomaY		;Começo do laço multiplicação, aqui usa o registrador B como contador dando LDR no SomaX
+		STR A	ParcialLSB
+Mult2:		SUB B	#1		;Laço 2, executando a multiplicação em 16 bits
+		STR B 	SubX
+		JZ	SomaAreas
+		ADD A	SomaY
+		JC 	SCMult
+Mult3:		LDR B	SubX
+		JMP	Mult2
+SomaAreas:	STR A 	ParcialLSB	;Usa a Flag para sinalizar quando deve ser negado
+		LDR B	ParcialLSB	;Caso a Flag seja 0 o numero é positivo, então pode prosseguir sem fazer a troca de sinal em 16 bits
+		LDR A	Flag
+		JZ	Positivo
+		LDR A	ParcialMSB
+		NOT A
+		STR A	ParcialMSB
+		NEG B	
+		LDR A	#0
+		STR A	Flag
+Positivo:	ADD B	AreaLSB		;Quando esta tudo correto, soma
+		STR B	AreaLSB
+		JSR	VerifC	
+		LDR A	AreaMSB
+		ADD A	ParcialMSB
+		STR A	AreaMSB
+EhZero:		ADD X	#2		;Este indice serve para pular quando Xo - Xe é zero, aqui é onde incrementa RX para continuar percorrendo o vetor
+		LDR B	NumVertices
+		SUB B	#1
+		STR B	NumVertices	;Decrementa e guarda o número de vértices, para que tenha fim
+		JZ	Final		;Na ultima execução vai para o final
+		LDR A	#0
+		STR A	ParcialMSB	
+		SUB B	#1
+		JZ	InicioPriUlt	;Na penultima execução passa para a parte onde é feita SubX e SomaY entre o último e o primeiro par de pontos
+		JMP	Inicio
+Final:		LDR B	AreaLSB
+		LDR A	AreaMSB
+		JN 	Nega
+		JMP	Shift
+
+Nega:		NOT A
+		NEG B
+Shift:		SHR B			;Divide por 2 o resultado em 16 bits
+		STR B	AreaLSB
+		JC 	Arredonda
+Volta: 		SHR A
+		STR A	AreaMSB
+		JC	Ajusta	
+Fim:		HLT
+	
+NegaNum:	NOP			;Nega SubX quando Xo - Xe é negativo
+		JN  	NegaNum2
+		JMP	Neganum,I
+NegaNum2:	NEG B
+		STR B	SubX
+		LDR A	Flag
+		ADD A	#1
+		STR A	Flag
+		JMP	NegaNum,I
+Ajusta:		ADD B	#128		;Ajusta o valor da AreaLSB quando é nescessário
+		STR B	AreaLSB
+		HLT
+VerifC:		NOP
+		JC	SomaMSB
+		JMP	VerifC, I
+SomaMSB:	LDR A	AreaMSB
+		ADD A	#1
+		STR A	AreaMSB
+		JMP	VerifC, I
+Arredonda:	ADD B	#1		;Caso precisa, arrendonda o numero que sofreu SHR
+		STR B	AreaLSB
+		JMP	Volta
+SCMult:		LDR B	ParcialMSB
+		ADD B	#1
+		STR B 	ParcialMSB
+		JMP 	Mult3
+InicioPriUlt:	LDR B 	190,X		;Essa parte do código serve para o ultimo caso, o código é o mesmo, com a leitura do vetor alterada (último e primeiro ponto)
+		SUB B	190
+		JZ	EhZero
+		JSR	NegaNum
+		STR A	SubX
+		JMP	StaXPriUlt
+StaXPriUlt: 	LDR A	191,X
+		ADD A	191
+		STR A	SomaY
+		JMP	Mult

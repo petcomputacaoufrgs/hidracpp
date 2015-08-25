@@ -1,0 +1,134 @@
+ORG 188
+
+AUX:	DB	0 ;; variável auxiliar
+linha:	DB	0
+coluna:	DB	0
+dir:	DB	0
+m:	DAB	[64]
+
+
+ORG 0
+
+;; Carrega coordenadas para index X
+	LDR X	linha
+	ADD X	linha
+	STR X	aux
+	ADD X	aux
+	STR X	aux
+	ADD X	aux
+	ADD X	coluna
+
+	LDR B	dir
+	JSR	atualizaDir
+
+loop:
+	LDR A	m,X
+	JZ	andar
+	JN	erro
+
+
+;; Mudar direçao
+
+	LDR B	m,X	;; atualizando direçao
+	STR B	dir
+	JSR	atualizaDir
+	NOT A	;; marca desvio para detecçao de laços
+	STR A	m,X
+
+
+andar:
+	STR X	aux
+	LDR A	aux
+
+
+dirJmp:
+	JMP	0	;; Jump vai ser atualizado na subrotina "atualizaDir"
+
+cima:
+	AND A	#56
+	JZ	sair	;; saiu pelo limite superior
+	SUB X	#8
+	JMP	loop
+direita:
+	AND A	#7
+	SUB A	#7
+	JZ	sair	;; saiu pelo limite direito
+	ADD X	#1
+	JMP	loop
+baixo:
+	AND A	#56
+	SUB A	#56
+	JZ	sair	;; saiu pelo limite superior
+	ADD X	#8
+	JMP	loop
+esquerda:
+	AND A	#7
+	JZ	sair	;; saiu pelo limite direito
+	SUB X	#1
+	JMP	loop
+
+
+sair:
+;; Atualiza coordenadas de saída
+	STR X	aux
+	AND X	#7
+	STR X	coluna
+	
+	LDR X	aux
+	SHR X		;; divide X por 8
+	SHR X	
+	SHR X	
+	STR X	linha;
+HLT
+
+
+erro:
+;; Erro: laço detectado
+	LDR A	#255
+	STR A	linha
+	STR A	coluna
+	STR A	dir
+	HLT
+
+;; inicio da subrotina atualizaDir --
+
+atualizaDir:
+	NOP
+	SUB B	#1
+	JZ	atCima
+	SUB B	#1
+	JZ	atDireita
+	SUB B	#1
+	JZ	atBaixo		;; Descobre pra que lado deve ir
+
+atEsquerda:
+	LDR B	eEsquerda
+	STR B	dirJmp+1
+	JMP atualizaDir,I	;; atualiza o jump para a direçao atual
+
+atCima:
+	LDR B	eCima
+	STR B	dirJmp+1
+	JMP atualizaDir,I	;; atualiza o jump para a direçao atual
+
+atDireita:
+	LDR B	eDireita
+	STR B	dirJmp+1
+	JMP atualizaDir,I	;; atualiza o jump para a direçao atual
+
+atBaixo:
+	LDR B	eBaixo
+	STR B	dirJmp+1
+	JMP atualizaDir,I	;; atualiza o jump para a direçao atual
+
+;; fim da subrotina atualizaDir --
+
+
+
+;; Memória não oficial (coisa feia)
+
+;; endereço dos rotulos
+eCima:     DB cima
+eDireita:  DB direita
+eBaixo:    DB baixo
+eEsquerda: DB esquerda

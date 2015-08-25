@@ -1,0 +1,71 @@
+	LDR X #0		;Zera X para contagem do índice da palavra e teste se a = 0, se for vai para azero.
+	LDR A var_a
+	JZ azero
+
+loop:
+	LDR A palavra,X		;Carrega a letra com índice X e verifica se é 0, se for vai para o fim senão diminui 65 e guarda em uma variável auxiliar para ser usada na multiplicação
+	JZ fim
+	SUB A #65
+	STR A aux
+	LDR B var_a
+
+loop_mult:
+	SUB B #1		;A soma se repete 5 vezes antes de testar se o número é negativo para fins de otimização
+	JZ add_b		;Isso ocorre pois nos casos mais extremos a soma atinge um número negativo apenas depois de, no mínimo, 5 iterações
+	ADD A aux
+	SUB B #1
+	JZ add_b
+	ADD A aux
+	SUB B #1
+	JZ add_b
+	ADD A aux
+	SUB B #1
+	JZ add_b
+	ADD A aux
+	SUB B #1
+	JZ add_b
+	ADD A aux
+	JN sub_104
+	JMP loop_mult
+
+sub_104:
+	SUB A #104		;Subtrai 104 pois é o maior número multiplo de 26 menor que 128
+	JMP loop_mult
+
+sub_104_mod:
+	SUB A #104		;Não foi feita uma subrotina aqui por questão de otimização
+	JMP mod
+
+add_b:
+	ADD A var_b		;Adiciona a variável b e faz mais um teste se passou de 127
+	JN sub_104_mod
+
+mod:
+	SUB A #26		;Subtrai 26 até ser negativo, isso significa que o número anterior a última subtração é o módulo
+	JN termina
+	JMP mod
+
+termina:
+	ADD A #91		;Soma novamente o 26 para chegar ao módulo e soma 65 para converter em ASCII e volta para o início do loop
+	STR A palavra,X
+	ADD X #1
+	JMP loop
+
+azero:
+	LDR A palavra,X		;Caso especial em que a = 0, como (X*0 + b) = b, basta colocar b no lugar da palavra, e como b já está entre 0 e 25 não é necessário fazer o módulo
+	JZ fim
+	LDR A var_b
+	ADD A #65
+	STR A palavra,X
+	ADD X #1
+	JMP azero
+
+fim:
+	HLT
+
+ORG 215
+
+aux:		DB	0
+var_a:		DB	1
+var_b:		DB	0
+palavra:	DAB	'INFORMATICA'
