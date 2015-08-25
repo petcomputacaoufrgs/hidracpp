@@ -73,8 +73,10 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     switch (instructionCode)
     {
-    case Instruction::NOP:
-        break;
+
+    //////////////////////////////////////////////////
+    // Load/Store
+    //////////////////////////////////////////////////
 
     case Instruction::LDR:
         result = memoryGetOperandValue(immediateAddress, addressingModeCode);
@@ -86,6 +88,12 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         result = getRegisterValue(registerName);
         memoryWrite(memoryGetOperandAddress(immediateAddress, addressingModeCode), result);
         break;
+
+
+
+    //////////////////////////////////////////////////
+    // Arithmetic and logic
+    //////////////////////////////////////////////////
 
     case Instruction::ADD:
         value1 = getRegisterValue(registerName);
@@ -133,6 +141,52 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         setBorrowOrCarry(value1 < value2);
         setOverflow(toSigned(value1) - toSigned(value2) != toSigned(result));
         break;
+
+    case Instruction::NEG:
+        value1 = getRegisterValue(registerName);
+        result = (-value1) & 0xFF;
+
+        setRegisterValue(registerName, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::SHR:
+        value1 = getRegisterValue(registerName);
+        result = (value1 >> 1) & 0xFF;
+
+        setRegisterValue(registerName, result);
+        setCarry(value1 & 0x01);
+        break;
+
+    case Instruction::SHL:
+        value1 = getRegisterValue(registerName);
+        result = (value1 << 1) & 0xFF;
+
+        setRegisterValue(registerName, result);
+        setCarry((value1 & 0x80) ? 1 : 0);
+        break;
+
+    case Instruction::ROR:
+        value1 = getRegisterValue(registerName);
+        result = ((value1 >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
+
+        setRegisterValue(registerName, result);
+        setCarry(value1 & 0x01);
+        break;
+
+    case Instruction::ROL:
+        value1 = getRegisterValue(registerName);
+        result = ((value1 << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
+
+        setRegisterValue(registerName, result);
+        setCarry((value1 & 0x80) ? 1 : 0);
+        break;
+
+
+
+    //////////////////////////////////////////////////
+    // Jumps
+    //////////////////////////////////////////////////
 
     case Instruction::JMP:
         if (!isImmediate) // Invalidate immediate jumps
@@ -198,51 +252,17 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         }
         break;
 
-    case Instruction::NEG:
-        value1 = getRegisterValue(registerName);
-        result = (-value1) & 0xFF;
 
-        setRegisterValue(registerName, result);
-        updateFlags(result);
-        break;
 
-    case Instruction::SHR:
-        value1 = getRegisterValue(registerName);
-        result = (value1 >> 1) & 0xFF;
-
-        setRegisterValue(registerName, result);
-        setCarry(value1 & 0x01);
-        break;
-
-    case Instruction::SHL:
-        value1 = getRegisterValue(registerName);
-        result = (value1 << 1) & 0xFF;
-
-        setRegisterValue(registerName, result);
-        setCarry((value1 & 0x80) ? 1 : 0);
-        break;
-
-    case Instruction::ROR:
-        value1 = getRegisterValue(registerName);
-        result = ((value1 >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
-
-        setRegisterValue(registerName, result);
-        setCarry(value1 & 0x01);
-        break;
-
-    case Instruction::ROL:
-        value1 = getRegisterValue(registerName);
-        result = ((value1 << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
-
-        setRegisterValue(registerName, result);
-        setCarry((value1 & 0x80) ? 1 : 0);
-        break;
+    //////////////////////////////////////////////////
+    // Halt
+    //////////////////////////////////////////////////
 
     case Instruction::HLT:
         setRunning(false);
         break;
 
-    default:
+    default: // NOP
         break;
     }
 
