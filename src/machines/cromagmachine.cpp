@@ -2,7 +2,7 @@
 
 CromagMachine::CromagMachine()
 {
-    identifier = "CMG";
+    identifier = "CMG"; // TODO: Confirmar c/Weber
 
     //////////////////////////////////////////////////
     // Initialize registers
@@ -48,7 +48,7 @@ CromagMachine::CromagMachine()
     instructions.append(new Instruction(2, "1001....", Instruction::JN,  "jn a"));
     instructions.append(new Instruction(2, "1010....", Instruction::JZ,  "jz a"));
     instructions.append(new Instruction(2, "1011....", Instruction::JC,  "jc a"));
-    instructions.append(new Instruction(1, "1110..00", Instruction::SHR, "shr"));
+    instructions.append(new Instruction(1, "1110....", Instruction::SHR, "shr"));
     instructions.append(new Instruction(1, "1111....", Instruction::HLT, "hlt"));
 
 

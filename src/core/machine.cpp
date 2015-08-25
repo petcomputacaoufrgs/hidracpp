@@ -1424,12 +1424,15 @@ void Machine::generateDescriptions()
     descriptions["ldr r a"] = "Carrega o valor no endereço 'a' para o registrador 'r'.";
     descriptions["add r a"] = "Adiciona o valor no endereço 'a' ao registrador 'r'.";
     descriptions["or r a"]  = "Realiza um 'ou' lógico entre cada bit de 'a' e o bit correspondente no registrador 'r'.";
-    descriptions["and r a"] = "Realiza um 'ou' lógico entre cada bit de 'a' e o bit correspondente no registrador 'r'.";
+    descriptions["and r a"] = "Realiza um 'e' lógico entre cada bit de 'a' e o bit correspondente no registrador 'r'.";
     descriptions["not r"]   = "Inverte (complementa) o valor dos bits do registrador 'r'.";
     descriptions["sub r a"] = "Subtrai o valor no endereço 'a' do registrador 'r'.";
     descriptions["jsr a"]   = "Desvia para subrotina, armazenando o valor atual de PC em 'a' e desviando a execução para o endereço 'a' + 1.";
     descriptions["neg r"]   = "Troca o sinal do valor em complemento de 2 do registrador 'r' de positivo para negativo e vice-versa.";
     descriptions["shr r"]   = "Realiza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
+
+    // Pitagoras
+    descriptions["jd a"] = "Se a flag Z estiver desativada (acumulador diferente de zero), desvia a execução para o endereço 'a'.";
 }
 
 QString Machine::getDescription(QString assemblyFormat)

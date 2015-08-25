@@ -27,7 +27,7 @@ HidraGui::HidraGui(QWidget *parent) :
     previousPCValue = 0;
 
     sourceAndMemoryInSync = false;
-    machine = NULL;
+    machine = nullptr;
 
     ui->layoutRegisters->setAlignment(Qt::AlignTop);
     ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
@@ -75,21 +75,24 @@ void HidraGui::selectMachine(QString machineName)
 {
     if (currentMachineName != machineName)
     {
-        delete machine;
+        Machine *previousMachine = machine;
 
-        if (machineName == "Ahmes")
+        if (machineName == "Neander")
+            machine = new NeanderMachine();
+        else if (machineName == "Ahmes")
             machine = new AhmesMachine();
         else if (machineName == "Cromag")
             machine = new CromagMachine();
-        else if (machineName == "Pitagors")
-            machine = new PitagorasMachine();
         else if (machineName == "Queops")
             machine = new QueopsMachine();
+        else if (machineName == "Pitagoras")
+            machine = new PitagorasMachine();
         else if (machineName == "Ramses")
             machine = new RamsesMachine();
         else
-            machine = new NeanderMachine(); // Default to Neander
+            return; // Error
 
+        delete previousMachine;
         connect(machine, SIGNAL(buildErrorDetected(QString)), this, SLOT(addError(QString)));
 
         ui->comboBoxMachine->setCurrentText(machineName);

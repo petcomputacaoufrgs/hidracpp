@@ -2,7 +2,7 @@
 
 PitagorasMachine::PitagorasMachine()
 {
-    identifier = "PTG";
+    identifier = "PTG"; // TODO: Confirmar c/Weber
 
     //////////////////////////////////////////////////
     // Initialize registers
@@ -37,25 +37,25 @@ PitagorasMachine::PitagorasMachine()
     // Initialize instructions
     //////////////////////////////////////////////////
 
-    instructions.append(new Instruction(1, "0000....", Instruction::NOP, "nop"));
-    instructions.append(new Instruction(2, "0001....", Instruction::STR, "sta a"));
-    instructions.append(new Instruction(2, "0010....", Instruction::LDR, "lda a"));
-    instructions.append(new Instruction(2, "0011....", Instruction::ADD, "add a"));
-    instructions.append(new Instruction(2, "0100....", Instruction::OR,  "or a"));
-    instructions.append(new Instruction(2, "0101....", Instruction::AND, "and a"));
-    instructions.append(new Instruction(1, "0110....", Instruction::NOT, "not"));
-    instructions.append(new Instruction(2, "0111....", Instruction::SUB, "sub a"));
-    instructions.append(new Instruction(2, "1000....", Instruction::JMP, "jmp a"));
-    instructions.append(new Instruction(2, "100100..", Instruction::JN,  "jn a"));
-    instructions.append(new Instruction(2, "100111..", Instruction::JP,  "jp a"));
-    instructions.append(new Instruction(2, "101000..", Instruction::JZ,  "jz a"));
-    instructions.append(new Instruction(2, "101001..", Instruction::JNZ, "jd a"));
-    instructions.append(new Instruction(2, "101100..", Instruction::JC,  "jc a"));
-    instructions.append(new Instruction(2, "101111..", Instruction::JB,  "jb a"));
-    instructions.append(new Instruction(1, "1110..00", Instruction::SHR, "shr"));
-    instructions.append(new Instruction(1, "1110..01", Instruction::SHL, "shl"));
-    instructions.append(new Instruction(1, "1110..10", Instruction::ROR, "ror"));
-    instructions.append(new Instruction(1, "1110..11", Instruction::ROL, "rol"));
+    instructions.append(new Instruction(1, "00000000", Instruction::NOP, "nop"));
+    instructions.append(new Instruction(2, "00010000", Instruction::STR, "sta a"));
+    instructions.append(new Instruction(2, "00100000", Instruction::LDR, "lda a"));
+    instructions.append(new Instruction(2, "00110000", Instruction::ADD, "add a"));
+    instructions.append(new Instruction(2, "01000000", Instruction::OR,  "or a"));
+    instructions.append(new Instruction(2, "01010000", Instruction::AND, "and a"));
+    instructions.append(new Instruction(1, "01100000", Instruction::NOT, "not"));
+    instructions.append(new Instruction(2, "01110000", Instruction::SUB, "sub a"));
+    instructions.append(new Instruction(2, "10000000", Instruction::JMP, "jmp a"));
+    instructions.append(new Instruction(2, "10010000", Instruction::JN,  "jn a"));
+    instructions.append(new Instruction(2, "10011100", Instruction::JP,  "jp a"));
+    instructions.append(new Instruction(2, "10100000", Instruction::JZ,  "jz a"));
+    instructions.append(new Instruction(2, "10101100", Instruction::JNZ, "jd a"));
+    instructions.append(new Instruction(2, "10110000", Instruction::JC,  "jc a"));
+    instructions.append(new Instruction(2, "10111100", Instruction::JB,  "jb a"));
+    instructions.append(new Instruction(1, "11100000", Instruction::SHR, "shr"));
+    instructions.append(new Instruction(1, "11100001", Instruction::SHL, "shl"));
+    instructions.append(new Instruction(1, "11100010", Instruction::ROR, "ror"));
+    instructions.append(new Instruction(1, "11100011", Instruction::ROL, "rol"));
     instructions.append(new Instruction(1, "1111....", Instruction::HLT, "hlt"));
 
 

@@ -56,8 +56,8 @@ QueopsMachine::QueopsMachine()
     // Initialize addressing modes
     //////////////////////////////////////////////////
 
-    addressingModes.append(new AddressingMode("......00", AddressingMode::DIRECT,       AddressingMode::NO_PATTERN));
-    addressingModes.append(new AddressingMode("......01", AddressingMode::INDIRECT,     "(.*),i"));
-    addressingModes.append(new AddressingMode("......10", AddressingMode::IMMEDIATE,    "#(.*)"));
+    addressingModes.append(new AddressingMode("......00", AddressingMode::DIRECT,        AddressingMode::NO_PATTERN));
+    addressingModes.append(new AddressingMode("......01", AddressingMode::INDIRECT,      "(.*),i"));
+    addressingModes.append(new AddressingMode("......10", AddressingMode::IMMEDIATE,     "#(.*)"));
     addressingModes.append(new AddressingMode("......11", AddressingMode::INDEXED_BY_PC, "(.*),pc"));
 }
