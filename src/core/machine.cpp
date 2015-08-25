@@ -1080,7 +1080,7 @@ void Machine::getNextOperandAddress(int &intermediateAddress, int &finalOperandA
     intermediateAddress = -1;
     finalOperandAddress = -1;
 
-    if (instruction->getNumBytes() != 2)
+    if (!instruction || instruction->getNumBytes() != 2)
         return;
 
     immediateAddress = (PC->getValue() + 1) % getMemorySize();
