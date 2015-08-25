@@ -7,13 +7,14 @@ Hidra - To-do
 Código
 
 - Follow PC (center if outside view)
-- "HLT atingido" para passo-a-passo.
+- MsgBox de "HLT atingido" para passo-a-passo.
 - Criar um .ini para lembar "exibir hexa" e último local carregado/salvo
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
 - StatusTip para comandos (ver guia rápido)
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
+- Aceitar valores negativos para endereços
 
 
 

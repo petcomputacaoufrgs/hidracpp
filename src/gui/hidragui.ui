@@ -189,6 +189,21 @@
          </item>
          <item>
           <property name="text">
+           <string>Cromag</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Pitagoras</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Queops</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>Ramses</string>
           </property>
          </item>

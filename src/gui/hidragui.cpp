@@ -79,6 +79,12 @@ void HidraGui::selectMachine(QString machineName)
 
         if (machineName == "Ahmes")
             machine = new AhmesMachine();
+        else if (machineName == "Cromag")
+            machine = new CromagMachine();
+        else if (machineName == "Pitagors")
+            machine = new PitagorasMachine();
+        else if (machineName == "Queops")
+            machine = new QueopsMachine();
         else if (machineName == "Ramses")
             machine = new RamsesMachine();
         else
@@ -478,6 +484,14 @@ void HidraGui::saveAs()
 
     if (currentMachineName == "Ahmes")
         extension = "Fonte do Ahmes (*.ahd)";
+    else if (currentMachineName == "Cromag")
+        extension = "Fonte do Cromag (*.cmg)";
+    else if (currentMachineName == "Pericles")
+        extension = "Fonte do Pericles (*.prc)";
+    else if (currentMachineName == "Pitagoras")
+        extension = "Fonte do Pitagoras (*.ptg)";
+    else if (currentMachineName == "Queops")
+        extension = "Fonte do Queops (*.qps)";
     else if (currentMachineName == "Ramses")
         extension = "Fonte do Ramses (*.rad)";
 
@@ -534,6 +548,14 @@ void HidraGui::load(QString filename)
         selectMachine("Neander");
     else if (extension == "ahd")
         selectMachine("Ahmes");
+    else if (extension == "cmg")
+        selectMachine("Cromag");
+    else if (extension == "prc")
+        selectMachine("Pericles");
+    else if (extension == "ptg")
+        selectMachine("Pitagoras");
+    else if (extension == "qps")
+        selectMachine("Queops");
     else if (extension == "rad")
         selectMachine("Ramses");
 

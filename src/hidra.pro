@@ -29,7 +29,12 @@ SOURCES += \
     machines/ahmesmachine.cpp \
     machines/neandermachine.cpp \
     machines/ramsesmachine.cpp \
-    core/addressingmode.cpp
+    core/addressingmode.cpp \
+    machines/cromagmachine.cpp \
+    machines/queopsmachine.cpp \
+    machines/pitagorasmachine.cpp \
+    machines/periclesmachine.cpp \
+    machines/nyandermachine.cpp
 
 HEADERS  += \
     gui/flagwidget.h \
@@ -45,7 +50,12 @@ HEADERS  += \
     machines/ahmesmachine.h \
     machines/neandermachine.h \
     machines/ramsesmachine.h \
-    core/addressingmode.h
+    core/addressingmode.h \
+    machines/cromagmachine.h \
+    machines/queopsmachine.h \
+    machines/pitagorasmachine.h \
+    machines/periclesmachine.h \
+    machines/nyandermachine.h
 
 FORMS    += \
     gui/flagwidget.ui \

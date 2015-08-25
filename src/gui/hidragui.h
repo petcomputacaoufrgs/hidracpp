@@ -18,6 +18,9 @@
 #include "flagwidget.h"
 #include "machines/neandermachine.h"
 #include "machines/ahmesmachine.h"
+#include "machines/cromagmachine.h"
+#include "machines/pitagorasmachine.h"
+#include "machines/queopsmachine.h"
 #include "machines/ramsesmachine.h"
 
 namespace Ui {
