@@ -16,6 +16,8 @@ public:
         JMP, JN, JP, JV, JNV, JZ, JNZ, JC, JNC, JB, JNB, JSR,
         NEG, SHR, SHL, ROR, ROL,
         HLT,
+
+        REG_INC, REG_DEC, REG_IF,
     };
 
     Instruction();

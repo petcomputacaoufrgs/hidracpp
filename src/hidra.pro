@@ -33,7 +33,8 @@ SOURCES += \
     machines/cromagmachine.cpp \
     machines/queopsmachine.cpp \
     machines/pitagorasmachine.cpp \
-    machines/voltamachine.cpp
+    machines/voltamachine.cpp \
+    machines/regmachine.cpp
 
 HEADERS  += \
     gui/flagwidget.h \
@@ -53,7 +54,8 @@ HEADERS  += \
     machines/cromagmachine.h \
     machines/queopsmachine.h \
     machines/pitagorasmachine.h \
-    machines/voltamachine.h
+    machines/voltamachine.h \
+    machines/regmachine.h
 
 FORMS    += \
     gui/flagwidget.ui \
