@@ -320,6 +320,11 @@ void Machine::updateFlags(int value)
     setFlagValue("Z", value == 0);
 }
 
+int Machine::address(int value)
+{
+    return (value & (memory.size() - 1)); // Bit-and, removes excess bits
+}
+
 int Machine::toSigned(int unsignedByte)
 {
     if (unsignedByte <= 127) // Max signed byte
@@ -357,7 +362,7 @@ void Machine::assemble(QString sourceCode)
     static QRegExp matchComments(commentsPattern);
 
     static QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
-    static QRegExp whitespaces("\\s+");
+    static QRegExp whitespace("\\s+");
 
 
 
@@ -420,7 +425,7 @@ void Machine::assemble(QString sourceCode)
 
             if (!sourceLines[lineNumber].isEmpty())
             {
-                QString mnemonic = sourceLines[lineNumber].section(whitespaces, 0, 0).toLower();
+                QString mnemonic = sourceLines[lineNumber].section(whitespace, 0, 0).toLower();
 
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
@@ -429,7 +434,7 @@ void Machine::assemble(QString sourceCode)
                 }
                 else // Directive
                 {
-                    QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
+                    QString arguments = sourceLines[lineNumber].section(whitespace, 1); // Everything after mnemonic
                     obeyDirective(mnemonic, arguments, true);
                 }
             }
@@ -463,8 +468,8 @@ void Machine::assemble(QString sourceCode)
 
             if (!sourceLines[lineNumber].isEmpty())
             {
-                QString mnemonic  = sourceLines[lineNumber].section(whitespaces, 0, 0).toLower();
-                QString arguments = sourceLines[lineNumber].section(whitespaces, 1); // Everything after mnemonic
+                QString mnemonic  = sourceLines[lineNumber].section(whitespace, 0, 0).toLower();
+                QString arguments = sourceLines[lineNumber].section(whitespace, 1); // Everything after mnemonic
 
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
@@ -472,7 +477,7 @@ void Machine::assemble(QString sourceCode)
                     // TODO: associateLine instead on FIRST PASS
                     addressCorrespondingLine[PC->getValue()] = lineNumber;
                     if (instruction->getNumBytes() == 2)
-                        addressCorrespondingLine[(PC->getValue() + 1) & 0xFF] = lineNumber;
+                        addressCorrespondingLine[address(PC->getValue() + 1)] = lineNumber;
 
                     buildInstruction(mnemonic, arguments);
                 }
@@ -508,9 +513,11 @@ void Machine::assemble(QString sourceCode)
 
 void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly)
 {
+    static QRegExp whitespace("\\s+");
+
     if (mnemonic == "org")
     {
-        QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+        QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
         int numberOfArguments = argumentList.size();
 
         if (numberOfArguments != 1)
@@ -641,8 +648,10 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
 
 void Machine::buildInstruction(QString mnemonic, QString arguments)
 {
+    static QRegExp whitespace("\\s+");
+
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = arguments.split(" ", QString::SkipEmptyParts);
+    QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
     int numberOfArguments = instruction->getArguments().size();
     AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT;
 
@@ -934,10 +943,10 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::Addre
             return immediateAddress;
 
         case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
-            return (memoryRead(immediateAddress) + getRegisterValue("X")) % getMemorySize();
+            return address(memoryRead(immediateAddress) + getRegisterValue("X"));
 
         case AddressingMode::INDEXED_BY_PC:
-            return (memoryRead(immediateAddress) + getRegisterValue("PC")) % getMemorySize();
+            return address(memoryRead(immediateAddress) + getRegisterValue("PC"));
     }
 
     return 0;
@@ -1083,7 +1092,7 @@ void Machine::getNextOperandAddress(int &intermediateAddress, int &finalOperandA
     if (!instruction || instruction->getNumBytes() != 2)
         return;
 
-    immediateAddress = (PC->getValue() + 1) % getMemorySize();
+    immediateAddress = address(PC->getValue() + 1);
 
     switch (addressingModeCode)
     {
@@ -1101,11 +1110,11 @@ void Machine::getNextOperandAddress(int &intermediateAddress, int &finalOperandA
             break;
 
         case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
-            finalOperandAddress = (getMemoryValue(immediateAddress) + getRegisterValue("X")) % getMemorySize();
+            finalOperandAddress = address(getMemoryValue(immediateAddress) + getRegisterValue("X"));
             break;
 
         case AddressingMode::INDEXED_BY_PC:
-            finalOperandAddress = (getMemoryValue(immediateAddress) + getRegisterValue("PC")) % getMemorySize();
+            finalOperandAddress = address(getMemoryValue(immediateAddress) + getRegisterValue("PC"));
             break;
     }
 }

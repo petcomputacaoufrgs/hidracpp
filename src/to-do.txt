@@ -15,6 +15,9 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 - Aceitar valores negativos para endereços
+- Colocar teste no Ramses para endereçamento negativo
+- Endereçamento relativo ao label ("LDR A Label+1")
+- Teste de endereçamento relativo ao label
 
 
 

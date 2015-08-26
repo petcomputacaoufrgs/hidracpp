@@ -74,6 +74,8 @@ public:
     void setCarry(bool state);
     void setBorrowOrCarry(bool borrowState); // Some machines use carry as not borrow
     void updateFlags(int value); // Updates N and Z
+
+    int address(int value); // Returns a valid address based on a value, removing excess bits (overflow)
     int toSigned(int unsignedByte);
 
 
