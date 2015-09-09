@@ -1,0 +1,100 @@
+﻿;Programa percorre uma matriz maior e faz a media de quatro elementos que formam uma matriz menor
+;A media é feita com soma 2 bytes dos 4 elementos dois shr para divisao por 4(com truncagem), e apos valor salvo em um byte
+
+LDR X #176 ;reseta as variaveis
+LDR A #240 
+STR A SALVA
+
+
+INICIO:;carrega as as quatro partes da matriz menor e soma, os jumps carry cuidam do vai um
+LDR A 0,x
+ADD A 1,x
+JSR VAIUM
+ADD A 8,x
+JSR VAIUM
+ADD A 9,x
+JSR VAIUM
+JSR SEGUNDOBYTE
+STR A SALVA,i
+LDR A SALVA 
+ADD A #1
+STR A SALVA
+ADD X #2
+
+LDR A 0,x
+ADD A 1,x
+JSR VAIUM
+ADD A 8,x
+JSR VAIUM
+ADD A 9,x
+JSR VAIUM
+JSR SEGUNDOBYTE
+STR A SALVA,i
+LDR A SALVA 
+ADD A #1
+STR A SALVA
+ADD X #2
+
+LDR A 0,x
+ADD A 1,x
+JSR VAIUM
+ADD A 8,x
+JSR VAIUM
+ADD A 9,x
+JSR VAIUM
+JSR SEGUNDOBYTE
+STR A SALVA,i
+LDR A SALVA 
+ADD A #1
+STR A SALVA
+ADD X #2
+
+
+LDR A 0,x
+ADD A 1,x
+JSR VAIUM
+ADD A 8,x
+JSR VAIUM
+ADD A 9,x
+JSR VAIUM
+JSR SEGUNDOBYTE
+STR A SALVA,i
+
+
+
+
+LDR A SALVA ;carrega a varivel q corre a matriz de salvar
+ADD A #1;adiciona 1
+JZ FIM;verifica se ja chegou na posição 255 +1 ou seja fim da matriz de salvar
+STR A SALVA
+ADD X #10
+JMP INICIO
+FIM:HLT
+
+
+
+
+
+VAIUM:
+NOP
+JC ADDCARRY
+JMP VAIUM,i
+ADDCARRY:ADD B #1
+JMP VAIUM,i
+
+SEGUNDOBYTE:
+NOP
+SHR A
+SHR A
+SHR B
+JC ADDB1
+JMP NOTADD
+ADDB1:ADD A #64
+NOTADD:SHR B
+JC ADDB2
+JMP SEGUNDOBYTE,i
+ADDB2:ADD A #128
+JMP SEGUNDOBYTE,i
+
+
+SALVA:DB 0;variavel para corre a matriz de salvar

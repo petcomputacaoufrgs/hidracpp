@@ -1,6 +1,6 @@
-ORG 188
+ÔªøORG 188
 
-AUX:	DB	0 ;; vari·vel auxiliar
+AUX:	DB	0 ;; vari√°vel auxiliar
 linha:	DB	0
 coluna:	DB	0
 dir:	DB	0
@@ -27,12 +27,12 @@ loop:
 	JN	erro
 
 
-;; Mudar direÁao
+;; Mudar dire√ßao
 
-	LDR B	m,X	;; atualizando direÁao
+	LDR B	m,X	;; atualizando dire√ßao
 	STR B	dir
 	JSR	atualizaDir
-	NOT A	;; marca desvio para detecÁao de laÁos
+	NOT A	;; marca desvio para detec√ßao de la√ßos
 	STR A	m,X
 
 
@@ -69,7 +69,7 @@ esquerda:
 
 
 sair:
-;; Atualiza coordenadas de saÌda
+;; Atualiza coordenadas de sa√≠da
 	STR X	aux
 	AND X	#7
 	STR X	coluna
@@ -83,7 +83,7 @@ HLT
 
 
 erro:
-;; Erro: laÁo detectado
+;; Erro: la√ßo detectado
 	LDR A	#255
 	STR A	linha
 	STR A	coluna
@@ -104,30 +104,30 @@ atualizaDir:
 atEsquerda:
 	LDR B	eEsquerda
 	STR B	dirJmp+1
-	JMP atualizaDir,I	;; atualiza o jump para a direÁao atual
+	JMP atualizaDir,I	;; atualiza o jump para a dire√ßao atual
 
 atCima:
 	LDR B	eCima
 	STR B	dirJmp+1
-	JMP atualizaDir,I	;; atualiza o jump para a direÁao atual
+	JMP atualizaDir,I	;; atualiza o jump para a dire√ßao atual
 
 atDireita:
 	LDR B	eDireita
 	STR B	dirJmp+1
-	JMP atualizaDir,I	;; atualiza o jump para a direÁao atual
+	JMP atualizaDir,I	;; atualiza o jump para a dire√ßao atual
 
 atBaixo:
 	LDR B	eBaixo
 	STR B	dirJmp+1
-	JMP atualizaDir,I	;; atualiza o jump para a direÁao atual
+	JMP atualizaDir,I	;; atualiza o jump para a dire√ßao atual
 
 ;; fim da subrotina atualizaDir --
 
 
 
-;; MemÛria n„o oficial (coisa feia)
+;; Mem√≥ria n√£o oficial (coisa feia)
 
-;; endereÁo dos rotulos
+;; endere√ßo dos rotulos
 eCima:     DB cima
 eDireita:  DB direita
 eBaixo:    DB baixo

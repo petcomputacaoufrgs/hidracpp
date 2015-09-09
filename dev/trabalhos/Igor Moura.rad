@@ -1,17 +1,17 @@
-	LDR X #0		;Zera X para contagem do Ìndice da palavra e teste se a = 0, se for vai para azero.
+Ôªø	LDR X #0		;Zera X para contagem do √≠ndice da palavra e teste se a = 0, se for vai para azero.
 	LDR A var_a
 	JZ azero
 
 loop:
-	LDR A palavra,X		;Carrega a letra com Ìndice X e verifica se È 0, se for vai para o fim sen„o diminui 65 e guarda em uma vari·vel auxiliar para ser usada na multiplicaÁ„o
+	LDR A palavra,X		;Carrega a letra com √≠ndice X e verifica se √© 0, se for vai para o fim sen√£o diminui 65 e guarda em uma vari√°vel auxiliar para ser usada na multiplica√ß√£o
 	JZ fim
 	SUB A #65
 	STR A aux
 	LDR B var_a
 
 loop_mult:
-	SUB B #1		;A soma se repete 5 vezes antes de testar se o n˙mero È negativo para fins de otimizaÁ„o
-	JZ add_b		;Isso ocorre pois nos casos mais extremos a soma atinge um n˙mero negativo apenas depois de, no mÌnimo, 5 iteraÁıes
+	SUB B #1		;A soma se repete 5 vezes antes de testar se o n√∫mero √© negativo para fins de otimiza√ß√£o
+	JZ add_b		;Isso ocorre pois nos casos mais extremos a soma atinge um n√∫mero negativo apenas depois de, no m√≠nimo, 5 itera√ß√µes
 	ADD A aux
 	SUB B #1
 	JZ add_b
@@ -29,30 +29,30 @@ loop_mult:
 	JMP loop_mult
 
 sub_104:
-	SUB A #104		;Subtrai 104 pois È o maior n˙mero multiplo de 26 menor que 128
+	SUB A #104		;Subtrai 104 pois √© o maior n√∫mero multiplo de 26 menor que 128
 	JMP loop_mult
 
 sub_104_mod:
-	SUB A #104		;N„o foi feita uma subrotina aqui por quest„o de otimizaÁ„o
+	SUB A #104		;N√£o foi feita uma subrotina aqui por quest√£o de otimiza√ß√£o
 	JMP mod
 
 add_b:
-	ADD A var_b		;Adiciona a vari·vel b e faz mais um teste se passou de 127
+	ADD A var_b		;Adiciona a vari√°vel b e faz mais um teste se passou de 127
 	JN sub_104_mod
 
 mod:
-	SUB A #26		;Subtrai 26 atÈ ser negativo, isso significa que o n˙mero anterior a ˙ltima subtraÁ„o È o mÛdulo
+	SUB A #26		;Subtrai 26 at√© ser negativo, isso significa que o n√∫mero anterior a √∫ltima subtra√ß√£o √© o m√≥dulo
 	JN termina
 	JMP mod
 
 termina:
-	ADD A #91		;Soma novamente o 26 para chegar ao mÛdulo e soma 65 para converter em ASCII e volta para o inÌcio do loop
+	ADD A #91		;Soma novamente o 26 para chegar ao m√≥dulo e soma 65 para converter em ASCII e volta para o in√≠cio do loop
 	STR A palavra,X
 	ADD X #1
 	JMP loop
 
 azero:
-	LDR A palavra,X		;Caso especial em que a = 0, como (X*0 + b) = b, basta colocar b no lugar da palavra, e como b j· est· entre 0 e 25 n„o È necess·rio fazer o mÛdulo
+	LDR A palavra,X		;Caso especial em que a = 0, como (X*0 + b) = b, basta colocar b no lugar da palavra, e como b j√° est√° entre 0 e 25 n√£o √© necess√°rio fazer o m√≥dulo
 	JZ fim
 	LDR A var_b
 	ADD A #65

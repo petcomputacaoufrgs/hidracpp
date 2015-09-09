@@ -1,4 +1,4 @@
-ldr X vet_X
+Ôªøldr X vet_X
 ldr B palavra	
 
 carrega_vetor:
@@ -7,7 +7,7 @@ carrega_vetor:
 	jn converte_ini
 	add B #1
 	str B palavra
-	str A 0,X ; vetor de convers„o
+	str A 0,X ; vetor de convers√£o
 	add X #2
 	ldr A tam
 	add A #1
@@ -16,13 +16,13 @@ carrega_vetor:
 	
 converte_ini:
 	str A 0,X ; vetor X
-	ldr X vet_X ; inÌcio do vetor de convers„o
+	ldr X vet_X ; in√≠cio do vetor de convers√£o
 converte:
 	ldr A 0,X
 	jz a_zero
 	jn modulo_ini
 	str A 151
-	ldr B var_a ; por quanto A ser· multiplicado
+	ldr B var_a ; por quanto A ser√° multiplicado
 	jz a_zero
 	add X #2
 
@@ -60,7 +60,7 @@ se_carry_b:
 	jmp converte
 
 modulo_ini:
-	ldr X #144 ; endereÁo do vetor de convers„o
+	ldr X #144 ; endere√ßo do vetor de convers√£o
 	ldr A 0,X
 modulo:
 	sub A #26

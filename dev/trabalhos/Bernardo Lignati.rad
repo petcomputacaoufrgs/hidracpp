@@ -1,0 +1,56 @@
+﻿;Bernardo Lignati ARQ1 Professor Lisboa Matricula:00230159
+;Programa percorre uma matriz maior e faz a media de quatro elementos que formam uma matriz menor
+;A media é feita com soma 2 bytes dos 4 elementos dois shr para divisao por 4(com truncagem), e apos valor salvo em um byte
+
+LDR X #176 ;reseta as variaveis
+LDR A #240 
+STR A SALVA
+
+
+INICIO:;carrega as as quatro partes da matriz menor e soma, os jumps carry cuidam do vai um
+LDR A 0,x
+ADD A 1,x
+JC ADD1
+VOLTA1: ADD A 8,x
+JC ADD2
+VOLTA2: ADD A 9,x
+JC ADD3
+VOLTA3: SHR A;divide a soma por 4 para pegar a media
+SHR A
+SHR B;pega o valor de B e soma em no primeiro byte
+JC ADDB1
+VOLTAB1:SHR B
+JC  ADDB2
+VOLTAB2:STR A SALVA,i
+
+LDR A SALVA ;carrega a varivel q corre a matriz de salvar
+ADD A #1;adiciona 1
+JZ FIM;verifica se ja chegou na posição 255 +1 ou seja fim da matriz de salvar
+STR A SALVA
+SHR A;ve se A é divisivel por 4 se for pula de linha
+JC COLUNA
+SHR A 
+JC COLUNA
+ADD X #8
+COLUNA:ADD X #2
+JMP INICIO
+FIM:HLT
+
+ADD1:ADD B #1;adições do carry na soma do byte menos significativo
+JMP VOLTA1
+ADD2:ADD B #1
+JMP VOLTA2
+ADD3:ADD B #1
+JMP VOLTA3
+
+
+ADDB1:;adições do byte mais significativo no menos
+ADD A #64
+JMP VOLTAB1
+
+ADDB2:
+ADD A #128
+JMP VOLTAB2
+
+
+SALVA:DB 0;variavel para corre a matriz de salvar
