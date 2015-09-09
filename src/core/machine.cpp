@@ -57,10 +57,12 @@ void Machine::decodeInstruction(int fetchedValue, Instruction *&instruction, Add
     addressingModeCode = extractAddressingModeCode(fetchedValue);
     registerName = extractRegisterName(fetchedValue);
 
-    if (instruction && instruction->getNumBytes() == 2)
+    if (instruction && instruction->getNumBytes() > 1)
     {
-        immediateAddress = getPCValue();
-        incrementPCValue();
+        immediateAddress = getPCValue(); // Address that contains first argument byte
+
+        for (int i = 0; i < instruction->getNumBytes() - 1; i++) // Skip argument bytes
+            incrementPCValue();
     }
 }
 
@@ -69,7 +71,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
     int value1, value2, result;
     Instruction::InstructionCode instructionCode;
     instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
-    bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE); // Invalidate immediate jumps
+    bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
 
     switch (instructionCode)
     {
@@ -263,6 +265,27 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         break;
 
     default: // NOP
+        break;
+
+
+
+    //////////////////////////////////////////////////
+    // REG
+    //////////////////////////////////////////////////
+
+    case Instruction::REG_INC:
+        setRegisterValue(registerName, getRegisterValue(registerName) + 1);
+        break;
+
+    case Instruction::REG_DEC:
+        setRegisterValue(registerName, getRegisterValue(registerName) - 1);
+        break;
+
+    case Instruction::REG_IF:
+        if (getRegisterValue(registerName))
+            setPCValue(getMemoryValue(immediateAddress));
+        else
+            setPCValue(getMemoryValue(immediateAddress + 1));
         break;
     }
 
@@ -653,9 +676,8 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
     int numberOfArguments = instruction->getArguments().size();
-    AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT;
-
-    static QRegExp matchChar("'.'");
+    AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT; // Default mode
+    QStringList instructionArguments = instruction->getArguments();
 
     int registerBitCode = 0b00000000;
     int addressingModeBitCode = 0b00000000;
@@ -664,17 +686,17 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     if (argumentList.size() != numberOfArguments)
         throw wrongNumberOfArguments;
 
-    // If first argument is a register:
-    if (numberOfArguments > 0 && instruction->getArguments().first() == "r")
+    // If argumentList contains a register:
+    if (instructionArguments.contains("r"))
     {
         registerBitCode = getRegisterBitCode(argumentList.first());
 
         if (registerBitCode == Register::NO_BIT_CODE)
-            throw invalidArgument; // Hidden register/invalid register name
+            throw invalidArgument; // Register not found (or invisible)
     }
 
-    // If last argument is an address:
-    if (numberOfArguments > 0 && instruction->getArguments().last() == "a")
+    // If argumentList contains an address/value:
+    if (instructionArguments.contains("a"))
     {
         extractArgumentAddressingModeCode(argumentList.last(), addressingModeCode); // Removes addressing mode from argument
         addressingModeBitCode = getAddressingModeBitCode(addressingModeCode);
@@ -684,29 +706,22 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     assemblerMemory[PC->getValue()]->setValue(instruction->getByteValue() | registerBitCode | addressingModeBitCode);
     PC->incrementValue();
 
-    // If instruction has two bytes, write second byte:
-    if (instruction->getNumBytes() > 1)
+    // Write second byte (address/value):
+    if (instructionArguments.contains("a"))
     {
-        QString argument = argumentList.last();
+        bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE);
+        assemblerMemory[PC->getValue()]->setValue(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
+        PC->incrementValue();
+    }
+    // If instruction has two addresses (REG_IF), write both addresses:
+    else if (instructionArguments.contains("a0") && instructionArguments.contains("a1"))
+    {
+        QString address0 = argumentList.at(instructionArguments.indexOf("a0"));
+        assemblerMemory[PC->getValue()]->setValue(argumentToValue(address0, false));
+        PC->incrementValue();
 
-        // Convert possible label to number:
-        if (labelPCMap.contains(argument.toLower()))
-            argument = QString::number(labelPCMap.value(argument.toLower()));
-
-        // Convert literal quote back
-        if (argument == QUOTE_SYMBOL)
-            argument = "'''";
-
-        // If immediate addressing mode, check for char between single quotes
-        if (addressingModeCode == AddressingMode::IMMEDIATE && matchChar.exactMatch(argument))
-            argument = QString::number(argument.at(1).toLatin1());
-
-        // Check if valid address/value:
-        if (!isValidAddress(argument)) // TODO: Distinguish address/value sizes
-            throw invalidValue;
-
-        // Write address argument:
-        assemblerMemory[PC->getValue()]->setValue(stringToInt(argument));
+        QString address1 = argumentList.at(instructionArguments.indexOf("a1"));
+        assemblerMemory[PC->getValue()]->setValue(argumentToValue(address1, false));
         PC->incrementValue();
     }
 }
@@ -802,10 +817,10 @@ bool Machine::isValidNBytesValue(QString valueString, int n)
         return isValidValue(valueString, -32768, 65535);
 }
 
-/*bool Machine::isValidRegisterValue(QString valueString)
+bool Machine::isValidByteValue(QString valueString)
 {
-
-}*/
+    return isValidValue(valueString, -128, 255);
+}
 
 bool Machine::isValidAddress(QString addressString)
 {
@@ -893,6 +908,34 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
             addressingModeCode = addressingMode->getAddressingModeCode();
             return;
         }
+    }
+}
+
+int Machine::argumentToValue(QString argument, bool isImmediate)
+{
+    static QRegExp matchChar("'.'");
+
+    // Convert label to number string
+    if (labelPCMap.contains(argument.toLower()))
+        argument = QString::number(labelPCMap.value(argument.toLower()));
+
+    if (isImmediate)
+    {
+        if (argument == QUOTE_SYMBOL) // Immediate quote
+            return (int)'\'';
+        else if (matchChar.exactMatch(argument)) // Immediate char
+            return (int)argument.at(1).toLatin1();
+        else if (isValidByteValue(argument)) // Immediate hex/dec value
+            return stringToInt(argument);
+        else
+            throw invalidValue;
+    }
+    else
+    {
+        if (isValidAddress(argument)) // Address
+            return stringToInt(argument);
+        else
+            throw invalidAddress;
     }
 }
 

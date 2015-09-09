@@ -100,12 +100,14 @@ public:
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);
     bool isValidNBytesValue(QString valueString, int numberOfBytes);
+    bool isValidByteValue(QString valueString);
     bool isValidAddress(QString addressString);
 
     // Auxiliary methods
     QStringList splitArguments(QString arguments);
     void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
+    int argumentToValue(QString argument, bool isImmediate);
     int stringToInt(QString valueString);
 
 
