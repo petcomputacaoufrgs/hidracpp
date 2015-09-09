@@ -165,12 +165,12 @@
          </item>
          <item>
           <property name="text">
-           <string>Cromag</string>
+           <string>Ramses</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Pitagoras</string>
+           <string>Cromag</string>
           </property>
          </item>
          <item>
@@ -180,7 +180,22 @@
          </item>
          <item>
           <property name="text">
-           <string>Ramses</string>
+           <string>Pitagoras</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Pericles</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>REG</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Volta</string>
           </property>
          </item>
          <item>

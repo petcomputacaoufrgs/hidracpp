@@ -81,14 +81,20 @@ void HidraGui::selectMachine(QString machineName)
             machine = new NeanderMachine();
         else if (machineName == "Ahmes")
             machine = new AhmesMachine();
+        else if (machineName == "Ramses")
+            machine = new RamsesMachine();
         else if (machineName == "Cromag")
             machine = new CromagMachine();
         else if (machineName == "Queops")
             machine = new QueopsMachine();
         else if (machineName == "Pitagoras")
             machine = new PitagorasMachine();
-        else if (machineName == "Ramses")
-            machine = new RamsesMachine();
+        //else if (machineName == "Pericles")
+        //    machine = new PericlesMachine();
+        else if (machineName == "REG")
+            machine = new RegMachine();
+        else if (machineName == "Volta")
+            machine = new VoltaMachine();
         else
             return; // Error
 
@@ -487,16 +493,22 @@ void HidraGui::saveAs()
 
     if (currentMachineName == "Ahmes")
         extension = "Fonte do Ahmes (*.ahd)";
-    else if (currentMachineName == "Cromag")
-        extension = "Fonte do Cromag (*.cmg)";
-    else if (currentMachineName == "Pericles")
-        extension = "Fonte do Pericles (*.prc)";
-    else if (currentMachineName == "Pitagoras")
-        extension = "Fonte do Pitagoras (*.ptg)";
-    else if (currentMachineName == "Queops")
-        extension = "Fonte do Queops (*.qps)";
     else if (currentMachineName == "Ramses")
         extension = "Fonte do Ramses (*.rad)";
+    else if (currentMachineName == "Cromag")
+            extension = "Fonte do Cromag (*.cmg)";
+    else if (currentMachineName == "Queops")
+        extension = "Fonte do Queops (*.qps)";
+    else if (currentMachineName == "Pitagoras")
+        extension = "Fonte do Pitagoras (*.ptg)";
+    else if (currentMachineName == "Pericles")
+        extension = "Fonte do Pericles (*.prc)";
+    else if (currentMachineName == "REG")
+        extension = "Fonte do REG (*.reg)";
+    else if (currentMachineName == "Volta")
+        extension = "Fonte do Volta (*.vlt)";
+
+
 
     QString filename = QFileDialog::getSaveFileName(this,
                                                    "Salvar código-fonte", "",
@@ -551,16 +563,20 @@ void HidraGui::load(QString filename)
         selectMachine("Neander");
     else if (extension == "ahd")
         selectMachine("Ahmes");
-    else if (extension == "cmg")
-        selectMachine("Cromag");
-    else if (extension == "prc")
-        selectMachine("Pericles");
-    else if (extension == "ptg")
-        selectMachine("Pitagoras");
-    else if (extension == "qps")
-        selectMachine("Queops");
     else if (extension == "rad")
         selectMachine("Ramses");
+    else if (extension == "cmg")
+        selectMachine("Cromag");
+    else if (extension == "qps")
+        selectMachine("Queops");
+    else if (extension == "ptg")
+        selectMachine("Pitagoras");
+    else if (extension == "prc")
+        selectMachine("Pericles");
+    else if (extension == "reg")
+        selectMachine("REG");
+    else if (extension == "vlt")
+        selectMachine("Volta");
 
     currentFilename = filename;
 
