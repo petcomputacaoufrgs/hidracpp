@@ -914,6 +914,21 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
 int Machine::argumentToValue(QString argument, bool isImmediate)
 {
     static QRegExp matchChar("'.'");
+    static QRegExp labelOffset("(.*)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
+
+    // Convert label with +/- offset to number
+    if (labelOffset.exactMatch(argument.toLower()))
+    {
+        int sign = (labelOffset.cap(2) == "+") ? +1 : -1;
+
+        if (!labelPCMap.contains(labelOffset.cap(1))) // Validate label
+            throw invalidLabel;
+        if (!isValidAddress(labelOffset.cap(3))) // Validate offset
+            throw invalidArgument;
+
+        // Argument = Label + Offset
+        argument = QString::number(labelPCMap.value(labelOffset.cap(1)) + sign*stringToInt(labelOffset.cap(3)));
+    }
 
     // Convert label to number string
     if (labelPCMap.contains(argument.toLower()))

@@ -15,9 +15,6 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 - Aceitar valores negativos para endereços
-- Colocar teste no Ramses para endereçamento negativo
-- Endereçamento relativo ao label ("LDR A Label+1")
-- Teste de endereçamento relativo ao label
 
 
 
@@ -31,7 +28,7 @@ Geral
 Interface
 
 - Usar caminho e nome do arquivo anterior em SaveAs
-- Nome do arquivo no título da janela? Asterisco quando for modificado
+- Asterisco no título quando o arquivo for modificado
 
 Breakpoints
 
