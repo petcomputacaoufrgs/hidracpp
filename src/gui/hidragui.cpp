@@ -45,6 +45,10 @@ HidraGui::HidraGui(QWidget *parent) :
     modifiedSinceBackup = false;
     forceSaveAs = true;
 
+    // Accept dropped files
+    codeEditor->setAcceptDrops(false);
+    setAcceptDrops(true);
+
     // Open recovery file (if existing)
     /*if (QFile::exists("__Recovery__.txt"))
     {
@@ -61,6 +65,31 @@ HidraGui::HidraGui(QWidget *parent) :
 HidraGui::~HidraGui()
 {
     delete ui;
+}
+
+void HidraGui::dragEnterEvent(QDragEnterEvent *e)
+{
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
+}
+
+// Accept dropped files
+void HidraGui::dropEvent(QDropEvent *e)
+{
+    if (e->mimeData()->urls().size() == 1)
+    {
+        QString filename = e->mimeData()->urls().at(0).toLocalFile();
+
+        if (QFile::exists(filename))
+        {
+            bool cancelled;
+            saveChangesDialog(cancelled);
+
+            if (!cancelled)
+                load(filename);
+        }
+    }
 }
 
 

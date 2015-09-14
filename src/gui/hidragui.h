@@ -117,6 +117,9 @@ private:
     void updateInformation(); // Show counters
     void updateInformation(int value); // Show value in dec/hex/bin
 
+    virtual void dragEnterEvent(QDragEnterEvent *e);
+    virtual void dropEvent(QDropEvent *e);
+
     QTimer backupTimer;
 
     QString getValueDescription(int value);
