@@ -29,9 +29,7 @@ HidraGui::HidraGui(QWidget *parent) :
     sourceAndMemoryInSync = false;
     machine = nullptr;
 
-    ui->layoutRegisters->setAlignment(Qt::AlignTop);
     ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
-    ui->scrollAreaRegisters->setWidgetResizable(true);
 
     ui->tableViewMemoryInstructions->setEditTriggers(false);
     ui->tableViewMemoryData->setEditTriggers(false);
@@ -191,6 +189,8 @@ void HidraGui::initializeMemoryTable()
 
 void HidraGui::initializeFlagWidgets()
 {
+    ui->areaFlags->setVisible(machine->getNumberOfFlags() > 0); // Only show flags area if there are flags to be displayed
+
     for (int i=0; i < machine->getNumberOfFlags(); i++)
     {
         FlagWidget *newFlag = new FlagWidget(this, machine->getFlagName(i), machine->getFlagValue(i));
@@ -201,6 +201,13 @@ void HidraGui::initializeFlagWidgets()
 
 void HidraGui::initializeRegisterWidgets()
 {
+    static int originalMaximumHeight = ui->areaRegisters->maximumHeight();
+
+    if (machine->getNumberOfRegisters() > 4) // If there are too many registers, don't restrict size
+        ui->areaRegisters->setMaximumHeight(0xFFFFFF);
+    else
+        ui->areaRegisters->setMaximumHeight(originalMaximumHeight);
+
     for (int i=0; i < machine->getNumberOfRegisters(); i++)
     {
         RegisterWidget *newRegister = new RegisterWidget(this, machine->getRegisterName(i));
@@ -504,7 +511,7 @@ void HidraGui::saveAs()
     else if (currentMachineName == "Pericles")
         extension = "Fonte do Pericles (*.prc)";
     else if (currentMachineName == "REG")
-        extension = "Fonte do REG (*.reg)";
+        extension = "Fonte do REG (*.rg)";
     else if (currentMachineName == "Volta")
         extension = "Fonte do Volta (*.vlt)";
 
@@ -573,7 +580,7 @@ void HidraGui::load(QString filename)
         selectMachine("Pitagoras");
     else if (extension == "prc")
         selectMachine("Pericles");
-    else if (extension == "reg")
+    else if (extension == "rg")
         selectMachine("REG");
     else if (extension == "vlt")
         selectMachine("Volta");

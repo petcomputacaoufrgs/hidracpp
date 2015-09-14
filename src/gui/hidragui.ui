@@ -198,11 +198,6 @@
            <string>Volta</string>
           </property>
          </item>
-         <item>
-          <property name="text">
-           <string>REG</string>
-          </property>
-         </item>
         </widget>
        </item>
        <item>
@@ -259,14 +254,14 @@
        <item>
         <widget class="QGroupBox" name="areaRegisters">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
            <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
+           <verstretch>1</verstretch>
           </sizepolicy>
          </property>
-         <property name="minimumSize">
+         <property name="maximumSize">
           <size>
-           <width>0</width>
+           <width>16777215</width>
            <height>115</height>
           </size>
          </property>
@@ -429,7 +424,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>40</height>
+           <height>20</height>
           </size>
          </property>
         </spacer>

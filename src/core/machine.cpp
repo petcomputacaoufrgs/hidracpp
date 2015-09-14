@@ -282,7 +282,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         break;
 
     case Instruction::REG_IF:
-        if (getRegisterValue(registerName))
+        if (getRegisterValue(registerName) == 0)
             setPCValue(getMemoryValue(immediateAddress));
         else
             setPCValue(getMemoryValue(immediateAddress + 1));
@@ -1505,6 +1505,11 @@ void Machine::generateDescriptions()
 
     // Pitagoras
     descriptions["jd a"] = "Se a flag Z estiver desativada (acumulador diferente de zero), desvia a execução para o endereço 'a'.";
+
+    // REG
+    descriptions["inc r"] = "Incrementa o registrador 'r' em uma unidade.";
+    descriptions["dec r"] = "Decrementa o registrador 'r' de uma unidade.";
+    descriptions["if r a0 a1"] = "Se o registrador 'r' for igual a zero (if zero), desvia a execução para o endereço 'a0'. Se for diferente de zero, desvia para 'a1'.";
 }
 
 QString Machine::getDescription(QString assemblyFormat)
