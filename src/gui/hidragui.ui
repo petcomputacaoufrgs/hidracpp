@@ -544,6 +544,7 @@
      <string>Exibir</string>
     </property>
     <addaction name="actionHexadecimalMode"/>
+    <addaction name="actionFastExecuteMode"/>
    </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuMemory"/>
@@ -687,6 +688,14 @@
    </property>
    <property name="shortcut">
     <string>F2</string>
+   </property>
+  </action>
+  <action name="actionFastExecuteMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Execução rápida</string>
    </property>
   </action>
  </widget>

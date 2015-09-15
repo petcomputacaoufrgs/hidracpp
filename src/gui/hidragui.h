@@ -45,6 +45,7 @@ public:
     void saveAs();
     void saveChangesDialog(bool &cancelled);
     void load(QString filename);
+    void step(bool refresh);
 
 public slots:
     void on_pushButtonBuild_clicked();
@@ -93,6 +94,8 @@ private slots:
 
     void statusBarMessageChanged(QString newMessage);
 
+    void on_actionFastExecuteMode_toggled(bool checked);
+
 private:
 
     void initializeMachineInterfaceComponents();
@@ -135,6 +138,7 @@ private:
     bool sourceAndMemoryInSync, buildSuccessful; // Both turn false when code is changed
     bool forceSaveAs; // Set to true when Save should trigger SaveAs
     bool showHexValues;
+    bool fastExecute;
     QStandardItemModel memoryModel;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;

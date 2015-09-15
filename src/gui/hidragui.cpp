@@ -24,6 +24,7 @@ HidraGui::HidraGui(QWidget *parent) :
 
     buildSuccessful = true;
     showHexValues = false;
+    fastExecute = false;
     previousPCValue = 0;
 
     sourceAndMemoryInSync = false;
@@ -623,6 +624,25 @@ void HidraGui::load(QString filename)
     forceSaveAs = false;
 }
 
+void HidraGui::step(bool refresh = true)
+{
+    try
+    {
+        machine->step();
+    }
+    catch (QString error)
+    {
+        machine->setRunning(false);
+        QMessageBox::information(this, tr("Error"), error);
+    }
+
+    if (refresh)
+    {
+        updateMachineInterface();
+        QApplication::processEvents();
+    }
+}
+
 
 
 //////////////////////////////////////////////////
@@ -744,26 +764,19 @@ void HidraGui::on_actionRun_triggered()
         machine->setRunning(true);
 
         // Keep running until stopped
-        while (machine->isRunning()) {
-            ui->actionStep->trigger();
-            QApplication::processEvents();
+        while (machine->isRunning())
+        {
+            int instructionsPerRefresh = (fastExecute) ? 1000 : 1; // Inside while loop, allows realtime change
+            int nextInstructionCount = machine->getInstructionCount() + 1;
+            bool refresh = (nextInstructionCount % instructionsPerRefresh == 0); // Refresh whenever it's a multiple of instructionsPerRefresh
+            step(refresh);
         }
     }
 }
 
 void HidraGui::on_actionStep_triggered()
 {
-    try
-    {
-        machine->step();
-    }
-    catch (QString error)
-    {
-        machine->setRunning(false);
-        QMessageBox::information(this, tr("Error"), error);
-    }
-
-    updateMachineInterface();
+    step();
 }
 
 void HidraGui::on_actionNew_triggered()
@@ -900,7 +913,7 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
     for (int i=0; i<registerWidgets.count(); i++)
         registerWidgets.at(i)->setMode(showHexValues);
 
-    updateMachineInterface();
+    updateMachineInterface(true);
 }
 
 void HidraGui::on_actionDisplayDataTable_toggled(bool checked)
@@ -966,4 +979,9 @@ void HidraGui::on_actionQuickGuide_triggered()
 void HidraGui::on_actionReference_triggered()
 {
     QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_Referencia.pdf"));
+}
+
+void HidraGui::on_actionFastExecuteMode_toggled(bool checked)
+{
+    fastExecute = checked;
 }
