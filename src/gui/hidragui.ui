@@ -545,6 +545,7 @@
     </property>
     <addaction name="actionHexadecimalMode"/>
     <addaction name="actionFastExecuteMode"/>
+    <addaction name="actionFollowPCMode"/>
    </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuMemory"/>
@@ -696,6 +697,14 @@
    </property>
    <property name="text">
     <string>Execução rápida</string>
+   </property>
+  </action>
+  <action name="actionFollowPCMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Tela segue execução</string>
    </property>
   </action>
  </widget>

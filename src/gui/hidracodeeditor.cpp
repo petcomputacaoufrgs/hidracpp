@@ -87,20 +87,10 @@ void HidraCodeEditor::highlightCurrentLine()
 
 void HidraCodeEditor::highlightPCLine(int pcLine)
 {
-    bool blockFound = false;
-    QTextBlock block = firstVisibleBlock();
-
-    // Find PC line's block
-    while (!blockFound && block.isValid() && block.isVisible())
-    {
-        if (block.blockNumber() == pcLine)
-            blockFound = true;
-        else
-            block = block.next();
-    }
+    QTextBlock block = document()->findBlockByNumber(pcLine);
 
     // Highlight block, if found
-    if (blockFound)
+    if (block.isValid())
     {
         QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -165,7 +155,7 @@ void HidraCodeEditor::setCurrentLine(int line)
 
     QTextCursor cursor(document()->findBlockByNumber(line));
     setTextCursor(cursor);
-    centerCursor();
+    ensureCursorVisible();
     setFocus();
 }
 
@@ -213,11 +203,12 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
                 breakpointBlock = QTextBlock(); // Invalidate block
         }
 
-        if (block.isVisible() && bottom >= event->rect().top()) {
+        if (block.isVisible() && bottom >= event->rect().top())
+        {
             QString number = QString::number(blockNumber + 1);
-            painter.setPen(QColor(128, 128, 128)); // Dark gray
-            painter.drawText(0, top, lineNumberArea->width() - 1, fontMetrics().height(),
-                             Qt::AlignRight, number);
+            bool onCursorLine = (blockNumber == textCursor().blockNumber());
+            painter.setPen(onCursorLine ? QColor(64, 64, 64) : QColor(128, 128, 128)); // Dark gray (darker for cursor line)
+            painter.drawText(0, top, lineNumberArea->width() - 1, fontMetrics().height(), Qt::AlignRight, number);
         }
 
         block = block.next();

@@ -6,9 +6,8 @@ Hidra - To-do
 
 Código
 
-- Follow PC (center if outside view)
 - MsgBox de "HLT atingido" para passo-a-passo.
-- Criar um .ini para lembar "exibir hexa" e último local carregado/salvo
+- Criar um .ini para lembrar "exibir hexa" e último local carregado/salvo
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
 - StatusTip para comandos (ver guia rápido)

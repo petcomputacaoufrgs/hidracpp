@@ -80,13 +80,10 @@ private slots:
 
     void on_actionResetRegisters_triggered();
     void on_actionSetBreakpoint_triggered();
-    void on_actionHexadecimalMode_toggled(bool checked);
     void on_comboBoxMachine_currentIndexChanged(const QString machineName);
 
     void on_actionClose_triggered();
     void closeEvent(QCloseEvent *event);
-
-    void on_actionDisplayDataTable_toggled(bool checked);
 
     void on_actionQuickGuide_triggered();
     void on_actionReference_triggered();
@@ -94,7 +91,9 @@ private slots:
 
     void statusBarMessageChanged(QString newMessage);
 
+    void on_actionHexadecimalMode_toggled(bool checked);
     void on_actionFastExecuteMode_toggled(bool checked);
+    void on_actionFollowPCMode_toggled(bool checked);
 
 private:
 
@@ -139,6 +138,7 @@ private:
     bool forceSaveAs; // Set to true when Save should trigger SaveAs
     bool showHexValues;
     bool fastExecute;
+    bool followPC;
     QStandardItemModel memoryModel;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;

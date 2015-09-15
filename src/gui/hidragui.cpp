@@ -25,6 +25,7 @@ HidraGui::HidraGui(QWidget *parent) :
     buildSuccessful = true;
     showHexValues = false;
     fastExecute = false;
+    followPC = false;
     previousPCValue = 0;
 
     sourceAndMemoryInSync = false;
@@ -46,7 +47,7 @@ HidraGui::HidraGui(QWidget *parent) :
     modifiedSinceBackup = false;
     forceSaveAs = true;
 
-    // Accept dropped files
+    // Load dropped files
     codeEditor->setAcceptDrops(false);
     setAcceptDrops(true);
 
@@ -639,6 +640,11 @@ void HidraGui::step(bool refresh = true)
     if (refresh)
     {
         updateMachineInterface();
+        if (followPC)
+        {
+            codeEditor->setCurrentLine(machine->getPCCorrespondingLine());
+            ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(machine->getPCValue(), 0));
+        }
         QApplication::processEvents();
     }
 }
@@ -906,21 +912,6 @@ void HidraGui::on_actionSetBreakpoint_triggered()
     machine->setBreakpoint(breakpointAddress);
 }
 
-void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
-{
-    showHexValues = checked;
-
-    for (int i=0; i<registerWidgets.count(); i++)
-        registerWidgets.at(i)->setMode(showHexValues);
-
-    updateMachineInterface(true);
-}
-
-void HidraGui::on_actionDisplayDataTable_toggled(bool checked)
-{
-    ui->tableViewMemoryData->setVisible(checked);
-}
-
 void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
 {
     selectMachine(machineName);
@@ -981,7 +972,22 @@ void HidraGui::on_actionReference_triggered()
     QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_Referencia.pdf"));
 }
 
+void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
+{
+    showHexValues = checked;
+
+    for (int i=0; i<registerWidgets.count(); i++)
+        registerWidgets.at(i)->setMode(showHexValues);
+
+    updateMachineInterface(true);
+}
+
 void HidraGui::on_actionFastExecuteMode_toggled(bool checked)
 {
     fastExecute = checked;
+}
+
+void HidraGui::on_actionFollowPCMode_toggled(bool checked)
+{
+    followPC = checked;
 }
