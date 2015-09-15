@@ -1,0 +1,47 @@
+	ORG	216
+Mult:	DB	1
+Shift:	DB	10
+String:	DB	73 ; I
+	DB	78 ; N
+	DB	70 ; F
+	DB	79 ; O
+	DB	82 ; R
+	DB	77 ; M
+	DB	65 ; A
+	DB	84 ; T
+	DB	73 ; I
+	DB	67 ; C
+	DB	65 ; A
+	DB	0
+
+	ORG	0
+	LDR X	#0	; Índice do caractere
+Loop:	LDR A	String,X
+	JZ	Halt
+	SUB A	#65	; Normaliza o caractere entre 0 e 25
+	STR A	String,X
+	
+	LDR A	#0
+	LDR B	Mult
+
+While:	JZ	EndWh	; While B > 0 (calcula A * B através de soma)
+	ADD A	String,X
+	SUB A	#26	; Subtrai 26 para verificar se passou de 25
+	JN	AddBk1	; Se não passou, adiciona 26 de volta
+	JMP	Cont1	; Se passou, segue com o valor correto
+AddBk1:	ADD A	#26
+Cont1:	SUB B	#1
+	JMP	While
+	
+EndWh:	ADD A	Shift	; Adiciona o Shift
+	SUB A	#26	; Subtrai 26 para verificar se passou de 25
+	JN	AddBk2
+	JMP	Cont2
+AddBk2:	ADD A	#26
+
+Cont2:	ADD A	#65	; Normaliza o novo valor
+	STR A	String,X; Armazena o novo valor
+	ADD X	#1	; Passa para o próximo caractere
+	JMP	Loop
+
+Halt:	HLT
