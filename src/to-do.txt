@@ -14,7 +14,6 @@ Código
 - StatusTip para comandos (ver guia rápido)
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
-- Aceitar valores negativos para endereços
 
 
 

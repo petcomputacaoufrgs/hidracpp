@@ -142,6 +142,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         setRegisterValue(registerName, result);
         setBorrowOrCarry(value1 < value2);
         setOverflow(toSigned(value1) - toSigned(value2) != toSigned(result));
+        updateFlags(result);
         break;
 
     case Instruction::NEG:
@@ -545,7 +546,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
 
         if (numberOfArguments != 1)
             throw wrongNumberOfArguments;
-        if (!isValidAddress(argumentList.first()))
+        if (!isValidOrg(argumentList.first()))
             throw invalidAddress;
 
         PC->setValue(argumentList.first().toInt(0));
@@ -822,9 +823,14 @@ bool Machine::isValidByteValue(QString valueString)
     return isValidValue(valueString, -128, 255);
 }
 
-bool Machine::isValidAddress(QString addressString)
+bool Machine::isValidAddress(QString addressString) // Allows negative values for offsets
 {
-    return isValidValue(addressString, 0, memory.size()-1);
+    return isValidValue(addressString, -memory.size(), memory.size()-1);
+}
+
+bool Machine::isValidOrg(QString offsetString)
+{
+    return isValidValue(offsetString, 0, memory.size()-1);
 }
 
 QStringList Machine::splitArguments(QString arguments)
@@ -914,7 +920,7 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
 int Machine::argumentToValue(QString argument, bool isImmediate)
 {
     static QRegExp matchChar("'.'");
-    static QRegExp labelOffset("(.*)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
+    static QRegExp labelOffset("(.+)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
 
     // Convert label with +/- offset to number
     if (labelOffset.exactMatch(argument.toLower()))

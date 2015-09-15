@@ -102,6 +102,7 @@ public:
     bool isValidNBytesValue(QString valueString, int numberOfBytes);
     bool isValidByteValue(QString valueString);
     bool isValidAddress(QString addressString);
+    bool isValidOrg(QString offsetString);
 
     // Auxiliary methods
     QStringList splitArguments(QString arguments);
