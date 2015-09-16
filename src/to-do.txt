@@ -14,6 +14,8 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 
+-Falar com Weber, instrução push e por do Volta mesmo código.
+
 
 
 [ Versões futuras ]
