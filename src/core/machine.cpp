@@ -288,6 +288,110 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         else
             setPCValue(getMemoryValue(immediateAddress + 1));
         break;
+
+
+
+
+    //////////////////////////////////////////////////
+    // Volta
+    //////////////////////////////////////////////////
+
+
+    case Instruction::VOLTA_NOP:
+        break;
+
+    case Instruction::VOLTA_ADD:
+        break;
+
+    case Instruction::VOLTA_SUB:
+        break;
+
+    case Instruction::VOLTA_AND:
+        break;
+
+    case Instruction::VOLTA_OR:
+        break;
+
+    case Instruction::VOLTA_CLR:
+        break;
+
+    case Instruction::VOLTA_NOT:
+        break;
+
+    case Instruction::VOLTA_REG:
+        break;
+
+    case Instruction::VOLTA_INC:
+        break;
+
+    case Instruction::VOLTA_DEC:
+        break;
+
+    case Instruction::VOLTA_ASR:
+        break;
+
+    case Instruction::VOLTA_ASL:
+        break;
+
+    case Instruction::VOLTA_ROR:
+        break;
+
+    case Instruction::VOLTA_ROL:
+        break;
+
+    case Instrution::VOLTA_SZ:
+        break;
+
+    case Instruction::VOLTA_SNZ:
+        break;
+
+    case Instruction::VOLTA_SPL:
+        break;
+
+    case Instruction::VOLTA_SMI:
+        break;
+
+    case Instruction::VOLTA_SPZ:
+        break;
+
+    case Instruction::VOLTA_SMZ:
+        break;
+
+    case Instruction::VOLTA_SEQ:
+        break;
+
+    case Instruction::VOLTA_SNE:
+        break;
+
+    case Instruction::VOLTA_SGR:
+        break;
+
+    case Instruction::VOLTA_SLS:
+        break;
+
+    case Instruction::VOLTA_SGE:
+        break;
+
+    case Instruction::VOLTA_SLE:
+        break;
+
+    case Instruction::VOLTA_RTS:
+        break;
+
+    case Instruction::VOLTA_PSH:
+        break;
+
+    case Instruction::VOLTA_POP:
+        break;
+
+    case Instruction::VOLTA_JMP:
+        break;
+
+    case Instruction::VOLTA_JSR:
+        break;
+
+    case Instruction::VOLTA_HLT:
+        break;
     }
 
     instructionCount++;
