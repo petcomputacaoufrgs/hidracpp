@@ -22,7 +22,7 @@
 #include "machines/cromagmachine.h"
 #include "machines/queopsmachine.h"
 #include "machines/pitagorasmachine.h"
-//#include "machines/periclesmachine.h"
+#include "machines/periclesmachine.h"
 #include "machines/regmachine.h"
 #include "machines/voltamachine.h"
 
