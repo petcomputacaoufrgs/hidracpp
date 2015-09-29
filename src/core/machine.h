@@ -96,6 +96,8 @@ public:
     void clearAssemblerData();
     void copyAssemblerMemoryToMemory();
     void reserveAssemblerMemory(int sizeToReserve);
+    virtual int  reserveAssemblerMemory(const Instruction *instruction, QString arguments);
+    virtual bool customAddressWrite(QString argument, bool isImmediate);
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);

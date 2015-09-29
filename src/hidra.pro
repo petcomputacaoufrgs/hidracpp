@@ -34,7 +34,8 @@ SOURCES += \
     machines/queopsmachine.cpp \
     machines/pitagorasmachine.cpp \
     machines/voltamachine.cpp \
-    machines/regmachine.cpp
+    machines/regmachine.cpp \
+    machines/periclesmachine.cpp
 
 HEADERS  += \
     gui/flagwidget.h \
@@ -55,7 +56,8 @@ HEADERS  += \
     machines/queopsmachine.h \
     machines/pitagorasmachine.h \
     machines/voltamachine.h \
-    machines/regmachine.h
+    machines/regmachine.h \
+    machines/periclesmachine.h
 
 FORMS    += \
     gui/flagwidget.ui \

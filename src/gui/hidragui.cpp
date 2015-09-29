@@ -118,8 +118,8 @@ void HidraGui::selectMachine(QString machineName)
             machine = new QueopsMachine();
         else if (machineName == "Pitagoras")
             machine = new PitagorasMachine();
-        //else if (machineName == "Pericles")
-        //    machine = new PericlesMachine();
+        else if (machineName == "Pericles")
+            machine = new PericlesMachine();
         else if (machineName == "REG")
             machine = new RegMachine();
         else if (machineName == "Volta")
@@ -590,7 +590,7 @@ void HidraGui::saveAs()
     else if (currentMachineName == "Ramses")
         extension = "Fonte do Ramses (*.rad)";
     else if (currentMachineName == "Cromag")
-            extension = "Fonte do Cromag (*.cmg)";
+        extension = "Fonte do Cromag (*.cmg)";
     else if (currentMachineName == "Queops")
         extension = "Fonte do Queops (*.qps)";
     else if (currentMachineName == "Pitagoras")

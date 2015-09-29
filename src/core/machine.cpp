@@ -287,6 +287,110 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         else
             setPCValue(getMemoryValue(immediateAddress + 1));
         break;
+
+
+
+
+    //////////////////////////////////////////////////
+    // Volta
+    //////////////////////////////////////////////////
+
+
+    case Instruction::VOLTA_NOP:
+        break;
+
+    case Instruction::VOLTA_ADD:
+        break;
+
+    case Instruction::VOLTA_SUB:
+        break;
+
+    case Instruction::VOLTA_AND:
+        break;
+
+    case Instruction::VOLTA_OR:
+        break;
+
+    case Instruction::VOLTA_CLR:
+        break;
+
+    case Instruction::VOLTA_NOT:
+        break;
+
+    case Instruction::VOLTA_REG:
+        break;
+
+    case Instruction::VOLTA_INC:
+        break;
+
+    case Instruction::VOLTA_DEC:
+        break;
+
+    case Instruction::VOLTA_ASR:
+        break;
+
+    case Instruction::VOLTA_ASL:
+        break;
+
+    case Instruction::VOLTA_ROR:
+        break;
+
+    case Instruction::VOLTA_ROL:
+        break;
+
+    case Instrution::VOLTA_SZ:
+        break;
+
+    case Instruction::VOLTA_SNZ:
+        break;
+
+    case Instruction::VOLTA_SPL:
+        break;
+
+    case Instruction::VOLTA_SMI:
+        break;
+
+    case Instruction::VOLTA_SPZ:
+        break;
+
+    case Instruction::VOLTA_SMZ:
+        break;
+
+    case Instruction::VOLTA_SEQ:
+        break;
+
+    case Instruction::VOLTA_SNE:
+        break;
+
+    case Instruction::VOLTA_SGR:
+        break;
+
+    case Instruction::VOLTA_SLS:
+        break;
+
+    case Instruction::VOLTA_SGE:
+        break;
+
+    case Instruction::VOLTA_SLE:
+        break;
+
+    case Instruction::VOLTA_RTS:
+        break;
+
+    case Instruction::VOLTA_PSH:
+        break;
+
+    case Instruction::VOLTA_POP:
+        break;
+
+    case Instruction::VOLTA_JMP:
+        break;
+
+    case Instruction::VOLTA_JSR:
+        break;
+
+    case Instruction::VOLTA_HLT:
+        break;
     }
 
     instructionCount++;
@@ -453,7 +557,23 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    reserveAssemblerMemory(instruction->getNumBytes());
+                    int numBytes; // Number of bytes reserved, used to
+
+                    if (instruction->getNumBytes() == 0)
+                    {
+                        QString arguments = sourceLines[lineNumber].section(whitespace, 1);
+                        numBytes = reserveAssemblerMemory(instruction, arguments);
+                    }
+                    else
+                    {
+                        numBytes = instruction->getNumBytes();
+                        reserveAssemblerMemory(numBytes);
+                    }
+
+                    for (int i = numBytes; i > 0; i--)
+                    {
+                        addressCorrespondingLine[PC->getValue()-i] = lineNumber;
+                    }
                 }
                 else // Directive
                 {
@@ -497,11 +617,6 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    // TODO: associateLine instead on FIRST PASS
-                    addressCorrespondingLine[PC->getValue()] = lineNumber;
-                    if (instruction->getNumBytes() == 2)
-                        addressCorrespondingLine[address(PC->getValue() + 1)] = lineNumber;
-
                     buildInstruction(mnemonic, arguments);
                 }
                 else // Directive
@@ -710,8 +825,11 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     if (instructionArguments.contains("a"))
     {
         bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE);
-        assemblerMemory[PC->getValue()]->setValue(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
-        PC->incrementValue();
+        if (!customAddressWrite(argumentList.last(), isImmediate))
+        {
+            assemblerMemory[PC->getValue()]->setValue(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
+            PC->incrementValue();
+        }
     }
     // If instruction has two addresses (REG_IF), write both addresses:
     else if (instructionArguments.contains("a0") && instructionArguments.contains("a1"))
@@ -792,6 +910,25 @@ void Machine::reserveAssemblerMemory(int sizeToReserve)
         else
             throw memoryOverlap; // Memory already reserved
     }
+}
+
+// Method for the machines that require the addressing mode to reserve memory.
+int Machine::reserveAssemblerMemory(const Instruction *instruction, QString arguments)
+{
+    (void)instruction;
+    (void)arguments;
+
+    // For default, do nothing
+    return 0;
+}
+
+
+bool Machine::customAddressWrite(QString argument, bool isImmediate)
+{
+    (void)argument;
+    (void)isImmediate;
+
+    return false;
 }
 
 bool Machine::isValidValue(QString valueString, int min, int max)
