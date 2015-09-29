@@ -7,7 +7,6 @@ Machine::Machine(QObject *parent) :
     QObject(parent)
 {
     PC = nullptr;
-    SP = nullptr;
 
     clearCounters();
     setBreakpoint(-1);

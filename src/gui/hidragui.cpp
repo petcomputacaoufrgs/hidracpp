@@ -218,6 +218,11 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryData->scrollTo(memoryModel.index(128, 1), QAbstractItemView::PositionAtTop);
 }
 
+void HidraGui::initializeStackTable()
+{
+
+}
+
 void HidraGui::initializeFlagWidgets()
 {
     ui->areaFlags->setVisible(machine->getNumberOfFlags() > 0); // Only show flags area if there are flags to be displayed
@@ -395,9 +400,10 @@ void HidraGui::updateMemoryTable(bool force)
             previousLabel[byteAddress] = labelName; // Update previousLabel
         }
     }
+}
 
-
-
+void HidraGui::updateMemoryTableColors(bool force)
+{
     //////////////////////////////////////////////////
     // Row color (highlight current instruction)
     //////////////////////////////////////////////////
@@ -432,6 +438,56 @@ void HidraGui::updateMemoryTable(bool force)
     // Update all cells, resize
     emit memoryModel.dataChanged(memoryModel.index(0, 0), memoryModel.index(memorySize, 0));
     ui->tableViewMemoryData->resizeColumnsToContents();
+}
+
+void HidraGui::updateStackTable()
+{
+    VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
+
+    if (voltaMachine == nullptr) // Not Volta machine
+        return;
+
+    int stackSize = voltaMachine->getStackSize();
+    int spValue = voltaMachine->getSPValue();
+    int base = showHexValues? 16 : 10;
+
+    for (int row=0; row<stackSize; row++)
+    {
+        int stackAddress = row;
+        int value = voltaMachine->getStackValue(stackAddress);
+
+        //////////////////////////////////////////////////
+        // Column 0: SP Arrow
+        //////////////////////////////////////////////////
+
+        stackModel.item(previousPCValue, 0)->setText((row == spValue) ? "\u2192" : ""); // Unicode arrow
+
+
+
+        //////////////////////////////////////////////////
+        // Column 1: Address
+        //////////////////////////////////////////////////
+
+        stackModel.item(row, 1)->setEnabled(false);
+        stackModel.item(row, 1)->setText(QString::number(stackAddress, base).toUpper());
+
+
+
+        //////////////////////////////////////////////////
+        // Column 2: Byte value
+        //////////////////////////////////////////////////
+
+        stackModel.item(row, 2)->setText(QString::number(value, base).toUpper());
+
+        // On mouse-over, sends value to statusbar (with "#" prefix)
+        // The information box then obtains the value and displays it in dec/hex/bin
+        QString statusTip = "#" + QString::number(voltaMachine->getMemoryValue(stackAddress));
+        stackModel.item(row, 2)->setStatusTip(statusTip);
+    }
+
+    // Update all cells, resize
+    emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(memorySize, 0));
+    ui->tableViewStack->resizeColumnsToContents();
 }
 
 void HidraGui::updateRegisterWidgets()

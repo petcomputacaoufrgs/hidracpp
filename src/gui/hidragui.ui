@@ -125,6 +125,19 @@
      </widget>
     </item>
     <item>
+     <widget class="QTableView" name="tableViewStack">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
+     </widget>
+    </item>
+    <item>
      <widget class="QWidget" name="areaSimulator" native="true">
       <property name="minimumSize">
        <size>
@@ -291,8 +304,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>279</width>
-               <height>86</height>
+               <width>275</width>
+               <height>77</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -494,6 +507,7 @@
    <zorder>areaSimulator</zorder>
    <zorder>tableViewMemoryInstructions</zorder>
    <zorder>tableViewMemoryData</zorder>
+   <zorder>tableViewStack</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -501,7 +515,7 @@
      <x>0</x>
      <y>0</y>
      <width>1059</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProgram">

@@ -99,6 +99,7 @@ private:
 
     void initializeMachineInterfaceComponents();
     void initializeMemoryTable();
+    void initializeStackTable();
     void initializeRegisterWidgets();
     void initializeFlagWidgets();
     void initializeHighlighter();
@@ -106,12 +107,15 @@ private:
 
     void clearMachineInterfaceComponents();
     void clearMemoryTable();
+    void clearStackTable();
     void clearRegisterWidgets();
     void clearFlagWidgets();
     void clearInstructionsList();
 
     void updateMachineInterfaceComponents(bool force);
     void updateMemoryTable(bool force);
+    void updateMemoryTableColors(bool force);
+    void updateStackTable();
     void updateRegisterWidgets();
     void updateFlagWidgets();
     void updateCodeEditor();
