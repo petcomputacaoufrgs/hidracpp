@@ -110,3 +110,49 @@ bool PericlesMachine::customAddressWrite(QString argument, bool isImmediate)
 
     return true;
 }
+
+void PericlesMachine::decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &immediateAddress)
+{
+    addressingModeCode = extractAddressingModeCode(fetchedValue);
+    registerName = extractRegisterName(fetchedValue);
+
+    if (instruction && instruction->getNumBytes() == 0)
+    {
+        immediateAddress = getPCValue(); // Address that contains first argument byte
+
+        incrementPCValue();
+
+        if (addressingModeCode != AddressingMode::IMMEDIATE)
+            incrementPCValue();
+    }
+}
+
+int PericlesMachine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+{
+    int fullAddress;
+
+    switch (addressingModeCode)
+    {
+        case AddressingMode::DIRECT:
+            fullAddress = memoryRead(immediateAddress);
+            return fullAddress + (memoryRead(immediateAddress+1) << 8);
+
+        case AddressingMode::INDIRECT:
+            fullAddress = memoryRead(immediateAddress);
+            fullAddress += (memoryRead(immediateAddress+1) << 8);
+            return memoryRead(fullAddress);
+
+        case AddressingMode::IMMEDIATE: // Immediate addressing mode
+            return immediateAddress;
+
+        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
+            fullAddress = memoryRead(immediateAddress);
+            fullAddress += (memoryRead(immediateAddress+1) << 8);
+            return address(fullAddress + getRegisterValue("X"));
+
+        case AddressingMode::INDEXED_BY_PC:
+            break;
+    }
+
+    return 0;
+}

@@ -339,7 +339,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
     case Instruction::VOLTA_ROL:
         break;
 
-    case Instrution::VOLTA_SZ:
+    case Instruction::VOLTA_SZ:
         break;
 
     case Instruction::VOLTA_SNZ:

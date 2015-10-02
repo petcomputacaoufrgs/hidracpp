@@ -14,7 +14,11 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 
--Falar com Weber, instrução push e por do Volta mesmo código.
+-Falar com Weber, instrução push e pop do Volta mesmo código.
+
+Erros
+
+-Na máquina Pericles, highlight do lugar da memória apontado pelo endereço dos dados não está funcionando
 
 
 
