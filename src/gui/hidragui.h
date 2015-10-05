@@ -114,7 +114,6 @@ private:
 
     void updateMachineInterfaceComponents(bool force);
     void updateMemoryTable(bool force);
-    void updateMemoryTableColors(bool force);
     void updateStackTable();
     void updateRegisterWidgets();
     void updateFlagWidgets();
@@ -143,7 +142,7 @@ private:
     bool showHexValues;
     bool fastExecute;
     bool followPC;
-    QStandardItemModel memoryModel;
+    QStandardItemModel memoryModel, stackModel;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
     QString currentMachineName;

@@ -163,6 +163,7 @@ void HidraGui::updateMachineInterface(bool force = false)
 void HidraGui::initializeMachineInterfaceComponents()
 {
     initializeMemoryTable();
+    initializeStackTable();
     initializeFlagWidgets();
     initializeRegisterWidgets();
     initializeHighlighter();
@@ -220,7 +221,39 @@ void HidraGui::initializeMemoryTable()
 
 void HidraGui::initializeStackTable()
 {
+    VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
 
+    if (voltaMachine == nullptr) // Not Volta machine
+        return;
+
+    int stackSize = voltaMachine->getStackSize();
+
+    ui->tableViewStack->setModel(&stackModel);
+
+    // Set table size
+    stackModel.setRowCount(stackSize);
+    stackModel.setColumnCount(3);
+
+    // Initialize items
+    for (int row = 0; row < stackSize; row++)
+    {
+        for (int column = 0; column < stackModel.columnCount(); column++)
+            stackModel.setData(stackModel.index(row, column), "");
+    }
+
+    // Set table headers
+    stackModel.setHeaderData(0, Qt::Horizontal, " ");
+    stackModel.setHeaderData(1, Qt::Horizontal, " End ");
+    stackModel.setHeaderData(2, Qt::Horizontal, "Valor");
+
+    // Adjust table settings
+    ui->tableViewStack->verticalHeader()->hide();
+    ui->tableViewStack->resizeRowsToContents();
+    ui->tableViewStack->resizeColumnsToContents();
+    ui->tableViewStack->setMouseTracking(true);
+
+    // Scroll to appropriate position
+    //ui->tableViewStack->scrollTo(stackModel.index(0, 1), QAbstractItemView::PositionAtTop);
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -332,6 +365,7 @@ void HidraGui::clearInstructionsList()
 void HidraGui::updateMachineInterfaceComponents(bool force)
 {
     updateMemoryTable(force);
+    updateStackTable();
     updateFlagWidgets();
     updateRegisterWidgets();
     updateCodeEditor();
@@ -400,10 +434,9 @@ void HidraGui::updateMemoryTable(bool force)
             previousLabel[byteAddress] = labelName; // Update previousLabel
         }
     }
-}
 
-void HidraGui::updateMemoryTableColors(bool force)
-{
+
+
     //////////////////////////////////////////////////
     // Row color (highlight current instruction)
     //////////////////////////////////////////////////
@@ -460,7 +493,7 @@ void HidraGui::updateStackTable()
         // Column 0: SP Arrow
         //////////////////////////////////////////////////
 
-        stackModel.item(previousPCValue, 0)->setText((row == spValue) ? "\u2192" : ""); // Unicode arrow
+        stackModel.item(row, 0)->setText((row == spValue) ? "\u2192" : ""); // Unicode arrow
 
 
 
@@ -481,12 +514,12 @@ void HidraGui::updateStackTable()
 
         // On mouse-over, sends value to statusbar (with "#" prefix)
         // The information box then obtains the value and displays it in dec/hex/bin
-        QString statusTip = "#" + QString::number(voltaMachine->getMemoryValue(stackAddress));
+        QString statusTip = "#" + QString::number(voltaMachine->getStackValue(stackAddress));
         stackModel.item(row, 2)->setStatusTip(statusTip);
     }
 
     // Update all cells, resize
-    emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(memorySize, 0));
+    emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(stackSize, 0));
     ui->tableViewStack->resizeColumnsToContents();
 }
 

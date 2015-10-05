@@ -8,7 +8,7 @@ class VoltaMachine : public Machine
 public:
     VoltaMachine();
 
-    void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
+    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
     void skipNextInstruction();
 
     void stackPush(int value);
@@ -21,6 +21,7 @@ public:
     void clearStack();
 
     int getSPValue();
+    virtual void clear();
 
     Register *SP;
 

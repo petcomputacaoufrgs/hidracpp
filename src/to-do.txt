@@ -13,8 +13,9 @@ Código
 - StatusTip para comandos (ver guia rápido)
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
-
--Falar com Weber, instrução push e por do Volta mesmo código.
+- Falar com o Weber: instruções PUSH e POP do Volta com mesmo código.
+- Falar com o Weber: Direção da pilha do Volta, endereçamento?
+- Indexed by PC errado, pois no step o PC já está apontando para a próxima instrução
 
 
 

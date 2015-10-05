@@ -9,10 +9,10 @@ VoltaMachine::VoltaMachine()
     //////////////////////////////////////////////////
 
     registers.append(new Register("PC", "", 8));
-    registers.append(new Register("SP", "", 8));
+    registers.append(new Register("SP", "", 6));
 
-    PC = registers.last();
-    SP = registers.first();
+    PC = registers.first();
+    SP = registers.last();
 
 
 
@@ -36,7 +36,7 @@ VoltaMachine::VoltaMachine()
     instructions.append(new Instruction(1, "00010100", Instruction::VOLTA_OR,  "or"));
     instructions.append(new Instruction(1, "00100001", Instruction::VOLTA_CLR, "clr"));
     instructions.append(new Instruction(1, "00100010", Instruction::VOLTA_NOT, "not"));
-    instructions.append(new Instruction(1, "00100011", Instruction::VOLTA_REG, "neg"));
+    instructions.append(new Instruction(1, "00100011", Instruction::VOLTA_NEG, "neg"));
     instructions.append(new Instruction(1, "00100100", Instruction::VOLTA_INC, "inc"));
     instructions.append(new Instruction(1, "00100101", Instruction::VOLTA_DEC, "dec"));
     instructions.append(new Instruction(1, "00110001", Instruction::VOLTA_ASR, "asr"));
@@ -74,9 +74,9 @@ VoltaMachine::VoltaMachine()
     addressingModes.append(new AddressingMode("......11", AddressingMode::INDEXED_BY_PC, "(.*),pc"));
 }
 
-void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress)
+void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString, int immediateAddress)
 {
-    int value1, value2, result;
+    int value1, value2, result, carry;
     Instruction::InstructionCode instructionCode;
     instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
 
@@ -266,7 +266,7 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
         break;
 
     case Instruction::VOLTA_PSH:
-        value1 = memoryRead(memoryGetOperandValue(immediateAddress, addressingModeCode));
+        value1 = memoryGetOperandValue(immediateAddress, addressingModeCode);
         stackPush(value1);
         break;
 
@@ -287,6 +287,9 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
     case Instruction::VOLTA_HLT:
         setRunning(false);
         break;
+
+    default:
+        break;
     }
     instructionCount++;
 }
@@ -295,7 +298,7 @@ void VoltaMachine::skipNextInstruction()
 {
     // Read first byte
     int fetchedValue = memoryReadNext();
-    instruction = getInstructionFromValue(fetchedValue);
+    Instruction *instruction = getInstructionFromValue(fetchedValue);
 
     // Skip next byte
     if (instruction && instruction->getNumBytes() == 2)
@@ -316,7 +319,7 @@ int VoltaMachine::getStackSize()
 void VoltaMachine::stackPush(int value)
 {
     accessCount++; // TODO: Stack conta acessos?
-    SP->decrementValue();
+    SP->setValue(SP->getValue() - 1); // Decrement SP
     setStackValue(SP->getValue(), value);
 }
 
@@ -345,12 +348,12 @@ void VoltaMachine::setStackSize(int size)
 
 int VoltaMachine::getStackValue(int address)
 {
-    return stack[address];
+    return stack[address]->getValue();
 }
 
 void VoltaMachine::setStackValue(int address, int value)
 {
-    stack[address] = value & 0xFF;
+    stack[address]->setValue(value & 0xFF);
 }
 
 void VoltaMachine::clearStack()
@@ -362,4 +365,10 @@ void VoltaMachine::clearStack()
 int VoltaMachine::getSPValue()
 {
     return SP->getValue();
+}
+
+void VoltaMachine::clear()
+{
+    clearStack();
+    Machine::clear();
 }
