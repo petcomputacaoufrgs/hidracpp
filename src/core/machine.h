@@ -150,7 +150,7 @@ public:
     int getBreakpoint() const;
     void setBreakpoint(int value);
 
-    void getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress);
+    virtual void getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress);
 
     int getMemorySize() const;
     void setMemorySize(int size);

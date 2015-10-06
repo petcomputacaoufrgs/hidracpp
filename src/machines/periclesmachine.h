@@ -14,6 +14,8 @@ public:
     virtual bool customAddressWrite(QString argument, bool isImmediate);
 
     virtual int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+
+    virtual void getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress);
 };
 
 #endif // PERICLESMACHINE_H
