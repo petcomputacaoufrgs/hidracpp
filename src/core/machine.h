@@ -218,6 +218,7 @@ protected:
     QVector<AddressingMode*> addressingModes;
     QHash<QString, int> labelPCMap;
     QHash<QString, QString> descriptions;
+    int instructionPC; // Used by PC addressing mode
     bool buildSuccessful;
     bool running;
     int firstErrorLine;

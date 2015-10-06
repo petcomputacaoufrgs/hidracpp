@@ -36,6 +36,8 @@ void Machine::step()
     AddressingMode::AddressingModeCode addressingModeCode;
     Instruction *instruction = nullptr;
 
+    instructionPC = getPCValue(); // Used by PC addressing mode
+
     fetchInstruction(fetchedValue, instruction); // Outputs fetched value (byte or word) and corresponding instruction
     decodeInstruction(fetchedValue, instruction, addressingModeCode, registerName, immediateAddress); // Outputs addressing mode, register and immediate address
     executeInstruction(instruction, addressingModeCode, registerName, immediateAddress);
@@ -1035,14 +1037,14 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::Addre
         case AddressingMode::INDIRECT:
             return memoryRead(memoryRead(immediateAddress));
 
-        case AddressingMode::IMMEDIATE: // Immediate addressing mode
+        case AddressingMode::IMMEDIATE:
             return immediateAddress;
 
-        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
+        case AddressingMode::INDEXED_BY_X:
             return address(memoryRead(immediateAddress) + getRegisterValue("X"));
 
-        case AddressingMode::INDEXED_BY_PC: // TODO: PC should still point to the current instruction, not the next one!
-            return address(memoryRead(immediateAddress) + getRegisterValue("PC"));
+        case AddressingMode::INDEXED_BY_PC:
+            return address(memoryRead(immediateAddress) + instructionPC);
     }
 
     return 0;

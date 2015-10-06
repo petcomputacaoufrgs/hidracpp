@@ -14,8 +14,7 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 - Falar com o Weber: instruções PUSH e POP do Volta com mesmo código.
-- Falar com o Weber: Direção da pilha do Volta, endereçamento?
-- Indexed by PC errado, pois no step o PC já está apontando para a próxima instrução
+- Falar com o Weber: Direção da pilha do Volta, endereçamento, valor inicial do SP, valor que aponta o SP
 
 
 
