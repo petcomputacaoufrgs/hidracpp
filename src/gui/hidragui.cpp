@@ -35,7 +35,6 @@ HidraGui::HidraGui(QWidget *parent) :
 
     ui->tableViewMemoryInstructions->setEditTriggers(false);
     ui->tableViewMemoryData->setEditTriggers(false);
-    ui->tableViewMemoryData->setVisible(false);
 
     // Select Neander machine and update interface
     selectMachine("Neander");
@@ -222,9 +221,14 @@ void HidraGui::initializeMemoryTable()
 void HidraGui::initializeStackTable()
 {
     VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
+    bool isVoltaMachine = (voltaMachine != nullptr);
 
-    if (voltaMachine == nullptr) // Not Volta machine
-        return;
+    // If machine is Volta, show stack. Otherwise, show data memory.
+    ui->tableViewStack->setVisible(isVoltaMachine);
+    ui->tableViewMemoryData->setVisible(!isVoltaMachine);
+
+    if (!isVoltaMachine)
+        return; // No stack to initialize
 
     int stackSize = voltaMachine->getStackSize();
 
@@ -332,6 +336,11 @@ void HidraGui::clearMachineInterfaceComponents()
 void HidraGui::clearMemoryTable()
 {
     memoryModel.clear();
+}
+
+void HidraGui::clearStackTable()
+{
+    stackModel.clear();
 }
 
 void HidraGui::clearRegisterWidgets()
