@@ -535,10 +535,9 @@ void Machine::assemble(QString sourceCode)
 
 
     buildSuccessful = true;
+
     copyAssemblerMemoryToMemory();
-    clearRegisters();
-    clearFlags();
-    clearCounters();
+    clearAfterBuild();
 }
 
 void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly)
@@ -1516,8 +1515,16 @@ void Machine::clear()
     clearCounters();
     clearAssemblerData();
 
-    setPCValue(0);
     setBreakpoint(-1);
+    setRunning(false);
+}
+
+void Machine::clearAfterBuild()
+{
+    clearRegisters();
+    clearFlags();
+    clearCounters();
+
     setRunning(false);
 }
 

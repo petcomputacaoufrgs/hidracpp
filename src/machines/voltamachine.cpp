@@ -442,3 +442,9 @@ void VoltaMachine::clear()
     clearStack();
     Machine::clear();
 }
+
+void VoltaMachine::clearAfterBuild()
+{
+    clearStack();
+    Machine::clearAfterBuild();
+}

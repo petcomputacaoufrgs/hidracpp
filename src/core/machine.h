@@ -200,6 +200,7 @@ public:
     void clearCounters();
 
     virtual void clear();
+    virtual void clearAfterBuild();
 
     virtual void generateDescriptions();
     QString getDescription(QString assemblyFormat);

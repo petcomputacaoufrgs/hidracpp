@@ -24,6 +24,7 @@ public:
 
     int getSPValue();
     virtual void clear();
+    virtual void clearAfterBuild();
 
     Register *SP;
 
