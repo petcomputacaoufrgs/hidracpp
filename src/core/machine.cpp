@@ -1216,6 +1216,14 @@ int Machine::getMemorySize() const
     return memory.size();
 }
 
+static bool isPowerOfTwo(unsigned int value)
+{
+    while (((value % 2) == 0) && value > 1) // While value is even and greater than one
+        value /= 2;
+
+    return (value == 1);
+}
+
 void Machine::setMemorySize(int size)
 {
     memory.fill(nullptr, size);
@@ -1230,24 +1238,27 @@ void Machine::setMemorySize(int size)
         memory[i] = new Byte();
         assemblerMemory[i] = new Byte();
     }
+
+    Q_ASSERT(isPowerOfTwo(size)); // Size must be a power of two for the mask to work
+    memoryMask = (size - 1);
 }
 
 int Machine::getMemoryValue(int address) const
 {
-    return memory[address]->getValue();
+    return memory[address & memoryMask]->getValue();
 }
 
 void Machine::setMemoryValue(int address, int value)
 {
-    memory[address]->setValue(value);
-    changed[address] = true;
+    memory[address & memoryMask]->setValue(value);
+    changed[address & memoryMask] = true;
 }
 
 bool Machine::hasByteChanged(int address)
 {
-    if (changed[address])
+    if (changed[address & memoryMask])
     {
-        changed[address] = false;
+        changed[address & memoryMask] = false;
         return true;
     }
     else
