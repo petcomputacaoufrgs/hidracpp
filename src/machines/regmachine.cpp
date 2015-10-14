@@ -45,3 +45,36 @@ RegMachine::RegMachine()
 
     addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN)); // Used for "if r a0 a1"
 }
+
+
+void RegMachine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode, QString registerName, int immediateAddress)
+{
+    Instruction::InstructionCode instructionCode;
+    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
+
+    switch (instructionCode)
+    {
+    case Instruction::REG_INC:
+        setRegisterValue(registerName, getRegisterValue(registerName) + 1);
+        break;
+
+    case Instruction::REG_DEC:
+        setRegisterValue(registerName, getRegisterValue(registerName) - 1);
+        break;
+
+    case Instruction::REG_IF:
+        if (getRegisterValue(registerName) == 0)
+            setPCValue(getMemoryValue(immediateAddress));
+        else
+            setPCValue(getMemoryValue(immediateAddress + 1));
+        break;
+
+    case Instruction::REG_HLT:
+        setRunning(false);
+        break;
+
+    default:
+        break;
+    }
+    instructionCount++;
+}

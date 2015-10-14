@@ -266,28 +266,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         setRunning(false);
         break;
 
-    default: // NOP
-        break;
-
-
-
-    //////////////////////////////////////////////////
-    // REG
-    //////////////////////////////////////////////////
-
-    case Instruction::REG_INC:
-        setRegisterValue(registerName, getRegisterValue(registerName) + 1);
-        break;
-
-    case Instruction::REG_DEC:
-        setRegisterValue(registerName, getRegisterValue(registerName) - 1);
-        break;
-
-    case Instruction::REG_IF:
-        if (getRegisterValue(registerName) == 0)
-            setPCValue(getMemoryValue(immediateAddress));
-        else
-            setPCValue(getMemoryValue(immediateAddress + 1));
+    default: // NOP etc.
         break;
     }
 

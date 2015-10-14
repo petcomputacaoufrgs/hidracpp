@@ -17,7 +17,7 @@ public:
         NEG, SHR, SHL, ROR, ROL,
         HLT,
 
-        REG_INC, REG_DEC, REG_IF,
+        REG_INC, REG_DEC, REG_IF, REG_HLT,
 
         VOLTA_NOP,
         VOLTA_ADD, VOLTA_SUB, VOLTA_AND,  VOLTA_OR, VOLTA_CLR, VOLTA_NOT, VOLTA_NEG,
