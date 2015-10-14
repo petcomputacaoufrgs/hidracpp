@@ -29,6 +29,8 @@ public:
 
     QVector<Byte*> stack;
     QVector<bool> stackChanged;
+
+    int stackMask;
 };
 
 #endif // VOLTAMACHINE_H

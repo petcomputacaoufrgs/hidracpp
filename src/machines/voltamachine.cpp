@@ -153,6 +153,7 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
     case Instruction::VOLTA_ASR:
         value1 = stackPop();
         result = value1 >> 1;
+        result |= (value1 & 0x80); // Preserve sign (arithmetic shift)
         stackPush(result);
         break;
 
@@ -395,6 +396,14 @@ int VoltaMachine::stackPop()
 // Getters/setters, clear
 //////////////////////////////////////////////////
 
+static bool isPowerOfTwo(unsigned int value)
+{
+    while (((value % 2) == 0) && value > 1) // While value is even and greater than one
+        value /= 2;
+
+    return (value == 1);
+}
+
 void VoltaMachine::setStackSize(int size)
 {
     stack.fill(nullptr, size);
@@ -402,16 +411,19 @@ void VoltaMachine::setStackSize(int size)
 
     for (int i=0; i<stack.size(); i++)
         stack[i] = new Byte();
+
+    Q_ASSERT(isPowerOfTwo(size)); // Size must be a power of two for the mask to work
+    stackMask = (size - 1);
 }
 
 int VoltaMachine::getStackValue(int address)
 {
-    return stack[address]->getValue();
+    return stack[address & stackMask]->getValue();
 }
 
 void VoltaMachine::setStackValue(int address, int value)
 {
-    stack[address]->setValue(value & 0xFF);
+    stack[address & stackMask]->setValue(value & 0xFF);
 }
 
 void VoltaMachine::clearStack()

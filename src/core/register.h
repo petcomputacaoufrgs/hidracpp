@@ -28,6 +28,7 @@ private:
 
     int value;
     int numOfBits;
+    int valueMask;
 };
 
 #endif // REGISTER_H

@@ -227,6 +227,7 @@ protected:
     int breakpoint;
     int instructionCount;
     int accessCount;
+    int memoryMask;
 
 signals:
     void buildErrorDetected(QString);

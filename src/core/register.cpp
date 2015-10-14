@@ -9,6 +9,7 @@ Register::Register(QString name, QString bitPattern, int numOfBits)
 
     this->numOfBits = numOfBits;
     this->value = 0;
+    this->valueMask = (1 << numOfBits) - 1;
 }
 
 QString Register::getName() const
@@ -36,7 +37,7 @@ int Register::getValue() const
 
 void Register::setValue(int value)
 {
-    this->value = value & ((1 << numOfBits) - 1);
+    this->value = value & valueMask;
 }
 
 void Register::incrementValue()

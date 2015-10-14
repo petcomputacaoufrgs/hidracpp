@@ -156,7 +156,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::SHR:
         value1 = getRegisterValue(registerName);
-        result = (value1 >> 1) & 0xFF;
+        result = (value1 >> 1) & 0xFF; // Logical shift (unsigned)
 
         setRegisterValue(registerName, result);
         setCarry(value1 & 0x01);
