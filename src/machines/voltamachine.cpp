@@ -318,16 +318,16 @@ int VoltaMachine::getStackSize()
 
 void VoltaMachine::stackPush(int value)
 {
-    accessCount++; // TODO: Stack conta acessos?
-    SP->setValue(SP->getValue() - 1); // Decrement SP
+    accessCount++;
     setStackValue(SP->getValue(), value);
+    SP->incrementValue();
 }
 
 int VoltaMachine::stackPop()
 {
     accessCount++;
+    SP->setValue(SP->getValue() - 1); // Decrement SP
     int value = getStackValue(SP->getValue());
-    SP->incrementValue();
     return value;
 }
 

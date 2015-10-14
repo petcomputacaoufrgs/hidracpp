@@ -8,7 +8,7 @@ class VoltaMachine : public Machine
 public:
     VoltaMachine();
 
-    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
+    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString, int immediateAddress);
     void skipNextInstruction();
 
     void stackPush(int value);

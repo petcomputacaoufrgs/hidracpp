@@ -495,14 +495,14 @@ void HidraGui::updateStackTable()
 
     for (int row=0; row<stackSize; row++)
     {
-        int stackAddress = row;
+        int stackAddress = stackSize-row-1;
         int value = voltaMachine->getStackValue(stackAddress);
 
         //////////////////////////////////////////////////
         // Column 0: SP Arrow
         //////////////////////////////////////////////////
 
-        stackModel.item(row, 0)->setText((row == spValue) ? "\u2192" : ""); // Unicode arrow
+        stackModel.item(row, 0)->setText((stackAddress == spValue) ? "\u2192" : ""); // Unicode arrow
 
 
 
@@ -519,6 +519,7 @@ void HidraGui::updateStackTable()
         // Column 2: Byte value
         //////////////////////////////////////////////////
 
+        stackModel.item(row, 2)->setEnabled(stackAddress < spValue); // Items before SP (and thus inaccessible) are greyed out
         stackModel.item(row, 2)->setText(QString::number(value, base).toUpper());
 
         // On mouse-over, sends value to statusbar (with "#" prefix)
