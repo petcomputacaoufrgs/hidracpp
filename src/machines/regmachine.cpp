@@ -31,11 +31,10 @@ RegMachine::RegMachine()
     // Initialize instructions
     //////////////////////////////////////////////////
 
-    instructions.append(new Instruction(1, "00......", Instruction::REG_INC, "inc r"));
-    instructions.append(new Instruction(1, "01......", Instruction::REG_DEC, "dec r"));
-    instructions.append(new Instruction(3, "10......", Instruction::REG_IF,  "if r a0 a1"));
-    instructions.append(new Instruction(1, "11......", Instruction::HLT,     "hlt"));
-
+    instructions.append(new Instruction(1, "00......", Instruction::INC,    "inc r"));
+    instructions.append(new Instruction(1, "01......", Instruction::DEC,    "dec r"));
+    instructions.append(new Instruction(3, "10......", Instruction::REG_IF, "if r a0 a1"));
+    instructions.append(new Instruction(1, "11......", Instruction::HLT,    "hlt"));
 
 
 
@@ -44,37 +43,4 @@ RegMachine::RegMachine()
     //////////////////////////////////////////////////
 
     addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN)); // Used for "if r a0 a1"
-}
-
-
-void RegMachine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode, QString registerName, int immediateAddress)
-{
-    Instruction::InstructionCode instructionCode;
-    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
-
-    switch (instructionCode)
-    {
-    case Instruction::REG_INC:
-        setRegisterValue(registerName, getRegisterValue(registerName) + 1);
-        break;
-
-    case Instruction::REG_DEC:
-        setRegisterValue(registerName, getRegisterValue(registerName) - 1);
-        break;
-
-    case Instruction::REG_IF:
-        if (getRegisterValue(registerName) == 0)
-            setPCValue(getMemoryValue(immediateAddress));
-        else
-            setPCValue(getMemoryValue(immediateAddress + 1));
-        break;
-
-    case Instruction::REG_HLT:
-        setRunning(false);
-        break;
-
-    default:
-        break;
-    }
-    instructionCount++;
 }

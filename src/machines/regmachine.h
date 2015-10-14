@@ -7,8 +7,6 @@ class RegMachine : public Machine
 {
 public:
     RegMachine();
-
-    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode, QString registerName, int immediateAddress);
 };
 
 #endif // REGMACHINE_H

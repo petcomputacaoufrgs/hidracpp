@@ -186,6 +186,14 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
         setCarry((value1 & 0x80) ? 1 : 0);
         break;
 
+    case Instruction::INC:
+        setRegisterValue(registerName, getRegisterValue(registerName) + 1);
+        break;
+
+    case Instruction::DEC:
+        setRegisterValue(registerName, getRegisterValue(registerName) - 1);
+        break;
+
 
 
     //////////////////////////////////////////////////
@@ -254,6 +262,13 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
             memoryWrite(jumpAddress, getPCValue());
             setPCValue(jumpAddress+1);
         }
+        break;
+
+    case Instruction::REG_IF:
+        if (getRegisterValue(registerName) == 0)
+            setPCValue(getMemoryValue(immediateAddress));
+        else
+            setPCValue(getMemoryValue(immediateAddress + 1));
         break;
 
 
