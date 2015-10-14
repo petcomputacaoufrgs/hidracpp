@@ -11,6 +11,8 @@ public:
     virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString, int immediateAddress);
     void skipNextInstruction();
 
+    virtual void generateDescriptions();
+
     void stackPush(int value);
     int  stackPop();
 

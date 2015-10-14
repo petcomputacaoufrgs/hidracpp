@@ -201,7 +201,7 @@ public:
 
     virtual void clear();
 
-    void generateDescriptions();
+    virtual void generateDescriptions();
     QString getDescription(QString assemblyFormat);
 
 protected:

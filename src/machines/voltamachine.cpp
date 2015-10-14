@@ -84,7 +84,7 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
     {
 
     //////////////////////////////////////////////////
-    // Arithmethic and logic
+    // Arithmethic and logic (two operands)
     //////////////////////////////////////////////////
 
     case Instruction::VOLTA_ADD:
@@ -114,6 +114,12 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
         result = value1 | value2;
         stackPush(result);
         break;
+
+
+
+    //////////////////////////////////////////////////
+    // Arithmethic and logic (one operand)
+    //////////////////////////////////////////////////
 
     case Instruction::VOLTA_CLR:
         stackPop();
@@ -173,7 +179,7 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
 
 
     //////////////////////////////////////////////////
-    // Conditionals
+    // Conditionals (one operand)
     //////////////////////////////////////////////////
 
     case Instruction::VOLTA_SZ:
@@ -211,6 +217,12 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
         if (value1 <= 0)
             skipNextInstruction();
         break;
+
+
+
+    //////////////////////////////////////////////////
+    // Conditionals (two operands)
+    //////////////////////////////////////////////////
 
     case Instruction::VOLTA_SEQ:
         value1 = stackPop();
@@ -288,7 +300,7 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
         setRunning(false);
         break;
 
-    default:
+    default: // NOP etc.
         break;
     }
     instructionCount++;
@@ -303,6 +315,52 @@ void VoltaMachine::skipNextInstruction()
     // Skip next byte
     if (instruction && instruction->getNumBytes() == 2)
         incrementPCValue();
+}
+
+void VoltaMachine::generateDescriptions()
+{
+    descriptions["nop"] = "Nenhuma operação.";
+
+    // Arithmetic and logic (two operands)
+    descriptions["add"] = "Desempilha op1 e op2 e empilha a soma de seus valores.";
+    descriptions["sub"] = "Desempilha op1 e op2 e empilha a subtração de seus valores."; // TODO: Especificar ordem
+    descriptions["and"] = "Desempilha op1 e op2 e empilha o 'e' lógico entre seus bits.";
+    descriptions["or"]  = "Desempilha op1 e op2 e empilha o 'ou' lógico entre seus bits.";
+
+    // Arithmetic and logic (one operand)
+    descriptions["clr"] = "Zera o valor no topo da pilha.";
+    descriptions["not"] = "Inverte (complementa) o valor dos bits do topo da pilha.";
+    descriptions["neg"] = "Troca o sinal do valor em complemento de 2 do topo da pilha entre positivo e negativo.";
+    descriptions["inc"] = "Incrementa em uma unidade o topo da pilha.";
+    descriptions["dec"] = "Decrementa de uma unidade o topo da pilha.";
+    descriptions["asr"] = "Realiza shift aritmético dos bits do topo da pilha para a direita, mantendo seu sinal em complemento de dois (bit mais significativo).";
+    descriptions["asl"] = "Realiza shift aritmético dos bits do topo da pilha para a esquerda, preenchendo com zero o bit menos significativo.";
+    descriptions["ror"] = "Realiza rotação para a direita dos bits do topo da pilha.";
+    descriptions["rol"] = "Realiza rotação para a esquerda dos bits do topo da pilha.";
+
+    // Conditionals (one operand)
+    descriptions["sz"]  = "Retira o topo da pilha e pula a próxima instrução se for igual a zero (skip on zero).";
+    descriptions["snz"] = "Retira o topo da pilha e pula a próxima instrução se for diferente de zero (skip on not zero).";
+    descriptions["spl"] = "Retira o topo da pilha e pula a próxima instrução se for positivo (skip on plus).";
+    descriptions["smi"] = "Retira o topo da pilha e pula a próxima instrução se for negativo (skip on minus).";
+    descriptions["spz"] = "Retira o topo da pilha e pula a próxima instrução se for maior ou igual a zero (skip on plus/zero).";
+    descriptions["smz"] = "Retira o topo da pilha e pula a próxima instrução se for menor ou igual a zero (skip on minus/zero).";
+
+    // Conditionals (two operands)
+    descriptions["seq"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 = op2 (skip if equal).";
+    descriptions["sne"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 ≠ op2 (skip if not equal).";
+    descriptions["sgr"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 &gt; op2 (skip if greater than).";
+    descriptions["sls"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 &lt; op2 (skip if less than).";
+    descriptions["sge"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 ≥ op2 (skip if greater than/equal to).";
+    descriptions["sle"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 ≤ op2 (skip if less than/equal to).";
+
+    // Others
+    descriptions["rts"]   = "Desvia para o endereço indicado pelo topo da pilha, desempilhando-o (retorno de sub-rotina).";
+    descriptions["psh a"] = "Empilha o valor do endereço de memória 'a'.";
+    descriptions["pop a"] = "Desempilha o topo da pilha, armazenando-o no endereço de memória 'a'.";
+    descriptions["jmp a"] = "Desvia a execução para o endereço 'a' (desvio incondicional).";
+    descriptions["jsr a"] = "Empilha PC e desvia para o endereço 'a' (desvio para sub-rotina).";
+    descriptions["hlt"]   = "Termina a execução.";
 }
 
 

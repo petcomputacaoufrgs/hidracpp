@@ -1534,7 +1534,7 @@ void Machine::generateDescriptions()
     descriptions["not r"]   = "Inverte (complementa) o valor dos bits do registrador 'r'.";
     descriptions["sub r a"] = "Subtrai o valor no endereço 'a' do registrador 'r'.";
     descriptions["jsr a"]   = "Desvia para subrotina, armazenando o valor atual de PC em 'a' e desviando a execução para o endereço 'a' + 1.";
-    descriptions["neg r"]   = "Troca o sinal do valor em complemento de 2 do registrador 'r' de positivo para negativo e vice-versa.";
+    descriptions["neg r"]   = "Troca o sinal do valor em complemento de 2 do registrador 'r' entre positivo e negativo.";
     descriptions["shr r"]   = "Realiza shift lógico dos bits do registrador 'r' para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
 
     // Pitagoras
