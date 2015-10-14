@@ -35,7 +35,6 @@ HidraGui::HidraGui(QWidget *parent) :
 
     ui->tableViewMemoryInstructions->setEditTriggers(false);
     ui->tableViewMemoryData->setEditTriggers(false);
-    ui->tableViewMemoryData->setVisible(false);
 
     // Select Neander machine and update interface
     selectMachine("Neander");
@@ -163,6 +162,7 @@ void HidraGui::updateMachineInterface(bool force = false)
 void HidraGui::initializeMachineInterfaceComponents()
 {
     initializeMemoryTable();
+    initializeStackTable();
     initializeFlagWidgets();
     initializeRegisterWidgets();
     initializeHighlighter();
@@ -216,6 +216,48 @@ void HidraGui::initializeMemoryTable()
     // Scroll to appropriate position
     ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, 0), QAbstractItemView::PositionAtTop);
     ui->tableViewMemoryData->scrollTo(memoryModel.index(128, 1), QAbstractItemView::PositionAtTop);
+}
+
+void HidraGui::initializeStackTable()
+{
+    VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
+    bool isVoltaMachine = (voltaMachine != nullptr);
+
+    // If machine is Volta, show stack. Otherwise, show data memory.
+    ui->tableViewStack->setVisible(isVoltaMachine);
+    ui->tableViewMemoryData->setVisible(!isVoltaMachine);
+
+    if (!isVoltaMachine)
+        return; // No stack to initialize
+
+    int stackSize = voltaMachine->getStackSize();
+
+    ui->tableViewStack->setModel(&stackModel);
+
+    // Set table size
+    stackModel.setRowCount(stackSize);
+    stackModel.setColumnCount(3);
+
+    // Initialize items
+    for (int row = 0; row < stackSize; row++)
+    {
+        for (int column = 0; column < stackModel.columnCount(); column++)
+            stackModel.setData(stackModel.index(row, column), "");
+    }
+
+    // Set table headers
+    stackModel.setHeaderData(0, Qt::Horizontal, " ");
+    stackModel.setHeaderData(1, Qt::Horizontal, " End ");
+    stackModel.setHeaderData(2, Qt::Horizontal, "Valor");
+
+    // Adjust table settings
+    ui->tableViewStack->verticalHeader()->hide();
+    ui->tableViewStack->resizeRowsToContents();
+    ui->tableViewStack->resizeColumnsToContents();
+    ui->tableViewStack->setMouseTracking(true);
+
+    // Scroll to appropriate position
+    //ui->tableViewStack->scrollTo(stackModel.index(0, 1), QAbstractItemView::PositionAtTop);
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -296,6 +338,11 @@ void HidraGui::clearMemoryTable()
     memoryModel.clear();
 }
 
+void HidraGui::clearStackTable()
+{
+    stackModel.clear();
+}
+
 void HidraGui::clearRegisterWidgets()
 {
     while(ui->layoutRegisters->count() > 0)
@@ -327,6 +374,7 @@ void HidraGui::clearInstructionsList()
 void HidraGui::updateMachineInterfaceComponents(bool force)
 {
     updateMemoryTable(force);
+    updateStackTable();
     updateFlagWidgets();
     updateRegisterWidgets();
     updateCodeEditor();
@@ -432,6 +480,56 @@ void HidraGui::updateMemoryTable(bool force)
     // Update all cells, resize
     emit memoryModel.dataChanged(memoryModel.index(0, 0), memoryModel.index(memorySize, 0));
     ui->tableViewMemoryData->resizeColumnsToContents();
+}
+
+void HidraGui::updateStackTable()
+{
+    VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
+
+    if (voltaMachine == nullptr) // Not Volta machine
+        return;
+
+    int stackSize = voltaMachine->getStackSize();
+    int spValue = voltaMachine->getSPValue();
+    int base = showHexValues? 16 : 10;
+
+    for (int row=0; row<stackSize; row++)
+    {
+        int stackAddress = row;
+        int value = voltaMachine->getStackValue(stackAddress);
+
+        //////////////////////////////////////////////////
+        // Column 0: SP Arrow
+        //////////////////////////////////////////////////
+
+        stackModel.item(row, 0)->setText((row == spValue) ? "\u2192" : ""); // Unicode arrow
+
+
+
+        //////////////////////////////////////////////////
+        // Column 1: Address
+        //////////////////////////////////////////////////
+
+        stackModel.item(row, 1)->setEnabled(false);
+        stackModel.item(row, 1)->setText(QString::number(stackAddress, base).toUpper());
+
+
+
+        //////////////////////////////////////////////////
+        // Column 2: Byte value
+        //////////////////////////////////////////////////
+
+        stackModel.item(row, 2)->setText(QString::number(value, base).toUpper());
+
+        // On mouse-over, sends value to statusbar (with "#" prefix)
+        // The information box then obtains the value and displays it in dec/hex/bin
+        QString statusTip = "#" + QString::number(voltaMachine->getStackValue(stackAddress));
+        stackModel.item(row, 2)->setStatusTip(statusTip);
+    }
+
+    // Update all cells, resize
+    emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(stackSize, 0));
+    ui->tableViewStack->resizeColumnsToContents();
 }
 
 void HidraGui::updateRegisterWidgets()

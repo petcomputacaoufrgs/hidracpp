@@ -64,8 +64,9 @@ public:
 
     void step();
     void fetchInstruction(int &fetchedValue, Instruction *&instruction);
+
     virtual void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &immediateAddress);
-    void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
+    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
 
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
     QString extractRegisterName(int fetchedValue);
@@ -122,9 +123,10 @@ public:
     int memoryRead(int address); // Increments accessCount
     void memoryWrite(int address, int value); // Increments accessCount
     int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
+
     virtual int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
-    inline int memoryGetOperandValue(  int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
-    inline int memoryGetJumpAddress(   int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    int memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    int memoryGetJumpAddress( int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
 
 
 
@@ -197,7 +199,7 @@ public:
     int getAccessCount();
     void clearCounters();
 
-    void clear();
+    virtual void clear();
 
     void generateDescriptions();
     QString getDescription(QString assemblyFormat);
@@ -206,7 +208,7 @@ protected:
 
     QString identifier;
     QVector<Register*> registers;
-    Register *PC, *SP;
+    Register *PC;
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
@@ -218,6 +220,7 @@ protected:
     QVector<AddressingMode*> addressingModes;
     QHash<QString, int> labelPCMap;
     QHash<QString, QString> descriptions;
+    int instructionPC; // Used by PC addressing mode
     bool buildSuccessful;
     bool running;
     int firstErrorLine;

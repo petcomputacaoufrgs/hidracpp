@@ -99,6 +99,7 @@ private:
 
     void initializeMachineInterfaceComponents();
     void initializeMemoryTable();
+    void initializeStackTable();
     void initializeRegisterWidgets();
     void initializeFlagWidgets();
     void initializeHighlighter();
@@ -106,12 +107,14 @@ private:
 
     void clearMachineInterfaceComponents();
     void clearMemoryTable();
+    void clearStackTable();
     void clearRegisterWidgets();
     void clearFlagWidgets();
     void clearInstructionsList();
 
     void updateMachineInterfaceComponents(bool force);
     void updateMemoryTable(bool force);
+    void updateStackTable();
     void updateRegisterWidgets();
     void updateFlagWidgets();
     void updateCodeEditor();
@@ -139,7 +142,7 @@ private:
     bool showHexValues;
     bool fastExecute;
     bool followPC;
-    QStandardItemModel memoryModel;
+    QStandardItemModel memoryModel, stackModel;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
     QString currentMachineName;

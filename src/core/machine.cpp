@@ -7,7 +7,6 @@ Machine::Machine(QObject *parent) :
     QObject(parent)
 {
     PC = nullptr;
-    SP = nullptr;
 
     clearCounters();
     setBreakpoint(-1);
@@ -36,6 +35,8 @@ void Machine::step()
     QString registerName;
     AddressingMode::AddressingModeCode addressingModeCode;
     Instruction *instruction = nullptr;
+
+    instructionPC = getPCValue(); // Used by PC addressing mode
 
     fetchInstruction(fetchedValue, instruction); // Outputs fetched value (byte or word) and corresponding instruction
     decodeInstruction(fetchedValue, instruction, addressingModeCode, registerName, immediateAddress); // Outputs addressing mode, register and immediate address
@@ -287,110 +288,6 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
             setPCValue(getMemoryValue(immediateAddress));
         else
             setPCValue(getMemoryValue(immediateAddress + 1));
-        break;
-
-
-
-
-    //////////////////////////////////////////////////
-    // Volta
-    //////////////////////////////////////////////////
-
-
-    case Instruction::VOLTA_NOP:
-        break;
-
-    case Instruction::VOLTA_ADD:
-        break;
-
-    case Instruction::VOLTA_SUB:
-        break;
-
-    case Instruction::VOLTA_AND:
-        break;
-
-    case Instruction::VOLTA_OR:
-        break;
-
-    case Instruction::VOLTA_CLR:
-        break;
-
-    case Instruction::VOLTA_NOT:
-        break;
-
-    case Instruction::VOLTA_REG:
-        break;
-
-    case Instruction::VOLTA_INC:
-        break;
-
-    case Instruction::VOLTA_DEC:
-        break;
-
-    case Instruction::VOLTA_ASR:
-        break;
-
-    case Instruction::VOLTA_ASL:
-        break;
-
-    case Instruction::VOLTA_ROR:
-        break;
-
-    case Instruction::VOLTA_ROL:
-        break;
-
-    case Instruction::VOLTA_SZ:
-        break;
-
-    case Instruction::VOLTA_SNZ:
-        break;
-
-    case Instruction::VOLTA_SPL:
-        break;
-
-    case Instruction::VOLTA_SMI:
-        break;
-
-    case Instruction::VOLTA_SPZ:
-        break;
-
-    case Instruction::VOLTA_SMZ:
-        break;
-
-    case Instruction::VOLTA_SEQ:
-        break;
-
-    case Instruction::VOLTA_SNE:
-        break;
-
-    case Instruction::VOLTA_SGR:
-        break;
-
-    case Instruction::VOLTA_SLS:
-        break;
-
-    case Instruction::VOLTA_SGE:
-        break;
-
-    case Instruction::VOLTA_SLE:
-        break;
-
-    case Instruction::VOLTA_RTS:
-        break;
-
-    case Instruction::VOLTA_PSH:
-        break;
-
-    case Instruction::VOLTA_POP:
-        break;
-
-    case Instruction::VOLTA_JMP:
-        break;
-
-    case Instruction::VOLTA_JSR:
-        break;
-
-    case Instruction::VOLTA_HLT:
         break;
     }
 
@@ -1140,14 +1037,14 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::Addre
         case AddressingMode::INDIRECT:
             return memoryRead(memoryRead(immediateAddress));
 
-        case AddressingMode::IMMEDIATE: // Immediate addressing mode
+        case AddressingMode::IMMEDIATE:
             return immediateAddress;
 
-        case AddressingMode::INDEXED_BY_X: // Indexed addressing mode
+        case AddressingMode::INDEXED_BY_X:
             return address(memoryRead(immediateAddress) + getRegisterValue("X"));
 
         case AddressingMode::INDEXED_BY_PC:
-            return address(memoryRead(immediateAddress) + getRegisterValue("PC"));
+            return address(memoryRead(immediateAddress) + instructionPC);
     }
 
     return 0;
