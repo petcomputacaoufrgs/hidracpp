@@ -177,7 +177,13 @@ void HidraCodeEditor::wheelEvent(QWheelEvent *e)
         return;
     }
 
-    QPlainTextEdit::wheelEvent(e);
+    QPlainTextEdit::wheelEvent(e); // Call parent method
+}
+
+void HidraCodeEditor::clear()
+{
+    breakpointBlock = QTextBlock(); // Invalidate breakpoint
+    QPlainTextEdit::clear(); // Call parent method
 }
 
 void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)

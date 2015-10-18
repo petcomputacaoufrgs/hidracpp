@@ -27,6 +27,7 @@ public:
     void setCurrentLine(int line);
 
     void wheelEvent(QWheelEvent *e);
+    virtual void clear();
 
 public slots:
 
