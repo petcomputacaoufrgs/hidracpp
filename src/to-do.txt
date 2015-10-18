@@ -16,6 +16,7 @@ Código
 - Testar endereços altos do Pericles
 - Greyed out stack [done]
 - Reg: muitos registradores?
+- Indexamento por PC, PC da instrução ou atual?
 
 Dúvidas do Volta:
 
@@ -45,7 +46,6 @@ Geral
 
 Interface
 
-- Usar caminho e nome do arquivo anterior em SaveAs
 - Asterisco no título quando o arquivo for modificado
 
 Breakpoints

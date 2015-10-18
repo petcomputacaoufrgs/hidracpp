@@ -192,6 +192,7 @@ public:
     Instruction* getInstructionFromValue(int value);
     Instruction* getInstructionFromMnemonic(QString mnemonic);
 
+    QVector<AddressingMode *> getAddressingModes() const;
     AddressingMode::AddressingModeCode getDefaultAddressingModeCode();
     int getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode);
 
@@ -204,6 +205,7 @@ public:
 
     virtual void generateDescriptions();
     QString getDescription(QString assemblyFormat);
+    void getAddressingModeDescription(AddressingMode::AddressingModeCode addressingModeCode, QString &acronym, QString &name, QString &format, QString &description);
 
 protected:
 

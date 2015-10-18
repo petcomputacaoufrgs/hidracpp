@@ -104,6 +104,7 @@ private:
     void initializeFlagWidgets();
     void initializeHighlighter();
     void initializeInstructionsList();
+    void initializeAddressingModesList();
 
     void clearMachineInterfaceComponents();
     void clearMemoryTable();
@@ -111,6 +112,7 @@ private:
     void clearRegisterWidgets();
     void clearFlagWidgets();
     void clearInstructionsList();
+    void clearAddressingModesList();
 
     void updateMachineInterfaceComponents(bool force);
     void updateMemoryTable(bool force);

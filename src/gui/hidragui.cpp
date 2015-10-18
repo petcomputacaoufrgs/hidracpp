@@ -164,6 +164,7 @@ void HidraGui::initializeMachineInterfaceComponents()
     initializeRegisterWidgets();
     initializeHighlighter();
     initializeInstructionsList();
+    initializeAddressingModesList();
 }
 
 void HidraGui::initializeMemoryTable()
@@ -214,7 +215,7 @@ void HidraGui::initializeMemoryTable()
 
     // Scroll to appropriate position
     ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, 0), QAbstractItemView::PositionAtTop);
-    ui->tableViewMemoryData->scrollTo(memoryModel.index(128, 1), QAbstractItemView::PositionAtTop);
+    ui->tableViewMemoryData->scrollTo(memoryModel.index((memorySize < 4096) ? 128 : 1024, 1), QAbstractItemView::PositionAtTop);
 }
 
 void HidraGui::initializeStackTable()
@@ -302,18 +303,48 @@ void HidraGui::initializeInstructionsList()
     foreach (Instruction *instruction, machine->getInstructions())
     {
         QLabel *instructionText = new QLabel(this);
-        instructionText->setText(instruction->getMnemonic().toUpper());
         instructionText->setTextFormat(Qt::RichText);
+        instructionText->setEnabled(false); // Grayed out
+
+        // Label text
+        instructionText->setText(instruction->getMnemonic().toUpper());
 
         // Description in tooltip
-        QString toolTip;
-        toolTip += "<b>" + instruction->getMnemonic().toUpper() + "</b> ";
-        toolTip += instruction->getArguments().join(" ") + "<br>";
-        toolTip += machine->getDescription(instruction->getAssemblyFormat());
+        QString toolTip = "<b>" + instruction->getMnemonic().toUpper() + "</b> " +
+                          instruction->getArguments().join(" ") + "<br>" +
+                          machine->getDescription(instruction->getAssemblyFormat());
         instructionText->setToolTip(toolTip);
 
-        instructionText->setEnabled(false); // Grayed out
         ui->layoutInstructions->addWidget(instructionText, i/6, i%6);
+        i += 1;
+    }
+}
+
+void HidraGui::initializeAddressingModesList()
+{
+    int i = 0;
+
+    ui->areaAddressingModes->setVisible(machine->getAddressingModes().size() > 1); // Only show if there's more than one addressing mode
+
+    foreach (AddressingMode *addressingMode, machine->getAddressingModes())
+    {
+        QString acronym, name, format, description;
+        machine->getAddressingModeDescription(addressingMode->getAddressingModeCode(), acronym, name, format, description);
+
+        QLabel *addressingModeText = new QLabel(this);
+        addressingModeText->setTextFormat(Qt::RichText);
+        addressingModeText->setEnabled(false); // Grayed out
+
+        // Label text
+        addressingModeText->setText(acronym);
+
+        // Description in tooltip
+        QString toolTip = "<b>" + name   + "</b><br>" +
+                          "<i>" + format + "</i><br>" +
+                          description;
+        addressingModeText->setToolTip(toolTip);
+
+        ui->layoutAddressingModes->addWidget(addressingModeText, i/6, i%6);
         i += 1;
     }
 }
@@ -330,6 +361,7 @@ void HidraGui::clearMachineInterfaceComponents()
     clearRegisterWidgets();
     clearFlagWidgets();
     clearInstructionsList();
+    clearAddressingModesList();
     clearErrorsField();
 }
 
@@ -363,6 +395,12 @@ void HidraGui::clearInstructionsList()
 {
     while(ui->layoutInstructions->count() > 0)
         delete ui->layoutInstructions->takeAt(0)->widget();
+}
+
+void HidraGui::clearAddressingModesList()
+{
+    while(ui->layoutAddressingModes->count() > 0)
+        delete ui->layoutAddressingModes->takeAt(0)->widget();
 }
 
 

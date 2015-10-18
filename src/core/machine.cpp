@@ -1469,6 +1469,11 @@ Instruction* Machine::getInstructionFromMnemonic(QString mnemonic)
     return nullptr;
 }
 
+QVector<AddressingMode *> Machine::getAddressingModes() const
+{
+    return addressingModes;
+}
+
 AddressingMode::AddressingModeCode Machine::getDefaultAddressingModeCode()
 {
     foreach (AddressingMode *addressingMode, addressingModes)
@@ -1586,4 +1591,45 @@ QString Machine::getDescription(QString assemblyFormat)
         generateDescriptions();
 
     return descriptions.value(assemblyFormat, "");
+}
+
+void Machine::getAddressingModeDescription(AddressingMode::AddressingModeCode addressingModeCode, QString &acronym, QString &name, QString &format, QString &description)
+{
+    switch (addressingModeCode)
+    {
+        case AddressingMode::DIRECT:
+            acronym     = "DIR";
+            name        = "Direto";
+            format      = "Formato: a";
+            description = "Valor de 'a' representa o endereço do operando, ou endereço de desvio em operações de jump.";
+            break;
+
+        case AddressingMode::INDIRECT:
+            acronym     = "IND";
+            name        = "Indireto";
+            format      = "Formato: a,I (sufixo ,I)";
+            description = "Valor de 'a' representa o endereço que contém o endereço direto.";
+            break;
+
+        case AddressingMode::IMMEDIATE:
+            acronym     = "IMD";
+            name        = "Imediato";
+            format      = "Formato: #a (prefixo #)";
+            description = "Valor de 'a' representa não um endereço, mas um valor imediato a ser carregado ou utilizado em operações aritméticas/lógicas.";
+            break;
+
+        case AddressingMode::INDEXED_BY_X:
+            acronym     = "IDX";
+            name        = "Indexado por X";
+            format      = "Formato: a,X (sufixo ,X)";
+            description = "Endereçamento direto com deslocamento (offset). A soma dos valores de ‘a’ e do registrador X representa o endereço direto.";
+            break;
+
+        case AddressingMode::INDEXED_BY_PC:
+            acronym     = "IPC";
+            name        = "Indexado por PC";
+            format      = "Formato: a,PC (sufixo ,PC)";
+            description = "Endereçamento direto com deslocamento (offset). A soma dos valores de ‘a’ e do registrador PC representa o endereço direto.";
+            break;
+    }
 }
