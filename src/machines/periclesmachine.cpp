@@ -68,47 +68,12 @@ PericlesMachine::PericlesMachine()
     addressingModes.append(new AddressingMode("......11", AddressingMode::INDEXED_BY_X, "(.*),x"));
 }
 
-int PericlesMachine::reserveAssemblerMemory(const Instruction *instruction, QString arguments)
+// Returns number of bytes reserved
+int PericlesMachine::calculateBytesToReserve(QString addressArgument)
 {
-    static QRegExp whitespace("\\s+");
-
-    QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getArguments().size();
     AddressingMode::AddressingModeCode addressingModeCode;
-
-    // Check if correct number of arguments:
-    if (argumentList.size() != numberOfArguments)
-        throw wrongNumberOfArguments;
-
-    extractArgumentAddressingModeCode(argumentList.last(), addressingModeCode); // Removes addressing mode from argument
-
-    int bytesToReserve;
-    // If the addressing mode is immediate reserve one byte for the instruction and one fore the number, otherwise reserve one for instruction and two for address.
-    if (addressingModeCode == AddressingMode::IMMEDIATE)
-        bytesToReserve = 2;
-    else
-        bytesToReserve = 3;
-
-    Machine::reserveAssemblerMemory(bytesToReserve);
-    return bytesToReserve;
-}
-
-bool PericlesMachine::customAddressWrite(QString argument, bool isImmediate)
-{
-    if (isImmediate)
-        return false;
-
-    int address = Machine::argumentToValue(argument, false);
-
-    int leastSignificantByte = address & 0xFF;
-    Machine::assemblerMemory[PC->getValue()]->setValue(leastSignificantByte);
-    PC->incrementValue();
-
-    int mostSignificantByte = (address >> 8) & 0x0F;
-    Machine::assemblerMemory[PC->getValue()]->setValue(mostSignificantByte);
-    PC->incrementValue();
-
-    return true;
+    extractArgumentAddressingModeCode(addressArgument, addressingModeCode);
+    return (addressingModeCode == AddressingMode::IMMEDIATE) ? 2 : 3; // Immediate requires only 2 bytes
 }
 
 void PericlesMachine::decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &immediateAddress)

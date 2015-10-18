@@ -423,7 +423,7 @@ void HidraGui::updateMemoryTable(bool force)
     int memorySize = machine->getMemorySize();
     int base = showHexValues? 16 : 10;
 
-    int currentLine = machine->getPCCorrespondingLine();
+    int currentLine = machine->getPCCorrespondingSourceLine();
 
 
 
@@ -498,7 +498,7 @@ void HidraGui::updateMemoryTable(bool force)
             rowColor = QColor(255, 202, 176); // Red
         else if (sourceAndMemoryInSync && row == intermediateAddress)
             rowColor = QColor(255, 228, 148); // Orange
-        else if (sourceAndMemoryInSync && currentLine == machine->getAddressCorrespondingLine(row) && currentLine >= 0)
+        else if (sourceAndMemoryInSync && currentLine == machine->getAddressCorrespondingSourceLine(row) && currentLine >= 0)
             rowColor = QColor(255, 244, 128); // Yellow
         else
             rowColor = Qt::white;
@@ -588,7 +588,7 @@ void HidraGui::updateFlagWidgets()
 void HidraGui::updateCodeEditor()
 {
     if (sourceAndMemoryInSync)
-        codeEditor->highlightPCLine(machine->getPCCorrespondingLine());
+        codeEditor->highlightPCLine(machine->getPCCorrespondingSourceLine());
     else
         codeEditor->disableLineHighlight();
 }
@@ -783,7 +783,7 @@ void HidraGui::step(bool refresh = true)
         updateMachineInterface();
         if (followPC)
         {
-            codeEditor->setCurrentLine(machine->getPCCorrespondingLine());
+            codeEditor->setCurrentLine(machine->getPCCorrespondingSourceLine());
             ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(machine->getPCValue(), 0));
         }
         QApplication::processEvents();
@@ -909,7 +909,7 @@ void HidraGui::on_actionRun_triggered()
     {
         // Set breakpoint
         int breakpointLine = codeEditor->getBreakpointLine();
-        int breakpointAddress = machine->getLineCorrespondingAddress(breakpointLine);
+        int breakpointAddress = machine->getSourceLineCorrespondingAddress(breakpointLine);
         machine->setBreakpoint(breakpointAddress);
 
         // Start running
@@ -1033,10 +1033,10 @@ void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &i
 
 void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
 {
-    int addressCorrespondingLine = machine->getAddressCorrespondingLine(index.row());
+    int addressCorrespondingSourceLine = machine->getAddressCorrespondingSourceLine(index.row());
 
-    if (addressCorrespondingLine != -1)
-        codeEditor->setCurrentLine(addressCorrespondingLine);
+    if (addressCorrespondingSourceLine != -1)
+        codeEditor->setCurrentLine(addressCorrespondingSourceLine);
 }
 
 void HidraGui::on_actionResetRegisters_triggered()
@@ -1054,7 +1054,7 @@ void HidraGui::on_actionSetBreakpoint_triggered()
 
     // Set breakpoint
     int breakpointLine = codeEditor->getBreakpointLine();
-    int breakpointAddress = machine->getLineCorrespondingAddress(breakpointLine);
+    int breakpointAddress = machine->getSourceLineCorrespondingAddress(breakpointLine);
     machine->setBreakpoint(breakpointAddress);
 }
 

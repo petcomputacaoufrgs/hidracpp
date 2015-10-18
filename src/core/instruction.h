@@ -35,7 +35,8 @@ public:
     QStringList getArguments() const;
     QString getAssemblyFormat() const;
     int getByteValue();
-    int getNumBytes() const;
+    int getNumBytes() const; // 0 if variable
+    int getNumberOfArguments() const;
 
     InstructionCode getInstructionCode() const;
     QString getBitPattern() const;

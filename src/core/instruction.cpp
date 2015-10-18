@@ -7,7 +7,7 @@ Instruction::Instruction()
 
 Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat)
 {
-    this->numBytes = numBytes;
+    this->numBytes = numBytes; // 0 if variable
     this->bitPattern = bitPattern;
     this->byteRegExp = QRegExp(bitPattern);
     this->instructionCode = instructionCode;
@@ -48,6 +48,11 @@ int Instruction::getByteValue()
 int Instruction::getNumBytes() const
 {
     return numBytes;
+}
+
+int Instruction::getNumberOfArguments() const
+{
+    return arguments.size();
 }
 
 Instruction::InstructionCode Instruction::getInstructionCode() const

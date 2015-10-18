@@ -360,8 +360,6 @@ int Machine::toSigned(int unsignedByte)
 
 void Machine::assemble(QString sourceCode)
 {
-    int errorCount = 0;
-
     running = false;
     buildSuccessful = false;
     firstErrorLine = -1;
@@ -449,28 +447,20 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    int numBytes; // Number of bytes reserved, used to
+                    int numBytes = instruction->getNumBytes();
 
-                    if (instruction->getNumBytes() == 0)
+                    if (numBytes == 0) // If instruction has variable number of bytes
                     {
-                        QString arguments = sourceLines[lineNumber].section(whitespace, 1);
-                        numBytes = reserveAssemblerMemory(instruction, arguments);
-                    }
-                    else
-                    {
-                        numBytes = instruction->getNumBytes();
-                        reserveAssemblerMemory(numBytes);
+                        QString addressArgument = sourceLines[lineNumber].section(whitespace, -1); // Last argument
+                        numBytes = calculateBytesToReserve(addressArgument);
                     }
 
-                    for (int i = numBytes; i > 0; i--)
-                    {
-                        addressCorrespondingLine[PC->getValue()-i] = lineNumber;
-                    }
+                    reserveAssemblerMemory(numBytes, lineNumber);
                 }
                 else // Directive
                 {
                     QString arguments = sourceLines[lineNumber].section(whitespace, 1); // Everything after mnemonic
-                    obeyDirective(mnemonic, arguments, true);
+                    obeyDirective(mnemonic, arguments, true, lineNumber);
                 }
             }
         }
@@ -479,12 +469,11 @@ void Machine::assemble(QString sourceCode)
             if (firstErrorLine == -1)
                 firstErrorLine = lineNumber;
             emitError(lineNumber, errorCode);
-            errorCount += 1;
         }
     }
 
-    if (errorCount > 0)
-        return; // Abort compilation
+    if (firstErrorLine >= 0)
+        return; // Error(s) found, abort compilation
 
 
 
@@ -492,14 +481,14 @@ void Machine::assemble(QString sourceCode)
     // SECOND PASS: Build instructions/defines
     //////////////////////////////////////////////////
 
-    lineCorrespondingAddress.fill(-1, sourceLines.size());
+    sourceLineCorrespondingAddress.fill(-1, sourceLines.size());
     PC->setValue(0);
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
         try
         {
-            lineCorrespondingAddress[lineNumber] = PC->getValue();
+            sourceLineCorrespondingAddress[lineNumber] = PC->getValue();
 
             if (!sourceLines[lineNumber].isEmpty())
             {
@@ -513,10 +502,7 @@ void Machine::assemble(QString sourceCode)
                 }
                 else // Directive
                 {
-                    // TODO: addressCorrespondingLine for arrays (DAB, DAW)
-                    if (mnemonic != "org")
-                        addressCorrespondingLine[PC->getValue()] = lineNumber;
-                    obeyDirective(mnemonic, arguments, false);
+                    obeyDirective(mnemonic, arguments, false, lineNumber);
                 }
             }
         }
@@ -525,12 +511,11 @@ void Machine::assemble(QString sourceCode)
             if (firstErrorLine == -1)
                 firstErrorLine = lineNumber;
             emitError(lineNumber, errorCode);
-            errorCount += 1;
         }
     }
 
-    if (errorCount > 0)
-        return; // Abort compilation
+    if (firstErrorLine >= 0)
+        return; // Error(s) found, abort compilation
 
 
 
@@ -540,7 +525,7 @@ void Machine::assemble(QString sourceCode)
     clearAfterBuild();
 }
 
-void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly)
+void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine)
 {
     static QRegExp whitespace("\\s+");
 
@@ -586,7 +571,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
             }
             else if (reserveOnly)
             {
-                reserveAssemblerMemory(argumentList.first().mid(1).toInt() * bytesPerArgument);
+                reserveAssemblerMemory(argumentList.first().mid(1).toInt() * bytesPerArgument, sourceLine);
             }
             else // Skip bytes
             {
@@ -596,7 +581,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
         }
         else if (reserveOnly)
         {
-            reserveAssemblerMemory(numberOfArguments * bytesPerArgument); // Increments PC
+            reserveAssemblerMemory(numberOfArguments * bytesPerArgument, sourceLine); // Increments PC
         }
         else
         {
@@ -681,15 +666,15 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
 
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
     QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
-    int numberOfArguments = instruction->getArguments().size();
     AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT; // Default mode
     QStringList instructionArguments = instruction->getArguments();
+    bool isImmediate = false;
 
     int registerBitCode = 0b00000000;
     int addressingModeBitCode = 0b00000000;
 
-    // Check if correct number of arguments:
-    if (argumentList.size() != numberOfArguments)
+    // Check if number of arguments is correct:
+    if (argumentList.size() != instruction->getNumberOfArguments())
         throw wrongNumberOfArguments;
 
     // If argumentList contains a register:
@@ -706,21 +691,31 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
     {
         extractArgumentAddressingModeCode(argumentList.last(), addressingModeCode); // Removes addressing mode from argument
         addressingModeBitCode = getAddressingModeBitCode(addressingModeCode);
+        isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE);
     }
+
+
 
     // Write first byte (instruction with register and addressing mode):
     assemblerMemory[PC->getValue()]->setValue(instruction->getByteValue() | registerBitCode | addressingModeBitCode);
     PC->incrementValue();
 
-    // Write second byte (address/value):
-    if (instructionArguments.contains("a"))
+    // Write second byte (if 1-byte address/immediate value):
+    if (instruction->getNumBytes() == 2 || isImmediate)
     {
-        bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE);
-        if (!customAddressWrite(argumentList.last(), isImmediate))
-        {
-            assemblerMemory[PC->getValue()]->setValue(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
-            PC->incrementValue();
-        }
+        assemblerMemory[PC->getValue()]->setValue(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
+        PC->incrementValue();
+    }
+    // Write second and third bytes (if 2-byte addresses):
+    else if (instructionArguments.contains("a"))
+    {
+        int address = argumentToValue(argumentList.last(), isImmediate);
+
+        assemblerMemory[PC->getValue()]->setValue(address & 0xFF); // Least significant byte (little-endian)
+        PC->incrementValue();
+
+        assemblerMemory[PC->getValue()]->setValue((address >> 8) & 0xFF); // Most significant byte
+        PC->incrementValue();
     }
     // If instruction has two addresses (REG_IF), write both addresses:
     else if (instructionArguments.contains("a0") && instructionArguments.contains("a1"))
@@ -768,11 +763,11 @@ void Machine::clearAssemblerData()
     {
         assemblerMemory[i]->setValue(0);
         reserved[i] = false;
-        addressCorrespondingLine[i] = -1;
+        addressCorrespondingSourceLine[i] = -1;
         addressCorrespondingLabel[i] = "";
     }
 
-    lineCorrespondingAddress.clear();
+    sourceLineCorrespondingAddress.clear();
     labelPCMap.clear();
 }
 
@@ -787,14 +782,15 @@ void Machine::copyAssemblerMemoryToMemory()
     }
 }
 
-// Reserve 'sizeToReserve' bytes starting from PC. Throws exception on overlap.
-void Machine::reserveAssemblerMemory(int sizeToReserve)
+// Reserve 'sizeToReserve' bytes starting from PC, associate addresses with a source line. Throws exception on overlap.
+void Machine::reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine)
 {
     while (sizeToReserve > 0)
     {
         if (!reserved[PC->getValue()])
         {
             reserved[PC->getValue()] = true;
+            addressCorrespondingSourceLine[PC->getValue()] = associatedSourceLine;
             PC->incrementValue();
             sizeToReserve--;
         }
@@ -803,23 +799,10 @@ void Machine::reserveAssemblerMemory(int sizeToReserve)
     }
 }
 
-// Method for the machines that require the addressing mode to reserve memory.
-int Machine::reserveAssemblerMemory(const Instruction *instruction, QString arguments)
+// Method for machines that require the addressing mode to reserve memory.
+int Machine::calculateBytesToReserve(QString)
 {
-    (void)instruction;
-    (void)arguments;
-
-    // For default, do nothing
     return 0;
-}
-
-
-bool Machine::customAddressWrite(QString argument, bool isImmediate)
-{
-    (void)argument;
-    (void)isImmediate;
-
-    return false;
 }
 
 bool Machine::isValidValue(QString valueString, int min, int max)
@@ -1043,12 +1026,12 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::Addre
     return 0;
 }
 
-inline int Machine::memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+int Machine::memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
 {
     return memoryRead(memoryGetOperandAddress(immediateAddress, addressingModeCode));
 }
 
-inline int Machine::memoryGetJumpAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+int Machine::memoryGetJumpAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
 {
     return memoryGetOperandAddress(immediateAddress, addressingModeCode);
 }
@@ -1229,7 +1212,7 @@ void Machine::setMemorySize(int size)
     assemblerMemory.fill(nullptr, size);
     reserved.fill(false, size);
     changed.fill(true, size);
-    addressCorrespondingLine.fill(-1, size);
+    addressCorrespondingSourceLine.fill(-1, size);
     addressCorrespondingLabel.fill("", size);
 
     for (int i=0; i<memory.size(); i++)
@@ -1422,19 +1405,19 @@ void Machine::incrementPCValue()
     PC->setValue(PC->getValue() + 1);
 }
 
-int Machine::getPCCorrespondingLine()
+int Machine::getPCCorrespondingSourceLine()
 {
-    return addressCorrespondingLine.value(PC->getValue(), -1);
+    return addressCorrespondingSourceLine.value(PC->getValue(), -1);
 }
 
-int Machine::getAddressCorrespondingLine(int address)
+int Machine::getAddressCorrespondingSourceLine(int address)
 {
-    return (buildSuccessful) ? addressCorrespondingLine.value(address, -1) : -1;
+    return (buildSuccessful) ? addressCorrespondingSourceLine.value(address, -1) : -1;
 }
 
-int Machine::getLineCorrespondingAddress(int line)
+int Machine::getSourceLineCorrespondingAddress(int line)
 {
-    return (buildSuccessful) ? lineCorrespondingAddress.value(line, -1) : -1;
+    return (buildSuccessful) ? sourceLineCorrespondingAddress.value(line, -1) : -1;
 }
 
 QString Machine::getAddressCorrespondingLabel(int address)

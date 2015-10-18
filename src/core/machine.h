@@ -90,15 +90,14 @@ public:
 
     // Assembly
     void assemble(QString sourceCode);
-    void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly);
+    void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
     void clearAssemblerData();
     void copyAssemblerMemoryToMemory();
-    void reserveAssemblerMemory(int sizeToReserve);
-    virtual int  reserveAssemblerMemory(const Instruction *instruction, QString arguments);
-    virtual bool customAddressWrite(QString argument, bool isImmediate);
+    void reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine);
+    virtual int calculateBytesToReserve(QString addressArgument);
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);
@@ -183,9 +182,9 @@ public:
     void setPCValue(int value);
     void incrementPCValue();
 
-    int getPCCorrespondingLine();
-    int getLineCorrespondingAddress(int line);
-    int getAddressCorrespondingLine(int address);
+    int getPCCorrespondingSourceLine();
+    int getSourceLineCorrespondingAddress(int line);
+    int getAddressCorrespondingSourceLine(int address);
     QString getAddressCorrespondingLabel(int address);
 
     QVector<Instruction *> getInstructions() const;
@@ -215,7 +214,7 @@ protected:
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
     QVector<bool> reserved;
-    QVector<int> addressCorrespondingLine, lineCorrespondingAddress; // Each address may be associated with a line of code
+    QVector<int> addressCorrespondingSourceLine, sourceLineCorrespondingAddress; // Each address may be associated with a line of code
     QVector<QString> addressCorrespondingLabel;
     QVector<bool> changed;
     QVector<Flag*> flags;
@@ -234,7 +233,6 @@ protected:
 
 signals:
     void buildErrorDetected(QString);
-public slots:
 
 };
 
