@@ -13,14 +13,26 @@ Código
 - StatusTip para comandos (ver guia rápido)
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
-- Falar com o Weber: instruções PUSH e POP do Volta com mesmo código.
-- Falar com o Weber: Direção da pilha do Volta, endereçamento, valor inicial do SP, valor que aponta o SP
-- Falar com o Weber: ordem do SUB e das comparações, CLR zera o topo da pilha, ASR
+- Testar endereços altos do Pericles
 - Greyed out stack [done]
+- Reg: muitos registradores?
+
+Dúvidas do Volta:
+
+- Instruções PUSH e POP c/mesmo código
+- Interface: inverter pilha? Mostrar endereços?
+- Valor inicial do SP, valor que aponta
+- Ordem do SUB e comparações
+- Shift ASR, preserva sinal?
+- Comparações, signed?
+- Acessos de NEG/CLR
+- Passagem de parâmetros
+- DUP, rotate, etc.
 
 Erros
 
--Na máquina Pericles, highlight do lugar da memória apontado pelo endereço dos dados não está funcionando
+- Pericles: highlight do lugar da memória apontado pelo endereço dos dados não está funcionando
+- Pericles: modo indireto só considera primeiro byte do endereço final (highlight tb)
 
 
 

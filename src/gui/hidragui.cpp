@@ -33,9 +33,6 @@ HidraGui::HidraGui(QWidget *parent) :
 
     ui->scrollAreaRegisters->setFrameShape(QFrame::NoFrame);
 
-    ui->tableViewMemoryInstructions->setEditTriggers(false);
-    ui->tableViewMemoryData->setEditTriggers(false);
-
     // Select Neander machine and update interface
     selectMachine("Neander");
 
@@ -204,10 +201,12 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryInstructions->resizeRowsToContents();
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryInstructions->setMouseTracking(true);
+    ui->tableViewMemoryInstructions->setEditTriggers(false);
     ui->tableViewMemoryData->verticalHeader()->hide();
     ui->tableViewMemoryData->resizeRowsToContents();
     ui->tableViewMemoryData->resizeColumnsToContents();
     ui->tableViewMemoryData->setMouseTracking(true);
+    ui->tableViewMemoryData->setEditTriggers(false);
 
     // Hide columns
     ui->tableViewMemoryInstructions->hideColumn(3); // Labels
@@ -246,7 +245,7 @@ void HidraGui::initializeStackTable()
     }
 
     // Set table headers
-    stackModel.setHeaderData(0, Qt::Horizontal, " ");
+    stackModel.setHeaderData(0, Qt::Horizontal, " SP ");
     stackModel.setHeaderData(1, Qt::Horizontal, " End ");
     stackModel.setHeaderData(2, Qt::Horizontal, "Valor");
 
@@ -255,9 +254,10 @@ void HidraGui::initializeStackTable()
     ui->tableViewStack->resizeRowsToContents();
     ui->tableViewStack->resizeColumnsToContents();
     ui->tableViewStack->setMouseTracking(true);
+    ui->tableViewStack->setEditTriggers(false);
 
     // Scroll to appropriate position
-    //ui->tableViewStack->scrollTo(stackModel.index(0, 1), QAbstractItemView::PositionAtTop);
+    ui->tableViewStack->scrollTo(stackModel.index(63, 0), QAbstractItemView::PositionAtBottom);
 }
 
 void HidraGui::initializeFlagWidgets()

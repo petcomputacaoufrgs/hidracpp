@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1059</width>
-    <height>499</height>
+    <width>1055</width>
+    <height>495</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -514,7 +514,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1059</width>
+     <width>1055</width>
      <height>21</height>
     </rect>
    </property>
@@ -558,6 +558,7 @@
      <string>Exibir</string>
     </property>
     <addaction name="actionHexadecimalMode"/>
+    <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
    </widget>

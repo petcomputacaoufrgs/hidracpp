@@ -76,7 +76,7 @@ VoltaMachine::VoltaMachine()
 
 void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString, int immediateAddress)
 {
-    int value1, value2, result, carry;
+    int value1, value2, result, bit;
     Instruction::InstructionCode instructionCode;
     instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
 
@@ -90,28 +90,28 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
     case Instruction::VOLTA_ADD:
         value1 = stackPop();
         value2 = stackPop();
-        result = value1 + value2;
+        result = value2 + value1;
         stackPush(result);
         break;
 
     case Instruction::VOLTA_SUB:
         value1 = stackPop();
         value2 = stackPop();
-        result = value1 - value2;
+        result = value2 - value1;
         stackPush(result);
         break;
 
     case Instruction::VOLTA_AND:
         value1 = stackPop();
         value2 = stackPop();
-        result = value1 & value2;
+        result = value2 & value1;
         stackPush(result);
         break;
 
     case Instruction::VOLTA_OR:
         value1 = stackPop();
         value2 = stackPop();
-        result = value1 | value2;
+        result = value2 | value1;
         stackPush(result);
         break;
 
@@ -133,7 +133,7 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
         break;
 
     case Instruction::VOLTA_NEG:
-        value1 = stackPop();
+        value1 = toSigned(stackPop());
         result = -value1;
         stackPush(result);
         break;
@@ -165,15 +165,15 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
 
     case Instruction::VOLTA_ROR:
         value1 = stackPop();
-        carry = value1 & 0x01; // Extract least significant bit
-        result = (value1 >> 1) | (carry << 7);
+        bit = value1 & 0x01; // Extract least significant bit
+        result = (value1 >> 1) | (bit << 7);
         stackPush(result);
         break;
 
     case Instruction::VOLTA_ROL:
         value1 = stackPop();
-        carry = value1 & 0x80; // Extract most significant bit
-        result = (value1 << 1) | (carry << 7);
+        bit = value1 & 0x80; // Extract most significant bit
+        result = (value1 << 1) | (bit >> 7);
         stackPush(result);
         break;
 
@@ -196,25 +196,25 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
         break;
 
     case Instruction::VOLTA_SPL:
-        value1 = stackPop();
+        value1 = toSigned(stackPop());
         if (value1 > 0)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SMI:
-        value1 = stackPop();
+        value1 = toSigned(stackPop());
         if (value1 < 0)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SPZ:
-        value1 = stackPop();
+        value1 = toSigned(stackPop());
         if (value1 >= 0)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SMZ:
-        value1 = stackPop();
+        value1 = toSigned(stackPop());
         if (value1 <= 0)
             skipNextInstruction();
         break;
@@ -228,42 +228,42 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
     case Instruction::VOLTA_SEQ:
         value1 = stackPop();
         value2 = stackPop();
-        if (value1 == value2)
+        if (value2 == value1)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SNE:
         value1 = stackPop();
         value2 = stackPop();
-        if (value1 != value2)
+        if (value2 != value1)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SGR:
-        value1 = stackPop();
-        value2 = stackPop();
-        if (value1 > value2)
+        value1 = toSigned(stackPop());
+        value2 = toSigned(stackPop());
+        if (value2 > value1)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SLS:
-        value1 = stackPop();
-        value2 = stackPop();
-        if (value1 < value2)
+        value1 = toSigned(stackPop());
+        value2 = toSigned(stackPop());
+        if (value2 < value1)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SGE:
-        value1 = stackPop();
-        value2 = stackPop();
-        if (value1 >= value2)
+        value1 = toSigned(stackPop());
+        value2 = toSigned(stackPop());
+        if (value2 >= value1)
             skipNextInstruction();
         break;
 
     case Instruction::VOLTA_SLE:
-        value1 = stackPop();
-        value2 = stackPop();
-        if (value1 <= value2)
+        value1 = toSigned(stackPop());
+        value2 = toSigned(stackPop());
+        if (value2 <= value1)
             skipNextInstruction();
         break;
 
@@ -323,10 +323,10 @@ void VoltaMachine::generateDescriptions()
     descriptions["nop"] = "Nenhuma operação.";
 
     // Arithmetic and logic (two operands)
-    descriptions["add"] = "Desempilha op1 e op2 e empilha a soma de seus valores.";
-    descriptions["sub"] = "Desempilha op1 e op2 e empilha a subtração de seus valores."; // TODO: Especificar ordem
-    descriptions["and"] = "Desempilha op1 e op2 e empilha o 'e' lógico entre seus bits.";
-    descriptions["or"]  = "Desempilha op1 e op2 e empilha o 'ou' lógico entre seus bits.";
+    descriptions["add"] = "Desempilha A e B, empilha B + A.";
+    descriptions["sub"] = "Desempilha A e B, empilha B - A.";
+    descriptions["and"] = "Desempilha A e B, empilha resultado do 'e' lógico entre seus bits.";
+    descriptions["or"]  = "Desempilha A e B, empilha resultado do 'ou' lógico entre seus bits.";
 
     // Arithmetic and logic (one operand)
     descriptions["clr"] = "Zera o valor no topo da pilha.";
@@ -348,12 +348,12 @@ void VoltaMachine::generateDescriptions()
     descriptions["smz"] = "Retira o topo da pilha e pula a próxima instrução se for menor ou igual a zero (skip on minus/zero).";
 
     // Conditionals (two operands)
-    descriptions["seq"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 = op2 (skip if equal).";
-    descriptions["sne"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 ≠ op2 (skip if not equal).";
-    descriptions["sgr"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 &gt; op2 (skip if greater than).";
-    descriptions["sls"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 &lt; op2 (skip if less than).";
-    descriptions["sge"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 ≥ op2 (skip if greater than/equal to).";
-    descriptions["sle"] = "Retira op1 e op2 da pilha e pula a próxima instrução se op1 ≤ op2 (skip if less than/equal to).";
+    descriptions["seq"] = "Retira A e B da pilha e pula a próxima instrução se B = A (skip if equal).";
+    descriptions["sne"] = "Retira A e B da pilha e pula a próxima instrução se B ≠ A (skip if not equal).";
+    descriptions["sgr"] = "Retira A e B da pilha e pula a próxima instrução se B &gt; A (skip if greater than).";
+    descriptions["sls"] = "Retira A e B da pilha e pula a próxima instrução se B &lt; A (skip if less than).";
+    descriptions["sge"] = "Retira A e B da pilha e pula a próxima instrução se B ≥ A (skip if greater than/equal to).";
+    descriptions["sle"] = "Retira A e B da pilha e pula a próxima instrução se B ≤ A (skip if less than/equal to).";
 
     // Others
     descriptions["rts"]   = "Desvia para o endereço indicado pelo topo da pilha, desempilhando-o (retorno de sub-rotina).";
@@ -378,15 +378,15 @@ int VoltaMachine::getStackSize()
 void VoltaMachine::stackPush(int value)
 {
     accessCount++;
-    setStackValue(SP->getValue(), value);
     SP->incrementValue();
+    setStackValue(SP->getValue(), value);
 }
 
 int VoltaMachine::stackPop()
 {
     accessCount++;
-    SP->setValue(SP->getValue() - 1); // Decrement SP
     int value = getStackValue(SP->getValue());
+    SP->setValue(SP->getValue() - 1); // Decrement SP
     return value;
 }
 
