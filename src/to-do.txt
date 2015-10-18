@@ -44,10 +44,6 @@ Geral
 - Find/Replace
 - Atalho para comentar várias linhas de código de uma vez
 
-Interface
-
-- Asterisco no título quando o arquivo for modificado
-
 Breakpoints
 
 - Adicionar e remover com clique, além de F12

@@ -19,9 +19,6 @@ HidraGui::HidraGui(QWidget *parent) :
 
     connect(ui->statusBar, SIGNAL(messageChanged(QString)), this, SLOT(statusBarMessageChanged(QString)));
 
-    currentFilename = "";
-    setWindowTitle("Hidra - PET Computação");
-
     buildSuccessful = true;
     showHexValues = false;
     fastExecute = false;
@@ -42,6 +39,7 @@ HidraGui::HidraGui(QWidget *parent) :
     modifiedFile = false;
     modifiedSinceBackup = false;
     forceSaveAs = true;
+    updateWindowTitle();
 
     // Load dropped files
     codeEditor->setAcceptDrops(false);
@@ -52,12 +50,12 @@ HidraGui::HidraGui(QWidget *parent) :
     {
         load("__Recovery__.txt");
         modifiedFile = true;
-    }*/ // TODO: Automatic loading only if single instance
+    }
 
     // Set backup timer
     backupTimer.setInterval(3*60000); // Save backup every N minutes
     connect(&backupTimer, SIGNAL(timeout()), this, SLOT(saveBackup()));
-    backupTimer.start();
+    backupTimer.start(); */ // TODO: Only open recovery once
 }
 
 HidraGui::~HidraGui()
@@ -615,6 +613,18 @@ void HidraGui::updateInformation(int value) // Show value in dec/hex/bin
     ui->textInformation->setText(getValueDescription(value));
 }
 
+void HidraGui::updateWindowTitle()
+{
+    QString filename = QFileInfo(currentFilename).fileName(); // Remove path
+    QString title;
+
+    title += (modifiedFile) ? "*" : "";
+    title += (filename != "") ? filename : "Sem título";
+    title += " - Hidra - PET Computação";
+
+    setWindowTitle(title);
+}
+
 QString HidraGui::getValueDescription(int value)
 {
     return QString("Dec: %1 | Hex: %2 | Bin: %3")
@@ -635,9 +645,9 @@ void HidraGui::newFile()
     machine->clear();
     initializeMachineInterface();
 
-    modifiedFile = false;
     currentFilename = "";
-    setWindowTitle("Hidra - PET Computação");
+    modifiedFile = false;
+    updateWindowTitle();
 }
 
 void HidraGui::save(QString filename)
@@ -654,12 +664,9 @@ void HidraGui::save(QString filename)
     out << codeEditor->toPlainText();
 
     currentFilename = filename;
-
-    QFileInfo fileInfo(currentFilename);
-    setWindowTitle(fileInfo.fileName() + " - Hidra - PET Computação");
-
     modifiedFile = false;
     forceSaveAs = false;
+    updateWindowTitle();
 }
 
 void HidraGui::saveAs()
@@ -754,12 +761,9 @@ void HidraGui::load(QString filename)
         selectMachine("Volta");
 
     currentFilename = filename;
-
-    QFileInfo fileInfo(currentFilename);
-    setWindowTitle(fileInfo.fileName() + " - Hidra - PET Computação");
-
     modifiedFile = false;
     forceSaveAs = false;
+    updateWindowTitle();
 }
 
 void HidraGui::step(bool refresh = true)
@@ -821,7 +825,12 @@ bool HidraGui::eventFilter(QObject *obj, QEvent *event)
 
 void HidraGui::sourceCodeChanged()
 {
-    modifiedFile = true;
+    if (!modifiedFile)
+    {
+        modifiedFile = true;
+        updateWindowTitle();
+    }
+
     modifiedSinceBackup = true;
 
     if (sourceAndMemoryInSync)

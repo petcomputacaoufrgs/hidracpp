@@ -123,6 +123,7 @@ private:
     void updateButtons();
     void updateInformation(); // Show counters
     void updateInformation(int value); // Show value in dec/hex/bin
+    void updateWindowTitle();
 
     virtual void dragEnterEvent(QDragEnterEvent *e);
     virtual void dropEvent(QDropEvent *e);
