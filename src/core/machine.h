@@ -146,21 +146,21 @@ public:
     void setRunning(bool running);
 
     bool getBuildSuccessful();
-    int getFirstErrorLine();
+    int  getFirstErrorLine();
 
-    int getBreakpoint() const;
+    int  getBreakpoint() const;
     void setBreakpoint(int value);
 
     virtual void getNextOperandAddress(int &intermediateAddress, int &intermediateAddress2, int &finalOperandAddress);
 
-    int getMemorySize() const;
+    int  getMemorySize() const;
     void setMemorySize(int size);
-    int getMemoryValue(int address) const;
+    int  getMemoryValue(int address) const;
     void setMemoryValue(int address, int value);
     bool hasByteChanged(int address); // Since last look-up
     void clearMemory();
 
-    int getNumberOfFlags() const;
+    int  getNumberOfFlags() const;
     QString getFlagName(int id) const;
     int  getFlagValue(int id) const;
     void setFlagValue(int id, int value);
@@ -169,8 +169,8 @@ public:
     void setFlagValue(Flag::FlagCode flagCode, int value);
     void clearFlags();
 
-    int getNumberOfRegisters() const;
-    int getRegisterBitCode(QString registerName) const; // -1 if no code
+    int  getNumberOfRegisters() const;
+    int  getRegisterBitCode(QString registerName) const; // -1 if no code
     QString getRegisterName(int id) const;
     int  getRegisterValue(int id, bool signedData = false) const;
     void setRegisterValue(int id, int value);
@@ -178,7 +178,7 @@ public:
     void setRegisterValue(QString registerName, int value);
     void clearRegisters();
 
-    int getPCValue() const;
+    int  getPCValue() const;
     void setPCValue(int value);
     void incrementPCValue();
 
@@ -195,8 +195,8 @@ public:
     AddressingMode::AddressingModeCode getDefaultAddressingModeCode();
     int getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode);
 
-    int getInstructionCount();
-    int getAccessCount();
+    int  getInstructionCount();
+    int  getAccessCount();
     void clearCounters();
 
     virtual void clear();

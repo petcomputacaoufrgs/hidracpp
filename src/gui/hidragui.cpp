@@ -36,9 +36,6 @@ HidraGui::HidraGui(QWidget *parent) :
     // Select Neander machine and update interface
     selectMachine("Neander");
 
-    // Show data table
-    ui->actionDisplayDataTable->trigger();
-
     modifiedFile = false;
     modifiedSinceBackup = false;
     forceSaveAs = true;
@@ -499,8 +496,7 @@ void HidraGui::updateMemoryTable(bool force)
         previousRowColor[row] = rowColor;
     }
 
-    // Update all cells, resize
-    //emit memoryModel.dataChanged(memoryModel.index(0, 0), memoryModel.index(memorySize, 0));
+    // Adjust size
     ui->tableViewMemoryData->resizeColumnsToContents();
 }
 
@@ -550,8 +546,7 @@ void HidraGui::updateStackTable()
         stackModel.item(row, ColumnStackValue)->setStatusTip(statusTip);
     }
 
-    // Update all cells, resize
-    //emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(stackSize, 0));
+    // Adjust size
     ui->tableViewStack->resizeColumnsToContents();
 }
 
@@ -1081,8 +1076,11 @@ void HidraGui::on_actionSetBreakpoint_triggered()
 void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 {
     showHexValues = checked;
-    showSignedData = false;
 
+    if (checked)
+        ui->actionSignedMode->setChecked(false); // Mutually exclusive modes
+
+    // Toggle register mode
     for (int i=0; i<registerWidgets.count(); i++)
         registerWidgets.at(i)->setMode(showHexValues);
 
@@ -1091,9 +1089,12 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 
 void HidraGui::on_actionSignedMode_toggled(bool checked)
 {
-    showHexValues = false;
     showSignedData = checked;
 
+    if (checked)
+        ui->actionHexadecimalMode->setChecked(false); // Mutually exclusive modes
+
+    // Toggle register mode
     for (int i=0; i<registerWidgets.count(); i++)
         registerWidgets.at(i)->setMode(showHexValues);
 

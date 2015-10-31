@@ -787,6 +787,9 @@
    <property name="text">
     <string>Interpretar dados negativos</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+-</string>
+   </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
