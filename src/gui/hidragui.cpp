@@ -20,7 +20,10 @@ HidraGui::HidraGui(QWidget *parent) :
     connect(ui->statusBar, SIGNAL(messageChanged(QString)), this, SLOT(statusBarMessageChanged(QString)));
 
     buildSuccessful = true;
+
+    // View options
     showHexValues = false;
+    showSignedData = false;
     fastExecute = false;
     followPC = false;
     previousPCValue = 0;
@@ -149,7 +152,7 @@ void HidraGui::initializeMemoryTable()
 
     // Set table size
     memoryModel.setRowCount(memorySize);
-    memoryModel.setColumnCount(4);
+    memoryModel.setColumnCount(NumColumns);
 
     previousRowColor = QVector<QColor>(memorySize);
     previousLabel = QVector<QString>(memorySize);
@@ -165,10 +168,11 @@ void HidraGui::initializeMemoryTable()
     }
 
     // Set table headers
-    memoryModel.setHeaderData(0, Qt::Horizontal, " ");
-    memoryModel.setHeaderData(1, Qt::Horizontal, " End ");
-    memoryModel.setHeaderData(2, Qt::Horizontal, "Valor");
-    memoryModel.setHeaderData(3, Qt::Horizontal, "  Label  ");
+    memoryModel.setHeaderData(ColumnPC,               Qt::Horizontal, " ");
+    memoryModel.setHeaderData(ColumnAddress,          Qt::Horizontal, " End ");
+    memoryModel.setHeaderData(ColumnInstructionValue, Qt::Horizontal, "Valor");
+    memoryModel.setHeaderData(ColumnDataValue,        Qt::Horizontal, "Dado");
+    memoryModel.setHeaderData(ColumnLabel,            Qt::Horizontal, "  Label  ");
 
     // Adjust table settings
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
@@ -183,12 +187,14 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryData->setEditTriggers(false);
 
     // Hide columns
-    ui->tableViewMemoryInstructions->hideColumn(3); // Labels
-    ui->tableViewMemoryData->hideColumn(0); // PC
+    ui->tableViewMemoryInstructions->hideColumn(ColumnLabel);
+    ui->tableViewMemoryInstructions->hideColumn(ColumnDataValue);
+    ui->tableViewMemoryData->hideColumn(ColumnPC);
+    ui->tableViewMemoryData->hideColumn(ColumnInstructionValue);
 
     // Scroll to appropriate position
-    ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, 0), QAbstractItemView::PositionAtTop);
-    ui->tableViewMemoryData->scrollTo(memoryModel.index((memorySize < 4096) ? 128 : 1024, 1), QAbstractItemView::PositionAtTop);
+    ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
+    ui->tableViewMemoryData->scrollTo(memoryModel.index((memorySize < 4096) ? 128 : 1024, ColumnAddress), QAbstractItemView::PositionAtTop);
 }
 
 void HidraGui::initializeStackTable()
@@ -209,17 +215,17 @@ void HidraGui::initializeStackTable()
 
     // Set table size
     stackModel.setRowCount(stackSize);
-    stackModel.setColumnCount(3);
+    stackModel.setColumnCount(NumColumnsStack);
 
     // Initialize items
     for (int row = 0; row < stackSize; row++)
     {
-        for (int column = 0; column < stackModel.columnCount(); column++)
+        for (int column = 0; column < NumColumnsStack; column++)
             stackModel.setData(stackModel.index(row, column), "");
     }
 
     // Set table headers
-    stackModel.setHeaderData(0, Qt::Horizontal, " SP ");
+    stackModel.setHeaderData(ColumnStackSP, Qt::Horizontal, " SP ");
     stackModel.setHeaderData(1, Qt::Horizontal, " End ");
     stackModel.setHeaderData(2, Qt::Horizontal, "Valor");
 
@@ -231,7 +237,7 @@ void HidraGui::initializeStackTable()
     ui->tableViewStack->setEditTriggers(false);
 
     // Scroll to appropriate position
-    ui->tableViewStack->scrollTo(stackModel.index(63, 0), QAbstractItemView::PositionAtBottom);
+    ui->tableViewStack->scrollTo(stackModel.index(voltaMachine->getStackSize() - 1, 0), QAbstractItemView::PositionAtBottom);
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -406,9 +412,9 @@ void HidraGui::updateMemoryTable(bool force)
     // Column 0: PC Arrow
     //////////////////////////////////////////////////
 
-    if (memoryModel.hasIndex(previousPCValue, 0))
-        memoryModel.item(previousPCValue, 0)->setText(""); // Clear last PC Value's arrow
-    memoryModel.item(machine->getPCValue(), 0)->setText("\u2192"); // Show arrow on current PC value
+    if (memoryModel.hasIndex(previousPCValue, ColumnPC))
+        memoryModel.item(previousPCValue, ColumnPC)->setText(""); // Clear last PC Value's arrow
+    memoryModel.item(machine->getPCValue(), ColumnPC)->setText("\u2192"); // Show arrow on current PC value
     previousPCValue = machine->getPCValue(); // Update last PC value
 
 
@@ -424,33 +430,38 @@ void HidraGui::updateMemoryTable(bool force)
 
         if (force)
         {
-            memoryModel.item(row, 1)->setEnabled(false);
-            memoryModel.item(row, 1)->setText(QString::number(byteAddress, base).toUpper());
+            memoryModel.item(row, ColumnAddress)->setEnabled(false);
+            memoryModel.item(row, ColumnAddress)->setText(QString::number(byteAddress, base).toUpper());
         }
 
         //////////////////////////////////////////////////
-        // Column 2: Byte value
+        // Columns 2, 3: Byte value
         //////////////////////////////////////////////////
 
         if (machine->hasByteChanged(byteAddress) || force) // Only update cell if byte value has changed
         {
-            memoryModel.item(row, 2)->setText(QString::number(value, base).toUpper());
+            QString instructionValueStr = QString::number(value, base).toUpper();
+            QString dataValueStr        = QString::number((showSignedData) ? machine->toSigned(value) : value, base).toUpper(); // May be signed
+
+            memoryModel.item(row, ColumnInstructionValue)->setText(instructionValueStr);
+            memoryModel.item(row, ColumnDataValue       )->setText(dataValueStr);
 
             // On mouse-over, sends value to statusbar (with "#" prefix)
             // The information box then obtains the value and displays it in dec/hex/bin
             QString statusTip = "#" + QString::number(machine->getMemoryValue(byteAddress));
-            memoryModel.item(row, 2)->setStatusTip(statusTip);
+            memoryModel.item(row, ColumnInstructionValue)->setStatusTip(statusTip);
+            memoryModel.item(row, ColumnDataValue       )->setStatusTip(statusTip);
         }
 
         //////////////////////////////////////////////////
-        // Column 3: Label
+        // Column 4: Label
         //////////////////////////////////////////////////
 
         if ((sourceAndMemoryInSync &&
              machine->getAddressCorrespondingLabel(byteAddress) != previousLabel[byteAddress]) || force) // Only update on change
         {
             QString labelName = machine->getAddressCorrespondingLabel(byteAddress);
-            memoryModel.item(row, 3)->setText(labelName);
+            memoryModel.item(row, ColumnLabel)->setText(labelName);
             previousLabel[byteAddress] = labelName; // Update previousLabel
         }
     }
@@ -481,7 +492,7 @@ void HidraGui::updateMemoryTable(bool force)
         // Update row color if needed
         if (previousRowColor[row] != rowColor)
         {
-            for (int column=0; column<memoryModel.columnCount(); column++)
+            for (int column=0; column<NumColumns; column++)
                 memoryModel.item(row, column)->setBackground(rowColor);
         }
 
@@ -489,7 +500,7 @@ void HidraGui::updateMemoryTable(bool force)
     }
 
     // Update all cells, resize
-    emit memoryModel.dataChanged(memoryModel.index(0, 0), memoryModel.index(memorySize, 0));
+    //emit memoryModel.dataChanged(memoryModel.index(0, 0), memoryModel.index(memorySize, 0));
     ui->tableViewMemoryData->resizeColumnsToContents();
 }
 
@@ -513,7 +524,7 @@ void HidraGui::updateStackTable()
         // Column 0: SP Arrow
         //////////////////////////////////////////////////
 
-        stackModel.item(row, 0)->setText((stackAddress == spValue) ? "\u2192" : ""); // Unicode arrow
+        stackModel.item(row, ColumnStackSP)->setText((stackAddress == spValue) ? "\u2192" : ""); // Unicode arrow
 
 
 
@@ -521,8 +532,8 @@ void HidraGui::updateStackTable()
         // Column 1: Address
         //////////////////////////////////////////////////
 
-        stackModel.item(row, 1)->setEnabled(false);
-        stackModel.item(row, 1)->setText(QString::number(stackAddress, base).toUpper());
+        stackModel.item(row, ColumnStackAddress)->setEnabled(false);
+        stackModel.item(row, ColumnStackAddress)->setText(QString::number(stackAddress, base).toUpper());
 
 
 
@@ -530,17 +541,17 @@ void HidraGui::updateStackTable()
         // Column 2: Byte value
         //////////////////////////////////////////////////
 
-        stackModel.item(row, 2)->setEnabled(stackAddress < spValue); // Items before SP (and thus inaccessible) are greyed out
-        stackModel.item(row, 2)->setText(QString::number(value, base).toUpper());
+        stackModel.item(row, ColumnStackValue)->setEnabled(stackAddress < spValue); // Items before SP (and thus inaccessible) are greyed out
+        stackModel.item(row, ColumnStackValue)->setText(QString::number(value, base).toUpper());
 
         // On mouse-over, sends value to statusbar (with "#" prefix)
         // The information box then obtains the value and displays it in dec/hex/bin
         QString statusTip = "#" + QString::number(voltaMachine->getStackValue(stackAddress));
-        stackModel.item(row, 2)->setStatusTip(statusTip);
+        stackModel.item(row, ColumnStackValue)->setStatusTip(statusTip);
     }
 
     // Update all cells, resize
-    emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(stackSize, 0));
+    //emit stackModel.dataChanged(stackModel.index(0, 0), stackModel.index(stackSize, 0));
     ui->tableViewStack->resizeColumnsToContents();
 }
 
@@ -548,7 +559,7 @@ void HidraGui::updateRegisterWidgets()
 {
     for (int i=0; i<registerWidgets.count(); i++)
     {
-        int value = machine->getRegisterValue(i);
+        int value = machine->getRegisterValue(i, showSignedData);
         registerWidgets.at(i)->setValue(value);
         registerWidgets.at(i)->setStatusTip("#" + QString::number(value));
     }
@@ -763,7 +774,7 @@ void HidraGui::step(bool refresh = true)
         if (followPC)
         {
             codeEditor->setCurrentLine(machine->getPCCorrespondingSourceLine());
-            ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(machine->getPCValue(), 0));
+            ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(machine->getPCValue(), ColumnAddress));
         }
         QApplication::processEvents();
     }
@@ -1070,6 +1081,18 @@ void HidraGui::on_actionSetBreakpoint_triggered()
 void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 {
     showHexValues = checked;
+    showSignedData = false;
+
+    for (int i=0; i<registerWidgets.count(); i++)
+        registerWidgets.at(i)->setMode(showHexValues);
+
+    updateMachineInterface(true);
+}
+
+void HidraGui::on_actionSignedMode_toggled(bool checked)
+{
+    showHexValues = false;
+    showSignedData = checked;
 
     for (int i=0; i<registerWidgets.count(); i++)
         registerWidgets.at(i)->setMode(showHexValues);

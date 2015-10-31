@@ -11,7 +11,7 @@ RamsesMachine::RamsesMachine()
     registers.append(new Register( "A", "....00..", 8));
     registers.append(new Register( "B", "....01..", 8));
     registers.append(new Register( "X", "....10..", 8));
-    registers.append(new Register("PC", "", 8));
+    registers.append(new Register("PC", "", 8, false));
 
     PC = registers.last();
 

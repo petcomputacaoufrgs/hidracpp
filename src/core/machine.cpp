@@ -1344,9 +1344,12 @@ QString Machine::getRegisterName(int id) const
         return "R" + QString::number(id); // Default to R0..R63
 }
 
-int Machine::getRegisterValue(int id) const
+int Machine::getRegisterValue(int id, bool signedData) const
 {
-    return registers[id]->getValue();
+    if (signedData && registers[id]->isData())
+        return registers[id]->getSignedValue();
+    else
+        return registers[id]->getValue();
 }
 
 int Machine::getRegisterValue(QString registerName) const

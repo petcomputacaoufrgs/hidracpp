@@ -34,7 +34,26 @@ class HidraGui : public QMainWindow
 {
     Q_OBJECT
 
+    enum MemoryTableColumn
+    {
+        ColumnPC,
+        ColumnAddress,
+        ColumnInstructionValue,
+        ColumnDataValue,
+        ColumnLabel,
+        NumColumns // Last column marker
+    };
+
+    enum StackTableColumn
+    {
+        ColumnStackSP,
+        ColumnStackAddress,
+        ColumnStackValue,
+        NumColumnsStack // Last column marker
+    };
+
 public:
+
     explicit HidraGui(QWidget *parent = 0);
     ~HidraGui();
 
@@ -80,6 +99,7 @@ private slots:
 
     // View menu
     void on_actionHexadecimalMode_toggled(bool checked);
+    void on_actionSignedMode_toggled(bool checked);
     void on_actionFastExecuteMode_toggled(bool checked);
     void on_actionFollowPCMode_toggled(bool checked);
 

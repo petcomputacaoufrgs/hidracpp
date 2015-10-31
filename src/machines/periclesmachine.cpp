@@ -11,7 +11,7 @@ PericlesMachine::PericlesMachine()
     registers.append(new Register( "A", "....00..", 8));
     registers.append(new Register( "B", "....01..", 8));
     registers.append(new Register( "X", "....10..", 8));
-    registers.append(new Register("PC", "", 12));
+    registers.append(new Register("PC", "", 12, false));
 
     PC = registers.last();
 

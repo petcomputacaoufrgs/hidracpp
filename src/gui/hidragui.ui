@@ -370,7 +370,7 @@
              <bool>true</bool>
             </property>
             <property name="text">
-             <string>Instruções: 0 | Acessos : 0</string>
+             <string>Instruções: 0 | Acessos: 0</string>
             </property>
            </widget>
           </item>
@@ -614,6 +614,7 @@
     <property name="title">
      <string>Exibir</string>
     </property>
+    <addaction name="actionSignedMode"/>
     <addaction name="actionHexadecimalMode"/>
     <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
@@ -777,6 +778,14 @@
    </property>
    <property name="text">
     <string>Tela segue execução</string>
+   </property>
+  </action>
+  <action name="actionSignedMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interpretar dados negativos</string>
    </property>
   </action>
  </widget>

@@ -14,7 +14,7 @@ RegMachine::RegMachine()
         registers.append(new Register("R" + QString::number(registerId), bitPattern, 8));
     }
 
-    registers.append(new Register("PC", "", 8));
+    registers.append(new Register("PC", "", 8, false));
     PC = registers.last();
 
 

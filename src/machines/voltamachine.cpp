@@ -8,8 +8,8 @@ VoltaMachine::VoltaMachine()
     // Initialize registers
     //////////////////////////////////////////////////
 
-    registers.append(new Register("PC", "", 8));
-    registers.append(new Register("SP", "", 6));
+    registers.append(new Register("PC", "", 8, false));
+    registers.append(new Register("SP", "", 6, false));
 
     PC = registers.first();
     SP = registers.last();

@@ -9,7 +9,7 @@ AhmesMachine::AhmesMachine()
     //////////////////////////////////////////////////
 
     registers.append(new Register("AC", "........", 8));
-    registers.append(new Register("PC", "", 8));
+    registers.append(new Register("PC", "", 8, false));
 
     PC = registers.last();
 
