@@ -63,31 +63,6 @@ HidraGui::~HidraGui()
     delete ui;
 }
 
-void HidraGui::dragEnterEvent(QDragEnterEvent *e)
-{
-    if (e->mimeData()->hasUrls()) {
-        e->acceptProposedAction();
-    }
-}
-
-// Accept dropped files
-void HidraGui::dropEvent(QDropEvent *e)
-{
-    if (e->mimeData()->urls().size() == 1)
-    {
-        QString filename = e->mimeData()->urls().at(0).toLocalFile();
-
-        if (QFile::exists(filename))
-        {
-            bool cancelled;
-            saveChangesDialog(cancelled);
-
-            if (!cancelled)
-                load(filename);
-        }
-    }
-}
-
 
 
 //////////////////////////////////////////////////
@@ -151,7 +126,7 @@ void HidraGui::updateMachineInterface(bool force = false)
 
 
 //////////////////////////////////////////////////
-// Initialization internal methods
+// Internal initialize methods
 //////////////////////////////////////////////////
 
 void HidraGui::initializeMachineInterfaceComponents()
@@ -350,7 +325,7 @@ void HidraGui::initializeAddressingModesList()
 
 
 //////////////////////////////////////////////////
-// Clearing internal methods
+// Internal clear methods
 //////////////////////////////////////////////////
 
 void HidraGui::clearMachineInterfaceComponents()
@@ -404,7 +379,7 @@ void HidraGui::clearAddressingModesList()
 
 
 //////////////////////////////////////////////////
-// Updating internal methods
+// Internal update methods
 //////////////////////////////////////////////////
 
 void HidraGui::updateMachineInterfaceComponents(bool force)
@@ -486,8 +461,8 @@ void HidraGui::updateMemoryTable(bool force)
     // Row color (highlight current instruction)
     //////////////////////////////////////////////////
 
-    int intermediateAddress, finalOperandAddress;
-    machine->getNextOperandAddress(intermediateAddress, finalOperandAddress);
+    int intermediateAddress, intermediateAddress2, finalOperandAddress;
+    machine->getNextOperandAddress(intermediateAddress, intermediateAddress2, finalOperandAddress);
 
     for (int row=0; row<memorySize; row++)
     {
@@ -496,7 +471,7 @@ void HidraGui::updateMemoryTable(bool force)
         // Get new color
         if (sourceAndMemoryInSync && row == finalOperandAddress)
             rowColor = QColor(255, 202, 176); // Red
-        else if (sourceAndMemoryInSync && row == intermediateAddress)
+        else if (sourceAndMemoryInSync && (row == intermediateAddress || row == intermediateAddress2))
             rowColor = QColor(255, 228, 148); // Orange
         else if (sourceAndMemoryInSync && currentLine == machine->getAddressCorrespondingSourceLine(row) && currentLine >= 0)
             rowColor = QColor(255, 244, 128); // Yellow
@@ -636,7 +611,7 @@ QString HidraGui::getValueDescription(int value)
 
 
 //////////////////////////////////////////////////
-// Saving/loading
+// File handling
 //////////////////////////////////////////////////
 
 void HidraGui::newFile()
@@ -689,8 +664,6 @@ void HidraGui::saveAs()
         extension = "Fonte do REG (*.rg)";
     else if (currentMachineName == "Volta")
         extension = "Fonte do Volta (*.vlt)";
-
-
 
     QString filename = QFileDialog::getSaveFileName(this,
                                                    "Salvar código-fonte", "",
@@ -766,6 +739,12 @@ void HidraGui::load(QString filename)
     updateWindowTitle();
 }
 
+
+
+//////////////////////////////////////////////////
+// Others
+//////////////////////////////////////////////////
+
 void HidraGui::step(bool refresh = true)
 {
     try
@@ -791,26 +770,30 @@ void HidraGui::step(bool refresh = true)
 }
 
 
-
-//////////////////////////////////////////////////
-// Errors field
-//////////////////////////////////////////////////
-
-void HidraGui::clearErrorsField()
+void HidraGui::dragEnterEvent(QDragEnterEvent *e)
 {
-    ui->textEditError->clear();
+    if (e->mimeData()->hasUrls()) {
+        e->acceptProposedAction();
+    }
 }
 
-void HidraGui::addError(QString errorString)
+// Accept dropped files
+void HidraGui::dropEvent(QDropEvent *e)
 {
-    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
+    if (e->mimeData()->urls().size() == 1)
+    {
+        QString filename = e->mimeData()->urls().at(0).toLocalFile();
+
+        if (QFile::exists(filename))
+        {
+            bool cancelled;
+            saveChangesDialog(cancelled);
+
+            if (!cancelled)
+                load(filename);
+        }
+    }
 }
-
-
-
-//////////////////////////////////////////////////
-// Others
-//////////////////////////////////////////////////
 
 bool HidraGui::eventFilter(QObject *obj, QEvent *event)
 {
@@ -821,6 +804,16 @@ bool HidraGui::eventFilter(QObject *obj, QEvent *event)
             qDebug() << sg->parentWidget();
     }
     return false;
+}
+
+void HidraGui::clearErrorsField()
+{
+    ui->textEditError->clear();
+}
+
+void HidraGui::addError(QString errorString)
+{
+    ui->textEditError->setPlainText(ui->textEditError->toPlainText() + errorString + "\n");
 }
 
 void HidraGui::sourceCodeChanged()
@@ -837,6 +830,22 @@ void HidraGui::sourceCodeChanged()
     {
         sourceAndMemoryInSync = false;
         codeEditor->disableLineHighlight();
+    }
+}
+
+void HidraGui::statusBarMessageChanged(QString newMessage)
+{
+    if (newMessage == " ") // Ignore self-triggered change
+        return;
+
+    if (newMessage.startsWith("#")) // Steal prefixed value from statusbar
+    {
+        updateInformation(newMessage.remove("#").toInt()); // Display dec/hex/bin
+        statusBar()->showMessage(" ");
+    }
+    else
+    {
+        updateInformation(); // Restore information to counters
     }
 }
 
@@ -861,25 +870,75 @@ void HidraGui::saveBackup()
 
 
 //////////////////////////////////////////////////
-// Actions
+// File menu
 //////////////////////////////////////////////////
 
-void HidraGui::on_pushButtonBuild_clicked()
+void HidraGui::on_actionNew_triggered()
 {
-    ui->actionBuild->trigger();
+    bool cancelled = false;
+    saveChangesDialog(cancelled);
+
+    // Se não foi cancelado, cria um novo arquivo
+    if (!cancelled)
+        newFile();
 }
 
-void HidraGui::on_pushButtonRun_clicked()
+void HidraGui::on_actionOpen_triggered()
 {
-    ui->actionRun->trigger();
+    QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rad)";
+    QString filename;
+
+    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", "", allExtensions);
+
+    if (!filename.isEmpty())
+    {
+        bool cancelled;
+        saveChangesDialog(cancelled);
+
+        if (!cancelled)
+            load(filename);
+    }
 }
 
-void HidraGui::on_pushButtonStep_clicked()
+void HidraGui::on_actionSave_triggered()
 {
-    ui->actionStep->trigger();
+    if(currentFilename == "" || forceSaveAs)
+        saveAs();
+    else
+        save(currentFilename);
+}
+
+void HidraGui::on_actionSaveAs_triggered()
+{
+    saveAs();
+}
+
+void HidraGui::on_actionClose_triggered()
+{
+    this->close();
+}
+
+void HidraGui::closeEvent(QCloseEvent *event)
+{
+    bool cancelled;
+    saveChangesDialog(cancelled);
+
+    // Delete backup file
+    if (!cancelled)
+        QFile::remove("__Recovery__.txt");
+
+    // Accept/reject window close event
+    if (!cancelled)
+        event->accept();
+    else
+        event->ignore();
 }
 
 
+
+//////////////////////////////////////////////////
+// Machine menu
+//////////////////////////////////////////////////
 
 void HidraGui::on_actionBuild_triggered()
 {
@@ -930,48 +989,6 @@ void HidraGui::on_actionStep_triggered()
 {
     step();
 }
-
-void HidraGui::on_actionNew_triggered()
-{
-    bool cancelled = false;
-    saveChangesDialog(cancelled);
-
-    // Se não foi cancelado, cria um novo arquivo
-    if (!cancelled)
-        newFile();
-}
-
-void HidraGui::on_actionOpen_triggered()
-{
-    QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rad)";
-    QString filename;
-
-    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", "", allExtensions);
-
-    if (!filename.isEmpty())
-    {
-        bool cancelled;
-        saveChangesDialog(cancelled);
-
-        if (!cancelled)
-            load(filename);
-    }
-}
-
-void HidraGui::on_actionSave_triggered()
-{
-    if(currentFilename == "" || forceSaveAs)
-        saveAs();
-    else
-        save(currentFilename);
-}
-
-void HidraGui::on_actionSaveAs_triggered()
-{
-    saveAs();
-}
-
-
 
 void HidraGui::on_actionImportMemory_triggered()
 {
@@ -1025,20 +1042,6 @@ void HidraGui::on_actionExportMemory_triggered()
     }
 }
 
-void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index)
-{
-    machine->setPCValue(index.row());
-    updateMachineInterface();
-}
-
-void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
-{
-    int addressCorrespondingSourceLine = machine->getAddressCorrespondingSourceLine(index.row());
-
-    if (addressCorrespondingSourceLine != -1)
-        codeEditor->setCurrentLine(addressCorrespondingSourceLine);
-}
-
 void HidraGui::on_actionResetRegisters_triggered()
 {
     machine->setRunning(false);
@@ -1058,65 +1061,11 @@ void HidraGui::on_actionSetBreakpoint_triggered()
     machine->setBreakpoint(breakpointAddress);
 }
 
-void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
-{
-    selectMachine(machineName);
-}
 
-void HidraGui::on_actionClose_triggered()
-{
-    this->close();
-}
 
-void HidraGui::closeEvent(QCloseEvent *event)
-{
-    bool cancelled;
-    saveChangesDialog(cancelled);
-
-    // Delete backup file
-    if (!cancelled)
-        QFile::remove("__Recovery__.txt");
-
-    // Accept/reject window close event
-    if (!cancelled)
-        event->accept();
-    else
-        event->ignore();
-}
-
-void HidraGui::on_actionAbout_triggered()
-{
-    QMessageBox::about(this, "Sobre o Hidra",
-                       "<p align='center'>Hidra v0.9 (" + QString(__DATE__) + ")<br><br>"
-                       "Desenvolvido pelo grupo PET Computação.<br><br>"
-                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.</p>");
-}
-
-void HidraGui::statusBarMessageChanged(QString newMessage)
-{
-    if (newMessage == " ") // Ignore self-triggered change
-        return;
-
-    if (newMessage.startsWith("#")) // Steal prefixed value from statusbar
-    {
-        updateInformation(newMessage.remove("#").toInt()); // Display dec/hex/bin
-        statusBar()->showMessage(" ");
-    }
-    else
-    {
-        updateInformation(); // Restore information to counters
-    }
-}
-
-void HidraGui::on_actionQuickGuide_triggered()
-{
-    QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_GuiaRapido.pdf"));
-}
-
-void HidraGui::on_actionReference_triggered()
-{
-    QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_Referencia.pdf"));
-}
+//////////////////////////////////////////////////
+// View menu
+//////////////////////////////////////////////////
 
 void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 {
@@ -1136,4 +1085,68 @@ void HidraGui::on_actionFastExecuteMode_toggled(bool checked)
 void HidraGui::on_actionFollowPCMode_toggled(bool checked)
 {
     followPC = checked;
+}
+
+
+
+//////////////////////////////////////////////////
+// Help menu
+//////////////////////////////////////////////////
+
+void HidraGui::on_actionQuickGuide_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_GuiaRapido.pdf"));
+}
+
+void HidraGui::on_actionReference_triggered()
+{
+    QDesktopServices::openUrl(QUrl::fromLocalFile("Hidra_Referencia.pdf"));
+}
+
+void HidraGui::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "Sobre o Hidra",
+                       "<p align='center'>Hidra v0.9 (" + QString(__DATE__) + ")<br><br>"
+                       "Desenvolvido pelo grupo PET Computação.<br><br>"
+                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.</p>");
+}
+
+
+
+//////////////////////////////////////////////////
+// Interface elements
+//////////////////////////////////////////////////
+
+void HidraGui::on_pushButtonBuild_clicked()
+{
+    ui->actionBuild->trigger();
+}
+
+void HidraGui::on_pushButtonRun_clicked()
+{
+    ui->actionRun->trigger();
+}
+
+void HidraGui::on_pushButtonStep_clicked()
+{
+    ui->actionStep->trigger();
+}
+
+void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index)
+{
+    machine->setPCValue(index.row());
+    updateMachineInterface();
+}
+
+void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
+{
+    selectMachine(machineName);
+}
+
+void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
+{
+    int addressCorrespondingSourceLine = machine->getAddressCorrespondingSourceLine(index.row());
+
+    if (addressCorrespondingSourceLine != -1)
+        codeEditor->setCurrentLine(addressCorrespondingSourceLine);
 }
