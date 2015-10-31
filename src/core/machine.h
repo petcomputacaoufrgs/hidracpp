@@ -30,8 +30,8 @@ namespace FileErrorCode
 class Machine : public QObject
 {
     Q_OBJECT
-public:
 
+public:
     enum ErrorCode
     {
         noError = 0,
@@ -151,7 +151,7 @@ public:
     int getBreakpoint() const;
     void setBreakpoint(int value);
 
-    virtual void getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress);
+    virtual void getNextOperandAddress(int &intermediateAddress, int &intermediateAddress2, int &finalOperandAddress);
 
     int getMemorySize() const;
     void setMemorySize(int size);
@@ -207,7 +207,6 @@ public:
     void getAddressingModeDescription(AddressingMode::AddressingModeCode addressingModeCode, QString &acronym, QString &name, QString &format, QString &description);
 
 protected:
-
     QString identifier;
     QVector<Register*> registers;
     Register *PC;
@@ -222,7 +221,6 @@ protected:
     QVector<AddressingMode*> addressingModes;
     QHash<QString, int> labelPCMap;
     QHash<QString, QString> descriptions;
-    int instructionPC; // Used by PC addressing mode
     bool buildSuccessful;
     bool running;
     int firstErrorLine;
@@ -233,7 +231,6 @@ protected:
 
 signals:
     void buildErrorDetected(QString);
-
 };
 
 

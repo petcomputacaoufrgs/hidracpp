@@ -36,8 +36,6 @@ void Machine::step()
     AddressingMode::AddressingModeCode addressingModeCode;
     Instruction *instruction = nullptr;
 
-    instructionPC = getPCValue(); // Used by PC addressing mode
-
     fetchInstruction(fetchedValue, instruction); // Outputs fetched value (byte or word) and corresponding instruction
     decodeInstruction(fetchedValue, instruction, addressingModeCode, registerName, immediateAddress); // Outputs addressing mode, register and immediate address
     executeInstruction(instruction, addressingModeCode, registerName, immediateAddress);
@@ -1020,15 +1018,16 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::Addre
             return address(memoryRead(immediateAddress) + getRegisterValue("X"));
 
         case AddressingMode::INDEXED_BY_PC:
-            return address(memoryRead(immediateAddress) + instructionPC);
-    }
+            return address(memoryRead(immediateAddress) + getRegisterValue("PC"));
 
-    return 0;
+        default:
+            return 0;
+    }
 }
 
 int Machine::memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
 {
-    return memoryRead(memoryGetOperandAddress(immediateAddress, addressingModeCode));
+    return memoryRead(memoryGetOperandAddress(immediateAddress, addressingModeCode)); // Return 1-byte value
 }
 
 int Machine::memoryGetJumpAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
@@ -1153,15 +1152,17 @@ void Machine::setBreakpoint(int value)
         breakpoint = value;
 }
 
-void Machine::getNextOperandAddress(int &intermediateAddress, int &finalOperandAddress)
+// Used to highlight the next operand
+void Machine::getNextOperandAddress(int &intermediateAddress, int &intermediateAddress2, int &finalOperandAddress)
 {
     int fetchedValue = getMemoryValue(PC->getValue());
     Instruction *instruction = getInstructionFromValue(fetchedValue);
     AddressingMode::AddressingModeCode addressingModeCode = extractAddressingModeCode(fetchedValue);
     int immediateAddress;
 
-    intermediateAddress = -1;
-    finalOperandAddress = -1;
+    intermediateAddress  = -1;
+    intermediateAddress2 = -1;
+    finalOperandAddress  = -1;
 
     if (!instruction || instruction->getNumBytes() != 2)
         return;
@@ -1176,7 +1177,7 @@ void Machine::getNextOperandAddress(int &intermediateAddress, int &finalOperandA
 
         case AddressingMode::INDIRECT:
             intermediateAddress = getMemoryValue(immediateAddress);
-            finalOperandAddress = getMemoryValue(getMemoryValue(immediateAddress));
+            finalOperandAddress = getMemoryValue(intermediateAddress);
             break;
 
         case AddressingMode::IMMEDIATE: // Immediate addressing mode

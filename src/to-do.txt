@@ -14,9 +14,9 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 - Testar endereços altos do Pericles
-- Greyed out stack [done]
 - Reg: muitos registradores?
 - Indexamento por PC, PC da instrução ou atual?
+- Pericles: Little endian ou big endian? DW?
 
 Dúvidas do Volta:
 
