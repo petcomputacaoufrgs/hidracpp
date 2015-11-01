@@ -223,6 +223,7 @@ protected:
     QHash<QString, QString> descriptions;
     bool buildSuccessful;
     bool running;
+    bool littleEndian;
     int firstErrorLine;
     int breakpoint;
     int instructionCount;

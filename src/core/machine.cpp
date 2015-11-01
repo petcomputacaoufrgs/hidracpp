@@ -7,6 +7,7 @@ Machine::Machine(QObject *parent) :
     QObject(parent)
 {
     PC = nullptr;
+    littleEndian = false;
 
     clearCounters();
     setBreakpoint(-1);
@@ -314,7 +315,7 @@ void Machine::setOverflow(bool state)
 {
     foreach (Flag *flag, flags)
     {
-        if (flag->getFlagCode() == Flag::OVERFLOW)
+        if (flag->getFlagCode() == Flag::OVERFLOW_FLAG)
             flag->setValue(state);
     }
 }
@@ -643,7 +644,13 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
                 // Write final value
                 if (bytesPerArgument == 2)
                 {
-                    assemblerMemory[PC->getValue()]->setValue((value & 0xFF00) >> 8); // Big endian
+                    if (littleEndian)
+                    {
+                        assemblerMemory[PC->getValue()]->setValue(value & 0x00FF);
+                        value = value >> 8;
+                    }
+                    else
+                        assemblerMemory[PC->getValue()]->setValue((value & 0xFF00) >> 8); // Big endian
                     PC->incrementValue();
                 }
 

@@ -8,7 +8,7 @@ class Flag
 public:
     enum FlagCode
     {
-        NEGATIVE, ZERO, CARRY, BORROW, OVERFLOW, CARRY_NOT_BORROW
+        NEGATIVE, ZERO, CARRY, BORROW, OVERFLOW_FLAG, CARRY_NOT_BORROW
     };
 
     Flag();
