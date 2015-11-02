@@ -16,7 +16,6 @@ Código
 - Testar endereços altos do Pericles
 - Pericles: Little endian ou big endian? DW?
 - Volta: valores inacessíveis em cinza claro (em vez de setEnabled(false))
-- Reg: separar PC de registradores
 - UI: Help para diretivas (mencionar DW/DAW do Pericles)
 - DB Label+1 deve funcionar
 

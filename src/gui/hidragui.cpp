@@ -202,6 +202,7 @@ void HidraGui::initializeStackTable()
     // If machine is Volta, show stack. Otherwise, show data memory.
     ui->tableViewStack->setVisible(isVoltaMachine);
     ui->tableViewMemoryData->setVisible(!isVoltaMachine);
+    ui->tableViewMemoryInstructions->setColumnHidden(ColumnLabel, !isVoltaMachine); // Show labels in Volta's memory table
 
     if (!isVoltaMachine)
         return; // No stack to initialize
@@ -244,25 +245,40 @@ void HidraGui::initializeFlagWidgets()
     for (int i=0; i < machine->getNumberOfFlags(); i++)
     {
         FlagWidget *newFlag = new FlagWidget(this, machine->getFlagName(i), machine->getFlagValue(i));
-        ui->layoutFlags->addWidget(newFlag);
         flagWidgets.append(newFlag);
+        ui->layoutFlags->addWidget(newFlag);
     }
 }
 
 void HidraGui::initializeRegisterWidgets()
 {
     static int originalMaximumHeight = ui->areaRegisters->maximumHeight();
+    bool separatePCFromRegisters = false;
 
-    if (machine->getNumberOfRegisters() > 4) // If there are too many registers, don't restrict size
+    // If there are too many registers, don't restrict height and show PC separately
+    if (machine->getNumberOfRegisters() > 4)
+    {
         ui->areaRegisters->setMaximumHeight(0xFFFFFF);
+        separatePCFromRegisters = true; // Show PC on its own area
+        ui->areaPC->setVisible(true);
+    }
     else
+    {
         ui->areaRegisters->setMaximumHeight(originalMaximumHeight);
+        ui->areaPC->setVisible(false);
+    }
 
     for (int i=0; i < machine->getNumberOfRegisters(); i++)
     {
+        // Create new register
         RegisterWidget *newRegister = new RegisterWidget(this, machine->getRegisterName(i));
-        ui->layoutRegisters->addWidget(newRegister, i/2, i%2); // Two per line, alternates left and right columns with i%2
         registerWidgets.append(newRegister);
+
+        // Add to GUI
+        if (separatePCFromRegisters && machine->getRegisterName(i) == "PC")
+            ui->layoutPC->addWidget(newRegister); // Show PC on its own area
+        else
+            ui->layoutRegisters->addWidget(newRegister, i/2, i%2); // Two per line, alternates left and right columns with i%2
     }
 }
 
