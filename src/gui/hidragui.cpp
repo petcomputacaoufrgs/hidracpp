@@ -537,7 +537,7 @@ void HidraGui::updateStackTable()
         // Column 2: Byte value
         //////////////////////////////////////////////////
 
-        stackModel.item(row, ColumnStackValue)->setEnabled(stackAddress < spValue); // Items before SP (and thus inaccessible) are greyed out
+        stackModel.item(row, ColumnStackValue)->setEnabled(stackAddress <= spValue); // Items after SP (and thus inaccessible) are greyed out
         stackModel.item(row, ColumnStackValue)->setText(QString::number(value, base).toUpper());
 
         // On mouse-over, sends value to statusbar (with "#" prefix)

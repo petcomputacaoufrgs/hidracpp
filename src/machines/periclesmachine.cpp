@@ -83,13 +83,13 @@ void PericlesMachine::decodeInstruction(int fetchedValue, Instruction *&instruct
     addressingModeCode = extractAddressingModeCode(fetchedValue);
     registerName = extractRegisterName(fetchedValue);
 
-    if (instruction && instruction->getNumBytes() == 0)
+    if (instruction && instruction->getNumBytes() == 0) // If instruction has variable number of bytes
     {
         immediateAddress = getPCValue(); // Address that contains first argument byte
 
+        // Skip argument bytes
         incrementPCValue();
-
-        if (addressingModeCode != AddressingMode::IMMEDIATE)
+        if (addressingModeCode != AddressingMode::IMMEDIATE) // Immediate argument has only 1 byte
             incrementPCValue();
     }
 }

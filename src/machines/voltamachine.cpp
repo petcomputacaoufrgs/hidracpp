@@ -57,7 +57,7 @@ VoltaMachine::VoltaMachine()
     instructions.append(new Instruction(1, "01010110", Instruction::VOLTA_SLE, "sle"));
     instructions.append(new Instruction(1, "01100110", Instruction::VOLTA_RTS, "rts"));
     instructions.append(new Instruction(2, "011100..", Instruction::VOLTA_PSH, "psh a"));
-    instructions.append(new Instruction(2, "011101..", Instruction::VOLTA_POP, "pop a")); // TODO: Código estava repetido, falar com o Weber
+    instructions.append(new Instruction(2, "100000..", Instruction::VOLTA_POP, "pop a"));
     instructions.append(new Instruction(2, "100100..", Instruction::VOLTA_JMP, "jmp a"));
     instructions.append(new Instruction(2, "101000..", Instruction::VOLTA_JSR, "jsr a"));
     instructions.append(new Instruction(1, "1111....", Instruction::VOLTA_HLT, "hlt"));
@@ -122,8 +122,8 @@ void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode:
     //////////////////////////////////////////////////
 
     case Instruction::VOLTA_CLR:
-        stackPop();
-        stackPush(0);
+        setStackValue(SP->getValue(), 0); // Replace top of stack
+        accessCount++; // Count single access
         break;
 
     case Instruction::VOLTA_NOT:

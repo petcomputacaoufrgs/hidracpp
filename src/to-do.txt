@@ -14,26 +14,11 @@ Código
 - Licença e site no About
 - Testar upper/lowercase [testado invertendo case]
 - Testar endereços altos do Pericles
-- Reg: muitos registradores?
-- Indexamento por PC, PC da instrução ou atual?
 - Pericles: Little endian ou big endian? DW?
-
-Dúvidas do Volta:
-
-- Instruções PUSH e POP c/mesmo código
-- Interface: inverter pilha? Mostrar endereços?
-- Valor inicial do SP, valor que aponta
-- Ordem do SUB e comparações
-- Shift ASR, preserva sinal?
-- Comparações, signed?
-- Acessos de NEG/CLR
-- Passagem de parâmetros
-- DUP, rotate, etc.
-
-Erros
-
-- Pericles: highlight do lugar da memória apontado pelo endereço dos dados não está funcionando
-- Pericles: modo indireto só considera primeiro byte do endereço final (highlight tb)
+- Volta: valores inacessíveis em cinza claro (em vez de setEnabled(false))
+- Reg: separar PC de registradores
+- UI: Help para diretivas (mencionar DW/DAW do Pericles)
+- DB Label+1 deve funcionar
 
 
 
@@ -41,7 +26,7 @@ Erros
 
 Geral
 
-- Find/Replace
+- Menu Editar c/Find/Replace
 - Atalho para comentar várias linhas de código de uma vez
 
 Breakpoints
