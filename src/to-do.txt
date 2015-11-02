@@ -27,6 +27,7 @@ Geral
 
 - Menu Editar c/Find/Replace
 - Atalho para comentar várias linhas de código de uma vez
+- Aceitar vírgula como separador de argumentos (seria apenas usado para REG_IF), cuidar modo indireto (,I)
 
 Breakpoints
 

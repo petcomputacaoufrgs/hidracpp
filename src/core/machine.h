@@ -50,7 +50,6 @@ public:
 
     // Constants
     QString ALLOCATE_SYMBOL = "%";
-    QString CHAR_SYMBOL = "$";
     QString QUOTE_SYMBOL = "¢";
 
     explicit Machine(QObject *parent = 0);
@@ -85,16 +84,15 @@ public:
     // Assembler
     //////////////////////////////////////////////////
 
-    // Build
-    void buildInstruction(QString mnemonic, QString arguments);
-
     // Assembly
     void assemble(QString sourceCode);
     void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine);
+    void buildInstruction(QString mnemonic, QString arguments);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
     void clearAssemblerData();
+    void setAssemblerMemoryNext(int value); // Increments PC
     void copyAssemblerMemoryToMemory();
     void reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine);
     virtual int calculateBytesToReserve(QString addressArgument);
@@ -110,7 +108,7 @@ public:
     QStringList splitArguments(QString arguments);
     void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
-    int argumentToValue(QString argument, bool isImmediate);
+    int argumentToValue(QString argument, bool isImmediate, int immediateNumBytes = 1);
     int stringToInt(QString valueString);
 
 
@@ -180,7 +178,7 @@ public:
 
     int  getPCValue() const;
     void setPCValue(int value);
-    void incrementPCValue();
+    void incrementPCValue(int units = 1);
 
     int getPCCorrespondingSourceLine();
     int getSourceLineCorrespondingAddress(int line);

@@ -60,9 +60,7 @@ void Machine::decodeInstruction(int fetchedValue, Instruction *&instruction, Add
     if (instruction && instruction->getNumBytes() > 1)
     {
         immediateAddress = getPCValue(); // Address that contains first argument byte
-
-        for (int i = 0; i < instruction->getNumBytes() - 1; i++) // Skip argument bytes
-            incrementPCValue();
+        incrementPCValue(instruction->getNumBytes() - 1); // Skip argument bytes
     }
 }
 
@@ -524,6 +522,7 @@ void Machine::assemble(QString sourceCode)
     clearAfterBuild();
 }
 
+// Mnemonic must be lowercase
 void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine)
 {
     static QRegExp whitespace("\\s+");
@@ -574,8 +573,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
             }
             else // Skip bytes
             {
-                for (int i = 0; i < argumentList.first().mid(1).toInt()*bytesPerArgument; i++)
-                    PC->incrementValue();
+                incrementPCValue(argumentList.first().mid(1).toInt()*bytesPerArgument);
             }
         }
         else if (reserveOnly)
@@ -587,75 +585,24 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
             // Process each argument
             for (QString argument : argumentList)
             {
-                int value = 0;
-                bool ok;
+                // TODO: Should DAB/DAW disallow labels as in Daedalus?
+                int value = argumentToValue(argument, true, bytesPerArgument);
 
-                // Process literal quote
-                if (argument.contains(QUOTE_SYMBOL))
+                // Write value
+                if (bytesPerArgument == 2 && littleEndian)
                 {
-                    value = '\'';
+                    setAssemblerMemoryNext( value       & 0xFF); // Least significant byte first
+                    setAssemblerMemoryNext((value >> 8) & 0xFF);
                 }
-
-                // Process character
-                else if (argument.at(0) == CHAR_SYMBOL)
+                else if (bytesPerArgument == 2) // Big endian
                 {
-                    value = argument.at(1).toLatin1();
+                    setAssemblerMemoryNext((value >> 8) & 0xFF); // Most significant byte first
+                    setAssemblerMemoryNext( value       & 0xFF);
                 }
-
-                // Process label
-                else if (labelPCMap.contains(argument.toLower()))
-                {
-                    if (mnemonic == "dab" || mnemonic == "daw")
-                        throw invalidArgument;
-
-                    value = labelPCMap.value(argument.toLower());
-                }
-
-                // Process hexadecimal number
-                else if (argument.at(0).toLower() == 'h')
-                {
-                    // Convert hexadecimal string to int
-                    value = argument.mid(1).toInt(&ok, 16); // Remove H
-
-                    // Check if invalid
-                    if (!ok)
-                        throw invalidArgument;
-                    else if (!isValidNBytesValue(QString::number(value), bytesPerArgument) || value < 0)
-                        throw invalidValue;
-                }
-
-                // Process decimal number
                 else
                 {
-                    // Convert decimal string to int
-                    value = argument.toInt(&ok, 10);
-
-                    // Check if invalid
-                    if (!ok)
-                        throw invalidArgument;
-                    else if (!isValidNBytesValue(argument, bytesPerArgument))
-                        throw invalidValue;
-
-                    //value = convertToUnsigned(argument.toInt(), bytesPerArgument);
+                    setAssemblerMemoryNext(value & 0xFF);
                 }
-
-
-
-                // Write final value
-                if (bytesPerArgument == 2)
-                {
-                    if (littleEndian)
-                    {
-                        assemblerMemory[PC->getValue()]->setValue(value & 0x00FF);
-                        value = value >> 8;
-                    }
-                    else
-                        assemblerMemory[PC->getValue()]->setValue((value & 0xFF00) >> 8); // Big endian
-                    PC->incrementValue();
-                }
-
-                assemblerMemory[PC->getValue()]->setValue(value & 0x00FF);
-                PC->incrementValue();
             }
         }
     }
@@ -702,36 +649,26 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
 
 
     // Write first byte (instruction with register and addressing mode):
-    assemblerMemory[PC->getValue()]->setValue(instruction->getByteValue() | registerBitCode | addressingModeBitCode);
-    PC->incrementValue();
+    setAssemblerMemoryNext(instruction->getByteValue() | registerBitCode | addressingModeBitCode);
 
     // Write second byte (if 1-byte address/immediate value):
     if (instruction->getNumBytes() == 2 || isImmediate)
     {
-        assemblerMemory[PC->getValue()]->setValue(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
-        PC->incrementValue();
+        setAssemblerMemoryNext(argumentToValue(argumentList.last(), isImmediate)); // Converts labels, chars, etc.
     }
     // Write second and third bytes (if 2-byte addresses):
     else if (instructionArguments.contains("a"))
     {
         int address = argumentToValue(argumentList.last(), isImmediate);
 
-        assemblerMemory[PC->getValue()]->setValue(address & 0xFF); // Least significant byte (little-endian)
-        PC->incrementValue();
-
-        assemblerMemory[PC->getValue()]->setValue((address >> 8) & 0xFF); // Most significant byte
-        PC->incrementValue();
+        setAssemblerMemoryNext( address       & 0xFF); // Least significant byte (little-endian)
+        setAssemblerMemoryNext((address >> 8) & 0xFF); // Most significant byte
     }
     // If instruction has two addresses (REG_IF), write both addresses:
     else if (instructionArguments.contains("a0") && instructionArguments.contains("a1"))
     {
-        QString address0 = argumentList.at(instructionArguments.indexOf("a0"));
-        assemblerMemory[PC->getValue()]->setValue(argumentToValue(address0, false));
-        PC->incrementValue();
-
-        QString address1 = argumentList.at(instructionArguments.indexOf("a1"));
-        assemblerMemory[PC->getValue()]->setValue(argumentToValue(address1, false));
-        PC->incrementValue();
+        setAssemblerMemoryNext(argumentToValue(argumentList.at(instructionArguments.indexOf("a0")), false));
+        setAssemblerMemoryNext(argumentToValue(argumentList.at(instructionArguments.indexOf("a1")), false));
     }
 }
 
@@ -776,6 +713,12 @@ void Machine::clearAssemblerData()
     labelPCMap.clear();
 }
 
+void Machine::setAssemblerMemoryNext(int value)
+{
+    assemblerMemory[PC->getValue()]->setValue(value);
+    incrementPCValue();
+}
+
 // Copies assemblerMemory to machine's memory
 void Machine::copyAssemblerMemoryToMemory()
 {
@@ -796,7 +739,7 @@ void Machine::reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine
         {
             reserved[PC->getValue()] = true;
             addressCorrespondingSourceLine[PC->getValue()] = associatedSourceLine;
-            PC->incrementValue();
+            incrementPCValue();
             sizeToReserve--;
         }
         else
@@ -815,7 +758,7 @@ bool Machine::isValidValue(QString valueString, int min, int max)
     bool ok;
     int value;
 
-    if (valueString.left(1) == "h")
+    if (valueString.left(1).toLower() == "h")
         value = valueString.mid(1).toInt(&ok, 16); // Remove "h"
     else
         value = valueString.toInt(&ok, 10);
@@ -895,7 +838,7 @@ QStringList Machine::splitArguments(QString arguments)
             argument.replace("'", "");
             foreach (QChar c, argument)
             {
-                finalArgumentList.append(CHAR_SYMBOL + c);
+                finalArgumentList.append('\'' + c + '\''); // Char between single quotes
             }
         }
         else // Value
@@ -932,8 +875,9 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
     }
 }
 
-int Machine::argumentToValue(QString argument, bool isImmediate)
+int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNumBytes)
 {
+    DEBUG_STRING(argument);
     static QRegExp matchChar("'.'");
     static QRegExp labelOffset("(.+)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
 
@@ -957,11 +901,11 @@ int Machine::argumentToValue(QString argument, bool isImmediate)
 
     if (isImmediate)
     {
-        if (argument == QUOTE_SYMBOL) // Immediate quote
+        if (argument.contains(QUOTE_SYMBOL)) // Immediate quote
             return (int)'\'';
         else if (matchChar.exactMatch(argument)) // Immediate char
             return (int)argument.at(1).toLatin1();
-        else if (isValidByteValue(argument)) // Immediate hex/dec value
+        else if (isValidNBytesValue(argument, immediateNumBytes)) // Immediate hex/dec value
             return stringToInt(argument);
         else
             throw invalidValue;
@@ -1411,9 +1355,9 @@ void Machine::setPCValue(int value)
     PC->setValue(value);
 }
 
-void Machine::incrementPCValue()
+void Machine::incrementPCValue(int units)
 {
-    PC->setValue(PC->getValue() + 1);
+    PC->setValue(PC->getValue() + units);
 }
 
 int Machine::getPCCorrespondingSourceLine()
