@@ -1,0 +1,257 @@
+﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Arquivo para teste das instruções da
+;; Máquina Ramses no Hidra
+;;
+;; RESULTADO ESPERADO:
+;; A partir de 200, cada teste deve escrever o
+;; valor 255 (0xFF) na memória.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test00: ORG, DB
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ORG    200
+Test00:    DB    255
+
+;; Labels para os outros testes:
+
+Test01:    DB    1
+Test02:    DB    1
+Test03:    DB    1
+Test04:    DB    1
+Test05:    DB    1
+Test06:    DB    1
+Test07:    DB    1
+Test08:    DB    1
+Test09:    DB    1
+Test10:    DB    1
+Test11:    DB    1
+Test12:    DB    1
+Test13:    DB    1
+Test14:    DB    1
+Test15:    DB    1
+Test16:    DB    1
+Test17:    DB    1
+Test18:    DB    1
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Constantes:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ORG    170
+
+EndInd:    DB    Val255
+Val000:    DB    0
+Val255:    DB    255
+
+JumpJSR:
+    NOP
+    LDR    A    #128
+    ADD    A    #127    ; 128 + 127 = 255
+    STR    A    TestJSR
+    JMP    JumpJSR,I
+
+TestJSR:    DB    0
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test01: LDR, STR, endereçamento direto, registrador RA
+;; 2 Instruções, 6 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    ORG    0
+    
+    LDR    A    200    ; (Endereço de Test00)
+    STR    A    201    ; Copia o valOR    A 255 de Test00 para Test01
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test02: Labels
+;; 2 Instruções, 6 Acessos / Total: 4 Instruções, 12 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    Val255
+    STR    A    Test02    ; Copia o valOR    A 255 para Test02
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test03: Endereçamento indireto, registrador RB
+;; 3 Instruções, 10 Acessos / Total: 7 Instruções, 22 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    B    Val000
+    LDR    B    EndInd,I
+    STR    B    Test03
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test04: Endereçamento imediato
+;; 3 Instruções, 8 Acessos / Total: 10 Instruções, 30 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    B    Val000
+    LDR    B    #255
+    STR    B    Test04
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test05: Endereçamento indexado, registrador RX
+;; 3 Instruções, 7 Acessos / Total: 13 Instruções, 37 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    X    #200
+    LDR    B    #255
+    STR    B    5,X    ; Guarda 255 na posição 200+5 (posição do Test05)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test06: ADD (com overflow)
+;; 4 Instruções, 9 Acessos / Total: 17 Instruções, 46 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #224
+    ADD    A    #224    ; 224 + 224 = 192 (overflow)
+    ADD    A    #63    ; 192 + 63 = 255
+    STR    A    Test06
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test07: OR
+;; 4 Instruções, 9 Acessos / Total: 21 Instruções, 55 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #7    ; 7 = 0b00000111
+    OR    A    #28    ; 28 = 0b00011100 | 7 bitor 28 = 31
+    ADD    A    #224    ; 31 + 224 = 255
+    STR    A    Test07
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test08: AND
+;; 4 Instruções, 9 Acessos / Total: 25 Instruções, 64 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #7    ; 7 = 0b00000111
+    AND    A    #28    ; 28 = 0b00011100 | 7 bitand 28 = 4
+    ADD    A    #251    ; 4 + 251 = 255
+    STR    A    Test08
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test09: NOT
+;; 4 Instruções, 8 Acessos / Total: 29 Instruções, 72 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #7    ; 7 = 0b00000111
+    NOT    A        ; bitnot 7 = 248
+    ADD    A    #7    ; 248 + 7 = 255
+    STR    A    Test09
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test10: SUB (com underflow)
+;; 3 Instruções, 7 Acessos / Total: 32 Instruções, 79 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #248
+    SUB    A    #249    ; 248 - 249 = 255 (underflow)
+    STR    A    Test10
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test11: NOP, JMP
+;; 4 Instruções, 8 Acessos / Total: 36 Instruções, 87 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    NOP
+    LDR    A    #255
+    JMP    JumpJMP    ; Pula próxima instrução
+    LDR    A    #7    ; Nunca executada
+
+JumpJMP:    STR    A    Test11
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test12: JN
+;; 6 Instruções, 13 Acessos / Total: 42 Instruções, 100/99 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #7
+    JN    JumpJN1    ; Jump ignorado
+    ADD    A    #121    ; 7 + 121 = 128 (negativo)
+
+JumpJN1:    JN    JumpJN2    ; Pula próxima instrução
+    LDR    A    #7    ; Nunca executada
+
+JumpJN2:    ADD    A    #127    ; 128 + 127 = 255
+    STR    A    Test12
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test13: JZ
+;; 6 Instruções, 13 Acessos / Total: 48 Instruções, 113/111 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #7
+    JZ    JumpJZ1    ; Jump ignorado
+    ADD    A    #249    ; 7 + 249 = 0 (overflow)
+
+JumpJZ1: JZ    JumpJZ2    ; Pula próxima instrução
+    LDR    A    #7    ; Nunca executada
+
+JumpJZ2:    ADD    A    #255    ; 0 + 255 = 255
+    STR    A    Test13
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test14: JC
+;; 7 Instruções, 15 Acessos / Total: 55 Instruções, 128/125 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #127
+    ADD    A    #128    ; 127 + 128 = 255
+    JC    JumpJC1    ; Jump ignorado
+    ADD    A    #128    ; 255 + 128 = 127 (carry)
+
+JumpJC1:    JC    JumpJC2    ; Pula próxima instrução
+    LDR    A    #28    ; Nunca executada
+
+JumpJC2:    ADD    A    #128    ; 127 + 128 = 255
+    STR    A    Test14
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test15: JSR
+;; 7 Instruções, 19 Acessos / Total: 62 Instruções, 147/144 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    JSR    JumpJSR
+    LDR    B    TestJSR
+    STR    B    Test15
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test16: NEG
+;; 8 Instruções, 14 Acessos / Total: 70 Instruções, 161/158 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #128
+    NEG    A        ; neg(128) = 128
+    ADD    A    #128    ; 128 + 128 = 0 (overflow)
+    NEG    A        ; neg(0) = 0
+    ADD    A    #12    ; 0 + 12 = 12
+    NEG    A        ; neg(12) = 244
+    ADD    A    #11    ; 244 + 11 = 255
+    STR    A    Test16    
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test17: SHR
+;; 7 Instruções, 13 Acessos / Total: 77 Instruções, 173/170 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #14
+    SHR    A        ; shr(14) = 7 (carry = 0)
+    JC    JumpSHR1    ; Jump ignorado
+    SHR    A        ; shr(7) = 3 (carry = 1)
+
+JumpSHR1: JC    JumpSHR2    ; Pula próxima instrução
+    LDR    A    #28    ; Nunca executada
+
+JumpSHR2: ADD    A    #252    ; 3 + 252 = 255
+    STR    A    Test17
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Test18: HLT
+;; 3 Instruções, 6 Acessos / Total: 80 Instruções, 179/176 Acessos
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    LDR    A    #255
+    STR    A    Test18
+    HLT        ; O programa deve parar aqui
+    LDR    A    #7
+    STR    A    Test18

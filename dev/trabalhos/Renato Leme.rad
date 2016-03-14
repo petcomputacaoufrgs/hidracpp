@@ -1,0 +1,110 @@
+﻿ldr X vet_X
+ldr B palavra	
+
+carrega_vetor:
+	ldr A palavra,I
+	sub A #65
+	jn converte_ini
+	add B #1
+	str B palavra
+	str A 0,X ; vetor de conversão
+	add X #2
+	ldr A tam
+	add A #1
+	str A tam
+	jmp carrega_vetor
+	
+converte_ini:
+	str A 0,X ; vetor X
+	ldr X vet_X ; início do vetor de conversão
+converte:
+	ldr A 0,X
+	jz a_zero
+	jn modulo_ini
+	str A 151
+	ldr B var_a ; por quanto A será multiplicado
+	jz a_zero
+	add X #2
+
+a_zero:
+	str B 2,X
+	jmp soma_b
+
+multiplica:
+	sub B #1
+	jz soma_b ;;;;;;;;; LEMBRAR DE TRATAR CASO EM QUE a = 0 ;;;;;;;;
+	ldr A -2,X
+	jz soma_b ; se for zero, nada a fazer
+	add A 151
+	str A -2,X
+	jc se_carry
+	jmp multiplica	
+
+se_carry:
+	ldr A -1,X
+	add A #1
+	str A -1,X ; soma 1 ao segundo byte do numero
+	jmp multiplica
+
+soma_b:
+	ldr A var_b
+	add A -2,X
+	str A -2,X
+	jc se_carry_b
+	jmp converte
+
+se_carry_b:
+	ldr A -1,X
+	add A #1
+	str A -1,X ; soma 1 ao segundo byte do numero
+	jmp converte
+
+modulo_ini:
+	ldr X #144 ; endereço do vetor de conversão
+	ldr A 0,X
+modulo:
+	sub A #26
+	jc modulo
+borrow:
+	ldr B 1,X
+	sub B #1
+	jn fim_modulo
+	str B 1,X
+	jmp modulo
+fim_modulo:
+	add A #26
+	str A 0,X
+	add X #2
+	ldr A 0,X
+	ldr B tam
+	sub B #1
+	jz troca_vetor_ini
+	str B tam
+	jmp modulo
+
+troca_vetor_ini:
+	ldr X #144
+	ldr B #218
+	str B palavra
+troca_vetor:
+	ldr A 0,X
+	jn fim
+	add A #65
+	str A palavra,I
+	str B palavra
+	add B #1
+	str B palavra
+	add X #2
+	jmp troca_vetor
+
+fim:
+	hlt
+
+org 213
+	tam:	 db 0
+	palavra: db 218
+	vet_X:   db 152
+	var_a:	 db 0
+	var_b: 	 db 25
+org 218
+	dab 77,78,89,72,82,77,65,84,73,67,90,65,65,65,65,65,65,65,65,65,65,0
