@@ -877,7 +877,6 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
 
 int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNumBytes)
 {
-    DEBUG_STRING(argument);
     static QRegExp matchChar("'.'");
     static QRegExp labelOffset("(.+)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
 

@@ -88,6 +88,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="statusTip">
+       <string>Memória - Interpretada como instruções. Duplo-clique para mover execução (PC).</string>
+      </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
@@ -107,6 +110,9 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
+      <property name="statusTip">
+       <string>Memória - Interpretada como dados. Duplo-clique para ir à linha de código correspondente.</string>
+      </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
       </property>
@@ -125,6 +131,9 @@
         <horstretch>0</horstretch>
         <verstretch>0</verstretch>
        </sizepolicy>
+      </property>
+      <property name="statusTip">
+       <string>Memória - Pilha</string>
       </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -166,6 +175,9 @@
        </property>
        <item>
         <widget class="QComboBox" name="comboBoxMachine">
+         <property name="statusTip">
+          <string>Permite selecionar a máquina.</string>
+         </property>
          <item>
           <property name="text">
            <string>Neander</string>
@@ -220,6 +232,9 @@
            <width>0</width>
            <height>40</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Exibe estado das flags da máquina.</string>
          </property>
          <property name="title">
           <string>Flags</string>
@@ -277,6 +292,9 @@
            <width>16777215</width>
            <height>115</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Registradores da máquina. Passe o mouse para ver valores convertidos. Opções extras de visualização no menu Exibir.</string>
          </property>
          <property name="title">
           <string>Registradores</string>
@@ -366,6 +384,9 @@
            <height>60</height>
           </size>
          </property>
+         <property name="statusTip">
+          <string>Exibe valor do Program Counter da máquina.</string>
+         </property>
          <property name="title">
           <string>Program Counter</string>
          </property>
@@ -386,6 +407,9 @@
            <width>0</width>
            <height>0</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Informações. Passe o mouse sobre valores da memória para exibir aqui conversões em diferentes bases.</string>
          </property>
          <property name="title">
           <string/>
@@ -417,6 +441,9 @@
              <height>32</height>
             </size>
            </property>
+           <property name="statusTip">
+            <string>Limpa a memória atual e compila o código-fonte para a memória.</string>
+           </property>
            <property name="text">
             <string>Montar</string>
            </property>
@@ -429,6 +456,9 @@
              <width>16777215</width>
              <height>32</height>
             </size>
+           </property>
+           <property name="statusTip">
+            <string>Executa o programa a partir da posição atual de PC.</string>
            </property>
            <property name="whatsThis">
             <string/>
@@ -448,6 +478,9 @@
              <width>16777215</width>
              <height>32</height>
             </size>
+           </property>
+           <property name="statusTip">
+            <string>Executa a instrução atual e avança PC para a seguinte.</string>
            </property>
            <property name="text">
             <string>Passo</string>
@@ -479,6 +512,9 @@
            <width>0</width>
            <height>40</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Passe o mouse para obter informações sobre cada instrução da máquina escolhida.</string>
          </property>
          <property name="title">
           <string>Instruções</string>
@@ -536,6 +572,9 @@
            <width>0</width>
            <height>40</height>
           </size>
+         </property>
+         <property name="statusTip">
+          <string>Passe o mouse para obter informações sobre cada modo de endereçamento da máquina escolhida.</string>
          </property>
          <property name="title">
           <string>Modos de end.</string>
@@ -652,10 +691,51 @@
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QStatusBar" name="statusBar">
+   <property name="palette">
+    <palette>
+     <active>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="192">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </active>
+     <inactive>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="192">
+         <red>0</red>
+         <green>0</green>
+         <blue>0</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </inactive>
+     <disabled>
+      <colorrole role="WindowText">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>120</red>
+         <green>120</green>
+         <blue>120</blue>
+        </color>
+       </brush>
+      </colorrole>
+     </disabled>
+    </palette>
+   </property>
+  </widget>
   <action name="actionBuild">
    <property name="text">
     <string>Montar</string>
+   </property>
+   <property name="statusTip">
+    <string>Limpa memória atual e compila o código-fonte para a memória.</string>
    </property>
    <property name="shortcut">
     <string>F6</string>
@@ -665,6 +745,9 @@
    <property name="text">
     <string>Passo</string>
    </property>
+   <property name="statusTip">
+    <string>Executa a instrução atual e avança PC para a instrução seguinte.</string>
+   </property>
    <property name="shortcut">
     <string>F8</string>
    </property>
@@ -672,6 +755,9 @@
   <action name="actionRun">
    <property name="text">
     <string>Rodar</string>
+   </property>
+   <property name="statusTip">
+    <string>Executa o programa a partir da posição atual de PC.</string>
    </property>
    <property name="shortcut">
     <string>F7</string>
@@ -681,6 +767,9 @@
    <property name="text">
     <string>Salvar como...</string>
    </property>
+   <property name="statusTip">
+    <string>Salvar como</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+Shift+S</string>
    </property>
@@ -688,6 +777,9 @@
   <action name="actionQuickGuide">
    <property name="text">
     <string>Guia rápido</string>
+   </property>
+   <property name="statusTip">
+    <string>Guia rápido para utilização do Hidra.</string>
    </property>
    <property name="shortcut">
     <string>F1</string>
@@ -702,7 +794,7 @@
    <property name="text">
     <string>Sair</string>
    </property>
-   <property name="toolTip">
+   <property name="statusTip">
     <string>Sair</string>
    </property>
    <property name="shortcut">
@@ -713,12 +805,18 @@
    <property name="text">
     <string>&amp;Salvar</string>
    </property>
+   <property name="statusTip">
+    <string>Salvar</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionOpen">
    <property name="text">
+    <string>Abrir</string>
+   </property>
+   <property name="statusTip">
     <string>Abrir</string>
    </property>
    <property name="shortcut">
@@ -729,15 +827,24 @@
    <property name="text">
     <string>Importar memória...</string>
    </property>
+   <property name="statusTip">
+    <string>Importa arquivo binário de memória, sobrescrevendo a memória atual.</string>
+   </property>
   </action>
   <action name="actionExportMemory">
    <property name="text">
     <string>Exportar memória...</string>
    </property>
+   <property name="statusTip">
+    <string>Exporta a memória atual como arquivo binário.</string>
+   </property>
   </action>
   <action name="actionResetRegisters">
    <property name="text">
     <string>Zerar registradores</string>
+   </property>
+   <property name="statusTip">
+    <string>Reinicia valor de flags e registradores, incluindo PC.</string>
    </property>
    <property name="shortcut">
     <string>F5</string>
@@ -750,6 +857,9 @@
    <property name="text">
     <string>Modo hexadecimal</string>
    </property>
+   <property name="statusTip">
+    <string>Exibe os valores de endereços, dados e registradores em hexadecimal.</string>
+   </property>
    <property name="shortcut">
     <string>Ctrl+H</string>
    </property>
@@ -757,6 +867,9 @@
   <action name="actionSetBreakpoint">
    <property name="text">
     <string>Inserir/remover breakpoint</string>
+   </property>
+   <property name="statusTip">
+    <string>Permite que o programa pare a execução ao alcançar a linha selecionada.</string>
    </property>
    <property name="shortcut">
     <string>F12</string>
@@ -774,9 +887,15 @@
    <property name="text">
     <string>Sobre</string>
    </property>
+   <property name="statusTip">
+    <string>Sobre</string>
+   </property>
   </action>
   <action name="actionNew">
    <property name="text">
+    <string>Novo</string>
+   </property>
+   <property name="statusTip">
     <string>Novo</string>
    </property>
    <property name="shortcut">
@@ -786,6 +905,9 @@
   <action name="actionReference">
    <property name="text">
     <string>Referência de uso</string>
+   </property>
+   <property name="statusTip">
+    <string>Referência de uso para as principais máquinas.</string>
    </property>
    <property name="shortcut">
     <string>F2</string>
@@ -798,6 +920,9 @@
    <property name="text">
     <string>Execução rápida</string>
    </property>
+   <property name="statusTip">
+    <string>Diminui a taxa de atualização dos valores na tela para uma execução mais rápida.</string>
+   </property>
   </action>
   <action name="actionFollowPCMode">
    <property name="checkable">
@@ -806,6 +931,9 @@
    <property name="text">
     <string>Tela segue execução</string>
    </property>
+   <property name="statusTip">
+    <string>Mantém a instrução atual sempre visível na área de código e na memória de instruções.</string>
+   </property>
   </action>
   <action name="actionSignedMode">
    <property name="checkable">
@@ -813,6 +941,9 @@
    </property>
    <property name="text">
     <string>Interpretar dados negativos</string>
+   </property>
+   <property name="statusTip">
+    <string>Permite visualizar os dados da memória e os registradores com sinal, em complemento de 2.</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>

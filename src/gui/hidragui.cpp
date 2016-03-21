@@ -12,6 +12,16 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->setupUi(this);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
 
+    // Change global font
+    QFontDatabase fontDatabase;
+    if (fontDatabase.families().contains("Segoe UI"))
+    {
+        QFont font = this->font();
+        font.setFamily("Segoe UI");
+        font.setPointSize(9);
+        this->setFont(font);
+    }
+
     codeEditor  = new HidraCodeEditor();
     highlighter = new HidraHighlighter(codeEditor->document());
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
@@ -857,17 +867,20 @@ void HidraGui::sourceCodeChanged()
 
 void HidraGui::statusBarMessageChanged(QString newMessage)
 {
-    if (newMessage == " ") // Ignore self-triggered change
+    static QString oldMessage;
+
+    if (newMessage == oldMessage) // Ignore self-triggered change
         return;
 
     if (newMessage.startsWith("#")) // Steal prefixed value from statusbar
     {
         updateInformation(newMessage.remove("#").toInt()); // Display dec/hex/bin
-        statusBar()->showMessage(" ");
+        statusBar()->showMessage(oldMessage); // Keep old message
     }
     else
     {
         updateInformation(); // Restore information to counters
+        oldMessage = newMessage;
     }
 }
 
@@ -1146,9 +1159,10 @@ void HidraGui::on_actionReference_triggered()
 void HidraGui::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "Sobre o Hidra",
-                       "<p align='center'>Hidra v0.9 (" + QString(__DATE__) + ")<br><br>"
-                       "Desenvolvido pelo grupo PET Computação.<br><br>"
-                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.</p>");
+                       "<p align='center'>Hidra v1.0.0 (" + QString(__DATE__) + ")<br><br>"
+                       "Desenvolvido pelo grupo <a href=inf.ufrgs.br/pet>PET Computação</a>.<br><br>"
+                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.<br><br>"
+                       "Código-fonte disponível em: <a href=https://github.com/petcomputacaoufrgs/hidracpp>github.com/petcomputacaoufrgs/hidracpp</a></p>");
 }
 
 
