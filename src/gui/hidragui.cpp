@@ -379,8 +379,11 @@ void HidraGui::clearStackTable()
 
 void HidraGui::clearRegisterWidgets()
 {
-    while(ui->layoutRegisters->count() > 0)
+    while (ui->layoutRegisters->count() > 0)
         delete ui->layoutRegisters->takeAt(0)->widget();
+
+    while (ui->layoutPC->count() > 0)
+        delete ui->layoutPC->takeAt(0)->widget();
 
     registerWidgets.clear();
 }
@@ -1017,6 +1020,9 @@ void HidraGui::on_actionRun_triggered()
             bool refresh = (nextInstructionCount % instructionsPerRefresh == 0); // Refresh whenever it's a multiple of instructionsPerRefresh
             step(refresh);
         }
+
+        if (fastExecute)
+            updateMachineInterface();
     }
 }
 

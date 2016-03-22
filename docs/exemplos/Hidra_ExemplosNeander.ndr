@@ -1,4 +1,28 @@
 ﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Dicas de uso
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Para rodar um programa, clique em Montar, e em seguida em Rodar. Você pode
+;; realizar a execução passo-a-passo com o comando Passo.
+
+;; Para rodar o programa até uma linha específica do código, utilize o comando
+;; Máquina -> Inserir/remover breakpoint (tecla F12), e execute o programa.
+
+;; Passe o mouse sobre valores da memória ou registradores para visualizá-los em
+;; hexadecimal ou binário.
+
+;; Passe o mouse sobre as instruções ou modos de acesso (canto inferior direito)
+;; para informações a respeito de cada instrução da máquina.
+
+;; Dê um clique duplo na tabela de memória esquerda (instruções) para mover a
+;; execução (PC) para o endereço escolhido.
+
+;; Dê um clique duplo em um label na tabela de memória direita (dados) para
+;; visualizar o código correspondente.
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; 01: Soma de valores
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
