@@ -1066,6 +1066,89 @@ FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
 
 
 //////////////////////////////////////////////////
+// Instruction strings
+//////////////////////////////////////////////////
+
+void Machine::updateInstructionStrings()
+{
+    int address = 0, pendingArgumentBytes = 0;
+    bool pcReached = false;
+
+    while (address < getMemorySize())
+    {
+        // Realign interpretation to PC when PC is reached
+        if (!pcReached && address >= getPCValue())
+        {
+            address = getPCValue();
+            pcReached = true;
+        }
+
+        if (pendingArgumentBytes == 0) // Used to skip argument lines
+        {
+            setInstructionString(address, generateInstructionString(address, pendingArgumentBytes));
+        }
+        else // Skip instruction's arguments (leave empty strings)
+        {
+            setInstructionString(address, "");
+            pendingArgumentBytes -= 1;
+        }
+
+        address += 1;
+    }
+}
+
+QString Machine::generateInstructionString(int address, int &argumentsSize)
+{
+    QString memoryString;
+    argumentsSize = 0;
+
+    // Fetch and decode instruction
+    int fetchedValue = getMemoryValue(address);
+    Instruction *instruction = getInstructionFromValue(getMemoryValue(address));
+    AddressingMode::AddressingModeCode addressingModeCode = extractAddressingModeCode(fetchedValue);
+    QString registerName = extractRegisterName(fetchedValue);
+
+    if (instruction == nullptr || instruction->getInstructionCode() == Instruction::NOP)
+    {
+        return "";
+    }
+
+    // Instruction name
+    memoryString = instruction->getMnemonic().toUpper();
+
+    // Register name
+    if (instruction->getArguments().contains("r"))
+    {
+        memoryString += " " + registerName;
+    }
+
+    // Argument value (with addressing mode)
+    if (instruction->getNumBytes() > 1)
+    {
+        memoryString += " " + generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+    }
+
+    return memoryString;
+}
+
+QString Machine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
+{
+    QString argument = QString::number(getMemoryValue(address + 1));
+    QString addressingModePattern = getAddressingModePattern(addressingModeCode);
+
+    if (addressingModePattern != AddressingMode::NO_PATTERN)
+    {
+        argument = addressingModePattern.replace("(.*)", argument); // Surround argument string with the corresponding addressing mode syntax
+    }
+
+    argumentsSize = instruction->getNumBytes() - 1;
+    return argument;
+}
+
+
+
+
+//////////////////////////////////////////////////
 // Getters/setters, clear
 //////////////////////////////////////////////////
 
@@ -1161,6 +1244,7 @@ void Machine::setMemorySize(int size)
 {
     memory.fill(nullptr, size);
     assemblerMemory.fill(nullptr, size);
+    instructionStrings.fill("", size);
     reserved.fill(false, size);
     changed.fill(true, size);
     addressCorrespondingSourceLine.fill(-1, size);
@@ -1204,6 +1288,21 @@ void Machine::clearMemory()
 {
     for (int i=0; i<memory.size(); i++)
         setMemoryValue(i, 0);
+}
+
+QString Machine::getInstructionString(int address)
+{
+    return instructionStrings[address & memoryMask];
+}
+
+void Machine::setInstructionString(int address, QString value)
+{
+    instructionStrings[address & memoryMask] = value;
+}
+
+void Machine::clearInstructionStrings()
+{
+    instructionStrings.fill("", getMemorySize());
 }
 
 int Machine::getNumberOfFlags() const
@@ -1433,6 +1532,17 @@ int Machine::getAddressingModeBitCode(AddressingMode::AddressingModeCode address
     throw QString("Invalid addressing mode code.");
 }
 
+QString Machine::getAddressingModePattern(AddressingMode::AddressingModeCode addressingModeCode)
+{
+    foreach (AddressingMode *addressingMode, addressingModes)
+    {
+        if (addressingMode->getAddressingModeCode() == addressingModeCode)
+            return addressingMode->getAssemblyPattern();
+    }
+
+    return QString("");
+}
+
 int Machine::getInstructionCount()
 {
     return instructionCount;
@@ -1455,6 +1565,7 @@ void Machine::clear()
     clearRegisters();
     clearFlags();
     clearCounters();
+    clearInstructionStrings();
     clearAssemblerData();
 
     setBreakpoint(-1);
@@ -1466,6 +1577,7 @@ void Machine::clearAfterBuild()
     clearRegisters();
     clearFlags();
     clearCounters();
+    clearInstructionStrings();
 
     setRunning(false);
 }

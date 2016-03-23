@@ -156,6 +156,27 @@ void PericlesMachine::getNextOperandAddress(int &intermediateAddress, int &inter
     }
 }
 
+QString PericlesMachine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
+{
+    QString addressingModePattern = getAddressingModePattern(addressingModeCode);
+
+    // Calculate size of argument
+    if (instruction->getNumBytes() == 0) // Instruction with variable number of bytes
+        argumentsSize = (addressingModeCode == AddressingMode::IMMEDIATE) ? 1 : 2;
+    else
+        argumentsSize = instruction->getNumBytes() - 1;
+
+    // Get argument
+    int argumentValue = (argumentsSize == 2) ? getMemoryTwoByteAddress(address + 1) : getMemoryValue(address);
+    QString argument = QString::number(argumentValue);
+
+    // Add addressing mode syntax
+    if (addressingModePattern != AddressingMode::NO_PATTERN)
+        argument = addressingModePattern.replace("(.*)", argument);
+
+    return argument;
+}
+
 int PericlesMachine::memoryReadTwoByteAddress(int address)
 {
     return memoryRead(address) + (memoryRead(address + 1) << 8);

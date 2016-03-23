@@ -7,6 +7,7 @@ class RegMachine : public Machine
 {
 public:
     RegMachine();
+    virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 };
 
 #endif // REGMACHINE_H

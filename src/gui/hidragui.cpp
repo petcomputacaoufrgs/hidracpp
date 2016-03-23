@@ -34,6 +34,7 @@ HidraGui::HidraGui(QWidget *parent) :
     // View options
     showHexValues = false;
     showSignedData = false;
+    showInstructionStrings = false;
     fastExecute = false;
     followPC = false;
     previousPCValue = 0;
@@ -175,11 +176,12 @@ void HidraGui::initializeMemoryTable()
     }
 
     // Set table headers
-    memoryModel.setHeaderData(ColumnPC,               Qt::Horizontal, " ");
-    memoryModel.setHeaderData(ColumnAddress,          Qt::Horizontal, " End ");
-    memoryModel.setHeaderData(ColumnInstructionValue, Qt::Horizontal, "Valor");
-    memoryModel.setHeaderData(ColumnDataValue,        Qt::Horizontal, "Dado");
-    memoryModel.setHeaderData(ColumnLabel,            Qt::Horizontal, "  Label  ");
+    memoryModel.setHeaderData(ColumnPC,                Qt::Horizontal, " ");
+    memoryModel.setHeaderData(ColumnAddress,           Qt::Horizontal, " End ");
+    memoryModel.setHeaderData(ColumnInstructionValue,  Qt::Horizontal, "Valor");
+    memoryModel.setHeaderData(ColumnDataValue,         Qt::Horizontal, "Dado");
+    memoryModel.setHeaderData(ColumnLabel,             Qt::Horizontal, "  Label  ");
+    memoryModel.setHeaderData(ColumnInstructionString, Qt::Horizontal, "   Instrução   ");
 
     // Adjust table settings
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
@@ -198,6 +200,7 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryInstructions->hideColumn(ColumnDataValue);
     ui->tableViewMemoryData->hideColumn(ColumnPC);
     ui->tableViewMemoryData->hideColumn(ColumnInstructionValue);
+    ui->tableViewMemoryData->hideColumn(ColumnInstructionString);
 
     // Scroll to appropriate position
     ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
@@ -432,7 +435,15 @@ void HidraGui::updateMemoryTable(bool force)
 
     int currentLine = machine->getPCCorrespondingSourceLine();
 
+    if (force)
+    {
+        ui->tableViewMemoryInstructions->setColumnHidden(ColumnInstructionString, !showInstructionStrings);
+    }
 
+    if (showInstructionStrings)
+    {
+        machine->updateInstructionStrings();
+    }
 
     //////////////////////////////////////////////////
     // Column 0: PC Arrow
@@ -489,6 +500,16 @@ void HidraGui::updateMemoryTable(bool force)
             QString labelName = machine->getAddressCorrespondingLabel(byteAddress);
             memoryModel.item(row, ColumnLabel)->setText(labelName);
             previousLabel[byteAddress] = labelName; // Update previousLabel
+        }
+
+        //////////////////////////////////////////////////
+        // Column 5: Instruction strings
+        //////////////////////////////////////////////////
+
+        if (showInstructionStrings)
+        {
+            QString instructionString = machine->getInstructionString(byteAddress);
+            memoryModel.item(row, ColumnInstructionString)->setText((instructionString != "NOP") ? instructionString : ""); // Omit NOPs
         }
     }
 
@@ -1134,6 +1155,13 @@ void HidraGui::on_actionSignedMode_toggled(bool checked)
         registerWidgets.at(i)->setMode(showHexValues);
 
     updateMachineInterface(true);
+}
+
+void HidraGui::on_actionShowInstructionStrings_toggled(bool checked)
+{
+    showInstructionStrings = checked;
+
+    updateMemoryTable(true);
 }
 
 void HidraGui::on_actionFastExecuteMode_toggled(bool checked)

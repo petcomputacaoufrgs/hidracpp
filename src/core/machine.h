@@ -117,9 +117,9 @@ public:
     // Memory read/write with access count
     //////////////////////////////////////////////////
 
-    int memoryRead(int address); // Increments accessCount
+    int  memoryRead(int address); // Increments accessCount
     void memoryWrite(int address, int value); // Increments accessCount
-    int memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
+    int  memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
 
     virtual int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
     int memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
@@ -133,6 +133,16 @@ public:
 
     FileErrorCode::FileErrorCode importMemory(QString filename);
     FileErrorCode::FileErrorCode exportMemory(QString filename);
+
+
+
+    //////////////////////////////////////////////////
+    // Instruction strings
+    //////////////////////////////////////////////////
+
+    void updateInstructionStrings();
+    QString generateInstructionString(int address, int &argumentsSize); // TODO: Fix Pericles
+    virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 
 
 
@@ -157,6 +167,10 @@ public:
     void setMemoryValue(int address, int value);
     bool hasByteChanged(int address); // Since last look-up
     void clearMemory();
+
+    QString getInstructionString(int address);
+    void setInstructionString(int address, QString value);
+    void clearInstructionStrings();
 
     int  getNumberOfFlags() const;
     QString getFlagName(int id) const;
@@ -192,6 +206,7 @@ public:
     QVector<AddressingMode *> getAddressingModes() const;
     AddressingMode::AddressingModeCode getDefaultAddressingModeCode();
     int getAddressingModeBitCode(AddressingMode::AddressingModeCode addressingModeCode);
+    QString getAddressingModePattern(AddressingMode::AddressingModeCode addressingModeCode);
 
     int  getInstructionCount();
     int  getAccessCount();
@@ -210,6 +225,7 @@ protected:
     Register *PC;
     QVector<Byte*> memory;
     QVector<Byte*> assemblerMemory;
+    QVector<QString> instructionStrings;
     QVector<bool> reserved;
     QVector<int> addressCorrespondingSourceLine, sourceLineCorrespondingAddress; // Each address may be associated with a line of code
     QVector<QString> addressCorrespondingLabel;

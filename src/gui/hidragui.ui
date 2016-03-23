@@ -680,8 +680,9 @@
     <property name="title">
      <string>Exibir</string>
     </property>
-    <addaction name="actionSignedMode"/>
     <addaction name="actionHexadecimalMode"/>
+    <addaction name="actionSignedMode"/>
+    <addaction name="actionShowInstructionStrings"/>
     <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
@@ -947,6 +948,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+-</string>
+   </property>
+  </action>
+  <action name="actionShowInstructionStrings">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Interpretar instruções em memória</string>
+   </property>
+   <property name="statusTip">
+    <string>Mostra instrução correspondente ao lado dos valores de memória.</string>
    </property>
   </action>
  </widget>

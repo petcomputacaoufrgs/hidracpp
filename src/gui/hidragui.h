@@ -41,6 +41,7 @@ class HidraGui : public QMainWindow
         ColumnInstructionValue,
         ColumnDataValue,
         ColumnLabel,
+        ColumnInstructionString,
         NumColumns // Last column marker
     };
 
@@ -100,6 +101,7 @@ private slots:
     // View menu
     void on_actionHexadecimalMode_toggled(bool checked);
     void on_actionSignedMode_toggled(bool checked);
+    void on_actionShowInstructionStrings_toggled(bool checked);
     void on_actionFastExecuteMode_toggled(bool checked);
     void on_actionFollowPCMode_toggled(bool checked);
 
@@ -178,7 +180,7 @@ private:
     QVector<QColor> previousRowColor;
 
     // View options
-    bool showHexValues, showSignedData; // Value display modes
+    bool showHexValues, showSignedData, showInstructionStrings; // Value display modes
     bool fastExecute; // Don't update memory table on every instruction
     bool followPC;
 };
