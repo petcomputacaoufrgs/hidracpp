@@ -185,9 +185,10 @@ public:
     int  getRegisterBitCode(QString registerName) const; // -1 if no code
     QString getRegisterName(int id) const;
     int  getRegisterValue(int id, bool signedData = false) const;
-    void setRegisterValue(int id, int value);
     int  getRegisterValue(QString registerName) const;
+    void setRegisterValue(int id, int value);
     void setRegisterValue(QString registerName, int value);
+    bool isRegisterData(int id);
     void clearRegisters();
 
     int  getPCValue() const;

@@ -1375,9 +1375,7 @@ int Machine::getRegisterBitCode(QString registerName) const
     foreach (Register *reg, registers)
     {
         if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
-        {
             return reg->getBitCode();
-        }
     }
 
     return Register::NO_BIT_CODE; // Register not found
@@ -1435,6 +1433,11 @@ void Machine::setRegisterValue(QString registerName, int value)
     }
 
     throw QString("Invalid register name: ") + registerName;
+}
+
+bool Machine::isRegisterData(int id)
+{
+    return registers[id]->isData();
 }
 
 void Machine::clearRegisters()

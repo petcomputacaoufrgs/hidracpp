@@ -4,20 +4,15 @@ Hidra - To-do
 
 [ Hidra 1.0 ]
 
-Código
+- Val->End->Val não mostra informações
+- Aviso de memória alterada manualmente
 
 - MsgBox de "HLT atingido" para passo-a-passo.
 - Criar um .ini para lembrar "exibir hexa" e último local carregado/salvo
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
   [ver: http://web.archive.org/web/20080511104347/http://wiki.qtcentre.org/index.php?title=SingleApplication]
-- StatusTip para comandos (ver guia rápido)
-- Licença e site no About
-- Testar upper/lowercase [testado invertendo case]
-- Testar endereços altos do Pericles
-- Pericles: Little endian ou big endian? DW?
-- Volta: valores inacessíveis em cinza claro (em vez de setEnabled(false))
 - UI: Help para diretivas (mencionar DW/DAW do Pericles)
-- DB Label+1 deve funcionar
+- Licença
 
 
 
@@ -28,6 +23,12 @@ Geral
 - Menu Editar c/Find/Replace
 - Atalho para comentar várias linhas de código de uma vez
 - Aceitar vírgula como separador de argumentos (seria apenas usado para REG_IF), cuidar modo indireto (,I)
+
+Testes p/outras máquinas
+
+- Testar upper/lowercase [testado invertendo case]
+- Testar endereços altos do Pericles
+- Testar DB Label+1
 
 Breakpoints
 

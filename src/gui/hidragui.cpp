@@ -233,6 +233,10 @@ void HidraGui::initializeStackTable()
     {
         for (int column = 0; column < NumColumnsStack; column++)
             stackModel.setData(stackModel.index(row, column), "");
+
+        // On mouse-over, the byte address is sent to the statusbar (with "@" prefix)
+        // The information box then obtains the address and displays its value in dec/hex/bin
+        memoryModel.item(row, ColumnDataValue)->setStatusTip(QString("@S") + QString::number(row));
     }
 
     // Set table headers
@@ -285,6 +289,7 @@ void HidraGui::initializeRegisterWidgets()
     {
         // Create new register
         RegisterWidget *newRegister = new RegisterWidget(this, machine->getRegisterName(i));
+        newRegister->setStatusTip("@R" + QString::number(i));
         registerWidgets.append(newRegister);
 
         // Add to GUI
@@ -482,12 +487,6 @@ void HidraGui::updateMemoryTable(bool force)
 
             memoryModel.item(row, ColumnInstructionValue)->setText(instructionValueStr);
             memoryModel.item(row, ColumnDataValue       )->setText(dataValueStr);
-
-            // On mouse-over, sends value to statusbar (with "#" prefix)
-            // The information box then obtains the value and displays it in dec/hex/bin
-            QString statusTip = "#" + QString::number(machine->getMemoryValue(byteAddress));
-            memoryModel.item(row, ColumnInstructionValue)->setStatusTip(statusTip);
-            memoryModel.item(row, ColumnDataValue       )->setStatusTip(statusTip);
         }
 
         //////////////////////////////////////////////////
@@ -589,11 +588,6 @@ void HidraGui::updateStackTable()
 
         stackModel.item(row, ColumnStackValue)->setEnabled(stackAddress <= spValue); // Items after SP (and thus inaccessible) are greyed out
         stackModel.item(row, ColumnStackValue)->setText(QString::number(value, base).toUpper());
-
-        // On mouse-over, sends value to statusbar (with "#" prefix)
-        // The information box then obtains the value and displays it in dec/hex/bin
-        QString statusTip = "#" + QString::number(voltaMachine->getStackValue(stackAddress));
-        stackModel.item(row, ColumnStackValue)->setStatusTip(statusTip);
     }
 
     // Adjust size
@@ -606,7 +600,6 @@ void HidraGui::updateRegisterWidgets()
     {
         int value = machine->getRegisterValue(i, showSignedData);
         registerWidgets.at(i)->setValue(value);
-        registerWidgets.at(i)->setStatusTip("#" + QString::number(value));
     }
 }
 
@@ -632,18 +625,6 @@ void HidraGui::updateButtons()
         ui->pushButtonRun->setText("Rodar");
 }
 
-void HidraGui::updateInformation() // Show counters
-{
-    QString informationString = "Instruções: " + QString::number(machine->getInstructionCount()) + "  |  "
-                              + "Acessos: "    + QString::number(machine->getAccessCount());
-    ui->textInformation->setText(informationString);
-}
-
-void HidraGui::updateInformation(int value) // Show value in dec/hex/bin
-{
-    ui->textInformation->setText(getValueDescription(value));
-}
-
 void HidraGui::updateWindowTitle()
 {
     QString filename = QFileInfo(currentFilename).fileName(); // Remove path
@@ -656,11 +637,57 @@ void HidraGui::updateWindowTitle()
     setWindowTitle(title);
 }
 
-QString HidraGui::getValueDescription(int value)
+void HidraGui::updateInformation()
+{
+    QString prefix = informationTrackedAddressPrefix;
+    QString informationString;
+
+    if (prefix == "") // No tracked address, show instruction/accesses counters
+    {
+        informationString = "Instruções: " + QString::number(machine->getInstructionCount()) + "  |  "
+                          + "Acessos: "    + QString::number(machine->getAccessCount());
+    }
+    else if (prefix == "@I" || prefix == "@D") // Track memory value
+    {
+        informationString = getValueDescription(machine->getMemoryValue(informationTrackedAddress), true);
+    }
+    else if (prefix == "@S") // Track stack value
+    {
+        VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
+
+        if (voltaMachine)
+            informationString = getValueDescription(voltaMachine->getStackValue(informationTrackedAddress), true);
+    }
+    else if (prefix == "@R") // Track register value
+    {
+        informationString = getValueDescription(machine->getRegisterValue(informationTrackedAddress),
+                                                machine->isRegisterData(informationTrackedAddress)); // Show signed data
+    }
+
+    ui->textInformation->setText(informationString);
+}
+
+void HidraGui::setInformationTrackedAddress(QString addressString)
+{
+    informationTrackedAddressPrefix = addressString.left(2); // Indicates address type
+    informationTrackedAddress       = addressString.remove(0, 2).toInt();
+}
+
+QString HidraGui::valueToString(int value, bool isHexadecimal, bool isSigned)
+{
+    if (isHexadecimal)
+        return QString::number(value, 16).leftJustified(2, QChar('0')).toUpper();
+    else if (isSigned)
+        return QString::number(machine->toSigned(value));
+    else
+        return QString::number(value);
+}
+
+QString HidraGui::getValueDescription(int value, bool isSigned)
 {
     return QString("Dec: %1 | Hex: %2 | Bin: %3")
-      .arg(value)
-      .arg(value, 2, 16, QChar('0'))
+      .arg(valueToString(value, false, isSigned))
+      .arg(valueToString(value, true, false))
       .arg(value, 8, 2, QChar('0'));
 }
 
@@ -889,23 +916,33 @@ void HidraGui::sourceCodeChanged()
     }
 }
 
+{
+
+
+    }
+
 void HidraGui::statusBarMessageChanged(QString newMessage)
 {
-    static QString oldMessage;
+    disableStatusBarSignal();
 
-    if (newMessage == oldMessage) // Ignore self-triggered change
-        return;
-
-    if (newMessage.startsWith("#")) // Steal prefixed value from statusbar
-    {
-        updateInformation(newMessage.remove("#").toInt()); // Display dec/hex/bin
-        statusBar()->showMessage(oldMessage); // Keep old message
-    }
+    // If a prefixed value is found in the status bar, this method takes this value and sends it to the information box
+    if (newMessage.startsWith("@"))
+        setInformationTrackedAddress(newMessage); // Send address/register ID to information box
     else
-    {
-        updateInformation(); // Restore information to counters
-        oldMessage = newMessage;
-    }
+        setInformationTrackedAddress(""); // Show default information (counters)
+
+    // Show appropriate status tip
+    if (newMessage.startsWith("@I"))
+        ui->statusBar->showMessage(ui->tableViewMemoryInstructions->statusTip());
+    else if (newMessage.startsWith("@D"))
+        ui->statusBar->showMessage(ui->tableViewMemoryData->statusTip());
+    else if (newMessage.startsWith("@S"))
+        ui->statusBar->showMessage(ui->tableViewStack->statusTip());
+    else if (newMessage.startsWith("@R"))
+        ui->statusBar->showMessage(ui->areaRegisters->statusTip());
+
+    updateInformation();
+    enableStatusBarSignal();
 }
 
 void HidraGui::saveBackup()
@@ -979,12 +1016,14 @@ void HidraGui::on_actionClose_triggered()
 
 void HidraGui::closeEvent(QCloseEvent *event)
 {
+    machine->setRunning(false);
+
     bool cancelled;
     saveChangesDialog(cancelled);
 
     // Delete backup file
-    if (!cancelled)
-        QFile::remove("__Recovery__.txt");
+    /*if (!cancelled)
+        QFile::remove("__Recovery__.txt");*/
 
     // Accept/reject window close event
     if (!cancelled)

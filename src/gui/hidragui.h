@@ -68,6 +68,9 @@ public:
     void step(bool refresh);
     bool eventFilter(QObject *obj, QEvent *event);
 
+    void enableStatusBarSignal();
+    void disableStatusBarSignal();
+
 public slots:
     void selectMachine(QString machineName);
     void initializeMachineInterface();
@@ -153,7 +156,8 @@ private:
     virtual void dragEnterEvent(QDragEnterEvent *e);
     virtual void dropEvent(QDropEvent *e);
 
-    QString getValueDescription(int value);
+    QString valueToString(int value, bool isHexadecimal, bool isSigned);
+    QString getValueDescription(int value, bool isSigned);
 
     // Interface elements
     Ui::HidraGui *ui;
@@ -163,6 +167,10 @@ private:
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
     QString currentMachineName;
+
+    // Information box
+    QString informationTrackedAddressPrefix;
+    int informationTrackedAddress;
 
     // File handling
     QString currentFilename;
