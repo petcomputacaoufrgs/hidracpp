@@ -160,6 +160,7 @@ void HidraGui::initializeMachineInterfaceComponents()
 void HidraGui::initializeMemoryTable()
 {
     int memorySize = machine->getMemorySize();
+    manuallyModifiedMemory = false;
 
     ui->tableViewMemoryInstructions->setModel(&memoryModel);
     ui->tableViewMemoryData->setModel(&memoryModel);
@@ -196,19 +197,15 @@ void HidraGui::initializeMemoryTable()
     memoryModel.setHeaderData(ColumnInstructionValue,  Qt::Horizontal, "Valor");
     memoryModel.setHeaderData(ColumnDataValue,         Qt::Horizontal, "Dado");
     memoryModel.setHeaderData(ColumnLabel,             Qt::Horizontal, "  Label  ");
-    memoryModel.setHeaderData(ColumnInstructionString, Qt::Horizontal, "   Instrução   ");
+    memoryModel.setHeaderData(ColumnInstructionString, Qt::Horizontal, " Instrução ");
 
     // Adjust table settings
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
-    ui->tableViewMemoryInstructions->resizeRowsToContents();
-    ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryInstructions->setMouseTracking(true);
-    //ui->tableViewMemoryInstructions->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableViewMemoryData->verticalHeader()->hide();
     ui->tableViewMemoryData->resizeRowsToContents();
     ui->tableViewMemoryData->resizeColumnsToContents();
     ui->tableViewMemoryData->setMouseTracking(true);
-    //ui->tableViewMemoryData->setEditTriggers(EditTrigger);
 
     // Hide columns
     ui->tableViewMemoryInstructions->hideColumn(ColumnLabel);
@@ -220,6 +217,10 @@ void HidraGui::initializeMemoryTable()
     // Scroll to appropriate position
     ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
     ui->tableViewMemoryData->scrollTo(memoryModel.index((memorySize < 4096) ? 128 : 1024, ColumnAddress), QAbstractItemView::PositionAtTop);
+
+    // Resize
+    ui->tableViewMemoryInstructions->resizeRowsToContents();
+    ui->tableViewMemoryInstructions->resizeColumnsToContents();
 }
 
 void HidraGui::initializeStackTable()
@@ -261,13 +262,15 @@ void HidraGui::initializeStackTable()
 
     // Adjust table settings
     ui->tableViewStack->verticalHeader()->hide();
-    ui->tableViewStack->resizeRowsToContents();
-    ui->tableViewStack->resizeColumnsToContents();
     ui->tableViewStack->setMouseTracking(true);
-    ui->tableViewStack->setEditTriggers(false);
+    ui->tableViewStack->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
     // Scroll to appropriate position
     ui->tableViewStack->scrollTo(stackModel.index(voltaMachine->getStackSize() - 1, 0), QAbstractItemView::PositionAtBottom);
+
+    // Resize
+    ui->tableViewStack->resizeRowsToContents();
+    ui->tableViewStack->resizeColumnsToContents();
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -968,6 +971,7 @@ void HidraGui::memoryTableDataChanged(QModelIndex topLeft, QModelIndex bottomRig
         else if (advanceToNextCell && topLeft == ui->tableViewMemoryData->currentIndex())
             ui->tableViewMemoryData->setCurrentIndex(memoryModel.index(topLeft.row() + 1, topLeft.column()));
 
+        manuallyModifiedMemory = true;
         advanceToNextCell = false;
     }
 }
@@ -1067,14 +1071,18 @@ void HidraGui::on_actionClose_triggered()
 
 void HidraGui::closeEvent(QCloseEvent *event)
 {
+    bool cancelled, answeredNo = false;
     machine->setRunning(false);
 
-    bool cancelled;
-    saveChangesDialog(cancelled);
+    saveChangesDialog(cancelled, &answeredNo);
 
     // Delete backup file
     /*if (!cancelled)
         QFile::remove("__Recovery__.txt");*/
+
+    if (!cancelled && !answeredNo && manuallyModifiedMemory && QMessageBox::warning(this, "Aviso", "Modificações manuais feitas na memória serão perdidas.",
+                                                                                    QMessageBox::Ok|QMessageBox::Cancel) == QMessageBox::Cancel)
+        cancelled = true;
 
     // Accept/reject window close event
     if (!cancelled)
@@ -1091,6 +1099,15 @@ void HidraGui::closeEvent(QCloseEvent *event)
 
 void HidraGui::on_actionBuild_triggered()
 {
+    if (manuallyModifiedMemory)
+    {
+        if (QMessageBox::warning(this, "Aviso", "Modificações manuais feitas na memória serão sobrescritas.",
+                                 QMessageBox::Ok|QMessageBox::Cancel) == QMessageBox::Cancel)
+            return; // Abort
+    }
+
+    manuallyModifiedMemory = false; // Don't ask user again until next edit
+
     clearErrorsField();
     machine->assemble(codeEditor->toPlainText());
 
@@ -1321,6 +1338,18 @@ void HidraGui::on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &i
 
 void HidraGui::on_comboBoxMachine_currentIndexChanged(const QString machineName)
 {
+    if (machineName == currentMachineName)
+        return;
+
+    if (manuallyModifiedMemory)
+    {
+        if (QMessageBox::warning(this, "Aviso", "Modificações manuais feitas na memória serão perdidas.", QMessageBox::Ok|QMessageBox::Cancel) == QMessageBox::Cancel)
+        {
+            ui->comboBoxMachine->setCurrentText(currentMachineName);
+            return; // Cancel
+        }
+    }
+
     selectMachine(machineName);
 }
 

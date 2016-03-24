@@ -62,7 +62,7 @@ public:
     void newFile();
     void save(QString filename);
     void saveAs();
-    void saveChangesDialog(bool &cancelled);
+    void saveChangesDialog(bool &cancelled, bool *answeredNo);
     void load(QString filename);
 
     void step(bool refresh);
@@ -178,7 +178,7 @@ private:
 
     // File handling
     QString currentFilename;
-    bool modifiedFile, modifiedSinceBackup;
+    bool modifiedFile, manuallyModifiedMemory, modifiedSinceBackup;
     bool forceSaveAs; // Set to true when Save should trigger SaveAs
     QTimer backupTimer;
 
