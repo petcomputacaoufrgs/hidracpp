@@ -40,7 +40,7 @@ HidraGui::HidraGui(QWidget *parent) :
     // View options
     showHexValues = false;
     showSignedData = false;
-    showInstructionStrings = false;
+    showCharacters = false;
     fastExecute = false;
     followPC = false;
     previousPCValue = 0;
@@ -132,12 +132,12 @@ void HidraGui::initializeMachineInterface()
 {
     clearMachineInterfaceComponents();
     initializeMachineInterfaceComponents();
-    updateMachineInterfaceComponents(true);
+    updateMachineInterfaceComponents(true, false);
 }
 
-void HidraGui::updateMachineInterface(bool force = false)
+void HidraGui::updateMachineInterface(bool force = false, bool updateInstructionStrings = true)
 {
-    updateMachineInterfaceComponents(force);
+    updateMachineInterfaceComponents(force, updateInstructionStrings);
 }
 
 
@@ -183,6 +183,7 @@ void HidraGui::initializeMemoryTable()
                 item->setFlags(item->flags() & ~Qt::ItemIsEditable); // Disable editing
         }
 
+        memoryModel.item(row, ColumnAddress)->setForeground(colorGrayedOut); // Grayed out
         previousRowColor[row] = Qt::white;
 
         // On mouse-over, the byte address is sent to the statusbar (with "@" prefix)
@@ -196,6 +197,7 @@ void HidraGui::initializeMemoryTable()
     memoryModel.setHeaderData(ColumnAddress,           Qt::Horizontal, " End ");
     memoryModel.setHeaderData(ColumnInstructionValue,  Qt::Horizontal, "Valor");
     memoryModel.setHeaderData(ColumnDataValue,         Qt::Horizontal, "Dado");
+    memoryModel.setHeaderData(ColumnCharacter,         Qt::Horizontal, "Car.");
     memoryModel.setHeaderData(ColumnLabel,             Qt::Horizontal, "  Label  ");
     memoryModel.setHeaderData(ColumnInstructionString, Qt::Horizontal, " Instrução ");
 
@@ -203,16 +205,16 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryInstructions->verticalHeader()->hide();
     ui->tableViewMemoryInstructions->setMouseTracking(true);
     ui->tableViewMemoryData->verticalHeader()->hide();
-    ui->tableViewMemoryData->resizeRowsToContents();
-    ui->tableViewMemoryData->resizeColumnsToContents();
     ui->tableViewMemoryData->setMouseTracking(true);
 
     // Hide columns
     ui->tableViewMemoryInstructions->hideColumn(ColumnLabel);
     ui->tableViewMemoryInstructions->hideColumn(ColumnDataValue);
+    ui->tableViewMemoryInstructions->hideColumn(ColumnCharacter);
     ui->tableViewMemoryData->hideColumn(ColumnPC);
     ui->tableViewMemoryData->hideColumn(ColumnInstructionValue);
     ui->tableViewMemoryData->hideColumn(ColumnInstructionString);
+    ui->tableViewMemoryData->setColumnHidden(ColumnCharacter, !showCharacters);
 
     // Scroll to appropriate position
     ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
@@ -221,6 +223,8 @@ void HidraGui::initializeMemoryTable()
     // Resize
     ui->tableViewMemoryInstructions->resizeRowsToContents();
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
+    ui->tableViewMemoryData->resizeRowsToContents();
+    ui->tableViewMemoryData->resizeColumnsToContents();
 }
 
 void HidraGui::initializeStackTable()
@@ -228,10 +232,7 @@ void HidraGui::initializeStackTable()
     VoltaMachine *voltaMachine = dynamic_cast<VoltaMachine*>(machine);
     bool isVoltaMachine = (voltaMachine != nullptr);
 
-    // If machine is Volta, show stack. Otherwise, show data memory.
-    ui->tableViewStack->setVisible(isVoltaMachine);
-    ui->tableViewMemoryData->setVisible(!isVoltaMachine);
-    ui->tableViewMemoryInstructions->setColumnHidden(ColumnLabel, !isVoltaMachine); // Show labels in Volta's memory table
+    ui->tableViewStack->setVisible(isVoltaMachine); // Show/hide stack
 
     if (!isVoltaMachine)
         return; // No stack to initialize
@@ -440,9 +441,9 @@ void HidraGui::clearAddressingModesList()
 // Internal update methods
 //////////////////////////////////////////////////
 
-void HidraGui::updateMachineInterfaceComponents(bool force)
+void HidraGui::updateMachineInterfaceComponents(bool force, bool updateInstructionStrings)
 {
-    updateMemoryTable(force);
+    updateMemoryTable(force, updateInstructionStrings);
     updateStackTable();
     updateFlagWidgets();
     updateRegisterWidgets();
@@ -451,19 +452,18 @@ void HidraGui::updateMachineInterfaceComponents(bool force)
     updateInformation();
 }
 
-void HidraGui::updateMemoryTable(bool force)
+void HidraGui::updateMemoryTable(bool force, bool updateInstructionStrings)
 {
     int memorySize  = machine->getMemorySize();
     int currentLine = machine->getPCCorrespondingSourceLine();
+    bool instructionStringsUpdated = false;
 
-    if (force)
-    {
-        ui->tableViewMemoryInstructions->setColumnHidden(ColumnInstructionString, !showInstructionStrings);
-    }
+    disableDataChangedSignal();
 
-    if (showInstructionStrings)
+    if (force || updateInstructionStrings)
     {
         machine->updateInstructionStrings();
+        instructionStringsUpdated = true;
     }
 
     //////////////////////////////////////////////////
@@ -490,7 +490,7 @@ void HidraGui::updateMemoryTable(bool force)
         }
 
         //////////////////////////////////////////////////
-        // Columns 2, 3: Byte value
+        // Columns 2, 3, 4: Byte value, Character
         //////////////////////////////////////////////////
 
         if (machine->hasByteChanged(byteAddress) || force) // Only update cell if byte value has changed
@@ -499,28 +499,30 @@ void HidraGui::updateMemoryTable(bool force)
             QString dataValueStr        = valueToString(value, showHexValues, showSignedData);
 
             memoryModel.item(row, ColumnInstructionValue)->setText(instructionValueStr);
-            memoryModel.item(row, ColumnDataValue       )->setText(dataValueStr);
+            memoryModel.item(row, ColumnDataValue)->setText(dataValueStr);
+
+            if (showCharacters)
+                memoryModel.item(row, ColumnCharacter)->setText((value >= 32 && value < 128) ? QChar(value) : ' ');
         }
 
         //////////////////////////////////////////////////
-        // Column 4: Label
+        // Column 5: Label
         //////////////////////////////////////////////////
 
-        if ((sourceAndMemoryInSync &&
-             machine->getAddressCorrespondingLabel(byteAddress) != previousLabel[byteAddress]) || force) // Only update on change
+        if (force) // Only update when forced
         {
             QString labelName = machine->getAddressCorrespondingLabel(byteAddress);
             memoryModel.item(row, ColumnLabel)->setText(labelName);
         }
 
         //////////////////////////////////////////////////
-        // Column 5: Instruction strings
+        // Column 6: Instruction strings
         //////////////////////////////////////////////////
 
-        if (showInstructionStrings)
+        if (instructionStringsUpdated)
         {
             QString instructionString = machine->getInstructionString(byteAddress);
-            memoryModel.item(row, ColumnInstructionString)->setText((instructionString != "NOP") ? instructionString : ""); // Omit NOPs
+            memoryModel.item(row, ColumnInstructionString)->setText(instructionString);
         }
     }
 
@@ -558,7 +560,12 @@ void HidraGui::updateMemoryTable(bool force)
     }
 
     // Adjust size
-    ui->tableViewMemoryData->resizeColumnsToContents();
+    if (force)
+    {
+        ui->tableViewMemoryInstructions->resizeColumnsToContents();
+        ui->tableViewMemoryData->resizeColumnsToContents();
+    }
+
     enableDataChangedSignal();
 }
 
@@ -768,7 +775,7 @@ void HidraGui::saveAs()
         save(filename); // Resets fileModified to false if successful
 }
 
-void HidraGui::saveChangesDialog(bool &cancelled)
+void HidraGui::saveChangesDialog(bool &cancelled, bool *answeredNo = nullptr)
 {
     cancelled = false;
 
@@ -790,6 +797,9 @@ void HidraGui::saveChangesDialog(bool &cancelled)
             if (modifiedFile) // If modifiedFile is still true, user has cancelled
                 cancelled = true;
         }
+
+        if (answeredNo != nullptr)
+            *answeredNo = (reply == QMessageBox::No);
     }
 }
 
@@ -840,7 +850,7 @@ void HidraGui::load(QString filename)
 // Others
 //////////////////////////////////////////////////
 
-void HidraGui::step(bool refresh = true)
+void HidraGui::step(bool refresh, bool updateInstructionStrings)
 {
     try
     {
@@ -854,7 +864,7 @@ void HidraGui::step(bool refresh = true)
 
     if (refresh)
     {
-        updateMachineInterface();
+        updateMachineInterface(false, updateInstructionStrings);
         if (followPC)
         {
             codeEditor->setCurrentLine(machine->getPCCorrespondingSourceLine());
@@ -955,6 +965,7 @@ void HidraGui::sourceCodeChanged()
     {
         sourceAndMemoryInSync = false;
         codeEditor->disableLineHighlight();
+        updateMemoryTable(false, false);
     }
 }
 
@@ -1118,12 +1129,12 @@ void HidraGui::on_actionBuild_triggered()
 
     machine->setPCValue(0);
 
-    updateMachineInterface();
+    updateMachineInterface(true);
 }
 
 void HidraGui::on_actionRun_triggered()
 {
-    // If already running
+    // If already running, stop
     if (machine->isRunning())
     {
         // Stop
@@ -1143,20 +1154,19 @@ void HidraGui::on_actionRun_triggered()
         // Keep running until stopped
         while (machine->isRunning())
         {
-            int instructionsPerRefresh = (fastExecute) ? 1000 : 1; // Inside while loop, allows realtime change
+            int instructionsPerRefresh = (fastExecute) ? 100 : 1; // Inside while loop, allows realtime change
             int nextInstructionCount = machine->getInstructionCount() + 1;
             bool refresh = (nextInstructionCount % instructionsPerRefresh == 0); // Refresh whenever it's a multiple of instructionsPerRefresh
-            step(refresh);
+            step(refresh, false); // Don't update instruction strings when running
         }
 
-        if (fastExecute)
-            updateMachineInterface();
+        updateMachineInterface(); // When finished, refresh skipped updates in fastExecute, update instruction strings
     }
 }
 
 void HidraGui::on_actionStep_triggered()
 {
-    step();
+    step(true, true);
 }
 
 void HidraGui::on_actionImportMemory_triggered()
@@ -1264,11 +1274,12 @@ void HidraGui::on_actionSignedMode_toggled(bool checked)
     updateMachineInterface(true);
 }
 
-void HidraGui::on_actionShowInstructionStrings_toggled(bool checked)
+void HidraGui::on_actionShowCharacters_toggled(bool checked)
 {
-    showInstructionStrings = checked;
+    showCharacters = checked;
 
-    updateMemoryTable(true);
+    ui->tableViewMemoryData->setColumnHidden(ColumnCharacter, !showCharacters);
+    updateMachineInterface(true);
 }
 
 void HidraGui::on_actionFastExecuteMode_toggled(bool checked)

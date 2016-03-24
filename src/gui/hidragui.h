@@ -40,6 +40,7 @@ class HidraGui : public QMainWindow
         ColumnAddress,
         ColumnInstructionValue,
         ColumnDataValue,
+        ColumnCharacter,
         ColumnLabel,
         ColumnInstructionString,
         NumColumns // Last column marker
@@ -65,7 +66,7 @@ public:
     void saveChangesDialog(bool &cancelled, bool *answeredNo);
     void load(QString filename);
 
-    void step(bool refresh);
+    void step(bool refresh, bool updateInstructionStrings);
     bool eventFilter(QObject *obj, QEvent *event);
 
     void enableDataChangedSignal();
@@ -76,7 +77,7 @@ public:
 public slots:
     void selectMachine(QString machineName);
     void initializeMachineInterface();
-    void updateMachineInterface(bool force);
+    void updateMachineInterface(bool force, bool updateInstructionStrings);
 
     void clearErrorsField();
     void addError(QString);
@@ -107,7 +108,7 @@ private slots:
     // View menu
     void on_actionHexadecimalMode_toggled(bool checked);
     void on_actionSignedMode_toggled(bool checked);
-    void on_actionShowInstructionStrings_toggled(bool checked);
+    void on_actionShowCharacters_toggled(bool checked);
     void on_actionFastExecuteMode_toggled(bool checked);
     void on_actionFollowPCMode_toggled(bool checked);
 
@@ -145,8 +146,8 @@ private:
     void clearAddressingModesList();
 
     // Internal update methods (called by initialize/updateMachineInterface)
-    void updateMachineInterfaceComponents(bool force);
-    void updateMemoryTable(bool force);
+    void updateMachineInterfaceComponents(bool force, bool updateInstructionStrings);
+    void updateMemoryTable(bool force, bool updateInstructionStrings);
     void updateStackTable();
     void updateRegisterWidgets();
     void updateFlagWidgets();
@@ -193,7 +194,7 @@ private:
     const QBrush colorGrayedOut;
 
     // View options
-    bool showHexValues, showSignedData, showInstructionStrings; // Value display modes
+    bool showHexValues, showSignedData, showCharacters; // Value display modes
     bool fastExecute; // Don't update memory table on every instruction
     bool followPC;
 };

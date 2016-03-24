@@ -1,24 +1,29 @@
-﻿;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dicas de uso
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Passe o mouse sobre as diferentes áreas do programa para obter informações
+;; úteis na barra de status.
+
 ;; Para rodar um programa, clique em Montar, e em seguida em Rodar. Você pode
-;; realizar a execução passo-a-passo com o comando Passo.
+;; realizar a execução passo-a-passo com o comando Passo (tecla F8).
 
 ;; Para rodar o programa até uma linha específica do código, utilize o comando
 ;; Máquina -> Inserir/remover breakpoint (tecla F12), e execute o programa.
 
+;; Passe o mouse sobre instruções ou modos de acesso (canto inferior direito)
+;; para visualizar a sintaxe e o funcionamento de cada um.
+
 ;; Passe o mouse sobre valores da memória ou registradores para visualizá-los em
 ;; hexadecimal ou binário.
-
-;; Passe o mouse sobre as instruções ou modos de acesso (canto inferior direito)
-;; para informações a respeito de cada instrução da máquina.
 
 ;; Dê um clique duplo na tabela de memória esquerda (instruções) para mover a
 ;; execução (PC) para o endereço escolhido.
 
 ;; Dê um clique duplo em um label na tabela de memória direita (dados) para
 ;; visualizar o código correspondente.
+
+;; De um clique duplo em um valor de memória para alterá-lo.
 
 
 
@@ -225,36 +230,39 @@ FimMul:
 
 ORG 128 ; Diretiva do montador, que posiciona a montagem na pos. 128 da memória
 
-        DB 1 ; Posição 128 (inicializada com 1 durante a montagem)
-        DB 2 ; Posição 129 (inicializada com 2)
-        DB   ; Posição 130 (não-inicializada)
+         DB 1 ; Posição 128 (inicializada com 1 durante a montagem)
+         DB 2 ; Posição 129 (inicializada com 2)
+         DB   ; Posição 130 (não-inicializada)
 
-Zero:   DB 0
-Um:     DB 1
-Dois:   DB 2
-MenosUm:DB -1 ; Armazenado como 255 (complemento de 2)
-Soma02: DB
+Zero:    DB 0
+Um:      DB 1
+Dois:    DB 2
+MenosUm: DB -1 ; Armazenado como 255 (complemento de 2)
+Soma02:  DB
 
-Valor1: DB 5
-Valor2: DB -5
-ResSoma:DB
+Valor1:  DB 5
+Valor2:  DB -5
+ResSoma: DB
 
-Entrada:DB -1
-Saida:  DB
+Entrada: DB -1
+Saida:   DB
 
-ValBool:DB 0
+ValBool: DB 0
 
-X:      DB 3
-Y:      DB 4
+X:       DB 3
+Y:       DB 4
 
-Valor:	DB
-NumIter:DB 5
+Valor:	 DB
+NumIter: DB 5
 
-Mul1:   DB 5
-Mul2:   DB 3
-ResMul: DB
+Mul1:    DB 5
+Mul2:    DB 3
+ResMul:  DB
 
-Val7:   DB 7
-Val22:  DB 22
-ResAnd: DB
-ResOr:  DB
+Val7:    DB 7
+Val22:   DB 22
+ResAnd:  DB
+ResOr:   DB
+
+DAB 'ABCDE' ; Exemplo de declaração de array de caracteres.
+            ; Experimente a opção Exibir->Interpretar caracteres

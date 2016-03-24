@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1055</width>
-    <height>495</height>
+    <width>1115</width>
+    <height>505</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -323,7 +323,7 @@
                <x>0</x>
                <y>0</y>
                <width>279</width>
-               <height>81</height>
+               <height>86</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -480,7 +480,7 @@
             </size>
            </property>
            <property name="statusTip">
-            <string>Executa a instrução atual e avança PC para a seguinte.</string>
+            <string>Executa a instrução atual e avança PC para a instrução seguinte.</string>
            </property>
            <property name="text">
             <string>Passo</string>
@@ -637,7 +637,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1055</width>
+     <width>1115</width>
      <height>21</height>
     </rect>
    </property>
@@ -682,7 +682,7 @@
     </property>
     <addaction name="actionHexadecimalMode"/>
     <addaction name="actionSignedMode"/>
-    <addaction name="actionShowInstructionStrings"/>
+    <addaction name="actionShowCharacters"/>
     <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
@@ -784,11 +784,6 @@
    </property>
    <property name="shortcut">
     <string>F1</string>
-   </property>
-  </action>
-  <action name="actionReportProblem">
-   <property name="text">
-    <string>Relatar um problema</string>
    </property>
   </action>
   <action name="actionClose">
@@ -946,19 +941,16 @@
    <property name="statusTip">
     <string>Permite visualizar os dados da memória e os registradores com sinal, em complemento de 2.</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+-</string>
-   </property>
   </action>
-  <action name="actionShowInstructionStrings">
+  <action name="actionShowCharacters">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Interpretar instruções em memória</string>
+    <string>Interpretar caracteres</string>
    </property>
    <property name="statusTip">
-    <string>Mostra instrução correspondente ao lado dos valores de memória.</string>
+    <string>Exibe os caracteres ASCII correspondentes aos valores na tabela de dados.</string>
    </property>
   </action>
  </widget>

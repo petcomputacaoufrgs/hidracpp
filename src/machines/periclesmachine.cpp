@@ -167,12 +167,12 @@ QString PericlesMachine::generateArgumentsString(int address, Instruction *instr
         argumentsSize = instruction->getNumBytes() - 1;
 
     // Get argument
-    int argumentValue = (argumentsSize == 2) ? getMemoryTwoByteAddress(address + 1) : getMemoryValue(address);
+    int argumentValue = (argumentsSize == 2) ? getMemoryTwoByteAddress(address + 1) : getMemoryValue(address + 1);
     QString argument = QString::number(argumentValue);
 
     // Add addressing mode syntax
     if (addressingModePattern != AddressingMode::NO_PATTERN)
-        argument = addressingModePattern.replace("(.*)", argument);
+        argument = addressingModePattern.replace("(.*)", argument).toUpper();
 
     return argument;
 }

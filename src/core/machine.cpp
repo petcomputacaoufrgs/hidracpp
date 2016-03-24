@@ -1080,6 +1080,7 @@ void Machine::updateInstructionStrings()
         if (!pcReached && address >= getPCValue())
         {
             address = getPCValue();
+            pendingArgumentBytes = 0;
             pcReached = true;
         }
 
@@ -1108,7 +1109,7 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     AddressingMode::AddressingModeCode addressingModeCode = extractAddressingModeCode(fetchedValue);
     QString registerName = extractRegisterName(fetchedValue);
 
-    if (instruction == nullptr || instruction->getInstructionCode() == Instruction::NOP)
+    if (instruction == nullptr || instruction->getInstructionCode() == Instruction::NOP || instruction->getInstructionCode() == Instruction::VOLTA_NOP)
     {
         return "";
     }
@@ -1123,7 +1124,7 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     }
 
     // Argument value (with addressing mode)
-    if (instruction->getNumBytes() > 1)
+    if (instruction->getNumBytes() != 1) // Size can be 0 (variable number of bytes)
     {
         memoryString += " " + generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
     }
@@ -1138,7 +1139,7 @@ QString Machine::generateArgumentsString(int address, Instruction *instruction, 
 
     if (addressingModePattern != AddressingMode::NO_PATTERN)
     {
-        argument = addressingModePattern.replace("(.*)", argument); // Surround argument string with the corresponding addressing mode syntax
+        argument = addressingModePattern.replace("(.*)", argument).toUpper(); // Surround argument string with the corresponding addressing mode syntax
     }
 
     argumentsSize = instruction->getNumBytes() - 1;
