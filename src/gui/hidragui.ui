@@ -89,7 +89,7 @@
        </sizepolicy>
       </property>
       <property name="statusTip">
-       <string>Memória - Interpretada como instruções. Duplo-clique para mover execução (PC).</string>
+       <string>Memória - Interpretada como instruções. Duplo-clique para mover execução (PC) ou alterar valores.</string>
       </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -111,7 +111,7 @@
        </sizepolicy>
       </property>
       <property name="statusTip">
-       <string>Memória - Interpretada como dados. Duplo-clique para ir à linha de código correspondente.</string>
+       <string>Memória - Interpretada como dados. Duplo-clique para ir à linha de código correspondente ou alterar valores.</string>
       </property>
       <property name="sizeAdjustPolicy">
        <enum>QAbstractScrollArea::AdjustToContents</enum>

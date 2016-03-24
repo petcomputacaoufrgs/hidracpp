@@ -68,6 +68,8 @@ public:
     void step(bool refresh);
     bool eventFilter(QObject *obj, QEvent *event);
 
+    void enableDataChangedSignal();
+    void disableDataChangedSignal();
     void enableStatusBarSignal();
     void disableStatusBarSignal();
 
@@ -81,6 +83,7 @@ public slots:
 
 private slots:
     void sourceCodeChanged();
+    void memoryTableDataChanged(QModelIndex topLeft, QModelIndex bottomRight);
     void statusBarMessageChanged(QString newMessage);
     void saveBackup();
 
@@ -149,9 +152,10 @@ private:
     void updateFlagWidgets();
     void updateCodeEditor();
     void updateButtons();
-    void updateInformation(); // Show counters
-    void updateInformation(int value); // Show value in dec/hex/bin
     void updateWindowTitle();
+    void updateInformation(); // Update counters or tracked value
+
+    void setInformationTrackedAddress(QString addressString); // Address tracked by information box
 
     virtual void dragEnterEvent(QDragEnterEvent *e);
     virtual void dropEvent(QDropEvent *e);
@@ -184,8 +188,9 @@ private:
     // Memory table
     QStandardItemModel memoryModel, stackModel;
     int previousPCValue;
-    QVector<QString> previousLabel;
-    QVector<QColor> previousRowColor;
+    QVector<QColor> previousRowColor;    
+    bool advanceToNextCell = false;
+    const QBrush colorGrayedOut;
 
     // View options
     bool showHexValues, showSignedData, showInstructionStrings; // Value display modes
