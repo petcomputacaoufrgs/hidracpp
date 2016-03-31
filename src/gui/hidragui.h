@@ -16,6 +16,7 @@
 #include "hidrahighlighter.h"
 #include "registerwidget.h"
 #include "flagwidget.h"
+#include "about.h"
 #include "machines/neandermachine.h"
 #include "machines/ahmesmachine.h"
 #include "machines/ramsesmachine.h"
@@ -171,6 +172,7 @@ private:
     HidraCodeEditor *codeEditor;
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
+    About *about;
     QString currentMachineName;
 
     // Information box

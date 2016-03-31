@@ -35,7 +35,8 @@ SOURCES += \
     machines/pitagorasmachine.cpp \
     machines/voltamachine.cpp \
     machines/regmachine.cpp \
-    machines/periclesmachine.cpp
+    machines/periclesmachine.cpp \
+    gui/about.cpp
 
 HEADERS  += \
     gui/flagwidget.h \
@@ -57,12 +58,14 @@ HEADERS  += \
     machines/pitagorasmachine.h \
     machines/voltamachine.h \
     machines/regmachine.h \
-    machines/periclesmachine.h
+    machines/periclesmachine.h \
+    gui/about.h
 
 FORMS    += \
     gui/flagwidget.ui \
     gui/hidragui.ui \
-    gui/registerwidget.ui
+    gui/registerwidget.ui \
+    gui/about.ui
 
 RESOURCES +=
 
