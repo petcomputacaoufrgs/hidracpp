@@ -1607,7 +1607,7 @@ void Machine::generateDescriptions()
 
     // Ahmes
     descriptions["sub a"] = "Subtrai o valor no endereço 'a' do acumulador.";
-    descriptions["jp a"]  = "Se as flags N e Z estiverem desativadas (acumulador positivo), desvia a execução para o endereço 'a'.";
+    descriptions["jp a"]  = "Se a flag N estiver desativada (acumulador positivo ou zero), desvia a execução para o endereço 'a'.";
     descriptions["jv a"]  = "Se a flag V estiver ativada (overflow), desvia a execução para o endereço 'a'.";
     descriptions["jnv a"] = "Se a flag V estiver desativada (not overflow), desvia a execução para o endereço 'a'.";
     descriptions["jnz a"] = "Se a flag Z estiver desativada (acumulador diferente de zero), desvia a execução para o endereço 'a'.";

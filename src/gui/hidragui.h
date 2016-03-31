@@ -65,7 +65,7 @@ public:
     void save(QString filename);
     void saveAs();
     void saveChangesDialog(bool &cancelled, bool *answeredNo);
-    void load(QString filename);
+    void load(QString filename, bool showErrors);
 
     void step(bool refresh, bool updateInstructionStrings);
     bool eventFilter(QObject *obj, QEvent *event);

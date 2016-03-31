@@ -750,24 +750,24 @@ void HidraGui::save(QString filename)
 
 void HidraGui::saveAs()
 {
-    QString extension = "Fonte do Neander (*.ndr)"; // Default
+    QString extension = "Fonte do Neander (*.ned)"; // Default
 
     if (currentMachineName == "Ahmes")
         extension = "Fonte do Ahmes (*.ahd)";
     else if (currentMachineName == "Ramses")
         extension = "Fonte do Ramses (*.rad)";
     else if (currentMachineName == "Cromag")
-        extension = "Fonte do Cromag (*.cmg)";
+        extension = "Fonte do Cromag (*.cro)"; // .crd .cmd N/A
     else if (currentMachineName == "Queops")
-        extension = "Fonte do Queops (*.qps)";
+        extension = "Fonte do Queops (*.qpd)";
     else if (currentMachineName == "Pitagoras")
-        extension = "Fonte do Pitagoras (*.ptg)";
+        extension = "Fonte do Pitagoras (*.ptd)"; // .pid .pit N/A
     else if (currentMachineName == "Pericles")
-        extension = "Fonte do Pericles (*.prc)";
+        extension = "Fonte do Pericles (*.prd)";
     else if (currentMachineName == "REG")
-        extension = "Fonte do REG (*.rg)";
+        extension = "Fonte do REG (*.red)";
     else if (currentMachineName == "Volta")
-        extension = "Fonte do Volta (*.vlt)";
+        extension = "Fonte do Volta (*.vod)";
 
     QString filename = QFileDialog::getSaveFileName(this,
                                                    "Salvar código-fonte", "",
@@ -805,14 +805,15 @@ void HidraGui::saveChangesDialog(bool &cancelled, bool *answeredNo = nullptr)
     }
 }
 
-void HidraGui::load(QString filename)
+void HidraGui::load(QString filename, bool showErrors = true)
 {
     QFile file(filename);
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        QMessageBox::information(this, tr("Erro ao abrir arquivo"),
-                                 file.errorString());
+        if (showErrors)
+            QMessageBox::information(this, tr("Erro ao abrir arquivo"), file.errorString());
+
         return;
     }
 
@@ -821,23 +822,23 @@ void HidraGui::load(QString filename)
 
     QString extension = filename.section(".", -1);
 
-    if (extension == "ndr")
+    if (extension == "ned")
         selectMachine("Neander");
     else if (extension == "ahd")
         selectMachine("Ahmes");
     else if (extension == "rad")
         selectMachine("Ramses");
-    else if (extension == "cmg")
+    else if (extension == "cro")
         selectMachine("Cromag");
-    else if (extension == "qps")
+    else if (extension == "qpd")
         selectMachine("Queops");
-    else if (extension == "ptg")
+    else if (extension == "ptd")
         selectMachine("Pitagoras");
-    else if (extension == "prc")
+    else if (extension == "prd")
         selectMachine("Pericles");
-    else if (extension == "rg")
+    else if (extension == "red")
         selectMachine("REG");
-    else if (extension == "vlt")
+    else if (extension == "vod")
         selectMachine("Volta");
 
     currentFilename = filename;
@@ -1051,7 +1052,7 @@ void HidraGui::on_actionNew_triggered()
 
 void HidraGui::on_actionOpen_triggered()
 {
-    QString allExtensions = "Fontes do Hidra (*.ndr *.ahd *.rad)";
+    QString allExtensions = "Fontes do Hidra (*.ned *.ahd *.rad *.cro *.qpd *.ptd *.prd *.red *.vod)";
     QString filename;
 
     filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", "", allExtensions);
