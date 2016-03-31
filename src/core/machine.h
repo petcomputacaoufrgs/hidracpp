@@ -176,6 +176,7 @@ public:
     QString getFlagName(int id) const;
     int  getFlagValue(int id) const;
     void setFlagValue(int id, int value);
+    bool hasFlag(Flag::FlagCode flagCode) const;
     int  getFlagValue(QString flagName) const;
     void setFlagValue(QString flagName, int value);
     void setFlagValue(Flag::FlagCode flagCode, int value);

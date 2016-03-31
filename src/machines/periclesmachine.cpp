@@ -33,7 +33,7 @@ PericlesMachine::PericlesMachine()
 
     flags.append(new Flag(Flag::NEGATIVE, "N"));
     flags.append(new Flag(Flag::ZERO, "Z", true));
-    flags.append(new Flag(Flag::CARRY_NOT_BORROW, "C"));
+    flags.append(new Flag(Flag::CARRY, "C"));
 
 
 

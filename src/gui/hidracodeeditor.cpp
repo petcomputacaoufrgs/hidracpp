@@ -142,6 +142,12 @@ void HidraCodeEditor::toggleBreakpointOnCursor()
     this->repaint();
 }
 
+void HidraCodeEditor::clearBreakpoint()
+{
+    breakpointBlock = QTextBlock();
+    this->repaint();
+}
+
 void HidraCodeEditor::disableLineHighlight()
 {
     QList<QTextEdit::ExtraSelection> extraSelections;

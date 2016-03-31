@@ -2,7 +2,7 @@
 
 CromagMachine::CromagMachine()
 {
-    identifier = "CMG"; // TODO: Confirmar c/Weber
+    identifier = "CRM"; // TODO: Confirmar c/Weber
 
     //////////////////////////////////////////////////
     // Initialize registers

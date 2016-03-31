@@ -51,7 +51,7 @@ PitagorasMachine::PitagorasMachine()
     instructions.append(new Instruction(2, "10100000", Instruction::JZ,  "jz a"));
     instructions.append(new Instruction(2, "10101100", Instruction::JNZ, "jd a"));
     instructions.append(new Instruction(2, "10110000", Instruction::JC,  "jc a"));
-    instructions.append(new Instruction(2, "10111100", Instruction::JB,  "jb a"));
+    instructions.append(new Instruction(2, "10111100", Instruction::JNC, "jb a"));
     instructions.append(new Instruction(1, "11100000", Instruction::SHR, "shr"));
     instructions.append(new Instruction(1, "11100001", Instruction::SHL, "shl"));
     instructions.append(new Instruction(1, "11100010", Instruction::ROR, "ror"));

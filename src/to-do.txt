@@ -4,9 +4,6 @@ Hidra - To-do
 
 [ Hidra 1.0 ]
 
-- Val->End->Val não mostra informações
-- Aviso de memória alterada manualmente
-
 - MsgBox de "HLT atingido" para passo-a-passo.
 - Criar um .ini para lembrar "exibir hexa" e último local carregado/salvo
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância

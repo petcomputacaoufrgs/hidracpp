@@ -218,15 +218,15 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryData->hideColumn(ColumnInstructionString);
     ui->tableViewMemoryData->setColumnHidden(ColumnCharacter, !showCharacters);
 
-    // Scroll to appropriate position
-    ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
-    ui->tableViewMemoryData->scrollTo(memoryModel.index((memorySize < 4096) ? 128 : 1024, ColumnAddress), QAbstractItemView::PositionAtTop);
-
     // Resize
     ui->tableViewMemoryInstructions->resizeRowsToContents();
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
     ui->tableViewMemoryData->resizeRowsToContents();
     ui->tableViewMemoryData->resizeColumnsToContents();
+
+    // Scroll to appropriate position
+    ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
+    ui->tableViewMemoryData->scrollTo(memoryModel.index((memorySize < 4096) ? 128 : 1024, ColumnAddress), QAbstractItemView::PositionAtTop);
 }
 
 void HidraGui::initializeStackTable()
@@ -268,12 +268,12 @@ void HidraGui::initializeStackTable()
     ui->tableViewStack->setMouseTracking(true);
     ui->tableViewStack->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-    // Scroll to appropriate position
-    ui->tableViewStack->scrollTo(stackModel.index(voltaMachine->getStackSize() - 1, 0), QAbstractItemView::PositionAtBottom);
-
     // Resize
     ui->tableViewStack->resizeRowsToContents();
     ui->tableViewStack->resizeColumnsToContents();
+
+    // Scroll to appropriate position
+    ui->tableViewStack->scrollTo(stackModel.index(voltaMachine->getStackSize() - 1, 0), QAbstractItemView::PositionAtBottom);
 }
 
 void HidraGui::initializeFlagWidgets()
@@ -843,6 +843,8 @@ void HidraGui::load(QString filename)
     currentFilename = filename;
     modifiedFile = false;
     forceSaveAs = false;
+
+    codeEditor->clearBreakpoint();
     updateWindowTitle();
 }
 
@@ -1121,15 +1123,20 @@ void HidraGui::on_actionBuild_triggered()
 
     manuallyModifiedMemory = false; // Don't ask user again until next edit
 
+    int previousPC = machine->getPCValue();
+
     clearErrorsField();
     machine->assemble(codeEditor->toPlainText());
 
     if (machine->getBuildSuccessful())
+    {
         sourceAndMemoryInSync = true;
+    }
     else
-        codeEditor->setCurrentLine(machine->getFirstErrorLine());
-
-    machine->setPCValue(0);
+    {
+        codeEditor->setCurrentLine(machine->getFirstErrorLine()); // Move cursor to first error line
+        machine->setPCValue(previousPC);
+    }
 
     updateMachineInterface(true);
 }

@@ -321,13 +321,14 @@ void Machine::setOverflow(bool state)
 void Machine::setCarry(bool state)
 {
     setFlagValue(Flag::CARRY, state);
-    setFlagValue(Flag::CARRY_NOT_BORROW, state);
 }
 
 void Machine::setBorrowOrCarry(bool borrowState)
 {
-    setFlagValue(Flag::BORROW, borrowState);
-    setFlagValue(Flag::CARRY_NOT_BORROW, !(borrowState));
+    if (hasFlag(Flag::BORROW))
+        setFlagValue(Flag::BORROW, borrowState);
+    else
+        setFlagValue(Flag::CARRY, !(borrowState));
 }
 
 void Machine::updateFlags(int value)
@@ -1110,24 +1111,18 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     QString registerName = extractRegisterName(fetchedValue);
 
     if (instruction == nullptr || instruction->getInstructionCode() == Instruction::NOP || instruction->getInstructionCode() == Instruction::VOLTA_NOP)
-    {
         return "";
-    }
 
     // Instruction name
     memoryString = instruction->getMnemonic().toUpper();
 
     // Register name
     if (instruction->getArguments().contains("r"))
-    {
-        memoryString += " " + registerName;
-    }
+        memoryString += " " + ((registerName != "") ? registerName : "?");
 
     // Argument value (with addressing mode)
     if (instruction->getNumBytes() != 1) // Size can be 0 (variable number of bytes)
-    {
         memoryString += " " + generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
-    }
 
     return memoryString;
 }
@@ -1138,9 +1133,7 @@ QString Machine::generateArgumentsString(int address, Instruction *instruction, 
     QString addressingModePattern = getAddressingModePattern(addressingModeCode);
 
     if (addressingModePattern != AddressingMode::NO_PATTERN)
-    {
         argument = addressingModePattern.replace("(.*)", argument).toUpper(); // Surround argument string with the corresponding addressing mode syntax
-    }
 
     argumentsSize = instruction->getNumBytes() - 1;
     return argument;
@@ -1335,6 +1328,17 @@ int Machine::getFlagValue(QString flagName) const
 void Machine::setFlagValue(int id, int value)
 {
     flags[id]->setValue(value);
+}
+
+bool Machine::hasFlag(Flag::FlagCode flagCode) const
+{
+    foreach (Flag *flag, flags)
+    {
+        if (flag->getFlagCode() == flagCode)
+            return true;
+    }
+
+    return false;
 }
 
 void Machine::setFlagValue(QString flagName, int value)
@@ -1609,7 +1613,12 @@ void Machine::generateDescriptions()
     descriptions["jnz a"] = "Se a flag Z estiver desativada (acumulador diferente de zero), desvia a execução para o endereço 'a'.";
     descriptions["jc a"]  = "Se a flag C estiver ativada (carry), desvia a execução para o endereço 'a'.";
     descriptions["jnc a"] = "Se a flag C estiver desativada (not carry), desvia a execução para o endereço 'a'.";
-    descriptions["jb a"]  = "Se a flag B estiver ativada (borrow), desvia a execução para o endereço 'a'.";
+
+    if (hasFlag(Flag::BORROW))
+        descriptions["jb a"]  = "Se a flag B estiver ativada (borrow), desvia a execução para o endereço 'a'.";
+    else
+        descriptions["jb a"]  = "Se a flag C estiver desativada (borrow), desvia a execução para o endereço 'a'.";
+
     descriptions["jnb a"] = "Se a flag B estiver desativada (not borrow), desvia a execução para o endereço 'a'.";
     descriptions["shr"]   = "Reliza shift lógico dos bits do acumulador para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
     descriptions["shl"]   = "Reliza shift lógico dos bits do acumulador para a esquerda, passando o estado do bit mais significativo para a flag C (carry) e preenchendo o bit menos significativo com 0.";

@@ -23,6 +23,7 @@ public:
     void highlightPCLine(int pcLine);
     int getBreakpointLine();
     void toggleBreakpointOnCursor();
+    void clearBreakpoint();
     void disableLineHighlight();
     void setCurrentLine(int line);
 
