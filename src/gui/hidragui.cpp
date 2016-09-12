@@ -50,14 +50,16 @@ HidraGui::HidraGui(QWidget *parent) :
     advanceToNextCell = false;
 
     buildSuccessful = true;
+    previousPCValue = 0;
 
     // View options
-    showHexValues = false;
+    showHexValues  = false;
     showSignedData = false;
     showCharacters = false;
-    fastExecute = false;
-    followPC = false;
-    previousPCValue = 0;
+    fastExecute    = false;
+    followPC       = true;
+
+    ui->actionFollowPCMode->setChecked(followPC);
 
     sourceAndMemoryInSync = false;
     machine = nullptr;
