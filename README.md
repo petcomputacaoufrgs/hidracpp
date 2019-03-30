@@ -22,7 +22,7 @@ Desenvolver usando Windows
 --------------------------
 
 Para desenvolver em Windows, primeiro instale o Qt 5.3 com MinGW (que inclui o ambiente QtCreator), através do link:<br/>
-http://download.qt-project.org/official_releases/qt/5.3/5.3.1/qt-opensource-windows-x86-mingw482_opengl-5.3.1.exe
+https://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-windows-x86-mingw482_opengl-5.3.2.exe
 
 Em seguida, clone o projeto através do software Git de sua preferência (ex: GitHub for Windows) e abra o arquivo <i>src/hidra.pro</i>.
 
@@ -30,7 +30,7 @@ Desenvolver usando Linux
 ------------------------
 
 Para desenvolver usando Linux, faça o download do Qt através deste link:<br/>
-http://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-linux-x86-5.3.2.run
+https://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-linux-x86-5.3.2.run
 
 Em seguida, siga o tutorial para instalação em sua distribuição Linux, por exemplo:<br/>
 https://wiki.qt.io/Install_Qt_5_on_Ubuntu

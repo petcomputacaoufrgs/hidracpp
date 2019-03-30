@@ -170,6 +170,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
         setRegisterValue(registerName, result);
         setCarry(value1 & 0x01);
+        updateFlags(result);
         break;
 
     case Instruction::SHL:
@@ -178,6 +179,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
         setRegisterValue(registerName, result);
         setCarry((value1 & 0x80) ? 1 : 0);
+        updateFlags(result);
         break;
 
     case Instruction::ROR:
@@ -186,6 +188,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
         setRegisterValue(registerName, result);
         setCarry(value1 & 0x01);
+        updateFlags(result);
         break;
 
     case Instruction::ROL:
@@ -194,6 +197,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
         setRegisterValue(registerName, result);
         setCarry((value1 & 0x80) ? 1 : 0);
+        updateFlags(result);
         break;
 
     case Instruction::INC:

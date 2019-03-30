@@ -712,7 +712,7 @@ void HidraGui::setInformationTrackedAddress(QString addressString)
 QString HidraGui::valueToString(int value, bool isHexadecimal, bool isSigned)
 {
     if (isHexadecimal)
-        return QString::number(value, 16).leftJustified(2, QChar('0')).toUpper();
+        return QString::number(value, 16).rightJustified(2, QChar('0')).toUpper();
     else if (isSigned)
         return QString::number(machine->toSigned(value));
     else
