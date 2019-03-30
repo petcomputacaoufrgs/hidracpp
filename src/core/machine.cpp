@@ -1409,6 +1409,17 @@ QString Machine::getRegisterName(int id) const
         return "R" + QString::number(id); // Default to R0..R63
 }
 
+bool Machine::hasRegister(QString registerName) const
+{
+    foreach (Register *reg, registers)
+    {
+        if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
+            return true;
+    }
+
+    return false;
+}
+
 int Machine::getRegisterValue(int id, bool signedData) const
 {
     if (signedData && registers[id]->isData())

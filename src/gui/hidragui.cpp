@@ -157,6 +157,15 @@ void HidraGui::updateMachineInterface(bool force = false, bool updateInstruction
     updateMachineInterfaceComponents(force, updateInstructionStrings);
 }
 
+void HidraGui::scrollToCurrentLine()
+{
+    if (followPC)
+    {
+        codeEditor->setCurrentLine(machine->getPCCorrespondingSourceLine());
+        ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(machine->getPCValue(), ColumnAddress));
+    }
+}
+
 
 
 //////////////////////////////////////////////////
@@ -655,6 +664,14 @@ void HidraGui::updateCodeEditor()
 
 void HidraGui::updateButtons()
 {
+    // Enable "Reset PC" if either SP != 0 or PC != 0
+    if (machine->hasRegister("SP") && machine->getRegisterValue("SP") != 0)
+        ui->pushButtonResetPC->setEnabled(true);
+    else if (machine->getPCValue() != 0)
+        ui->pushButtonResetPC->setEnabled(true);
+    else
+        ui->pushButtonResetPC->setEnabled(false);
+
     if (machine->isRunning())
         ui->pushButtonRun->setText("Parar");
     else
@@ -885,11 +902,7 @@ void HidraGui::step(bool refresh, bool updateInstructionStrings)
     if (refresh)
     {
         updateMachineInterface(false, updateInstructionStrings);
-        if (followPC)
-        {
-            codeEditor->setCurrentLine(machine->getPCCorrespondingSourceLine());
-            ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(machine->getPCValue(), ColumnAddress));
-        }
+        scrollToCurrentLine();
         QApplication::processEvents();
     }
 }
@@ -1157,6 +1170,23 @@ void HidraGui::on_actionBuild_triggered()
     updateMachineInterface(true);
 }
 
+void HidraGui::on_actionResetPC_triggered()
+{
+    // Stop machine and reset PC
+    machine->setRunning(false);
+    machine->setPCValue(0);
+
+    // Reset SP on stack machines
+    if (machine->hasRegister("SP"))
+        machine->setRegisterValue("SP", 0);
+
+    // Reset access counters
+    machine->clearCounters();
+
+    updateMachineInterface();
+    scrollToCurrentLine();
+}
+
 void HidraGui::on_actionRun_triggered()
 {
     // If already running, stop
@@ -1354,6 +1384,11 @@ void HidraGui::on_actionAbout_triggered()
 void HidraGui::on_pushButtonBuild_clicked()
 {
     ui->actionBuild->trigger();
+}
+
+void HidraGui::on_pushButtonResetPC_clicked()
+{
+    ui->actionResetPC->trigger();
 }
 
 void HidraGui::on_pushButtonRun_clicked()
