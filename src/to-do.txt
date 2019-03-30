@@ -2,6 +2,8 @@ Hidra - To-do
 
 Geral
 
+- Oferecer para salvar o arquivo no mesmo local do arquivo aberto
+- Ao exportar memória, alertar que código e memória não estão em sincronia
 - MsgBox de "HLT atingido" para passo-a-passo.
 - Criar um .ini para lembrar "exibir hexa" e último local carregado/salvo
 - Recovery automático desabilitado, pois recuperava quando abria segunda instância
@@ -9,7 +11,7 @@ Geral
 - UI: Help para diretivas (mencionar DW/DAW do Pericles)
 - Menu Editar c/Find/Replace
 - Atalho para comentar várias linhas de código de uma vez
-- Aceitar vírgula como separador de argumentos (seria apenas usado para REG_IF), cuidar modo indireto (,I)
+- Aceitar vírgula como separador de argumentos ("ADD A, 10", "IF A, 1, 2"). Cuidar modo indireto (,I)
 
 Testes p/outras máquinas
 
@@ -23,5 +25,4 @@ Breakpoints
 
 Sugestões
 
-- Desabilitar edição enquanto executa (modos edição e execução, botão Montar vira Editar)
 - Disassembler de .mem
