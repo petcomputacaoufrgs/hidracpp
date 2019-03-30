@@ -1160,6 +1160,7 @@ void HidraGui::on_actionBuild_triggered()
     if (machine->getBuildSuccessful())
     {
         sourceAndMemoryInSync = true;
+        scrollToCurrentLine();
     }
     else
     {
