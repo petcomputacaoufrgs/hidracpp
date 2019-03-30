@@ -956,7 +956,7 @@
   </action>
   <action name="actionReference">
    <property name="text">
-    <string>Montador e Máquinas</string>
+    <string>Montador e máquinas</string>
    </property>
    <property name="statusTip">
     <string>Referência de uso para as principais máquinas.</string>
