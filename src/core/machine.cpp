@@ -444,7 +444,7 @@ void Machine::assemble(QString sourceCode)
                 if (!validLabel.exactMatch(labelName.toLower()))
                     throw invalidLabel;
                 if (labelPCMap.contains(labelName.toLower()))
-                    throw duplicatedLabel;
+                    throw duplicateLabel;
 
                 labelPCMap.insert(labelName.toLower(), PC->getValue()); // Add to map
                 addressCorrespondingLabel[PC->getValue()] = labelName;
@@ -703,7 +703,7 @@ void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
     errorMessages[invalidString] = "String inválido.";
     errorMessages[invalidLabel] = "Label inválido.";
     errorMessages[invalidArgument] = "Argumento inválido.";
-    errorMessages[duplicatedLabel] = "Label já definido.";
+    errorMessages[duplicateLabel] = "Label já definido.";
     errorMessages[memoryOverlap] = "Sobreposição de memória.";
     errorMessages[notImplemented] = "Funcionalidade não implementada.";
     errorMessages[undefinedError] = "Erro indefinido.";
