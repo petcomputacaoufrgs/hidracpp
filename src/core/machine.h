@@ -42,7 +42,7 @@ public:
         invalidString,
         invalidLabel,
         invalidArgument,
-        duplicatedLabel,
+        duplicateLabel,
         memoryOverlap,
         notImplemented,
         undefinedError,
@@ -185,6 +185,7 @@ public:
     int  getNumberOfRegisters() const;
     int  getRegisterBitCode(QString registerName) const; // -1 if no code
     QString getRegisterName(int id) const;
+    bool hasRegister(QString registerName) const;
     int  getRegisterValue(int id, bool signedData = false) const;
     int  getRegisterValue(QString registerName) const;
     void setRegisterValue(int id, int value);

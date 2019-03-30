@@ -21,6 +21,9 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <property name="bottomMargin">
+     <number>6</number>
+    </property>
     <item>
      <widget class="QWidget" name="areaEditor" native="true">
       <property name="minimumSize">
@@ -323,7 +326,7 @@
                <x>0</x>
                <y>0</y>
                <width>279</width>
-               <height>86</height>
+               <height>69</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -429,16 +432,31 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
           <number>4</number>
          </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
          <item>
           <widget class="QPushButton" name="pushButtonBuild">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>26</height>
+            </size>
+           </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
              <height>32</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
            <property name="statusTip">
@@ -450,42 +468,83 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="pushButtonRun">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>32</height>
-            </size>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="spacing">
+            <number>4</number>
            </property>
-           <property name="statusTip">
-            <string>Executa o programa a partir da posição atual de PC.</string>
-           </property>
-           <property name="whatsThis">
-            <string/>
-           </property>
-           <property name="text">
-            <string>Rodar</string>
-           </property>
-           <property name="autoDefault">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="pushButtonStep">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="statusTip">
-            <string>Executa a instrução atual e avança PC para a instrução seguinte.</string>
-           </property>
-           <property name="text">
-            <string>Passo</string>
-           </property>
-          </widget>
+           <item>
+            <widget class="QPushButton" name="pushButtonResetPC">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="statusTip">
+              <string>Zera o valor do registrador PC para que o programa seja executado novamente.</string>
+             </property>
+             <property name="text">
+              <string>Zerar PC</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonRun">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="statusTip">
+              <string>Executa o programa a partir da posição atual de PC, ou pausa a execução.</string>
+             </property>
+             <property name="whatsThis">
+              <string/>
+             </property>
+             <property name="text">
+              <string>Rodar</string>
+             </property>
+             <property name="autoDefault">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonStep">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="statusTip">
+              <string>Executa a instrução atual e avança PC para a instrução seguinte.</string>
+             </property>
+             <property name="text">
+              <string>Passo</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </item>
         </layout>
        </item>
@@ -665,9 +724,9 @@
     <property name="title">
      <string>Máquina</string>
     </property>
-    <addaction name="actionResetRegisters"/>
-    <addaction name="separator"/>
     <addaction name="actionBuild"/>
+    <addaction name="separator"/>
+    <addaction name="actionResetPC"/>
     <addaction name="actionRun"/>
     <addaction name="actionStep"/>
     <addaction name="separator"/>
@@ -739,7 +798,7 @@
     <string>Limpa memória atual e compila o código-fonte para a memória.</string>
    </property>
    <property name="shortcut">
-    <string>F6</string>
+    <string>F5</string>
    </property>
   </action>
   <action name="actionStep">
@@ -842,9 +901,6 @@
    <property name="statusTip">
     <string>Reinicia valor de flags e registradores, incluindo PC.</string>
    </property>
-   <property name="shortcut">
-    <string>F5</string>
-   </property>
   </action>
   <action name="actionHexadecimalMode">
    <property name="checkable">
@@ -900,7 +956,7 @@
   </action>
   <action name="actionReference">
    <property name="text">
-    <string>Referência de uso</string>
+    <string>Montador e Máquinas</string>
    </property>
    <property name="statusTip">
     <string>Referência de uso para as principais máquinas.</string>
@@ -951,6 +1007,17 @@
    </property>
    <property name="statusTip">
     <string>Exibe os caracteres ASCII correspondentes aos valores na tabela de dados.</string>
+   </property>
+  </action>
+  <action name="actionResetPC">
+   <property name="text">
+    <string>Zerar PC</string>
+   </property>
+   <property name="statusTip">
+    <string>Zera o valor do registrador PC para que o programa seja executado novamente.</string>
+   </property>
+   <property name="shortcut">
+    <string>F6</string>
    </property>
   </action>
  </widget>

@@ -79,6 +79,7 @@ public slots:
     void selectMachine(QString machineName);
     void initializeMachineInterface();
     void updateMachineInterface(bool force, bool updateInstructionStrings);
+    void scrollToCurrentLine();
 
     void clearErrorsField();
     void addError(QString);
@@ -99,6 +100,7 @@ private slots:
 
     // Machine menu
     void on_actionBuild_triggered();
+    void on_actionResetPC_triggered();
     void on_actionRun_triggered();
     void on_actionStep_triggered();
     void on_actionImportMemory_triggered();
@@ -120,6 +122,7 @@ private slots:
 
     // Interface elements
     void on_pushButtonBuild_clicked();
+    void on_pushButtonResetPC_clicked();
     void on_pushButtonRun_clicked();
     void on_pushButtonStep_clicked();
     void on_comboBoxMachine_currentIndexChanged(const QString machineName);

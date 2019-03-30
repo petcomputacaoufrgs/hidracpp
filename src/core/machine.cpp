@@ -1413,6 +1413,17 @@ QString Machine::getRegisterName(int id) const
         return "R" + QString::number(id); // Default to R0..R63
 }
 
+bool Machine::hasRegister(QString registerName) const
+{
+    foreach (Register *reg, registers)
+    {
+        if (reg->getName().compare(registerName, Qt::CaseInsensitive) == 0)
+            return true;
+    }
+
+    return false;
+}
+
 int Machine::getRegisterValue(int id, bool signedData) const
 {
     if (signedData && registers[id]->isData())
@@ -1637,8 +1648,8 @@ void Machine::generateDescriptions()
         descriptions["jb a"]  = "Se a flag C estiver desativada (borrow), desvia a execução para o endereço 'a'.";
 
     descriptions["jnb a"] = "Se a flag B estiver desativada (not borrow), desvia a execução para o endereço 'a'.";
-    descriptions["shr"]   = "Reliza shift lógico dos bits do acumulador para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
-    descriptions["shl"]   = "Reliza shift lógico dos bits do acumulador para a esquerda, passando o estado do bit mais significativo para a flag C (carry) e preenchendo o bit menos significativo com 0.";
+    descriptions["shr"]   = "Realiza shift lógico dos bits do acumulador para a direita, passando o estado do bit menos significativo para a flag C (carry) e preenchendo o bit mais significativo com 0.";
+    descriptions["shl"]   = "Realiza shift lógico dos bits do acumulador para a esquerda, passando o estado do bit mais significativo para a flag C (carry) e preenchendo o bit menos significativo com 0.";
     descriptions["ror"]   = "Realiza rotação para a esquerda dos bits do acumulador, incluindo a flag C (carry) como um bit.";
     descriptions["rol"]   = "Realiza rotação para a direita dos bits do acumulador, incluindo a flag C (carry) como um bit.";
 
