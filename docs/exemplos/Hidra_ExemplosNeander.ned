@@ -5,17 +5,17 @@
 ;; Passe o mouse sobre as diferentes áreas do programa para obter informações
 ;; úteis na barra de status.
 
-;; Para rodar um programa, clique em Montar, e em seguida em Rodar. Você pode
-;; realizar a execução passo-a-passo com o comando Passo (tecla F8).
-
-;; Para rodar o programa até uma linha específica do código, utilize o comando
-;; Máquina -> Inserir/remover breakpoint (tecla F12), e execute o programa.
-
 ;; Passe o mouse sobre instruções ou modos de acesso (canto inferior direito)
 ;; para visualizar a sintaxe e o funcionamento de cada um.
 
 ;; Passe o mouse sobre valores da memória ou registradores para visualizá-los em
 ;; hexadecimal ou binário.
+
+;; Para rodar um programa, clique em Montar, e em seguida em Rodar. Você pode
+;; realizar a execução passo-a-passo com o comando Passo (tecla F8).
+
+;; Para rodar o programa até uma linha específica do código, utilize o comando
+;; Máquina -> Inserir/remover breakpoint (tecla F12), e execute o programa.
 
 ;; Dê um clique duplo na tabela de memória esquerda (instruções) para mover a
 ;; execução (PC) para o endereço escolhido.
@@ -23,7 +23,7 @@
 ;; Dê um clique duplo em um label na tabela de memória direita (dados) para
 ;; visualizar o código correspondente.
 
-;; De um clique duplo em um valor de memória para alterá-lo.
+;; Dê um clique duplo em um valor de memória para alterá-lo.
 
 
 
