@@ -573,7 +573,7 @@
           </size>
          </property>
          <property name="statusTip">
-          <string>Passe o mouse para obter informações sobre cada instrução da máquina escolhida.</string>
+          <string>Passe o mouse para obter a sintaxe e a descrição de cada instrução da máquina escolhida.</string>
          </property>
          <property name="title">
           <string>Instruções</string>
@@ -633,7 +633,7 @@
           </size>
          </property>
          <property name="statusTip">
-          <string>Passe o mouse para obter informações sobre cada modo de endereçamento da máquina escolhida.</string>
+          <string>Passe o mouse para obter a sintaxe e a descrição de cada modo de endereçamento da máquina escolhida.</string>
          </property>
          <property name="title">
           <string>Modos de end.</string>
