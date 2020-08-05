@@ -11,7 +11,7 @@ Geral
 - UI: Help para diretivas (mencionar DW/DAW do Pericles)
 - Menu Editar c/Find/Replace
 - Atalho para comentar várias linhas de código de uma vez
-- Aceitar vírgula como separador de argumentos ("ADD A, 10", "IF A, 1, 2"). Cuidar modo indireto (,I)
+- [FEITO] Aceitar vírgula como separador de argumentos ("ADD A, 10", "IF A, 1, 2"). Cuidar modo indireto (,I)
 
 Testes p/outras máquinas
 
