@@ -1194,9 +1194,11 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     if (instruction->getArguments().contains("r"))
         memoryString += " " + ((registerName != "") ? registerName : "?");
 
+    /*
     // Argument value (with addressing mode)
     if (instruction->getNumBytes() != 1) // Size can be 0 (variable number of bytes)
         memoryString += " " + generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+    */
 
     return memoryString;
 }
