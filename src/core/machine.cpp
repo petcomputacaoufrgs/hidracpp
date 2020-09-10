@@ -1194,22 +1194,26 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     if (instruction->getArguments().contains("r"))
         memoryString += " " + ((registerName != "") ? registerName : "?");
 
-    /*
     // Argument value (with addressing mode)
-    if (instruction->getNumBytes() != 1) // Size can be 0 (variable number of bytes)
-        memoryString += " " + generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
-    */
+    // Size can be 0 (variable number of bytes)
+    if (instruction->getNumBytes() != 1)
+    {
+        QString argumentString = generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+        if (argumentString.length() > 0) {
+            memoryString += " " + argumentString;
+        }
+    }
 
     return memoryString;
 }
 
 QString Machine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
 {
-    QString argument = QString::number(getMemoryValue(address + 1));
+    QString argument;
     QString addressingModePattern = getAddressingModePattern(addressingModeCode);
 
     if (addressingModePattern != AddressingMode::NO_PATTERN)
-        argument = addressingModePattern.replace("(.*)", argument).toUpper(); // Surround argument string with the corresponding addressing mode syntax
+        argument = addressingModePattern.replace("(.*)", "").toUpper(); // Surround argument string with the corresponding addressing mode syntax
 
     argumentsSize = instruction->getNumBytes() - 1;
     return argument;

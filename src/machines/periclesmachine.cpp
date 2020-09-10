@@ -172,7 +172,7 @@ QString PericlesMachine::generateArgumentsString(int address, Instruction *instr
 
     // Add addressing mode syntax
     if (addressingModePattern != AddressingMode::NO_PATTERN)
-        argument = addressingModePattern.replace("(.*)", argument).toUpper();
+        argument = addressingModePattern.replace("(.*)", "").toUpper();
 
     return argument;
 }
