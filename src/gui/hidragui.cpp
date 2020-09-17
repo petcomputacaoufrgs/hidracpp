@@ -359,7 +359,6 @@ void HidraGui::initializeInstructionsList()
     {
         QLabel *instructionText = new QLabel(this);
         instructionText->setTextFormat(Qt::RichText);
-        instructionText->setEnabled(false); // Grayed out
 
         // Label text
         instructionText->setText(instruction->getMnemonic().toUpper());
@@ -369,7 +368,6 @@ void HidraGui::initializeInstructionsList()
                           instruction->getArguments().join(" ") + "<br>" +
                           machine->getDescription(instruction->getAssemblyFormat());
         instructionText->setToolTip(toolTip);
-
         ui->layoutInstructions->addWidget(instructionText, i/6, i%6);
         i += 1;
     }
@@ -388,7 +386,6 @@ void HidraGui::initializeAddressingModesList()
 
         QLabel *addressingModeText = new QLabel(this);
         addressingModeText->setTextFormat(Qt::RichText);
-        addressingModeText->setEnabled(false); // Grayed out
 
         // Label text
         addressingModeText->setText(acronym);
