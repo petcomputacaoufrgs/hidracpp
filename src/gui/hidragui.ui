@@ -745,6 +745,9 @@
     <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
+    <addaction name="separator"/>
+    <addaction name="actionBaseConversor"/>
+    <addaction name="actionPointConversor"/>
    </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuMemory"/>
@@ -1020,20 +1023,20 @@
     <string>F6</string>
    </property>
   </action>
-  <action name="actionToggleConversor">
+  <action name="actionPointConversor">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Conversores</string>
+    <string>Conversor de pontos flutuante e fixo</string>
    </property>
   </action>
-  <action name="actionTogglePontoConversor">
+  <action name="actionBaseConversor">
    <property name="checkable">
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Conversor de Ponto</string>
+    <string>Conversor de base</string>
    </property>
   </action>
  </widget>

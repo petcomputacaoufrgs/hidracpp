@@ -78,6 +78,8 @@ HidraGui::HidraGui(QWidget *parent) :
     codeEditor->setAcceptDrops(false);
     setAcceptDrops(true);
 
+    baseConversor = new BaseConversor();
+
     // Open recovery file (if existing)
     /*if (QFile::exists("__Recovery__.txt"))
     {
@@ -1431,4 +1433,9 @@ void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
 
     if (addressCorrespondingSourceLine != -1)
         codeEditor->setCurrentLine(addressCorrespondingSourceLine);
+}
+
+void HidraGui::on_actionBaseConversor_triggered()
+{
+    baseConversor->show();
 }

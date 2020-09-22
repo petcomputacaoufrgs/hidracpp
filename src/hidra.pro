@@ -15,6 +15,7 @@ CONFIG  += \
     c++11
 
 SOURCES += \
+    gui/baseconversor.cpp \
     gui/flagwidget.cpp \
     gui/hidracodeeditor.cpp \
     gui/hidragui.cpp \
@@ -39,6 +40,7 @@ SOURCES += \
     gui/about.cpp
 
 HEADERS  += \
+    gui/baseconversor.h \
     gui/flagwidget.h \
     gui/hidracodeeditor.h \
     gui/hidragui.h \
@@ -62,6 +64,7 @@ HEADERS  += \
     gui/about.h
 
 FORMS    += \
+    gui/baseconversor.ui \
     gui/flagwidget.ui \
     gui/hidragui.ui \
     gui/registerwidget.ui \

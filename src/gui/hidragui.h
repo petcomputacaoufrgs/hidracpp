@@ -14,6 +14,7 @@
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
+#include "baseconversor.h"
 #include "registerwidget.h"
 #include "flagwidget.h"
 #include "about.h"
@@ -114,6 +115,7 @@ private slots:
     void on_actionShowCharacters_toggled(bool checked);
     void on_actionFastExecuteMode_toggled(bool checked);
     void on_actionFollowPCMode_toggled(bool checked);
+    void on_actionBaseConversor_triggered();
 
     // Help menu
     void on_actionQuickGuide_triggered();
@@ -170,6 +172,8 @@ private:
 
     // Interface elements
     Ui::HidraGui *ui;
+
+    BaseConversor *baseConversor;
     Machine *machine;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
