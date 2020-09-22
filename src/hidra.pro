@@ -20,6 +20,7 @@ SOURCES += \
     gui/hidracodeeditor.cpp \
     gui/hidragui.cpp \
     gui/hidrahighlighter.cpp \
+    gui/pointconversor.cpp \
     gui/registerwidget.cpp \
     core/byte.cpp \
     core/flag.cpp \
@@ -45,6 +46,7 @@ HEADERS  += \
     gui/hidracodeeditor.h \
     gui/hidragui.h \
     gui/hidrahighlighter.h \
+    gui/pointconversor.h \
     gui/registerwidget.h \
     core/byte.h \
     core/flag.h \
@@ -67,6 +69,7 @@ FORMS    += \
     gui/baseconversor.ui \
     gui/flagwidget.ui \
     gui/hidragui.ui \
+    gui/pointconversor.ui \
     gui/registerwidget.ui \
     gui/about.ui
 

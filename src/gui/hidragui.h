@@ -15,6 +15,7 @@
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "baseconversor.h"
+#include "pointconversor.h"
 #include "registerwidget.h"
 #include "flagwidget.h"
 #include "about.h"
@@ -131,6 +132,8 @@ private slots:
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
+    void on_actionPointConversor_triggered();
+
 private:
     // Internal initialize methods (called by initializeMachineInterface)
     void initializeMachineInterfaceComponents();
@@ -172,8 +175,9 @@ private:
 
     // Interface elements
     Ui::HidraGui *ui;
-
     BaseConversor *baseConversor;
+    PointConversor *pointConversor;
+
     Machine *machine;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;

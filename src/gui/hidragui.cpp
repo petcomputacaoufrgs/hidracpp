@@ -79,6 +79,7 @@ HidraGui::HidraGui(QWidget *parent) :
     setAcceptDrops(true);
 
     baseConversor = new BaseConversor();
+    pointConversor = new PointConversor();
 
     // Open recovery file (if existing)
     /*if (QFile::exists("__Recovery__.txt"))
@@ -1438,4 +1439,9 @@ void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
 void HidraGui::on_actionBaseConversor_triggered()
 {
     baseConversor->show();
+}
+
+void HidraGui::on_actionPointConversor_triggered()
+{
+    pointConversor->show();
 }
