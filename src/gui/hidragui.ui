@@ -1025,7 +1025,7 @@
   </action>
   <action name="actionPointConversor">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Conversor de pontos flutuante e fixo</string>
@@ -1033,7 +1033,7 @@
   </action>
   <action name="actionBaseConversor">
    <property name="checkable">
-    <bool>true</bool>
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>Conversor de base</string>
