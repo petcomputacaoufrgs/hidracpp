@@ -38,14 +38,14 @@
      </widget>
     </item>
     <item row="0" column="3">
-     <widget class="QLineEdit" name="lineEdit_2">
+     <widget class="QLineEdit" name="lineEditOutputBase">
       <property name="text">
        <string>2</string>
       </property>
      </widget>
     </item>
     <item row="1" column="1" colspan="3">
-     <widget class="QLineEdit" name="lineEdit_3"/>
+     <widget class="QLineEdit" name="lineEditInputValor"/>
     </item>
     <item row="3" column="0" colspan="2">
      <widget class="QPushButton" name="pushButton">
@@ -69,7 +69,7 @@
      </widget>
     </item>
     <item row="0" column="1">
-     <widget class="QLineEdit" name="lineEdit">
+     <widget class="QLineEdit" name="lineEditInputBase">
       <property name="text">
        <string>10</string>
       </property>
@@ -83,7 +83,7 @@
      </widget>
     </item>
     <item row="2" column="1" colspan="3">
-     <widget class="QLineEdit" name="lineEdit_4">
+     <widget class="QLineEdit" name="lineEditOutputValor">
       <property name="readOnly">
        <bool>true</bool>
       </property>
