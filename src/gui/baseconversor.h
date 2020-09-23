@@ -2,6 +2,9 @@
 #define BASECONVERSOR_H
 
 #include <QDialog>
+#include <iostream>
+#include <math.h>
+#include <string>
 
 namespace Ui {
 class BaseConversor;
@@ -15,8 +18,16 @@ public:
     explicit BaseConversor(QWidget *parent = nullptr);
     ~BaseConversor();
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
     Ui::BaseConversor *ui;
 };
+
+
+using namespace std;
+
+
 
 #endif // BASECONVERSOR_H
