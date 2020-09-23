@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PointConversor</class>
- <widget class="QDialog" name="PointConversor">
+ <class>PointConversorDialog</class>
+ <widget class="QDialog" name="PointConversorDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

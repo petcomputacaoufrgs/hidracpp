@@ -1,7 +1,7 @@
-#include "pointconversor.h"
+#include "pointconversordialog.h"
 #include "ui_pointconversor.h"
 
-PointConversor::PointConversor(QWidget *parent) :
+PointConversorDialog::PointConversorDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PointConversor)
 {
@@ -10,19 +10,19 @@ PointConversor::PointConversor(QWidget *parent) :
     output = 0.0;
 }
 
-PointConversor::~PointConversor()
+PointConversorDialog::~PointConversorDialog()
 {
     delete ui;
 }
 
-void PointConversor::on_pushButtonInvert_clicked()
+void PointConversorDialog::on_pushButtonInvert_clicked()
 {
     QString input = ui->lineEditInput->text();
     ui->lineEditInput->setText(ui->lineEditOutput->text());
     ui->lineEditOutput->setText(input);
 }
 
-void PointConversor::parseInput()
+void PointConversorDialog::parseInput()
 {
     QString inputFormat = ui->comboBoxInput->currentText();
     if (inputFormat == "Notação Humana")
@@ -68,7 +68,7 @@ void PointConversor::parseInput()
     }
 }
 
-uint64_t PointConversor::parseBin()
+uint64_t PointConversorDialog::parseBin()
 {
     uint64_t bits = 0;
     QString inputText = ui->lineEditInput->text().trimmed();
@@ -82,7 +82,7 @@ uint64_t PointConversor::parseBin()
     return bits;
 }
 
-void PointConversor::parseFloat16()
+void PointConversorDialog::parseFloat16()
 {
     // Parse a binary unsigned number.
     uint16_t bits = parseBin();

@@ -2,19 +2,19 @@
 #define POINTCONVERSOR_H
 
 #include <QDialog>
-#include <stdint.h>
+#include <cstdint>
 
 namespace Ui {
 class PointConversor;
 }
 
-class PointConversor : public QDialog
+class PointConversorDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit PointConversor(QWidget *parent = nullptr);
-    ~PointConversor();
+    explicit PointConversorDialog(QWidget *parent = nullptr);
+    ~PointConversorDialog();
 
 private slots:
     void on_pushButtonInvert_clicked();
