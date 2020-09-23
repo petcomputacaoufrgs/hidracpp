@@ -5,7 +5,7 @@
 #include <cstdint>
 
 namespace Ui {
-class PointConversor;
+class PointConversorDialog;
 }
 
 class PointConversorDialog : public QDialog
@@ -20,7 +20,7 @@ private slots:
     void on_pushButtonInvert_clicked();
 
 private:
-    Ui::PointConversor *ui;
+    Ui::PointConversorDialog *ui;
     double input;
     double output;
 

@@ -15,8 +15,9 @@ CONFIG  += \
     c++11
 
 SOURCES += \
+    core/baseconversor.cpp \
     core/pointconversor.cpp \
-    gui/baseconversor.cpp \
+    gui/baseconversordialog.cpp \
     gui/flagwidget.cpp \
     gui/hidracodeeditor.cpp \
     gui/hidragui.cpp \
@@ -42,8 +43,9 @@ SOURCES += \
     gui/about.cpp
 
 HEADERS  += \
+    core/baseconversor.h \
     core/pointconversor.h \
-    gui/baseconversor.h \
+    gui/baseconversordialog.h \
     gui/flagwidget.h \
     gui/hidracodeeditor.h \
     gui/hidragui.h \
@@ -68,7 +70,7 @@ HEADERS  += \
     gui/about.h
 
 FORMS    += \
-    gui/baseconversor.ui \
+    gui/baseconversordialog.ui \
     gui/flagwidget.ui \
     gui/hidragui.ui \
     gui/pointconversordialog.ui \

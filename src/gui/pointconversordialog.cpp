@@ -1,9 +1,9 @@
 #include "pointconversordialog.h"
-#include "ui_pointconversor.h"
+#include "ui_pointconversordialog.h"
 
 PointConversorDialog::PointConversorDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::PointConversor)
+    ui(new Ui::PointConversorDialog)
 {
     ui->setupUi(this);
     input = 0.0;

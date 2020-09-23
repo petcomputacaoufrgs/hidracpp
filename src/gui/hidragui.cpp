@@ -78,7 +78,7 @@ HidraGui::HidraGui(QWidget *parent) :
     codeEditor->setAcceptDrops(false);
     setAcceptDrops(true);
 
-    baseConversor = new BaseConversor();
+    baseConversor = new BaseConversorDialog();
     pointConversor = new PointConversorDialog();
 
     // Open recovery file (if existing)

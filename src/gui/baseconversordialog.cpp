@@ -1,5 +1,5 @@
-#include "baseconversor.h"
-#include "ui_baseconversor.h"
+#include "baseconversordialog.h"
+#include "ui_baseconversordialog.h"
 
 using namespace std;
 
@@ -33,19 +33,19 @@ string baseConversor(string inputValor, long long inputBase, long long outputBas
 }
 
 
-BaseConversor::BaseConversor(QWidget *parent) :
+BaseConversorDialog::BaseConversorDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::BaseConversor)
+    ui(new Ui::BaseConversorDialog)
 {
     ui->setupUi(this);
 }
 
-BaseConversor::~BaseConversor()
+BaseConversorDialog::~BaseConversorDialog()
 {
     delete ui;
 }
 
-void BaseConversor::on_pushButton_clicked()
+void BaseConversorDialog::on_pushButton_clicked()
 {
     string inputValue = ui->lineEditInputValor->text().toStdString();
     string inputBaseString = ui->lineEditInputBase->text().toStdString();
@@ -57,7 +57,7 @@ void BaseConversor::on_pushButton_clicked()
     ui->lineEditOutputValor->setText(QString::fromStdString(baseConversor(inputValue, inputBase, outputBase)));
 }
 
-void BaseConversor::on_pushButton_2_clicked()
+void BaseConversorDialog::on_pushButton_2_clicked()
 {
     QString inputBaseStringQ = ui->lineEditInputBase->text();
     ui->lineEditInputBase->setText(ui->lineEditOutputBase->text());

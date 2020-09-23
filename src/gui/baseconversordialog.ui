@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BaseConversor</class>
- <widget class="QDialog" name="BaseConversor">
+ <class>BaseConversorDialog</class>
+ <widget class="QDialog" name="BaseConversorDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -40,7 +40,7 @@
     <item row="0" column="3">
      <widget class="QLineEdit" name="lineEditOutputBase">
       <property name="text">
-       <string>Inverter Entrada/Saída</string>
+       <string>16</string>
       </property>
      </widget>
     </item>
@@ -116,6 +116,13 @@
         </item>
        </layout>
       </widget>
+     </widget>
+    </item>
+    <item row="3" column="2" colspan="2">
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="text">
+       <string>Inverter Entrada/Saída</string>
+      </property>
      </widget>
     </item>
    </layout>

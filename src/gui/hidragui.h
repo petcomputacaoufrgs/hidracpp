@@ -14,7 +14,7 @@
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
-#include "baseconversor.h"
+#include "baseconversordialog.h"
 #include "pointconversordialog.h"
 #include "registerwidget.h"
 #include "flagwidget.h"
@@ -175,7 +175,7 @@ private:
 
     // Interface elements
     Ui::HidraGui *ui;
-    BaseConversor *baseConversor;
+    BaseConversorDialog *baseConversor;
     PointConversorDialog *pointConversor;
 
     Machine *machine;

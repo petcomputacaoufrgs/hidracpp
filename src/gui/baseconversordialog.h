@@ -7,16 +7,16 @@
 #include <string>
 
 namespace Ui {
-class BaseConversor;
+class BaseConversorDialog;
 }
 
-class BaseConversor : public QDialog
+class BaseConversorDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit BaseConversor(QWidget *parent = nullptr);
-    ~BaseConversor();
+    explicit BaseConversorDialog(QWidget *parent = nullptr);
+    ~BaseConversorDialog();
 
 private slots:
     void on_pushButton_clicked();
@@ -24,7 +24,7 @@ private slots:
     void on_pushButton_2_clicked();
 
 private:
-    Ui::BaseConversor *ui;
+    Ui::BaseConversorDialog *ui;
 };
 
 
