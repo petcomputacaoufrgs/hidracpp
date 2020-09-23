@@ -47,8 +47,6 @@ BaseConversor::~BaseConversor()
 
 void BaseConversor::on_pushButton_clicked()
 {
-    QString UIoutputBase = ui->lineEditInputBase->text();
-
     string inputValue = ui->lineEditInputValor->text().toStdString();
     string inputBaseString = ui->lineEditInputBase->text().toStdString();
     string outputBaseString = ui->lineEditOutputBase->text().toStdString();
@@ -57,4 +55,11 @@ void BaseConversor::on_pushButton_clicked()
 
 
     ui->lineEditOutputValor->setText(QString::fromStdString(baseConversor(inputValue, inputBase, outputBase)));
+}
+
+void BaseConversor::on_pushButton_2_clicked()
+{
+    QString inputBaseStringQ = ui->lineEditInputBase->text();
+    ui->lineEditInputBase->setText(ui->lineEditOutputBase->text());
+    ui->lineEditOutputBase->setText(inputBaseStringQ);
 }
