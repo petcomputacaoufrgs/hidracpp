@@ -160,6 +160,7 @@ void HidraCodeEditor::setCurrentLine(int line)
         return;
 
     QTextCursor cursor(document()->findBlockByNumber(line));
+    cursor.movePosition(QTextCursor::EndOfLine);
     setTextCursor(cursor);
     ensureCursorVisible();
 }
