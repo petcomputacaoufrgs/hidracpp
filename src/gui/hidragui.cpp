@@ -1367,13 +1367,6 @@ void HidraGui::on_actionReference_triggered()
 void HidraGui::on_actionAbout_triggered()
 {
     about->show();
-//    QMessageBox::about(this, "Sobre o Hidra",
-//                       "<p align='center'>Hidra v1.0.0 (" + QString(__DATE__) + ")<br><br>"
-//                       "Copyright © PET Computação UFRGS"
-//                       "Universidade Federal do Rio Grande do Sul<br><br>"
-//                       "Desenvolvido pelo grupo <a href=inf.ufrgs.br/pet>PET Computação UFRGS</a>.<br><br>"
-//                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.<br><br>"
-//                       "Código-fonte disponível em: <a href=https://github.com/petcomputacaoufrgs/hidracpp>github.com/petcomputacaoufrgs/hidracpp</a></p>");
 }
 
 
