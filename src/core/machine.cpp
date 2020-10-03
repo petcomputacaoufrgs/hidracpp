@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * Copyright (C) 2015, 2016 PET Computação UFRGS
+ * Copyright (C) 2015-2020 PET Computação UFRGS
  *
  * Este arquivo é parte do programa Hidra.
  *
