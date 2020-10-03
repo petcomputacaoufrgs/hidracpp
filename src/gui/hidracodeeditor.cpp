@@ -162,7 +162,6 @@ void HidraCodeEditor::setCurrentLine(int line)
     QTextCursor cursor(document()->findBlockByNumber(line));
     setTextCursor(cursor);
     ensureCursorVisible();
-    setFocus();
 }
 
 void HidraCodeEditor::wheelEvent(QWheelEvent *e)
