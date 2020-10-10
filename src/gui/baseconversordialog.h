@@ -1,10 +1,9 @@
-#ifndef BASECONVERSOR_H
-#define BASECONVERSOR_H
+#ifndef BASECONVERSORDIALOG_H
+#define BASECONVERSORDIALOG_H
 
 #include <QDialog>
-#include <iostream>
-#include <math.h>
-#include <string>
+#include "../core/baseconversor.h"
+
 
 namespace Ui {
 class BaseConversorDialog;
@@ -32,4 +31,4 @@ using namespace std;
 
 
 
-#endif // BASECONVERSOR_H
+#endif // BASECONVERSORDIALOG_H
