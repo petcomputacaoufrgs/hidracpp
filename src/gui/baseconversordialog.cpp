@@ -17,17 +17,48 @@ BaseConversorDialog::~BaseConversorDialog()
 void BaseConversorDialog::on_pushButton_clicked()
 {
     BaseConversor baseConversor;
+    QString stringOut = "Etrada original";
+    int inputTypeIndex = ui->inputType->currentIndex();
+    int outputTypeIndex = ui->outputType->currentIndex();
+
+    // Getting inputs
     QString inputValorStringQ = ui->lineEditInputValor->text();
     QString baseInQ = ui->lineEditInputBase->text();
     QString baseOutQ = ui->lineEditOutputBase->text();
+    // converting bases from QString to int
+    int baseOut = baseOutQ.toInt();
+    int baseIn = baseInQ.toInt();
 
-    ui->label_5->setText(baseConversor.inputValidation(baseInQ.toInt(),
-                                                      baseOutQ.toInt(),
-                                                      inputValorStringQ));
+    // Input validation
 
-    QString stringOut = BaseConversor()
-        .input(inputValorStringQ, baseInQ.toInt())
-        .output(baseOutQ.toInt());
+
+    switch (inputTypeIndex){
+        case 0: ui->labelError->setText(baseConversor.inputValidation
+                                                (baseIn, baseOut, inputValorStringQ));
+                baseConversor = baseConversor.inputPositive(inputValorStringQ, baseIn);
+                break;
+        case 1: ui->labelError->setText(baseConversor.inputValidationSignalMagnitude
+                                                (baseIn, baseOut, inputValorStringQ));
+                baseConversor = baseConversor.inputSignalMagnitude(inputValorStringQ, baseIn);
+                break;
+
+        case 2: ui->labelError->setText(baseConversor.inputValidation
+                                        (baseIn, baseOut, inputValorStringQ));
+                baseConversor = baseConversor.inputOnesComplement(inputValorStringQ, baseIn);
+                break;
+
+        case 3: baseConversor = baseConversor.inputTwosComplement(inputValorStringQ, baseIn);
+            break;
+    }
+
+    switch (outputTypeIndex){
+        case 0: if(baseConversor.getNegativeSignal() == true)
+                    ui->labelError->setText("Valor negativo, não há representação em inteiro positivo");
+                stringOut = baseConversor.outputPositive(baseOut);
+                break;
+        case 1: stringOut = baseConversor.outputSignalMagnitude(baseOut);
+                break;
+    }
 
     ui->lineEditOutputValor->setText(stringOut);
 

@@ -10,14 +10,32 @@ class BaseConversor
 {
 public:
     BaseConversor();
-    BaseConversor& input(QString digits, int base);
     long long unsigned getBits();
-    QString output(int base);
-    QString inputValidation(int baseIn, int baseOut, QString digits);
+    void setBits(long long unsigned input);
+    bool getNegativeSignal();
     int mapInput(char i);
+    long long unsigned getDec(QString digits, int base);
+    long long unsigned getComplement(QString digits, int base);
+
+    // Input functions
+    BaseConversor& inputPositive(QString digits, int base);
+    BaseConversor& inputSignalMagnitude(QString digits, int base);
+    BaseConversor& inputOnesComplement(QString digits, int base);
+    BaseConversor& inputTwosComplement(QString digits, int base);
+    // Output functions
+    QString outputPositive(int base);
+    QString outputSignalMagnitude(int base);
+    QString outputOnesComplement(int base);
+    QString outputTwosComplement(int base);
+    // Validation functions
+    QString inputValidation(int baseIn, int baseOut, QString digits);
+    QString inputValidationSignalMagnitude(int baseIn, int baseOut, QString digits);
+    QString inputValidationOnesComplement(int baseIn, int baseOut, QString digits);
+    QString inputValidationTwosComplement(int baseIn, int baseOut, QString digits);
 
 private:
     long long unsigned bits;
+    bool negativeSignal;
 
 };
 

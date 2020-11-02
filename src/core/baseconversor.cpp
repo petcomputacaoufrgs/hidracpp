@@ -5,14 +5,30 @@ BaseConversor::BaseConversor()
     bits = 0;
 }
 
-int BaseConversor::mapInput(char i){
+long long unsigned BaseConversor::getBits()
+{
+    return bits;
+}
+
+void BaseConversor::setBits(long long unsigned input){
+    bits = input;
+}
+
+bool BaseConversor::getNegativeSignal(){
+    return negativeSignal;
+}
+
+int BaseConversor::mapInput(char i)
+{
     if(i>='0' && i<='9') return i-48;
     else if (i>='a' && i<='z') return i-87;
     else if (i>='A' && i<='Z') return i-55;
     else return -1;
 }
 
-BaseConversor& BaseConversor::input(QString digitsQ, int base)
+
+// Input functions
+long long unsigned BaseConversor::getDec(QString digitsQ, int base)
 {
     long long unsigned current, exp, decimalResult = 0;
     std::string digits = digitsQ.toStdString();
@@ -20,20 +36,113 @@ BaseConversor& BaseConversor::input(QString digitsQ, int base)
     for(int i=digits.size()-1; i>=0; i--){
         current = mapInput(digits[i]);
         exp=digits.size()-i-1;
-        if(current>=0 && current<base)
-            decimalResult += current * pow(base, exp);
-
+        decimalResult += current * pow(base, exp);
      }
+
+    return decimalResult;
+}
+
+long long unsigned BaseConversor::getComplement(QString digitsQ, int base)
+{
+    std::string digits=digitsQ.toStdString();
+    unsigned long long inputValue = getDec(digitsQ, base);
+    unsigned int length = digits.length();
+
+    if(base % 2 == 0){
+        if(mapInput(digits[0]) < base/2)
+        {
+            bits = inputValue;
+            negativeSignal = false;
+        }
+        else
+        {
+            bits = pow(base, length) - 1 - inputValue;
+            negativeSignal  = true;
+        }
+    }
+
+    else
+    {
+        unsigned int i=0;
+        do
+        {
+            if(mapInput(digits[i]) < base/2 || (i == length-1 && mapInput(digits[i]) == base/2))
+            {
+                bits = inputValue;
+                negativeSignal = false;
+                break;
+            }
+            else if(mapInput(digits[i]) > base/2)
+            {
+                bits = pow(base, length) - 1 - inputValue;
+                negativeSignal  = true;
+                break;
+
+            }
+
+
+            i++;
+            if (i == length) break;
+
+
+        }while(1);
+    }
+
+    return bits;
+}
+
+BaseConversor& BaseConversor::inputPositive(QString digitsQ, int base)
+{
+
+    bits = getDec(digitsQ, base);
+    negativeSignal = false;
+    return *this;
+}
+
+BaseConversor& BaseConversor::inputSignalMagnitude(QString digitsQ, int base)
+{
+    long long unsigned current, exp, decimalResult = 0;
+    std::string digits=digitsQ.toStdString();
+
+    for(int i=digits.size()-2; i>=0; i--){
+        current = mapInput(digits[i]);
+        exp=digits.size()-i-1;
+        decimalResult += current * pow(base, exp);
+     }
+
+    if(digits[0] == '1')
+        negativeSignal = true;
+    else
+        negativeSignal = false;
+
     bits = decimalResult;
     return *this;
 }
 
-long long unsigned BaseConversor::getBits()
+
+BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, int base)
 {
-    return bits;
+   bits =getComplement(digitsQ, base);
+   return *this;
 }
 
-QString BaseConversor::output(int base)
+
+
+BaseConversor& BaseConversor::inputTwosComplement(QString digitsQ, int base)
+{
+    bits = getComplement(digitsQ, base);
+    if(negativeSignal == true)
+        bits += 1;
+
+    return *this;
+}
+
+
+
+
+// Output functions
+
+QString BaseConversor::outputPositive(int base)
 {
     std::string outputResult = "";
     char mapOutput[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -46,6 +155,23 @@ QString BaseConversor::output(int base)
 
     return QString::fromStdString(outputResult);
 }
+
+QString BaseConversor::outputSignalMagnitude(int base)
+{
+    QString outputResultQ = outputPositive(base);
+    std::string outputResult = outputResultQ.toStdString();
+
+    if(negativeSignal == true)
+        outputResult.insert(outputResult.begin(), '-');
+    else
+        outputResult.insert(outputResult.begin(), '+');
+
+    return QString::fromStdString(outputResult);
+}
+
+
+
+// Validation functions
 
 QString BaseConversor::inputValidation(int baseIn, int baseOut, QString digits)
 {
@@ -63,4 +189,14 @@ QString BaseConversor::inputValidation(int baseIn, int baseOut, QString digits)
     }
 
     return "";
+}
+
+QString BaseConversor::inputValidationSignalMagnitude(int baseIn, int baseOut, QString digits)
+{
+    QString error = inputValidation(baseIn, baseOut, digits);
+
+    if(digits[0] != '0' && digits[0] != '1')
+        error = "Em sinal magnitude o primeiro digito deve ser 0 ou 1!";
+
+    return error;
 }
