@@ -14,6 +14,7 @@ public:
     void setBits(long long unsigned input);
     bool getNegativeSignal();
     int mapInput(char i);
+    char mapOutput(int i);
     long long unsigned getDec(QString digits, int base);
     long long unsigned getComplement(QString digits, int base);
 

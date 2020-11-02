@@ -48,7 +48,7 @@ void BaseConversorDialog::on_pushButton_clicked()
                 break;
 
         case 3: baseConversor = baseConversor.inputTwosComplement(inputValorStringQ, baseIn);
-            break;
+                break;
     }
 
     switch (outputTypeIndex){
@@ -57,6 +57,10 @@ void BaseConversorDialog::on_pushButton_clicked()
                 stringOut = baseConversor.outputPositive(baseOut);
                 break;
         case 1: stringOut = baseConversor.outputSignalMagnitude(baseOut);
+                break;
+        case 2: stringOut = baseConversor.outputOnesComplement(baseOut);
+                break;
+        case 3: stringOut = baseConversor.outputTwosComplement(baseOut);
                 break;
     }
 
