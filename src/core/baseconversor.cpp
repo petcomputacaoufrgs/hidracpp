@@ -30,7 +30,6 @@ char BaseConversor::mapOutput(int i)
 {
     char map[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     return map[i];
-
 }
 
 
@@ -55,46 +54,41 @@ long long unsigned BaseConversor::getComplement(QString digitsQ, int base)
     unsigned long long inputValue = getDec(digitsQ, base);
     unsigned int length = digits.length();
 
-    if(base % 2 == 0){
-        if(mapInput(digits[0]) < base/2)
-        {
+    // Case the base is even
+    if(base % 2 == 0) {
+        // Check the first digit
+        if(mapInput(digits[0]) < base/2){
             bits = inputValue;
             negativeSignal = false;
         }
-        else
-        {
+        else {
             bits = pow(base, length) - 1 - inputValue;
             negativeSignal  = true;
         }
     }
 
-    else
-    {
+    // Case the base is odd, check each digit until find one that's is greater
+    // or less than the base/2
+    else {
         unsigned int i=0;
-        do
-        {
-            if(mapInput(digits[i]) < base/2 || (i == length-1 && mapInput(digits[i]) == base/2))
-            {
+        do{
+            if(mapInput(digits[i]) < base/2 ||
+                    (i == length-1 && mapInput(digits[i]) == base/2)){
                 bits = inputValue;
                 negativeSignal = false;
                 break;
             }
-            else if(mapInput(digits[i]) > base/2)
-            {
+            else if(mapInput(digits[i]) > base/2){
                 bits = pow(base, length) - 1 - inputValue;
                 negativeSignal  = true;
                 break;
-
             }
-
 
             i++;
             if (i == length) break;
 
-
         }while(1);
     }
-
     return bits;
 }
 
@@ -132,7 +126,6 @@ BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, int base)
    bits =getComplement(digitsQ, base);
    return *this;
 }
-
 
 
 BaseConversor& BaseConversor::inputTwosComplement(QString digitsQ, int base)
@@ -179,9 +172,12 @@ QString BaseConversor::outputOnesComplement(int base)
 {
     QString stringValue = outputPositive(base);
     if(negativeSignal == true) {
-        unsigned long long maxValue = pow(base, stringValue.length());
+        unsigned long long maxValue = pow(base, stringValue.length()+1);
         bits = maxValue - 1 - bits;
         stringValue = outputPositive(base);
+    }
+    else{
+        stringValue.insert(0, "0");
     }
     return stringValue;
 }
@@ -191,9 +187,12 @@ QString BaseConversor::outputTwosComplement(int base)
 {
     QString stringValue = outputPositive(base);
     if(negativeSignal == true) {
-        unsigned long long maxValue = pow(base, stringValue.length());
+        unsigned long long maxValue = pow(base, stringValue.length()+1);
         bits = maxValue - bits;
         stringValue = outputPositive(base);
+    }
+    else {
+        stringValue.insert(0, "0");
     }
     return stringValue;
 }
