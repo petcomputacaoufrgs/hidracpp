@@ -18,6 +18,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    a.setOrganizationName("PET Computação UFRGS");
+    a.setApplicationName("Hidra");
+
     HidraGui w;
 
     if (argc == 2)

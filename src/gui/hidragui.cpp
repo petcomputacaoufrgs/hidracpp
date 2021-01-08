@@ -166,6 +166,21 @@ void HidraGui::scrollToCurrentLine()
     }
 }
 
+void HidraGui::loadConfFile()
+{
+    showHexValues  = settings.value("showHexValues", false).toBool();
+    showSignedData = settings.value("showSignedData", false).toBool();
+    showCharacters = settings.value("showCharacters", false).toBool();
+    fastExecute    = settings.value("fastExecute", false).toBool();
+    followPC       = settings.value("followPC", true).toBool();
+
+    ui->actionHexadecimalMode->setChecked(showHexValues);
+    ui->actionSignedMode->setChecked(showSignedData);
+    ui->actionShowCharacters->setChecked(showCharacters);
+    ui->actionFastExecuteMode->setChecked(fastExecute);
+    ui->actionFollowPCMode->setChecked(followPC);
+}
+
 
 
 //////////////////////////////////////////////////
@@ -181,6 +196,7 @@ void HidraGui::initializeMachineInterfaceComponents()
     initializeHighlighter();
     initializeInstructionsList();
     initializeAddressingModesList();
+    loadConfFile();
 }
 
 void HidraGui::initializeMemoryTable()
@@ -1304,6 +1320,8 @@ void HidraGui::on_actionSetBreakpoint_triggered()
 
 void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 {
+    settings.setValue("showHexValues", checked);
+
     showHexValues = checked;
 
     if (checked)
@@ -1318,6 +1336,8 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 
 void HidraGui::on_actionSignedMode_toggled(bool checked)
 {
+    settings.setValue("showSignedData", checked);
+
     showSignedData = checked;
 
     if (checked)
@@ -1332,6 +1352,8 @@ void HidraGui::on_actionSignedMode_toggled(bool checked)
 
 void HidraGui::on_actionShowCharacters_toggled(bool checked)
 {
+    settings.setValue("showCharacters", checked);
+
     showCharacters = checked;
 
     ui->tableViewMemoryData->setColumnHidden(ColumnCharacter, !showCharacters);
@@ -1340,11 +1362,15 @@ void HidraGui::on_actionShowCharacters_toggled(bool checked)
 
 void HidraGui::on_actionFastExecuteMode_toggled(bool checked)
 {
+    settings.setValue("fastExecute", checked);
+
     fastExecute = checked;
 }
 
 void HidraGui::on_actionFollowPCMode_toggled(bool checked)
 {
+    settings.setValue("followPC", checked);
+
     followPC = checked;
 }
 
