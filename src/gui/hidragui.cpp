@@ -817,12 +817,19 @@ void HidraGui::saveAs()
     else if (currentMachineName == "Volta")
         extension = "Fonte do Volta (*.vod)";
 
+    QString saveDir = settings.value("saveDir", "").toString();
+
     QString filename = QFileDialog::getSaveFileName(this,
-                                                   "Salvar código-fonte", "",
+                                                   "Salvar código-fonte", saveDir,
                                                    extension);
 
-    if (!filename.isEmpty())
+    if (!filename.isEmpty()){
+        // Setting dir of save in config file
+        saveDir = filename.left(filename.lastIndexOf(QChar('/')));
+        settings.setValue("saveDir", saveDir);
+
         save(filename); // Resets fileModified to false if successful
+    }
 }
 
 void HidraGui::saveChangesDialog(bool &cancelled, bool *answeredNo = nullptr)
@@ -1099,7 +1106,7 @@ void HidraGui::on_actionOpen_triggered()
     QString allExtensions = "Fontes do Hidra (*.ned *.ahd *.rad *.cro *.qpd *.ptd *.prd *.red *.vod)";
     QString filename;
 
-    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", "", allExtensions);
+    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", settings.value("saveDir", "").toString(), allExtensions);
 
     if (!filename.isEmpty())
     {
