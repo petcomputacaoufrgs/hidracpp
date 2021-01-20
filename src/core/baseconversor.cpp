@@ -34,6 +34,7 @@ char BaseConversor::mapOutput(int i)
 
 
 // Input functions
+
 long long unsigned BaseConversor::getDec(QString digitsQ, int base)
 {
     long long unsigned current, exp, decimalResult = 0;
@@ -54,9 +55,8 @@ long long unsigned BaseConversor::getComplement(QString digitsQ, int base)
     unsigned long long inputValue = getDec(digitsQ, base);
     unsigned int length = digits.length();
 
-    // Case the base is even
+    // Case the base is even just check msb
     if(base % 2 == 0) {
-        // Check the first digit
         if(mapInput(digits[0]) < base/2){
             bits = inputValue;
             negativeSignal = false;
@@ -67,8 +67,8 @@ long long unsigned BaseConversor::getComplement(QString digitsQ, int base)
         }
     }
 
-    // Case the base is odd, check each digit until find one that's is greater
-    // or less than the base/2
+    // Case the base is odd, check each digit starting from the msb
+    // until find one that's is greater or less than base/2
     else {
         unsigned int i=0;
         do{
@@ -94,7 +94,6 @@ long long unsigned BaseConversor::getComplement(QString digitsQ, int base)
 
 BaseConversor& BaseConversor::inputPositive(QString digitsQ, int base)
 {
-
     bits = getDec(digitsQ, base);
     negativeSignal = false;
     return *this;
@@ -117,6 +116,7 @@ BaseConversor& BaseConversor::inputSignalMagnitude(QString digitsQ, int base)
         negativeSignal = false;
 
     bits = decimalResult;
+    signalMagnitude = true;
     return *this;
 }
 
@@ -172,7 +172,9 @@ QString BaseConversor::outputOnesComplement(int base)
 {
     QString stringValue = outputPositive(base);
     if(negativeSignal == true) {
-        unsigned long long maxValue = pow(base, stringValue.length()+1);
+        unsigned long long maxValue = pow(base, stringValue.length());
+        //if(signalMagnitude != false)
+          //  maxValue += base;
         bits = maxValue - 1 - bits;
         stringValue = outputPositive(base);
     }
@@ -187,7 +189,7 @@ QString BaseConversor::outputTwosComplement(int base)
 {
     QString stringValue = outputPositive(base);
     if(negativeSignal == true) {
-        unsigned long long maxValue = pow(base, stringValue.length()+1);
+        unsigned long long maxValue = pow(base, stringValue.length());
         bits = maxValue - bits;
         stringValue = outputPositive(base);
     }
@@ -225,7 +227,9 @@ QString BaseConversor::inputValidationSignalMagnitude(int baseIn, int baseOut, Q
     QString error = inputValidation(baseIn, baseOut, digits);
 
     if(digits[0] != '1' && digits[0] != '0')
-        error = "Em sinal magnitude o primeiro digito deve ser + ou -";
+        error = "Em sinal magnitude o primeiro digito deve ser 0(+) ou 1(-)";
+    else if(digits.length() < 2)
+        error = "É necessário ter no mínimo dois dígitos (um para o sinal)";
 
     return error;
 }

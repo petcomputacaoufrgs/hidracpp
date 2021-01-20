@@ -37,6 +37,7 @@ public:
 private:
     long long unsigned bits;
     bool negativeSignal;
+    bool signalMagnitude=false;
 
 };
 
