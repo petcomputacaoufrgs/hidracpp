@@ -11,6 +11,8 @@
 
 class LineNumberArea;
 
+class FindReplaceDialog;
+
 class HidraCodeEditor : public QPlainTextEdit
 {
     Q_OBJECT
@@ -26,11 +28,11 @@ public:
     void clearBreakpoint();
     void disableLineHighlight();
     void setCurrentLine(int line);
+    void bindFindReplaceDialog(FindReplaceDialog *dialog);
+    void unbindFindReplaceDialog();
 
     void wheelEvent(QWheelEvent *e);
     virtual void clear();
-
-public slots:
 
 protected:
     void resizeEvent(QResizeEvent *event);
@@ -43,6 +45,7 @@ private slots:
 private:
     QWidget *lineNumberArea;
     QTextBlock breakpointBlock;
+    FindReplaceDialog *findReplaceDialog;
 };
 
 

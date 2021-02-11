@@ -18,17 +18,18 @@ public:
 
     void clearState();
 
+public slots:
+    void onSelectionChange();
+
 private slots:
     void on_cancelButton_clicked();
-
     void on_findButton_clicked();
-
     void on_replaceButton_clicked();
-
     void on_replaceAllButton_clicked();
 
 protected:
-     virtual void closeEvent(QCloseEvent *evt);
+    virtual void closeEvent(QCloseEvent *evt);
+    virtual void showEvent(QShowEvent *evt);
 
 private:
     Ui::FindReplaceDialog *ui;

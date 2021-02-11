@@ -22,6 +22,11 @@ void FindReplaceDialog::clearState()
     ui->replaceTextEdit->clear();
 }
 
+void FindReplaceDialog::onSelectionChange()
+{
+    selected = false;
+}
+
 void FindReplaceDialog::find()
 {
     if (editor->find(ui->findTextEdit->toPlainText())) {
@@ -41,6 +46,7 @@ bool FindReplaceDialog::replace()
     if (selected) {
         editor->insertPlainText(ui->replaceTextEdit->toPlainText());
         selected = false;
+        this->find();
         return true;
     } else {
         return false;
@@ -51,11 +57,18 @@ void FindReplaceDialog::closeEvent(QCloseEvent *evt)
 {
     QDialog::closeEvent(evt);
     this->clearState();
+    editor->unbindFindReplaceDialog();
+}
+
+void FindReplaceDialog::showEvent(QShowEvent *evt)
+{
+    QDialog::showEvent(evt);
+    editor->bindFindReplaceDialog(this);
 }
 
 void FindReplaceDialog::on_findButton_clicked()
 {
-    find();
+    this->find();
 }
 
 void FindReplaceDialog::on_cancelButton_clicked()
@@ -65,7 +78,7 @@ void FindReplaceDialog::on_cancelButton_clicked()
 
 void FindReplaceDialog::on_replaceButton_clicked()
 {
-    editor->insertPlainText(ui->replaceTextEdit->toPlainText());
+    this->replace();
 }
 
 void FindReplaceDialog::on_replaceAllButton_clicked()
