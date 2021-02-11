@@ -38,6 +38,7 @@ HidraGui::HidraGui(QWidget *parent) :
 
     codeEditor  = new HidraCodeEditor();
     highlighter = new HidraHighlighter(codeEditor->document());
+    findReplaceDialog = new FindReplaceDialog(codeEditor);
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
     connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
     about = new About();
@@ -95,6 +96,7 @@ HidraGui::~HidraGui()
 {
     delete about;
     delete ui;
+    delete findReplaceDialog;
 }
 
 
@@ -1434,4 +1436,9 @@ void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
 
     if (addressCorrespondingSourceLine != -1)
         codeEditor->setCurrentLine(addressCorrespondingSourceLine);
+}
+
+void HidraGui::on_actionFindReplace_triggered()
+{
+    findReplaceDialog->show();
 }
