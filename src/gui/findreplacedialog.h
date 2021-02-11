@@ -16,6 +16,8 @@ public:
     explicit FindReplaceDialog(HidraCodeEditor *editor, QWidget *parent = nullptr);
     ~FindReplaceDialog();
 
+    void clearState();
+
 private slots:
     void on_cancelButton_clicked();
 
@@ -23,9 +25,18 @@ private slots:
 
     void on_replaceButton_clicked();
 
+    void on_replaceAllButton_clicked();
+
+protected:
+     virtual void closeEvent(QCloseEvent *evt);
+
 private:
     Ui::FindReplaceDialog *ui;
     HidraCodeEditor *editor;
+    bool selected;
+
+    void find();
+    bool replace();
 };
 
 #endif // FINDREPLACEDIALOG_H
