@@ -36,8 +36,11 @@ private:
     HidraCodeEditor *editor;
     bool selected;
 
+    int replaceSizeDiff();
+
     void find();
-    bool replace();
+    void replace();
+    void replaceAll();
 };
 
 #endif // FINDREPLACEDIALOG_H
