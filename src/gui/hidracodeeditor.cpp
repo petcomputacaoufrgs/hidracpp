@@ -170,8 +170,10 @@ void HidraCodeEditor::setCurrentLine(int line)
 
 void HidraCodeEditor::bindFindReplaceDialog(FindReplaceDialog *dialog)
 {
+    this->unbindFindReplaceDialog();
     findReplaceDialog = dialog;
-    if (findReplaceDialog != nullptr) {
+
+    if (dialog != nullptr) {
         connect(this,
                 &HidraCodeEditor::selectionChanged,
                 findReplaceDialog,
