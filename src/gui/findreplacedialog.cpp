@@ -8,6 +8,9 @@ FindReplaceDialog::FindReplaceDialog(HidraCodeEditor *editor, QWidget *parent) :
     ui->setupUi(this);
     this->editor = editor;
     selected = false;
+    current = 0;
+    foundCount = 0;
+    changingCount = 0;
 }
 
 FindReplaceDialog::~FindReplaceDialog()
@@ -24,7 +27,44 @@ void FindReplaceDialog::clearState()
 
 void FindReplaceDialog::onSelectionChange()
 {
-    selected = false;
+    if (changingCount == 0) {
+        selected = false;
+        this->updateCounters();
+    }
+}
+
+void FindReplaceDialog::updateCounters()
+{
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
+
+    QTextCursor cursor = editor->textCursor();
+    int originalPos = cursor.selectionStart();
+    int originalLength = cursor.selectionEnd() - originalPos;
+
+    cursor.setPosition(0, QTextCursor::MoveAnchor);
+    editor->setTextCursor(cursor);
+
+    QString findText = ui->findTextEdit->toPlainText();
+
+    foundCount = 0;
+    current = 0;
+
+    while (editor->find(findText)) {
+        foundCount++;
+        cursor = editor->textCursor();
+
+        if (cursor.selectionStart() <= originalPos) {
+            current++;
+        }
+    }
+
+    cursor.setPosition(originalPos, QTextCursor::MoveAnchor);
+    cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, originalLength);
+    editor->setTextCursor(cursor);
+
+    ui->labelCurrent->setText(QString::number(current));
+    ui->labelFound->setText(QString::number(foundCount));
 }
 
 int FindReplaceDialog::replaceSizeDiff()
@@ -34,16 +74,23 @@ int FindReplaceDialog::replaceSizeDiff()
 
 void FindReplaceDialog::find()
 {
-    if (editor->find(ui->findTextEdit->toPlainText())) {
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
+
+    QString findText = ui->findTextEdit->toPlainText();
+    if (editor->find(findText)) {
         selected = true;
     } else {
         editor->moveCursor(QTextCursor::Start);
-        selected = editor->find(ui->findTextEdit->toPlainText());
+        selected = editor->find(findText);
     }
 }
 
 void FindReplaceDialog::replace()
 {
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
+
     if (!selected) {
         this->find();
     }
@@ -57,82 +104,34 @@ void FindReplaceDialog::replace()
 
 void FindReplaceDialog::replaceAll()
 {
-    /*
-     * Difference between sizes of replace text and find text, required to
-     * recompute positions when a substitution happens.
-     */
-    int sizeDiff = this->replaceSizeDiff();
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
 
-    /* Position where we started. */
     QTextCursor cursor = editor->textCursor();
     int originalPos = cursor.selectionStart();
 
-    /* Selects something if not selected. */
-    if (!selected) {
-        this->find();
-    }
+    cursor.setPosition(0, QTextCursor::MoveAnchor);
+    editor->setTextCursor(cursor);
 
-    /* Start and end of the first selection. */
-    cursor = editor->textCursor();
-    int lastPosStart = cursor.selectionStart();
-    int lastPosEnd = cursor.selectionEnd();
+    QString findText = ui->findTextEdit->toPlainText();
+    QString replaceText = ui->replaceTextEdit->toPlainText();
 
-    /* We need to keep track if the selection is reaching original position. */
-    bool inBounds = true;
+    int sizeDiff = replaceText.length() - findText.length();
 
-    while (selected && inBounds) {
-        /*
-         * Adjust original position due to replace below.
-         *
-         * It is ok to perform this if no selection is found after the
-         * replacement. We can compute inBounds below, and even if it is
-         * true, the object's selected attribute will be false next iteration,
-         * and all we do until then is to compute inBounds.
-         */
-        if (originalPos > lastPosStart) {
-            originalPos += sizeDiff;
-        }
-
-        /*
-         * Required since we are replacing text in position given by lastPos.
-         */
-        lastPosEnd += sizeDiff;
-
-        this->replace();
-
-        /* Position of the selection AFTER the replacement above. */
+    while (editor->find(findText)) {
         cursor = editor->textCursor();
-        int currPosStart = cursor.selectionStart();
-        int currPosEnd = cursor.selectionEnd();
 
-        /* We assume it is false by default. */
-        inBounds = false;
-
-        /* Only true if one of the following conditions hold. */
-        if (currPosStart > lastPosStart && lastPosStart >= originalPos) {
-            inBounds = true;
-        } else if (lastPosStart >= originalPos && originalPos > currPosStart) {
-            inBounds = true;
-        } else if (originalPos > currPosStart && currPosStart > lastPosStart) {
-            inBounds = true;
+        if (cursor.selectionEnd() <= originalPos) {
+            originalPos += sizeDiff;
+        } else if (cursor.selectionStart() <= originalPos) {
+            originalPos = cursor.selectionStart();
         }
 
-        /*
-         * inBounds will only be true if one of the conditions above happens,
-         * and if any of the ones below is true, inBounds will be false again.
-         */
-        if (currPosEnd > originalPos && originalPos > currPosStart) {
-            inBounds = false;
-        } else if (currPosEnd > lastPosEnd && lastPosEnd > currPosStart) {
-            inBounds = false;
-        } else if (currPosEnd > lastPosStart && lastPosStart > currPosStart) {
-            inBounds = false;
-        }
-
-        /* Now the last selection is the current one. */
-        lastPosStart = currPosStart;
-        lastPosEnd = currPosEnd;
+        editor->insertPlainText(replaceText);
     }
+
+    cursor.setPosition(originalPos, QTextCursor::MoveAnchor);
+    editor->setTextCursor(cursor);
 }
 
 void FindReplaceDialog::closeEvent(QCloseEvent *evt)
@@ -146,11 +145,13 @@ void FindReplaceDialog::showEvent(QShowEvent *evt)
 {
     QDialog::showEvent(evt);
     editor->bindFindReplaceDialog(this);
+    this->updateCounters();
 }
 
 void FindReplaceDialog::on_findButton_clicked()
 {
     this->find();
+    this->updateCounters();
 }
 
 void FindReplaceDialog::on_cancelButton_clicked()
@@ -161,9 +162,28 @@ void FindReplaceDialog::on_cancelButton_clicked()
 void FindReplaceDialog::on_replaceButton_clicked()
 {
     this->replace();
+    this->updateCounters();
 }
 
 void FindReplaceDialog::on_replaceAllButton_clicked()
 {
     this->replaceAll();
+    this->updateCounters();
+}
+
+
+FindReplaceDialog::ChangingGuard FindReplaceDialog::changingGuard()
+{
+    return FindReplaceDialog::ChangingGuard(changingCount);
+}
+
+FindReplaceDialog::ChangingGuard::ChangingGuard(int &count) :
+    count(count)
+{
+    this->count++;
+}
+
+FindReplaceDialog::ChangingGuard::~ChangingGuard()
+{
+    this->count--;
 }
