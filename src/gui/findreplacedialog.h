@@ -26,6 +26,7 @@ private slots:
     void on_findButton_clicked();
     void on_replaceButton_clicked();
     void on_replaceAllButton_clicked();
+    void on_replaceSelected_clicked();
 
 protected:
     virtual void closeEvent(QCloseEvent *evt);
@@ -46,6 +47,7 @@ private:
     void find();
     void replace();
     void replaceAll();
+    void replaceSelection();
 
     QTextDocument::FindFlags findFlags();
 

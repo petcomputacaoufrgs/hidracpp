@@ -1,5 +1,6 @@
 #include "findreplacedialog.h"
 #include "ui_findreplacedialog.h"
+#include <iostream>
 
 FindReplaceDialog::FindReplaceDialog(HidraCodeEditor *editor, QWidget *parent) :
     QDialog(parent),
@@ -140,6 +141,38 @@ void FindReplaceDialog::replaceAll()
     editor->setTextCursor(cursor);
 }
 
+void FindReplaceDialog::replaceSelection()
+{
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
+
+    QTextCursor cursor = editor->textCursor();
+    int selectionStart = cursor.selectionStart();
+    int selectionEnd = cursor.selectionEnd();
+
+    cursor.setPosition(selectionStart, QTextCursor::MoveAnchor);
+    editor->setTextCursor(cursor);
+
+    QTextDocument::FindFlags flags = this->findFlags();
+    QString findText = ui->findTextEdit->toPlainText();
+    QString replaceText = ui->replaceTextEdit->toPlainText();
+
+    int sizeDiff = replaceText.length() - findText.length();
+    bool insideSelection = true;
+
+    while (editor->find(findText, flags) && insideSelection) {
+        cursor = editor->textCursor();
+        insideSelection = cursor.selectionEnd() <= selectionEnd;
+        if (insideSelection) {
+            editor->insertPlainText(replaceText);
+            selectionEnd += sizeDiff;
+        }
+    }
+
+    cursor.setPosition(selectionStart, QTextCursor::MoveAnchor);
+    editor->setTextCursor(cursor);
+}
+
 QTextDocument::FindFlags FindReplaceDialog::findFlags()
 {
     QTextDocument::FindFlags flags;
@@ -188,7 +221,6 @@ void FindReplaceDialog::on_replaceAllButton_clicked()
     this->updateCounters();
 }
 
-
 FindReplaceDialog::ChangingGuard FindReplaceDialog::changingGuard()
 {
     return FindReplaceDialog::ChangingGuard(changingCount);
@@ -203,4 +235,10 @@ FindReplaceDialog::ChangingGuard::ChangingGuard(int &count) :
 FindReplaceDialog::ChangingGuard::~ChangingGuard()
 {
     this->count--;
+}
+
+void FindReplaceDialog::on_replaceSelected_clicked()
+{
+    this->replaceSelection();
+    this->updateCounters();
 }
