@@ -47,6 +47,8 @@ private:
     void replace();
     void replaceAll();
 
+    QTextDocument::FindFlags findFlags();
+
     /*
      * This is a RAII guard, in order to prevent the onSelectionChange method
      * from performing its actions when the FindReplaceDialog itself is changing

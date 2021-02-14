@@ -23,6 +23,8 @@ void FindReplaceDialog::clearState()
     selected = false;
     ui->findTextEdit->clear();
     ui->replaceTextEdit->clear();
+    ui->caseCheckBox->setChecked(false);
+    ui->regexCheckBox->setChecked(false);
 }
 
 void FindReplaceDialog::onSelectionChange()
@@ -45,12 +47,13 @@ void FindReplaceDialog::updateCounters()
     cursor.setPosition(0, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
+    QTextDocument::FindFlags flags = this->findFlags();
     QString findText = ui->findTextEdit->toPlainText();
 
     foundCount = 0;
     current = 0;
 
-    while (editor->find(findText)) {
+    while (editor->find(findText, flags)) {
         foundCount++;
         cursor = editor->textCursor();
 
@@ -77,12 +80,14 @@ void FindReplaceDialog::find()
     /* RAII guard */
     ChangingGuard guard = this->changingGuard();
 
+    QTextDocument::FindFlags flags = this->findFlags();
     QString findText = ui->findTextEdit->toPlainText();
-    if (editor->find(findText)) {
+
+    if (editor->find(findText, flags)) {
         selected = true;
     } else {
         editor->moveCursor(QTextCursor::Start);
-        selected = editor->find(findText);
+        selected = editor->find(findText, flags);
     }
 }
 
@@ -113,12 +118,13 @@ void FindReplaceDialog::replaceAll()
     cursor.setPosition(0, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
+    QTextDocument::FindFlags flags = this->findFlags();
     QString findText = ui->findTextEdit->toPlainText();
     QString replaceText = ui->replaceTextEdit->toPlainText();
 
     int sizeDiff = replaceText.length() - findText.length();
 
-    while (editor->find(findText)) {
+    while (editor->find(findText, flags)) {
         cursor = editor->textCursor();
 
         if (cursor.selectionEnd() <= originalPos) {
@@ -132,6 +138,17 @@ void FindReplaceDialog::replaceAll()
 
     cursor.setPosition(originalPos, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
+}
+
+QTextDocument::FindFlags FindReplaceDialog::findFlags()
+{
+    QTextDocument::FindFlags flags;
+
+    if (ui->caseCheckBox->isChecked()) {
+        flags.setFlag(QTextDocument::FindCaseSensitively);
+    }
+
+    return flags;
 }
 
 void FindReplaceDialog::closeEvent(QCloseEvent *evt)
