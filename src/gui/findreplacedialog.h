@@ -42,7 +42,8 @@ private:
 
     void updateCounters();
 
-    int replaceSizeDiff();
+    bool findRaw();
+    int replaceRaw();
 
     void find();
     void replace();

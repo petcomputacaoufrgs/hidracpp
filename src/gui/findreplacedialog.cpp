@@ -48,13 +48,10 @@ void FindReplaceDialog::updateCounters()
     cursor.setPosition(0, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
-    QTextDocument::FindFlags flags = this->findFlags();
-    QString findText = ui->findTextEdit->toPlainText();
-
     foundCount = 0;
     current = 0;
 
-    while (editor->find(findText, flags)) {
+    while (this->findRaw()) {
         foundCount++;
         cursor = editor->textCursor();
 
@@ -71,9 +68,75 @@ void FindReplaceDialog::updateCounters()
     ui->labelFound->setText(QString::number(foundCount));
 }
 
-int FindReplaceDialog::replaceSizeDiff()
+bool FindReplaceDialog::findRaw()
 {
-    return ui->replaceTextEdit->toPlainText().length() - ui->findTextEdit->toPlainText().length();
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
+
+    if (ui->regexCheckBox->isChecked()) {
+        QRegularExpression findRegex(ui->findTextEdit->toPlainText());
+        selected = editor->find(findRegex, this->findFlags());
+    } else {
+        QString findText(ui->findTextEdit->toPlainText());
+        selected = editor->find(findText, this->findFlags());
+    }
+
+    return selected;
+}
+
+int FindReplaceDialog::replaceRaw()
+{
+    /* RAII guard */
+    ChangingGuard guard = this->changingGuard();
+
+    int diff = 0;
+
+    if (ui->regexCheckBox->isChecked()) {
+        QRegularExpression findRegex(ui->findTextEdit->toPlainText());
+        QString selection(editor->textCursor().selectedText());
+        QStringList matches(findRegex.match(selection).capturedTexts());
+        QString replaceExpr(ui->replaceTextEdit->toPlainText());
+
+        QStringList pieces(replaceExpr.split('$'));
+        QString replaceText(pieces[0]);
+
+        for (int i = 1; i < pieces.length(); i++) {
+            int cut = 0;
+            int group = 0;
+            bool inBounds = true;
+            bool hasGroup = false;
+
+            while (cut < pieces[i].length() && pieces[i][cut].isDigit() && inBounds) {
+                int newGroup = group * 10 + pieces[i][cut].digitValue();
+                inBounds = newGroup < matches.length();
+                if (inBounds) {
+                    group = newGroup;
+                    hasGroup = true;
+                    cut++;
+                }
+            }
+
+            if (pieces[i].length() == 0) {
+                replaceText += '$';
+            } else {
+                if (hasGroup) {
+                    replaceText += matches[group];
+                }
+                replaceText += pieces[i].rightRef(pieces[i].length() - cut);
+            }
+        }
+
+        editor->insertPlainText(replaceText);
+        diff = replaceText.length() - selection.length();
+    } else {
+        QString findText(ui->findTextEdit->toPlainText());
+        QString replaceText(ui->replaceTextEdit->toPlainText());
+        editor->insertPlainText(replaceText);
+        diff = replaceText.length() - findText.length();
+    }
+
+    selected = false;
+    return diff;
 }
 
 void FindReplaceDialog::find()
@@ -81,14 +144,9 @@ void FindReplaceDialog::find()
     /* RAII guard */
     ChangingGuard guard = this->changingGuard();
 
-    QTextDocument::FindFlags flags = this->findFlags();
-    QString findText = ui->findTextEdit->toPlainText();
-
-    if (editor->find(findText, flags)) {
-        selected = true;
-    } else {
+    if (!this->findRaw()) {
         editor->moveCursor(QTextCursor::Start);
-        selected = editor->find(findText, flags);
+        this->findRaw();
     }
 }
 
@@ -102,8 +160,7 @@ void FindReplaceDialog::replace()
     }
 
     if (selected) {
-        editor->insertPlainText(ui->replaceTextEdit->toPlainText());
-        selected = false;
+        this->replaceRaw();
         this->find();
     }
 }
@@ -119,22 +176,16 @@ void FindReplaceDialog::replaceAll()
     cursor.setPosition(0, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
-    QTextDocument::FindFlags flags = this->findFlags();
-    QString findText = ui->findTextEdit->toPlainText();
-    QString replaceText = ui->replaceTextEdit->toPlainText();
-
-    int sizeDiff = replaceText.length() - findText.length();
-
-    while (editor->find(findText, flags)) {
+    while (this->findRaw()) {
         cursor = editor->textCursor();
+
+        int sizeDiff = this->replaceRaw();
 
         if (cursor.selectionEnd() <= originalPos) {
             originalPos += sizeDiff;
         } else if (cursor.selectionStart() <= originalPos) {
             originalPos = cursor.selectionStart();
         }
-
-        editor->insertPlainText(replaceText);
     }
 
     cursor.setPosition(originalPos, QTextCursor::MoveAnchor);
@@ -153,18 +204,14 @@ void FindReplaceDialog::replaceSelection()
     cursor.setPosition(selectionStart, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
-    QTextDocument::FindFlags flags = this->findFlags();
-    QString findText = ui->findTextEdit->toPlainText();
-    QString replaceText = ui->replaceTextEdit->toPlainText();
-
-    int sizeDiff = replaceText.length() - findText.length();
     bool insideSelection = true;
 
-    while (editor->find(findText, flags) && insideSelection) {
+    while (this->findRaw() && insideSelection) {
         cursor = editor->textCursor();
         insideSelection = cursor.selectionEnd() <= selectionEnd;
+
         if (insideSelection) {
-            editor->insertPlainText(replaceText);
+            int sizeDiff = this->replaceRaw();
             selectionEnd += sizeDiff;
         }
     }
