@@ -1,6 +1,5 @@
 #include "findreplacedialog.h"
 #include "ui_findreplacedialog.h"
-#include <iostream>
 
 FindReplaceDialog::FindReplaceDialog(HidraCodeEditor *editor, QWidget *parent) :
     QDialog(parent),
@@ -41,6 +40,8 @@ void FindReplaceDialog::updateCounters()
     /* RAII guard */
     ChangingGuard guard = this->changingGuard();
 
+    bool prevSelected = selected;
+
     QTextCursor cursor = editor->textCursor();
     int originalPos = cursor.selectionStart();
     int originalLength = cursor.selectionEnd() - originalPos;
@@ -66,6 +67,8 @@ void FindReplaceDialog::updateCounters()
 
     ui->labelCurrent->setText(QString::number(current));
     ui->labelFound->setText(QString::number(foundCount));
+
+    selected = prevSelected;
 }
 
 bool FindReplaceDialog::findRaw()
