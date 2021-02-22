@@ -53,6 +53,16 @@ private:
     QTextDocument::FindFlags findFlags();
 
     /*
+     * Adds a piece of regex replace command. Pieces must have been split where
+     * a '$' would occur. This means that in the original string, the piece was
+     * preceeded by '$'. It transforms things (in the original string) like '$1'
+     * into the text captured by the first group of the regex.
+     *
+     * This function exists solely to make replaceRaw() not so big.
+     */
+    void appendRegexPiece(QString &replaceText, QString const &piece, QStringList const &matches);
+
+    /*
      * This is a RAII guard, in order to prevent the onSelectionChange method
      * from performing its actions when the FindReplaceDialog itself is changing
      * the editor.

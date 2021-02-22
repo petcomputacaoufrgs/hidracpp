@@ -104,29 +104,7 @@ int FindReplaceDialog::replaceRaw()
         QString replaceText(pieces[0]);
 
         for (int i = 1; i < pieces.length(); i++) {
-            int cut = 0;
-            int group = 0;
-            bool inBounds = true;
-            bool hasGroup = false;
-
-            while (cut < pieces[i].length() && pieces[i][cut].isDigit() && inBounds) {
-                int newGroup = group * 10 + pieces[i][cut].digitValue();
-                inBounds = newGroup < matches.length();
-                if (inBounds) {
-                    group = newGroup;
-                    hasGroup = true;
-                    cut++;
-                }
-            }
-
-            if (pieces[i].length() == 0) {
-                replaceText += '$';
-            } else {
-                if (hasGroup) {
-                    replaceText += matches[group];
-                }
-                replaceText += pieces[i].rightRef(pieces[i].length() - cut);
-            }
+            this->appendRegexPiece(replaceText, pieces[i], matches);
         }
 
         editor->insertPlainText(replaceText);
@@ -140,6 +118,33 @@ int FindReplaceDialog::replaceRaw()
 
     selected = false;
     return diff;
+}
+
+void FindReplaceDialog::appendRegexPiece(QString &replaceText, QString const &piece, QStringList const &matches)
+{
+    if (piece.length() == 0) {
+        replaceText += '$';
+    } else {
+        int cut = 0;
+        int group = 0;
+        bool inBounds = true;
+        bool hasGroup = false;
+
+        while (cut < piece.length() && piece[cut].isDigit() && inBounds) {
+            int newGroup = group * 10 + piece[cut].digitValue();
+            inBounds = newGroup < matches.length();
+            if (inBounds) {
+                group = newGroup;
+                hasGroup = true;
+                cut++;
+            }
+        }
+
+        if (hasGroup) {
+            replaceText += matches[group];
+        }
+        replaceText += piece.rightRef(piece.length() - cut);
+    }
 }
 
 void FindReplaceDialog::find()
