@@ -555,7 +555,13 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
         if (!isValidOrg(argumentList.first()))
             throw invalidAddress;
 
-        PC->setValue(argumentList.first().toInt(0));
+        if (arguments[0] == 'h' || arguments[0] == 'H'){
+            bool ok = true;
+            arguments[0] = '0';
+            int end = arguments.toInt(&ok, 16);
+            PC->setValue(end);
+        } else
+            PC->setValue(argumentList.first().toInt(0));
     }
     else if (QRegExp("db|dw|dab|daw").exactMatch(mnemonic))
     {
