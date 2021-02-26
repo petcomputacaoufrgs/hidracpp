@@ -41,6 +41,7 @@ private:
     int foundCount;
 
     void updateCounters();
+    void clearCounters();
 
     bool findRaw();
     int replaceRaw();

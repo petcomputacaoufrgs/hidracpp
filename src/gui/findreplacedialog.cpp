@@ -31,8 +31,17 @@ void FindReplaceDialog::onSelectionChange()
 {
     if (changingCount == 0) {
         selected = false;
-        this->updateCounters();
+        this->clearCounters();
     }
+}
+
+void FindReplaceDialog::clearCounters()
+{
+    foundCount = 0;
+    current = 0;
+
+    ui->labelCurrent->setText(QString::number(current));
+    ui->labelFound->setText(QString::number(foundCount));
 }
 
 void FindReplaceDialog::updateCounters()
@@ -250,7 +259,7 @@ void FindReplaceDialog::showEvent(QShowEvent *evt)
 {
     QDialog::showEvent(evt);
     editor->bindFindReplaceDialog(this);
-    this->updateCounters();
+    this->clearCounters();
 }
 
 void FindReplaceDialog::on_findButton_clicked()
