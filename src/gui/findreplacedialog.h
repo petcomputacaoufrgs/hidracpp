@@ -43,7 +43,12 @@ private:
     void updateCounters();
     void clearCounters();
 
+    /* Finds the searched text and returns if found. No wrap-around. */
     bool findRaw();
+    /*
+     * Replaces selected text and returns the difference between the size of
+     * the replaced text and the searched text.
+     */
     int replaceRaw();
 
     void find();
@@ -52,16 +57,18 @@ private:
     void replaceSelection();
 
     QTextDocument::FindFlags findFlags();
+    QRegularExpression findRegex();
 
     /*
      * Adds a piece of regex replace command. Pieces must have been split where
-     * a '$' would occur. This means that in the original string, the piece was
-     * preceeded by '$'. It transforms things (in the original string) like '$1'
-     * into the text captured by the first group of the regex.
+     * a '$' would occur, and it cannot be empty. This means that in the
+     * original string, the piece was preceeded by '$'. It transforms things
+     * (in the original string) like '$1' into the text captured by the first
+     * group of the regex.
      *
      * This function exists solely to make replaceRaw() not so big.
      */
-    void appendRegexPiece(QString &replaceText, QString const &piece, QStringList const &matches);
+    void replaceRegexParam(QString &replaceText, QString const &piece, QStringList const &matches);
 
     /*
      * This is a RAII guard, in order to prevent the onSelectionChange method

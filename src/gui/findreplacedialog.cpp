@@ -9,8 +9,7 @@ FindReplaceDialog::FindReplaceDialog(HidraCodeEditor *editor, QWidget *parent) :
     this->editor = editor;
     selected = false;
     current = 0;
-    foundCount = 0;
-    changingCount = 0;
+    this->clearCounters();
 }
 
 FindReplaceDialog::~FindReplaceDialog()
@@ -25,6 +24,7 @@ void FindReplaceDialog::clearState()
     ui->replaceTextEdit->clear();
     ui->caseCheckBox->setChecked(false);
     ui->regexCheckBox->setChecked(false);
+    this->clearCounters();
 }
 
 void FindReplaceDialog::onSelectionChange()
@@ -40,21 +40,23 @@ void FindReplaceDialog::clearCounters()
     foundCount = 0;
     current = 0;
 
-    ui->labelCurrent->setText(QString::number(current));
-    ui->labelFound->setText(QString::number(foundCount));
+    ui->labelCurrent->setText("?");
+    ui->labelFound->setText("?");
 }
 
 void FindReplaceDialog::updateCounters()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
     bool prevSelected = selected;
 
+    /* Saves original position to restore later. */
     QTextCursor cursor = editor->textCursor();
     int originalPos = cursor.selectionStart();
     int originalLength = cursor.selectionEnd() - originalPos;
 
+    /* Moves to the beginning of the document. */
     cursor.setPosition(0, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
@@ -65,15 +67,18 @@ void FindReplaceDialog::updateCounters()
         foundCount++;
         cursor = editor->textCursor();
 
+        /* Counts this search as behind original selection. */
         if (cursor.selectionStart() <= originalPos) {
             current++;
         }
     }
 
+    /* Restores original selection. */
     cursor.setPosition(originalPos, QTextCursor::MoveAnchor);
     cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, originalLength);
     editor->setTextCursor(cursor);
 
+    /* Updates UI display. */
     ui->labelCurrent->setText(QString::number(current));
     ui->labelFound->setText(QString::number(foundCount));
 
@@ -83,11 +88,52 @@ void FindReplaceDialog::updateCounters()
 bool FindReplaceDialog::findRaw()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
     if (ui->regexCheckBox->isChecked()) {
-        QRegularExpression findRegex(ui->findTextEdit->toPlainText());
-        selected = editor->find(findRegex, this->findFlags());
+        QRegularExpression findRegex(this->findRegex());
+        QTextDocument::FindFlags flags = this->findFlags();
+
+        /*
+         * We might restore cursor position depending on whether a valid
+         * search result is found.
+         */
+        int selectionStart = editor->textCursor().selectionStart();
+
+        selected = editor->find(findRegex, flags);
+
+        /*
+         * Attention:
+         *
+         * The stuff below is required since a Regex can find a zero-length
+         * string. If we do not deal with this, an infinite loop may happen in
+         * other methods.
+         */
+
+        QTextCursor cursor(editor->textCursor());
+
+        /* If the search resulted in a valid selection. */
+        bool hasSelection = cursor.hasSelection();
+        /* If the search hit the end of the document. */
+        bool atEnd = cursor.atEnd();
+
+        if (selected && !hasSelection && !atEnd) {
+            /* If found, but selection empty and not at the end, moves one
+             * character in order to make this not an infinite loop.
+             */
+            cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+            editor->setTextCursor(cursor);
+            selected = editor->find(findRegex, flags);
+        } else if (selected && !hasSelection && atEnd) {
+            /*
+             * If found, selection empty but at the end, restores position and
+             * registers this search as a failure.
+             */
+            cursor = editor->textCursor();
+            cursor.setPosition(selectionStart);
+            editor->setTextCursor(cursor);
+            selected = false;
+        }
     } else {
         QString findText(ui->findTextEdit->toPlainText());
         selected = editor->find(findText, this->findFlags());
@@ -99,21 +145,46 @@ bool FindReplaceDialog::findRaw()
 int FindReplaceDialog::replaceRaw()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
     int diff = 0;
 
     if (ui->regexCheckBox->isChecked()) {
-        QRegularExpression findRegex(ui->findTextEdit->toPlainText());
+        QRegularExpression findRegex(this->findRegex());
         QString selection(editor->textCursor().selectedText());
+
+        /*
+         * Matches the selection with the regular expression and gets captured
+         * groups.
+         */
         QStringList matches(findRegex.match(selection).capturedTexts());
+
+        /*
+         * Expression given by the user to replace the match, using $i to refer
+         * to captured groups, $0 to refer to the whole match.
+         */
         QString replaceExpr(ui->replaceTextEdit->toPlainText());
 
+        /* The first piece will not contain a '$'. */
         QStringList pieces(replaceExpr.split('$'));
         QString replaceText(pieces[0]);
 
+        /* Keep track if previous is between "$$". */
+        bool prevEmpty = false;
+
         for (int i = 1; i < pieces.length(); i++) {
-            this->appendRegexPiece(replaceText, pieces[i], matches);
+            if (prevEmpty) {
+                /* Previous empty? Ignore '$' and just append things. */
+                replaceText += pieces[i];
+                prevEmpty = false;
+            } else if (pieces[i].length() == 0) {
+                /* Current empty? Between "$$". */
+                replaceText += '$';
+                prevEmpty = true;
+            } else {
+                /* Otherwise, potential parameter. */
+                this->replaceRegexParam(replaceText, pieces[i], matches);
+            }
         }
 
         editor->insertPlainText(replaceText);
@@ -129,37 +200,42 @@ int FindReplaceDialog::replaceRaw()
     return diff;
 }
 
-void FindReplaceDialog::appendRegexPiece(QString &replaceText, QString const &piece, QStringList const &matches)
+void FindReplaceDialog::replaceRegexParam(QString &replaceText, QString const &piece, QStringList const &matches)
 {
-    if (piece.length() == 0) {
-        replaceText += '$';
-    } else {
-        int cut = 0;
-        int group = 0;
-        bool inBounds = true;
-        bool hasGroup = false;
+    int cut = 0;
+    int group = 0;
+    bool inBounds = true;
+    bool hasGroup = false;
 
-        while (cut < piece.length() && piece[cut].isDigit() && inBounds) {
-            int newGroup = group * 10 + piece[cut].digitValue();
-            inBounds = newGroup < matches.length();
-            if (inBounds) {
-                group = newGroup;
-                hasGroup = true;
-                cut++;
-            }
+    /*
+     * Attempts to parse a captured group index.
+     *
+     * Iterate while inside piece, current is digit, and computed group is in
+     * bounds of the number of captured groups.
+     *
+     * It becomes out of bounds if a newly computed group is out of bounds.
+     */
+    while (cut < piece.length() && piece[cut].isDigit() && inBounds) {
+        int newGroup = group * 10 + piece[cut].digitValue();
+        inBounds = newGroup < matches.length();
+        if (inBounds) {
+            group = newGroup;
+            /* Save the fact that at least one digit was parsed. */
+            hasGroup = true;
+            cut++;
         }
-
-        if (hasGroup) {
-            replaceText += matches[group];
-        }
-        replaceText += piece.rightRef(piece.length() - cut);
     }
+
+    if (hasGroup) {
+        replaceText += matches[group];
+    }
+    replaceText += piece.rightRef(piece.length() - cut);
 }
 
 void FindReplaceDialog::find()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
     if (!this->findRaw()) {
         editor->moveCursor(QTextCursor::Start);
@@ -170,7 +246,7 @@ void FindReplaceDialog::find()
 void FindReplaceDialog::replace()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
     if (!selected) {
         this->find();
@@ -185,19 +261,29 @@ void FindReplaceDialog::replace()
 void FindReplaceDialog::replaceAll()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
+    /* Saves original position. */
     QTextCursor cursor = editor->textCursor();
     int originalPos = cursor.selectionStart();
 
+    /* Moves to the start. */
     cursor.setPosition(0, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
     while (this->findRaw()) {
         cursor = editor->textCursor();
 
+        /*
+         * Replaces and gets the difference between replaced text and found
+         * text.
+         */
         int sizeDiff = this->replaceRaw();
 
+        /*
+         * Takes size difference into account in order to maintain original
+         * position correct.
+         */
         if (cursor.selectionEnd() <= originalPos) {
             originalPos += sizeDiff;
         } else if (cursor.selectionStart() <= originalPos) {
@@ -205,6 +291,7 @@ void FindReplaceDialog::replaceAll()
         }
     }
 
+    /* Restore original position. */
     cursor.setPosition(originalPos, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 }
@@ -212,27 +299,33 @@ void FindReplaceDialog::replaceAll()
 void FindReplaceDialog::replaceSelection()
 {
     /* RAII guard */
-    ChangingGuard guard = this->changingGuard();
+    ChangingGuard guard(this->changingGuard());
 
+    /* Gets our bounds. */
     QTextCursor cursor = editor->textCursor();
     int selectionStart = cursor.selectionStart();
     int selectionEnd = cursor.selectionEnd();
 
+    /* Moves to the beginning of the selection. */
     cursor.setPosition(selectionStart, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 
+    /* Keeps track if we still are inside the selection. */
     bool insideSelection = true;
 
     while (this->findRaw() && insideSelection) {
+        /* Are we inside the selection? */
         cursor = editor->textCursor();
         insideSelection = cursor.selectionEnd() <= selectionEnd;
 
         if (insideSelection) {
+            /* If so, replaces and takes difference into account. */
             int sizeDiff = this->replaceRaw();
             selectionEnd += sizeDiff;
         }
     }
 
+    /* Restores the cursor to the beginning of the selection. */
     cursor.setPosition(selectionStart, QTextCursor::MoveAnchor);
     editor->setTextCursor(cursor);
 }
@@ -246,6 +339,18 @@ QTextDocument::FindFlags FindReplaceDialog::findFlags()
     }
 
     return flags;
+}
+
+QRegularExpression FindReplaceDialog::findRegex()
+{
+    QRegularExpression regex(ui->findTextEdit->toPlainText());
+    QRegularExpression::PatternOptions options = regex.patternOptions();
+    options.setFlag(QRegularExpression::MultilineOption);
+    if (ui->caseCheckBox->isChecked()) {
+        options.setFlag(QRegularExpression::CaseInsensitiveOption, false);
+    }
+    regex.setPatternOptions(options);
+    return regex;
 }
 
 void FindReplaceDialog::closeEvent(QCloseEvent *evt)
