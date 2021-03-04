@@ -346,9 +346,8 @@ QRegularExpression FindReplaceDialog::findRegex()
     QRegularExpression regex(ui->findTextEdit->toPlainText());
     QRegularExpression::PatternOptions options = regex.patternOptions();
     options.setFlag(QRegularExpression::MultilineOption);
-    if (ui->caseCheckBox->isChecked()) {
-        options.setFlag(QRegularExpression::CaseInsensitiveOption, false);
-    }
+    options.setFlag(QRegularExpression::CaseInsensitiveOption,
+                    ui->caseCheckBox->isChecked());
     regex.setPatternOptions(options);
     return regex;
 }
