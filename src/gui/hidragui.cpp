@@ -828,7 +828,10 @@ void HidraGui::saveAs()
         saveDir = filename.left(filename.lastIndexOf(QChar('/')));
         settings.setValue("saveDir", saveDir);
 
-        save(filename); // Resets fileModified to false if successful
+        if(filename.contains('.'))
+            save(filename);
+        else
+            save(filename + extension.mid(extension.length()-5, 4)); // Puts the extension
     }
 }
 
