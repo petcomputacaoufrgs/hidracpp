@@ -556,10 +556,8 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
             throw invalidAddress;
 
         if (arguments[0] == 'h' || arguments[0] == 'H'){
-            bool ok = true;
             arguments[0] = '0';
-            int end = arguments.toInt(&ok, 16);
-            PC->setValue(end);
+            PC->setValue(arguments.toInt(NULL, 16));
         } else
             PC->setValue(argumentList.first().toInt(0));
     }
