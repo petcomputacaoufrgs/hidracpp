@@ -325,8 +325,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>279</width>
-               <height>69</height>
+               <width>277</width>
+               <height>78</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -697,7 +697,7 @@
      <x>0</x>
      <y>0</y>
      <width>1115</width>
-     <height>21</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProgram">
@@ -745,6 +745,8 @@
     <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
+    <addaction name="separator"/>
+    <addaction name="actionDefaultValues"/>
    </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuMemory"/>
@@ -1018,6 +1020,11 @@
    </property>
    <property name="shortcut">
     <string>F6</string>
+   </property>
+  </action>
+  <action name="actionDefaultValues">
+   <property name="text">
+    <string>Restaurar  Opções Padrões</string>
    </property>
   </action>
  </widget>

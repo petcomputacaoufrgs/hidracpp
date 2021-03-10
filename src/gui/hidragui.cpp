@@ -1471,3 +1471,26 @@ void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
     if (addressCorrespondingSourceLine != -1)
         codeEditor->setCurrentLine(addressCorrespondingSourceLine);
 }
+
+void HidraGui::on_actionDefaultValues_triggered()
+{
+
+    settings.setValue("showHexValues", false);
+    showHexValues = false;
+    settings.setValue("showSignedData", false);
+    showSignedData = false;
+    settings.setValue("showCharacters", false);
+    showCharacters = false;
+    settings.setValue("fastExecute", false);
+    fastExecute = false;
+    settings.setValue("followPC", true);
+    followPC = true;
+
+    ui->actionHexadecimalMode->setChecked(showHexValues);
+    ui->actionSignedMode->setChecked(showSignedData);
+    ui->actionShowCharacters->setChecked(showCharacters);
+    ui->actionFastExecuteMode->setChecked(fastExecute);
+    ui->actionFollowPCMode->setChecked(followPC);
+
+    updateMachineInterface(true);
+}

@@ -130,6 +130,8 @@ private slots:
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
+    void on_actionDefaultValues_triggered();
+
 private:
     // Internal initialize methods (called by initializeMachineInterface)
     void initializeMachineInterfaceComponents();
