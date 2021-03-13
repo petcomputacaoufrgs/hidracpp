@@ -57,7 +57,7 @@ private:
     void replaceSelection();
 
     QTextDocument::FindFlags findFlags();
-    QRegularExpression findRegex();
+    QRegExp findRegex();
 
     /*
      * Adds a piece of regex replace command. Pieces must have been split where

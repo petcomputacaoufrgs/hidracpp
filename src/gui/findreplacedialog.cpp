@@ -91,7 +91,7 @@ bool FindReplaceDialog::findRaw()
     ChangingGuard guard(this->changingGuard());
 
     if (ui->regexCheckBox->isChecked()) {
-        QRegularExpression findRegex(this->findRegex());
+        QRegExp findRegex(this->findRegex());
         QTextDocument::FindFlags flags = this->findFlags();
 
         /*
@@ -150,14 +150,15 @@ int FindReplaceDialog::replaceRaw()
     int diff = 0;
 
     if (ui->regexCheckBox->isChecked()) {
-        QRegularExpression findRegex(this->findRegex());
+        QRegExp findRegex(this->findRegex());
         QString selection(editor->textCursor().selectedText());
 
         /*
          * Matches the selection with the regular expression and gets captured
          * groups.
          */
-        QStringList matches(findRegex.match(selection).capturedTexts());
+        findRegex.indexIn(selection);
+        QStringList matches(findRegex.capturedTexts());
 
         /*
          * Expression given by the user to replace the match, using $i to refer
@@ -333,22 +334,20 @@ void FindReplaceDialog::replaceSelection()
 QTextDocument::FindFlags FindReplaceDialog::findFlags()
 {
     QTextDocument::FindFlags flags;
-
     if (ui->caseCheckBox->isChecked()) {
         flags.setFlag(QTextDocument::FindCaseSensitively);
     }
-
     return flags;
 }
 
-QRegularExpression FindReplaceDialog::findRegex()
+QRegExp FindReplaceDialog::findRegex()
 {
-    QRegularExpression regex(ui->findTextEdit->toPlainText());
-    QRegularExpression::PatternOptions options = regex.patternOptions();
-    options.setFlag(QRegularExpression::MultilineOption);
-    options.setFlag(QRegularExpression::CaseInsensitiveOption,
-                    ui->caseCheckBox->isChecked());
-    regex.setPatternOptions(options);
+    QRegExp regex(ui->findTextEdit->toPlainText());
+    if (ui->caseCheckBox->isChecked()) {
+        regex.setCaseSensitivity(Qt::CaseSensitive);
+    } else {
+        regex.setCaseSensitivity(Qt::CaseInsensitive);
+    }
     return regex;
 }
 
