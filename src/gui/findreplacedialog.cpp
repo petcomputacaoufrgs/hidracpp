@@ -342,13 +342,16 @@ QTextDocument::FindFlags FindReplaceDialog::findFlags()
 
 QRegExp FindReplaceDialog::findRegex()
 {
-    QRegExp regex(ui->findTextEdit->toPlainText());
+    Qt::CaseSensitivity caseSensitivity;
     if (ui->caseCheckBox->isChecked()) {
-        regex.setCaseSensitivity(Qt::CaseSensitive);
+        caseSensitivity = Qt::CaseSensitive;
     } else {
-        regex.setCaseSensitivity(Qt::CaseInsensitive);
+        caseSensitivity = Qt::CaseInsensitive;
     }
-    return regex;
+
+    return QRegExp(ui->findTextEdit->toPlainText(),
+                   caseSensitivity,
+                   QRegExp::RegExp2);
 }
 
 void FindReplaceDialog::closeEvent(QCloseEvent *evt)
