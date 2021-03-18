@@ -1116,8 +1116,10 @@ void HidraGui::on_actionOpen_triggered()
         bool cancelled;
         saveChangesDialog(cancelled);
 
-        if (!cancelled)
+        if (!cancelled){
+            settings.setValue("saveDir", filename.left(filename.lastIndexOf(QChar('/'))));
             load(filename);
+           }
     }
 }
 
