@@ -1,5 +1,4 @@
 #include "hidracodeeditor.h"
-#include "findreplacedialog.h"
 
 HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 {
@@ -27,8 +26,6 @@ HidraCodeEditor::HidraCodeEditor(QWidget *parent) : QPlainTextEdit(parent)
 
     updateLineNumberAreaWidth(0);
     //highlightCurrentLine();
-
-    findReplaceDialog = nullptr;
 }
 
 int HidraCodeEditor::lineNumberAreaWidth()
@@ -163,41 +160,9 @@ void HidraCodeEditor::setCurrentLine(int line)
         return;
 
     QTextCursor cursor(document()->findBlockByNumber(line));
-    cursor.movePosition(QTextCursor::EndOfLine);
     setTextCursor(cursor);
     ensureCursorVisible();
-}
-
-void HidraCodeEditor::bindFindReplaceDialog(FindReplaceDialog *dialog)
-{
-    this->unbindFindReplaceDialog();
-    findReplaceDialog = dialog;
-
-    if (dialog != nullptr) {
-        connect(this,
-                &HidraCodeEditor::selectionChanged,
-                findReplaceDialog,
-                &FindReplaceDialog::onSelectionChange);
-        connect(this,
-                &HidraCodeEditor::textChanged,
-                findReplaceDialog,
-                &FindReplaceDialog::onSelectionChange);
-    }
-}
-
-void HidraCodeEditor::unbindFindReplaceDialog()
-{
-    if (findReplaceDialog != nullptr) {
-        disconnect(this,
-                   &HidraCodeEditor::selectionChanged,
-                   findReplaceDialog,
-                   &FindReplaceDialog::onSelectionChange);
-        disconnect(this,
-                   &HidraCodeEditor::textChanged,
-                   findReplaceDialog,
-                   &FindReplaceDialog::onSelectionChange);
-        findReplaceDialog = nullptr;
-    }
+    setFocus();
 }
 
 void HidraCodeEditor::wheelEvent(QWheelEvent *e)

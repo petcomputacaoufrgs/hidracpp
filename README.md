@@ -16,12 +16,12 @@ https://github.com/petcomputacaoufrgs/hidracpp/releases/
 Para desenvolver
 ================
 
-O projeto é desenvolvido na linguagem C++, utilizando o framework Qt versão 5.3 e o ambiente Qt Creator.
+O projeto é desenvolvido na linguagem C++, utilizando o framework Qt versão 5.3 e o ambiente QtCreator.
 
 Desenvolver usando Windows
 --------------------------
 
-Para desenvolver em Windows, primeiro instale o Qt 5.3 com MinGW (que inclui o ambiente Qt Creator), através do link:<br/>
+Para desenvolver em Windows, primeiro instale o Qt 5.3 com MinGW (que inclui o ambiente QtCreator), através do link:<br/>
 https://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-windows-x86-mingw482_opengl-5.3.2.exe
 
 Em seguida, clone o projeto através do software Git de sua preferência (ex: GitHub for Windows) e abra o arquivo <i>src/hidra.pro</i>.
@@ -35,4 +35,4 @@ https://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-linux-x86-5.3.2.run
 Em seguida, siga o tutorial para instalação em sua distribuição Linux, por exemplo:<br/>
 https://wiki.qt.io/Install_Qt_5_on_Ubuntu
 
-Por fim, clone o projeto através do software Git de sua preferência (ex: Git GUI) e utilize o Qt Creator instalado para abrir o arquivo <i>src/hidra.pro</i>.
+Por fim, clone o projeto através do software Git de sua preferência (ex: Git GUI) e utilize o QtCreator instalado para abrir o arquivo <i>src/hidra.pro</i>.

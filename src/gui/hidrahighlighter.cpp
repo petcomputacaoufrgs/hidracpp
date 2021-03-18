@@ -112,8 +112,10 @@ void HidraHighlighter::initializeCommentsHighlightRule()
     const QString STRING = "(?:'[^']*')";
     const QString COMMENT = "(;.*)$";
 
-    // Create new regular expression pattern
     QString commentsPattern = "^(?:" + CHARS_EXCEPT_QUOTE_SEMICOLON + STRING + "?)*" + COMMENT;
+
+    // Create new regular expression pattern
+    //QString commentsPattern = "(;.*)";
 
     // Set corresponding format
     QTextCharFormat commentsFormat;

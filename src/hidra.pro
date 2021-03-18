@@ -15,7 +15,6 @@ CONFIG  += \
     c++11
 
 SOURCES += \
-    gui/findreplacedialog.cpp \
     gui/flagwidget.cpp \
     gui/hidracodeeditor.cpp \
     gui/hidragui.cpp \
@@ -40,7 +39,6 @@ SOURCES += \
     gui/about.cpp
 
 HEADERS  += \
-    gui/findreplacedialog.h \
     gui/flagwidget.h \
     gui/hidracodeeditor.h \
     gui/hidragui.h \
@@ -64,7 +62,6 @@ HEADERS  += \
     gui/about.h
 
 FORMS    += \
-    gui/findreplacedialog.ui \
     gui/flagwidget.ui \
     gui/hidragui.ui \
     gui/registerwidget.ui \
