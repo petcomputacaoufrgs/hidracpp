@@ -16,6 +16,7 @@
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "registerwidget.h"
+#include "findreplacedialog.h"
 #include "flagwidget.h"
 #include "about.h"
 #include "machines/neandermachine.h"
@@ -131,6 +132,7 @@ private slots:
     void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
     void on_actionDefaultValues_triggered();
+    void on_actionFindReplace_triggered();
 
 private:
     // Internal initialize methods (called by initializeMachineInterface)
@@ -181,6 +183,7 @@ private:
     Machine *machine;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
+    FindReplaceDialog *findReplaceDialog;
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
     About *about;

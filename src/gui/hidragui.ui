@@ -325,8 +325,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>277</width>
-               <height>78</height>
+               <width>275</width>
+               <height>68</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -697,7 +697,7 @@
      <x>0</x>
      <y>0</y>
      <width>1115</width>
-     <height>28</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProgram">
@@ -745,6 +745,8 @@
     <addaction name="separator"/>
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
+    <addaction name="separator"/>
+    <addaction name="actionFindReplace"/>
     <addaction name="separator"/>
     <addaction name="actionDefaultValues"/>
    </widget>
@@ -1025,6 +1027,14 @@
   <action name="actionDefaultValues">
    <property name="text">
     <string>Restaurar  Opções Padrões</string>
+   </property>
+  </action>
+  <action name="actionFindReplace">
+   <property name="text">
+    <string>Buscar e Substituir</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>
