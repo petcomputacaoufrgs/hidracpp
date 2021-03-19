@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QVector>
 #include <QColor>
+#include <QSettings>
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
@@ -130,6 +131,7 @@ private slots:
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
+    void on_actionDefaultValues_triggered();
     void on_actionFindReplace_triggered();
 
 private:
@@ -170,6 +172,11 @@ private:
 
     QString valueToString(int value, bool isHexadecimal, bool isSigned);
     QString getValueDescription(int value, bool isSigned);
+
+    // Config file
+    void loadConfFile();
+    QSettings settings;
+
 
     // Interface elements
     Ui::HidraGui *ui;
