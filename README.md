@@ -40,11 +40,8 @@ Por fim, clone o projeto através do software Git de sua preferência (ex: Git G
 Cross-Compile: compilar no Linux para Windows
 ---------------------------------------------
 
-Aviso: o cross-compile polui o diretório do Hidra com arquivos que o Git, por enquanto, não vai ignorar.
-Certifique-se de salvar seu trabalho, e limpar arquivos de cross-compile antes de registrar novas mudanças no Git (ou cuidar para não incluir arquvos de cross-compile).
-
 Vamos nos referir ao diretório do projeto do Hidra no seu computador como `$HIDRA`.
-Por exemplo, se o Hidra está em "`/home/joaozinho/Documents/pet/hidra`", `$HIDRA` é "`/home/joaozinho/Documents/pet/hidra`".
+Por exemplo, se o Hidra está em "`/home/joaozinho/Documents/pet/hidracpp`", `$HIDRA` é "`/home/joaozinho/Documents/pet/hidracpp`".
 
 O projeto "mxe" provê ferramentas para fazer cross-compile do Qt.
 Vamos baixar o projeto "mxe":
@@ -60,7 +57,7 @@ Por exemplo, se o repositório foi baixado em "`/home/joaozinho/Documents/pet/mx
 Agora, é necessário instalar algumas dependências, listadas em https://mxe.cc/#requirements.
 A forma exata de instalá-las vai depender da sua distribuição Linux, mas ao tentar executar o próximo passo, você deve ser avisado do que falta.
 O próximo passo é fazer cross-compile da parte mais essencial do Qt, necessária para o Hidra.
-Para tal, execute o seguinte (no diretório `$MXE`):
+Para tal, execute o seguinte (no diretório "`$MXE`"):
 ```
 make qtbase
 ```
@@ -70,28 +67,42 @@ Note que o comando acima só constrói a parte mais essencial.
 Se algum dia precisarmos de features fora do `qtbase`, é necessário também
 executar `make qt5`.
 
-Agora, vamos ao diretório do Hidra (`$HIDRA`/src).
-```
-cd $HIDRA/src
-```
-
 Precisamos que as ferramentas do Qt que acabamos de construir estejam visíveis.
 Para tal, você precisa executar o seguinte comando:
 ```
 export PATH="$MXE/usr/bin:$PATH"
 ```
 
-E então, precisamos gerar artefatos de compilação do Hidra:
+Agora, vamos ao diretório do Hidra (`$HIDRA`/src).
 ```
-i686-w64-mingw32.static-qmake-qt5
+cd $HIDRA
 ```
 
-Finalmente, vamos compilar o Hidra:
+Vamos criar um diretório novo para colocar nossos artefatos.
+Faremos um diretório "`$HIDRA/build-cross-compile`".
+Execute o seguinte no diretório "`$HIDRA`".
+```
+mkdir build-cross-compile
+
+cd build-cross-compile
+```
+
+Agora, precisamos gerar artefatos de compilação do Hidra.
+Execute o seguinte no diretório "`$HIDRA/build-cross-compile`":
+```
+i686-w64-mingw32.static-qmake-qt5 ../src
+```
+
+Certifique-se de que o passo anterior terminou em sucesso.
+Finalmente, vamos compilar o Hidra.
+Execute o seguinte, novamente no diretório "`$HIDRA/build-cross-compile`":
 ```
 make
 ```
 
-Agora o arquivo do hidra encontra-se em:
+Certifique-se de que o passo anterior terminou em sucesso.
+Tudo está pronto agora.
+O arquivo do hidra encontra-se em:
 ```
-$HIDRA/src/release/hidra.exe
+$HIDRA/build-cross-compile/release/hidra.exe
 ```
