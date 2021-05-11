@@ -63,6 +63,7 @@ make qtbase
 ```
 
 Certifique-se de que o passo anterior terminou em sucesso.
+
 Note que o comando acima só constrói a parte mais essencial.
 Se algum dia precisarmos de features fora do `qtbase`, é necessário também
 executar `make qt5`.
@@ -73,14 +74,14 @@ Para tal, você precisa executar o seguinte comando:
 export PATH="$MXE/usr/bin:$PATH"
 ```
 
-Agora, vamos ao diretório do Hidra (`$HIDRA`/src).
+Agora, vamos ao diretório do Hidra ("`$HIDRA`").
 ```
 cd $HIDRA
 ```
 
 Vamos criar um diretório novo para colocar nossos artefatos.
-Faremos um diretório "`$HIDRA/build-cross-compile`".
-Execute o seguinte no diretório "`$HIDRA`".
+Vamos chamá-lo "`$HIDRA/build-cross-compile`".
+Execute o seguinte, no diretório "`$HIDRA`":
 ```
 mkdir build-cross-compile
 
@@ -88,12 +89,13 @@ cd build-cross-compile
 ```
 
 Agora, precisamos gerar artefatos de compilação do Hidra.
-Execute o seguinte no diretório "`$HIDRA/build-cross-compile`":
+Execute o seguinte, no diretório "`$HIDRA/build-cross-compile`":
 ```
 i686-w64-mingw32.static-qmake-qt5 ../src
 ```
 
 Certifique-se de que o passo anterior terminou em sucesso.
+
 Finalmente, vamos compilar o Hidra.
 Execute o seguinte, novamente no diretório "`$HIDRA/build-cross-compile`":
 ```
@@ -101,6 +103,7 @@ make
 ```
 
 Certifique-se de que o passo anterior terminou em sucesso.
+
 Tudo está pronto agora.
 O arquivo do hidra encontra-se em:
 ```
