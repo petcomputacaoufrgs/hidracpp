@@ -18,12 +18,17 @@ public:
     ~BaseConversorDialog();
 
 private slots:
-    void on_pushButton_clicked();
+    void on_convertButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_invertButton_clicked();
 
 private:
     Ui::BaseConversorDialog *ui;
+
+    static const int TYPE_POSITIVE = 0;
+    static const int TYPE_SIGN_MAGNITUDE = 1;
+    static const int TYPE_ONES_COMPLEMENT = 2;
+    static const int TYPE_TWOS_COMPLEMENT = 3;
 };
 
 

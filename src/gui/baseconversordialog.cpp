@@ -14,7 +14,7 @@ BaseConversorDialog::~BaseConversorDialog()
 }
 
 
-void BaseConversorDialog::on_pushButton_clicked()
+void BaseConversorDialog::on_convertButton_clicked()
 {
     BaseConversor baseConversor;
     QString stringOut = "Etrada original";
@@ -32,46 +32,53 @@ void BaseConversorDialog::on_pushButton_clicked()
     // Input validation
 
 
-    switch (inputTypeIndex){
-        case 0: ui->labelError->setText(baseConversor.inputValidation
-                                                (baseIn, baseOut, inputValorStringQ));
-                baseConversor = baseConversor.inputPositive(inputValorStringQ, baseIn);
-                break;
-        case 1: ui->labelError->setText(baseConversor.inputValidationSignalMagnitude
-                                                (baseIn, baseOut, inputValorStringQ));
-                baseConversor = baseConversor.inputSignalMagnitude(inputValorStringQ, baseIn);
-                break;
+    switch (inputTypeIndex) {
+        case TYPE_POSITIVE:
+            ui->labelError->setText(
+                    baseConversor.validate(baseIn, baseOut, inputValorStringQ));
+            baseConversor = baseConversor.inputPositive(inputValorStringQ, baseIn);
+            break;
+        case TYPE_SIGN_MAGNITUDE:
+            ui->labelError->setText(
+                    baseConversor.validateSignMagnitude(baseIn, baseOut, inputValorStringQ));
+            baseConversor = baseConversor.inputSignMagnitude(inputValorStringQ, baseIn);
+            break;
 
-        case 2: ui->labelError->setText(baseConversor.inputValidation
-                                        (baseIn, baseOut, inputValorStringQ));
-                baseConversor = baseConversor.inputOnesComplement(inputValorStringQ, baseIn);
-                break;
+        case TYPE_ONES_COMPLEMENT:
+            ui->labelError->setText(
+                    baseConversor.validate(baseIn, baseOut, inputValorStringQ));
+            baseConversor = baseConversor.inputOnesComplement(inputValorStringQ, baseIn);
+            break;
 
-        case 3: baseConversor = baseConversor.inputTwosComplement(inputValorStringQ, baseIn);
-                break;
+        case TYPE_TWOS_COMPLEMENT:
+            baseConversor = baseConversor.inputTwosComplement(inputValorStringQ, baseIn);
+            break;
     }
 
-    switch (outputTypeIndex){
-        case 0: if(baseConversor.getNegativeSignal() == true)
-                    ui->labelError->setText("Valor negativo, não há representação em inteiro positivo");
-                stringOut = baseConversor.outputPositive(baseOut);
-                break;
-        case 1: stringOut = baseConversor.outputSignalMagnitude(baseOut);
-                break;
-        case 2: stringOut = baseConversor.outputOnesComplement(baseOut);
-                break;
-        case 3: stringOut = baseConversor.outputTwosComplement(baseOut);
-                break;
+    switch (outputTypeIndex) {
+        case TYPE_POSITIVE:
+            if (baseConversor.getNegativeSignal())
+                ui->labelError->setText("Valor negativo, não há representação em inteiro positivo");
+            stringOut = baseConversor.outputPositive(baseOut);
+            break;
+        case TYPE_SIGN_MAGNITUDE:
+            stringOut = baseConversor.outputSignMagnitude(baseOut);
+            break;
+        case TYPE_ONES_COMPLEMENT:
+            stringOut = baseConversor.outputOnesComplement(baseOut);
+            break;
+        case TYPE_TWOS_COMPLEMENT:
+            stringOut = baseConversor.outputTwosComplement(baseOut);
+            break;
     }
 
     ui->lineEditOutputValor->setText(stringOut);
 
 }
 
-void BaseConversorDialog::on_pushButton_2_clicked()
+void BaseConversorDialog::on_invertButton_clicked()
 {
     QString inputBaseStringQ = ui->lineEditInputBase->text();
     ui->lineEditInputBase->setText(ui->lineEditOutputBase->text());
     ui->lineEditOutputBase->setText(inputBaseStringQ);
 }
-

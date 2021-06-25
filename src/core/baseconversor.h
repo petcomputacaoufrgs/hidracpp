@@ -20,25 +20,26 @@ public:
 
     // Input functions
     BaseConversor& inputPositive(QString digits, int base);
-    BaseConversor& inputSignalMagnitude(QString digits, int base);
+    BaseConversor& inputSignMagnitude(QString digits, int base);
     BaseConversor& inputOnesComplement(QString digits, int base);
     BaseConversor& inputTwosComplement(QString digits, int base);
+
     // Output functions
     QString outputPositive(int base);
-    QString outputSignalMagnitude(int base);
+    QString outputSignMagnitude(int base);
     QString outputOnesComplement(int base);
     QString outputTwosComplement(int base);
+
     // Validation functions
-    QString inputValidation(int baseIn, int baseOut, QString digits);
-    QString inputValidationSignalMagnitude(int baseIn, int baseOut, QString digits);
-    QString inputValidationOnesComplement(int baseIn, int baseOut, QString digits);
-    QString inputValidationTwosComplement(int baseIn, int baseOut, QString digits);
+    QString validate(int baseIn, int baseOut, QString digits);
+    QString validateSignMagnitude(int baseIn, int baseOut, QString digits);
+    QString validateOnesComplement(int baseIn, int baseOut, QString digits);
+    QString validateTwosComplement(int baseIn, int baseOut, QString digits);
 
 private:
     long long unsigned bits;
     bool negativeSignal;
-    bool signalMagnitude=false;
-
+    bool signalMagnitude;
 };
 
 #endif // BASECONVERSOR_H

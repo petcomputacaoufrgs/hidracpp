@@ -15,7 +15,12 @@ PointConversorDialog::~PointConversorDialog()
     delete ui;
 }
 
-void PointConversorDialog::on_pushButtonInvert_clicked()
+void PointConversorDialog::on_convertButton_clicked()
+{
+
+}
+
+void PointConversorDialog::on_invertButton_clicked()
 {
     QString input = ui->lineEditInput->text();
     ui->lineEditInput->setText(ui->lineEditOutput->text());

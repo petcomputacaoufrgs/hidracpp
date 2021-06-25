@@ -16,6 +16,7 @@ CONFIG  += \
 
 SOURCES += \
     core/baseconversor.cpp \
+    core/invalidconversorinput.cpp \
     core/pointconversor.cpp \
     gui/baseconversordialog.cpp \
     gui/flagwidget.cpp \
@@ -44,6 +45,7 @@ SOURCES += \
 
 HEADERS  += \
     core/baseconversor.h \
+    core/invalidconversorinput.h \
     core/pointconversor.h \
     gui/baseconversordialog.h \
     gui/flagwidget.h \

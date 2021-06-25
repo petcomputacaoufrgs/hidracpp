@@ -17,7 +17,8 @@ public:
     ~PointConversorDialog();
 
 private slots:
-    void on_pushButtonInvert_clicked();
+    void on_convertButton_clicked();
+    void on_invertButton_clicked();
 
 private:
     Ui::PointConversorDialog *ui;

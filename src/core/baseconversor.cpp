@@ -3,6 +3,8 @@
 BaseConversor::BaseConversor()
 {
     bits = 0;
+    negativeSignal = false;
+    signalMagnitude = false;
 }
 
 long long unsigned BaseConversor::getBits()
@@ -99,7 +101,7 @@ BaseConversor& BaseConversor::inputPositive(QString digitsQ, int base)
     return *this;
 }
 
-BaseConversor& BaseConversor::inputSignalMagnitude(QString digitsQ, int base)
+BaseConversor& BaseConversor::inputSignMagnitude(QString digitsQ, int base)
 {
     long long unsigned current, exp, decimalResult = 0;
     std::string digits=digitsQ.toStdString();
@@ -155,7 +157,7 @@ QString BaseConversor::outputPositive(int base)
     return QString::fromStdString(outputResult);
 }
 
-QString BaseConversor::outputSignalMagnitude(int base)
+QString BaseConversor::outputSignMagnitude(int base)
 {
     QString outputResultQ = outputPositive(base);
     std::string outputResult = outputResultQ.toStdString();
@@ -204,7 +206,7 @@ QString BaseConversor::outputTwosComplement(int base)
 
 // Validation functions
 
-QString BaseConversor::inputValidation(int baseIn, int baseOut, QString digits)
+QString BaseConversor::validate(int baseIn, int baseOut, QString digits)
 {
     if (baseIn < 2 || baseIn > 36)
         return "Base de entrada deve ser entre 2 e 36!";
@@ -222,9 +224,9 @@ QString BaseConversor::inputValidation(int baseIn, int baseOut, QString digits)
     return "";
 }
 
-QString BaseConversor::inputValidationSignalMagnitude(int baseIn, int baseOut, QString digits)
+QString BaseConversor::validateSignMagnitude(int baseIn, int baseOut, QString digits)
 {
-    QString error = inputValidation(baseIn, baseOut, digits);
+    QString error = validate(baseIn, baseOut, digits);
 
     if(digits[0] != '1' && digits[0] != '0')
         error = "Em sinal magnitude o primeiro digito deve ser 0(+) ou 1(-)";

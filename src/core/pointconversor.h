@@ -2,6 +2,7 @@
 #define POINTCONVERSOR_H
 
 #include <cstdint>
+#include <qstring.h>
 
 class PointConversor
 {
@@ -13,21 +14,37 @@ private:
     };
 public:
     PointConversor();
-    PointConversor& inputHalfFloat(uint16_t number);
-    PointConversor& inputSingleFloat(float number);
-    PointConversor& inputDoubleFloat(double number);
-    PointConversor& inputFixed8(uint8_t number, int16_t pointPos);
-    PointConversor& inputFixed16(uint16_t number, int16_t pointPos);
-    PointConversor& inputFixed32(uint32_t number, int16_t pointPos);
-    PointConversor& inputFixed64(uint64_t number, int16_t pointPos);
+    PointConversor& inputHalfFloatRaw(uint16_t number);
+    PointConversor& inputSingleFloatRaw(float number);
+    PointConversor& inputDoubleFloatRaw(double number);
+    PointConversor& inputFixed8Raw(uint8_t number, int16_t pointPos);
+    PointConversor& inputFixed16Raw(uint16_t number, int16_t pointPos);
+    PointConversor& inputFixed32Raw(uint32_t number, int16_t pointPos);
+    PointConversor& inputFixed64Raw(uint64_t number, int16_t pointPos);
 
-    uint16_t outputHalfFloat();
-    float outputSingleFloat();
-    double outputDoubleFloat();
-    uint8_t outputFixed8(int16_t pointPos);
-    uint16_t outputFixed16(int16_t pointPos);
-    uint32_t outputFixed32(int16_t pointPos);
-    uint64_t outputFixed64(int16_t pointPos);
+    PointConversor& inputHalfFloat(QString const& number);
+    PointConversor& inputSingleFloat(QString const& number);
+    PointConversor& inputDoubleFloat(QString const& number);
+    PointConversor& inputFixed8(QString const& number);
+    PointConversor& inputFixed16(QString const& number);
+    PointConversor& inputFixed32(QString const& number);
+    PointConversor& inputFixed64(QString const& number);
+
+    uint16_t outputHalfFloatRaw();
+    float outputSingleFloatRaw();
+    double outputDoubleFloatRaw();
+    uint8_t outputFixed8Raw(int16_t pointPos);
+    uint16_t outputFixed16Raw(int16_t pointPos);
+    uint32_t outputFixed32Raw(int16_t pointPos);
+    uint64_t outputFixed64Raw(int16_t pointPos);
+
+    QString outputHalfFloat();
+    QString outputSingleFloat();
+    QString outputDoubleFloat();
+    QString outputFixed8(int16_t pointPos);
+    QString outputFixed16(int16_t pointPos);
+    QString outputFixed32(int16_t pointPos);
+    QString outputFixed64(int16_t pointPos);
 
 private:
     uint64_t digits;
@@ -35,11 +52,18 @@ private:
     bool sign;
     Normality normality;
 
-    PointConversor& inputGenericFloat(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize);
-    PointConversor& inputGenericFixed(uint64_t number, uint16_t width, int16_t pointPos);
+    PointConversor& inputGenericFloatRaw(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize);
+    PointConversor& inputGenericFixedRaw(uint64_t number, uint16_t width, int16_t pointPos);
 
-    uint64_t outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize);
-    uint64_t outputGenericFixed(uint16_t width, int16_t pointPos);
+    PointConversor& inputGenericFloat(QString const &number, uint16_t mantissaSize, uint16_t exponentSize);
+    PointConversor& inputGenericFixed(QString const &number, uint16_t width);
+
+    uint64_t outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize);
+    uint64_t outputGenericFixedRaw(uint16_t width, int16_t pointPos);
+
+    QString outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize);
+    QString outputGenericFixed(uint16_t width, int16_t pointPos);
+
 };
 
 #endif // POINTCONVERSOR_H

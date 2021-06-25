@@ -1,4 +1,5 @@
 #include "pointconversor.h"
+#include "invalidconversorinput.h"
 
 PointConversor::PointConversor()
 {
@@ -8,83 +9,153 @@ PointConversor::PointConversor()
     normality = PointConversor::NORMAL;
 }
 
-PointConversor& PointConversor::inputHalfFloat(uint16_t number)
+PointConversor& PointConversor::inputHalfFloatRaw(uint16_t number)
+{
+    return this->inputGenericFloatRaw(number, 10, 5);
+}
+
+PointConversor& PointConversor::inputSingleFloatRaw(float number)
+{
+    union { float number; uint32_t bits; } bitCast { number };
+    return this->inputGenericFloatRaw(bitCast.bits, 23, 8);
+}
+
+PointConversor& PointConversor::inputDoubleFloatRaw(double number)
+{
+    union { double number; uint64_t bits; } bitCast { number };
+    return this->inputGenericFloatRaw(bitCast.bits, 52, 11);
+}
+
+PointConversor& PointConversor::inputFixed8Raw(uint8_t number, int16_t pointPos)
+{
+    return this->inputGenericFixedRaw(number, 8, pointPos);
+}
+
+PointConversor& PointConversor::inputFixed16Raw(uint16_t number, int16_t pointPos)
+{
+    return this->inputGenericFixedRaw(number, 16, pointPos);
+}
+
+PointConversor& PointConversor::inputFixed32Raw(uint32_t number, int16_t pointPos)
+{
+    return this->inputGenericFixedRaw(number, 32, pointPos);
+}
+
+PointConversor& PointConversor::inputFixed64Raw(uint64_t number, int16_t pointPos)
+{
+    return this->inputGenericFixedRaw(number, 64, pointPos);
+}
+
+PointConversor& PointConversor::inputHalfFloat(QString const& number)
 {
     return this->inputGenericFloat(number, 10, 5);
 }
 
-PointConversor& PointConversor::inputSingleFloat(float number)
+PointConversor& PointConversor::inputSingleFloat(QString const& number)
 {
-    union { float number; uint32_t bits; } bitCast { number };
-    return this->inputGenericFloat(bitCast.bits, 23, 8);
+    return this->inputGenericFloat(number, 23, 8);
 }
 
-PointConversor& PointConversor::inputDoubleFloat(double number)
+PointConversor& PointConversor::inputDoubleFloat(QString const& number)
 {
-    union { double number; uint64_t bits; } bitCast { number };
-    return this->inputGenericFloat(bitCast.bits, 52, 11);
+    return this->inputGenericFloat(number, 52, 11);
 }
 
-PointConversor& PointConversor::inputFixed8(uint8_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed8(QString const& number)
 {
-    return this->inputGenericFixed(number, 8, pointPos);
+    return this->inputGenericFixed(number, 8);
 }
 
-PointConversor& PointConversor::inputFixed16(uint16_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed16(QString const& number)
 {
-    return this->inputGenericFixed(number, 16, pointPos);
+    return this->inputGenericFixed(number, 16);
 }
 
-PointConversor& PointConversor::inputFixed32(uint32_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed32(QString const& number)
 {
-    return this->inputGenericFixed(number, 32, pointPos);
+    return this->inputGenericFixed(number, 32);
 }
 
-PointConversor& PointConversor::inputFixed64(uint64_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed64(QString const& number)
 {
-    return this->inputGenericFixed(number, 64, pointPos);
+    return this->inputGenericFixed(number, 64);
 }
 
-uint16_t PointConversor::outputHalfFloat()
+uint16_t PointConversor::outputHalfFloatRaw()
 {
-    return this->outputGenericFloat(10, 5);
+    return this->outputGenericFloatRaw(10, 5);
 }
 
-float PointConversor::outputSingleFloat()
+float PointConversor::outputSingleFloatRaw()
 {
-    uint32_t number = this->outputGenericFloat(23, 8);
+    uint32_t number = this->outputGenericFloatRaw(23, 8);
     union { uint32_t bits; float number; } bitCast { number };
     return bitCast.number;
 }
 
-double PointConversor::outputDoubleFloat()
+double PointConversor::outputDoubleFloatRaw()
 {
-    uint64_t number = this->outputGenericFloat(52, 10);
+    uint64_t number = this->outputGenericFloatRaw(52, 11);
     union { uint64_t bits; double number; } bitCast { number };
     return bitCast.number;
 }
 
-uint8_t PointConversor::outputFixed8(int16_t pointPos)
+uint8_t PointConversor::outputFixed8Raw(int16_t pointPos)
+{
+    return this->outputGenericFixedRaw(8, pointPos);
+}
+
+uint16_t PointConversor::outputFixed16Raw(int16_t pointPos)
+{
+    return this->outputGenericFixedRaw(16, pointPos);
+}
+
+uint32_t PointConversor::outputFixed32Raw(int16_t pointPos)
+{
+    return this->outputGenericFixedRaw(32, pointPos);
+}
+
+uint64_t PointConversor::outputFixed64Raw(int16_t pointPos)
+{
+    return this->outputGenericFixedRaw(64, pointPos);
+}
+
+QString PointConversor::outputHalfFloat()
+{
+    return this->outputGenericFloat(10, 5);
+}
+
+QString PointConversor::outputSingleFloat()
+{
+    return this->outputGenericFloat(23, 8);
+}
+
+QString PointConversor::outputDoubleFloat()
+{
+    return this->outputGenericFloat(52, 11);
+}
+
+QString PointConversor::outputFixed8(int16_t pointPos)
 {
     return this->outputGenericFixed(8, pointPos);
 }
 
-uint16_t PointConversor::outputFixed16(int16_t pointPos)
+QString PointConversor::outputFixed16(int16_t pointPos)
 {
     return this->outputGenericFixed(16, pointPos);
 }
 
-uint32_t PointConversor::outputFixed32(int16_t pointPos)
+QString PointConversor::outputFixed32(int16_t pointPos)
 {
     return this->outputGenericFixed(32, pointPos);
 }
 
-uint64_t PointConversor::outputFixed64(int16_t pointPos)
+QString PointConversor::outputFixed64(int16_t pointPos)
 {
     return this->outputGenericFixed(64, pointPos);
 }
 
-PointConversor& PointConversor::inputGenericFloat(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize)
+PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize)
 {
     uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
     int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
@@ -108,7 +179,7 @@ PointConversor& PointConversor::inputGenericFloat(uint64_t number, uint16_t mant
     return *this;
 }
 
-PointConversor& PointConversor::inputGenericFixed(uint64_t number, uint16_t width, int16_t pointPos)
+PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, uint16_t width, int16_t pointPos)
 {
     uint64_t sign_mask = (uint64_t) 1 << (width - 1);
 
@@ -124,7 +195,7 @@ PointConversor& PointConversor::inputGenericFixed(uint64_t number, uint16_t widt
     return *this;
 }
 
-uint64_t PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize)
+uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize)
 {
     int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
     uint64_t finalBit = ((uint64_t) 1 << (exponentSize + mantissaSize));
@@ -173,7 +244,73 @@ uint64_t PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t expo
     return number;
 }
 
-uint64_t PointConversor::outputGenericFixed(uint16_t width, int16_t pointPos)
+PointConversor& PointConversor::inputGenericFloat(QString const &number, uint16_t mantissaSize, uint16_t exponentSize)
+{
+    uint64_t bits = 0;
+    bool hasChars = false;
+    int count = 0;
+
+    for (QChar numChar : number) {
+        if (numChar == '0' || numChar == '1') {
+            bits <<= 1;
+            bits |= numChar.digitValue();
+            if (bits != 0) {
+                count++;
+            }
+            if (count > mantissaSize + exponentSize + 1) {
+                throw InvalidConversorInput("Entrada é muito grande");
+            }
+            hasChars = true;
+        } else if (numChar != ' ') {
+            throw InvalidConversorInput("Entrada precisa conter apenas 0 ou 1");
+        }
+    }
+
+    if (!hasChars) {
+        throw InvalidConversorInput("Entrada não pode ser vazia");
+    }
+
+    return this->inputGenericFloatRaw(bits, mantissaSize, exponentSize);
+}
+
+PointConversor& PointConversor::inputGenericFixed(QString const &number, uint16_t width)
+{
+    uint64_t bits = 0;
+    bool hasChars = false;
+    bool pointFound = false;
+    int16_t pointPos = 0;
+    int count = 0;
+
+    for (QChar numChar : number) {
+        if (numChar == '0' || numChar == '1') {
+            bits <<= 1;
+            bits |= numChar.digitValue();
+            if (bits != 0 && !pointFound) {
+                count++;
+            }
+            if (count > width && numChar != '0') {
+                throw InvalidConversorInput("Entrada é muito grande");
+            }
+            hasChars = true;
+        } else if (numChar == '.') {
+            if (pointFound) {
+                throw InvalidConversorInput("Entrada pode conter apenas um ponto");
+            }
+            pointFound = true;
+            pointPos = count;
+        } else if (numChar != ' ') {
+            throw InvalidConversorInput("Entrada precisa conter apenas 0 ou 1 (ou ponto)");
+        }
+    }
+
+    if (!hasChars) {
+        throw InvalidConversorInput("Entrada não pode ser vazia");
+    }
+
+    return this->inputGenericFixedRaw(bits, width, count - pointPos);
+}
+
+uint64_t PointConversor::outputGenericFixedRaw(uint16_t width, int16_t pointPos)
 {
     uint64_t number = digits;
     int16_t numExponent = exponent;
@@ -189,4 +326,44 @@ uint64_t PointConversor::outputGenericFixed(uint16_t width, int16_t pointPos)
         number = ~number + 1;
     }
     return number;
+}
+
+QString PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize)
+{
+    uint64_t bits = this->outputGenericFloatRaw(mantissaSize, exponentSize);
+    QString output;
+
+    for (uint64_t i = 0; i < mantissaSize + exponentSize + 1; i++) {
+        uint64_t mask = (uint64_t) 1 << i;
+        output.append(bits & mask ? '1' : '0');
+    }
+    return output;
+}
+
+QString PointConversor::outputGenericFixed(uint16_t width, int16_t pointPos)
+{
+    uint64_t bits = this->outputGenericFixedRaw(width, pointPos);
+    QString output;
+
+    for (int i = width - 1; i >= pointPos; i--) {
+        if (i >= 0) {
+            uint64_t mask = (uint64_t) 1 << (uint64_t) i;
+            output.append(bits & mask ? '1' : '0');
+        } else {
+            output.append('0');
+        }
+    }
+
+    output.append('.');
+
+    for (int i = pointPos - 1; i >= 0; i--) {
+        if (i < width) {
+            uint64_t mask = (uint64_t) 1 << (uint64_t) i;
+            output.append(bits & mask ? '1' : '0');
+        } else {
+            output.append('0');
+        }
+    }
+
+    return output;
 }
