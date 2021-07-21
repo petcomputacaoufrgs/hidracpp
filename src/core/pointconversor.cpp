@@ -171,9 +171,9 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
         }
         exponent -= exponentMask >> 1;
     } else if (digits == 0) {
-        normality = PointConversor::INFINITY;
+        normality = PointConversor::INFINITY_NAN;
     } else {
-        normality = PointConversor::NAN;
+        normality = PointConversor::NOT_A_NUMBER;
     }
 
     return *this;
@@ -228,11 +228,11 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
             numDigits >>= 1;
         }
         break;
-    case PointConversor::INFINITY:
+    case PointConversor::INFINITY_NAN:
         numExponent = exponentMask;
         numDigits = 0;
         break;
-    case PointConversor::NAN:
+    case PointConversor::NOT_A_NUMBER:
         numExponent = exponentMask;
         numDigits = 1;
         break;
@@ -273,6 +273,8 @@ PointConversor& PointConversor::inputGenericFloat(QString const &number, uint16_
     return this->inputGenericFloatRaw(bits, mantissaSize, exponentSize);
 }
 
+#include <iostream>
+
 PointConversor& PointConversor::inputGenericFixed(QString const &number, uint16_t width)
 {
     uint64_t bits = 0;
@@ -285,7 +287,7 @@ PointConversor& PointConversor::inputGenericFixed(QString const &number, uint16_
         if (numChar == '0' || numChar == '1') {
             bits <<= 1;
             bits |= numChar.digitValue();
-            if (bits != 0 && !pointFound) {
+            if (bits != 0 || pointFound) {
                 count++;
             }
             if (count > width && numChar != '0') {

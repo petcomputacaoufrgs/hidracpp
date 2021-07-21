@@ -9,8 +9,8 @@ class PointConversor
 private:
     enum Normality {
         NORMAL,
-        NAN,
-        INFINITY
+        NOT_A_NUMBER,
+        INFINITY_NAN
     };
 public:
     PointConversor();
