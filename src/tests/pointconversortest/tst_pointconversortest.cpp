@@ -16,12 +16,15 @@ public:
 private slots:
     void initTestCase();
     void cleanupTestCase();
+
     void test_fixedSamePoint();
     void test_fixedOtherPoint();
     void test_fixedZerosRight();
     void test_fixedZerosLeft();
 
     void test_floatToFloat();
+
+    void test_floatToFixed();
 };
 
 PointConversorTest::PointConversorTest()
@@ -70,14 +73,20 @@ void PointConversorTest::test_fixedZerosLeft()
 
 void PointConversorTest::test_floatToFloat()
 {
-    QCOMPARE(conversor.inputDoubleFloat("0011111110011010100000000000000000000000000000000000000000000000").outputSingleFloat(),
-             "00111100110101000000000000000000");
+    QCOMPARE(conversor.inputDoubleFloat("0011111110100110000000000000000000000000000000000000000000000000").outputSingleFloat(),
+             "00111101001100000000000000000000");
 
-    QCOMPARE(conversor.inputSingleFloat("00111101001010010000000000000000").outputSingleFloat(),
+    QCOMPARE(conversor.inputSingleFloat("00111101001010010000000000000000").outputDoubleFloat(),
              "0011111110100101001000000000000000000000000000000000000000000000");
 
     QCOMPARE(conversor.inputSingleFloat("01000010010000000110000000000000").outputHalfFloat(),
              "0101001000000011");
+}
+
+void PointConversorTest::test_floatToFixed()
+{
+    QCOMPARE(conversor.inputSingleFloat("01000001110000010100100000000000").outputFixed16(10),
+             "11000.0010100100");
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)

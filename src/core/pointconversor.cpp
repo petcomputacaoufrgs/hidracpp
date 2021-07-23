@@ -159,7 +159,7 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
 {
     uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
     int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
-    uint64_t finalBit = ((uint64_t) 1 << (exponentSize + mantissaSize));
+    uint64_t finalBit = ((uint64_t) 1 << mantissaSize);
 
     sign = number >> (exponentSize + mantissaSize);
     digits = number & mantissaMask;
@@ -169,7 +169,8 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
             digits |= finalBit;
             normality = PointConversor::NORMAL;
         }
-        exponent -= exponentMask >> 1;
+        digits <<= 64 - mantissaSize - 1;
+        exponent = exponent - (exponentMask >> 1);
     } else if (digits == 0) {
         normality = PointConversor::INFINITY_NAN;
     } else {
@@ -195,10 +196,13 @@ PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, uint16_t w
     return *this;
 }
 
+#include <iostream>
+
 uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize)
 {
+    uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
     int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
-    uint64_t finalBit = ((uint64_t) 1 << (exponentSize + mantissaSize));
+    uint64_t finalBit = ((uint64_t) 1 << mantissaSize);
     int16_t numExponent;
     uint64_t numDigits;
 
@@ -208,16 +212,19 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
         numDigits = digits;
         while (numDigits < finalBit && numDigits > 0) {
             numDigits <<= 1;
+        }
+
+        while (numDigits >= (finalBit << 1)) {
+            numDigits >>= 1;
+        }
+
+        numDigits &= ~finalBit;
+
+        while (numExponent > exponentMask) {
+            numDigits <<= 1;
             numExponent -= 1;
         }
-        while (numDigits > finalBit) {
-            numDigits >>= 1;
-            numExponent += 1;
-        }
-        while (numExponent >= exponentMask) {
-            numDigits >>= 1;
-            numExponent -= 1;
-        }
+
         if (numDigits == 0) {
             numExponent = 0;
         } else if (numExponent >= exponentMask) {
@@ -238,7 +245,7 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
         break;
     }
 
-    uint64_t number = numDigits;
+    uint64_t number = numDigits & mantissaMask;
     number |= (uint64_t) numExponent << mantissaSize;
     number |= (uint64_t) sign << (mantissaSize + exponentSize);
     return number;
@@ -272,8 +279,6 @@ PointConversor& PointConversor::inputGenericFloat(QString const &number, uint16_
 
     return this->inputGenericFloatRaw(bits, mantissaSize, exponentSize);
 }
-
-#include <iostream>
 
 PointConversor& PointConversor::inputGenericFixed(QString const &number, uint16_t width)
 {
@@ -335,8 +340,8 @@ QString PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t expon
     uint64_t bits = this->outputGenericFloatRaw(mantissaSize, exponentSize);
     QString output;
 
-    for (uint64_t i = 0; i < mantissaSize + exponentSize + 1; i++) {
-        uint64_t mask = (uint64_t) 1 << i;
+    for (uint64_t i = mantissaSize + exponentSize + 1; i > 0; i--) {
+        uint64_t mask = (uint64_t) 1 << (i - 1);
         output.append(bits & mask ? '1' : '0');
     }
     return output;
