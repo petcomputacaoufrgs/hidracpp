@@ -26,24 +26,24 @@ PointConversor& PointConversor::inputDoubleFloatRaw(double number)
     return this->inputGenericFloatRaw(bitCast.bits, 52, 11);
 }
 
-PointConversor& PointConversor::inputFixed8Raw(uint8_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed8Raw(uint8_t number, int16_t pointPos, Signedness signedness)
 {
-    return this->inputGenericFixedRaw(number, 8, pointPos);
+    return this->inputGenericFixedRaw(number, 8, pointPos, signedness);
 }
 
-PointConversor& PointConversor::inputFixed16Raw(uint16_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed16Raw(uint16_t number, int16_t pointPos, Signedness signedness)
 {
-    return this->inputGenericFixedRaw(number, 16, pointPos);
+    return this->inputGenericFixedRaw(number, 16, pointPos, signedness);
 }
 
-PointConversor& PointConversor::inputFixed32Raw(uint32_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed32Raw(uint32_t number, int16_t pointPos, Signedness signedness)
 {
-    return this->inputGenericFixedRaw(number, 32, pointPos);
+    return this->inputGenericFixedRaw(number, 32, pointPos, signedness);
 }
 
-PointConversor& PointConversor::inputFixed64Raw(uint64_t number, int16_t pointPos)
+PointConversor& PointConversor::inputFixed64Raw(uint64_t number, int16_t pointPos, Signedness signedness)
 {
-    return this->inputGenericFixedRaw(number, 64, pointPos);
+    return this->inputGenericFixedRaw(number, 64, pointPos, signedness);
 }
 
 PointConversor& PointConversor::inputHalfFloat(QString const& number)
@@ -61,24 +61,24 @@ PointConversor& PointConversor::inputDoubleFloat(QString const& number)
     return this->inputGenericFloat(number, 52, 11);
 }
 
-PointConversor& PointConversor::inputFixed8(QString const& number)
+PointConversor& PointConversor::inputFixed8(QString const& number, Signedness signedness)
 {
-    return this->inputGenericFixed(number, 8);
+    return this->inputGenericFixed(number, 8, signedness);
 }
 
-PointConversor& PointConversor::inputFixed16(QString const& number)
+PointConversor& PointConversor::inputFixed16(QString const& number, Signedness signedness)
 {
-    return this->inputGenericFixed(number, 16);
+    return this->inputGenericFixed(number, 16, signedness);
 }
 
-PointConversor& PointConversor::inputFixed32(QString const& number)
+PointConversor& PointConversor::inputFixed32(QString const& number, Signedness signedness)
 {
-    return this->inputGenericFixed(number, 32);
+    return this->inputGenericFixed(number, 32, signedness);
 }
 
-PointConversor& PointConversor::inputFixed64(QString const& number)
+PointConversor& PointConversor::inputFixed64(QString const& number, Signedness signedness)
 {
-    return this->inputGenericFixed(number, 64);
+    return this->inputGenericFixed(number, 64, signedness);
 }
 
 uint16_t PointConversor::outputHalfFloatRaw()
@@ -100,24 +100,24 @@ double PointConversor::outputDoubleFloatRaw()
     return bitCast.number;
 }
 
-uint8_t PointConversor::outputFixed8Raw(int16_t pointPos)
+uint8_t PointConversor::outputFixed8Raw(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixedRaw(8, pointPos);
+    return this->outputGenericFixedRaw(8, pointPos, signedness);
 }
 
-uint16_t PointConversor::outputFixed16Raw(int16_t pointPos)
+uint16_t PointConversor::outputFixed16Raw(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixedRaw(16, pointPos);
+    return this->outputGenericFixedRaw(16, pointPos, signedness);
 }
 
-uint32_t PointConversor::outputFixed32Raw(int16_t pointPos)
+uint32_t PointConversor::outputFixed32Raw(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixedRaw(32, pointPos);
+    return this->outputGenericFixedRaw(32, pointPos, signedness);
 }
 
-uint64_t PointConversor::outputFixed64Raw(int16_t pointPos)
+uint64_t PointConversor::outputFixed64Raw(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixedRaw(64, pointPos);
+    return this->outputGenericFixedRaw(64, pointPos, signedness);
 }
 
 QString PointConversor::outputHalfFloat()
@@ -135,24 +135,24 @@ QString PointConversor::outputDoubleFloat()
     return this->outputGenericFloat(52, 11);
 }
 
-QString PointConversor::outputFixed8(int16_t pointPos)
+QString PointConversor::outputFixed8(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixed(8, pointPos);
+    return this->outputGenericFixed(8, pointPos, signedness);
 }
 
-QString PointConversor::outputFixed16(int16_t pointPos)
+QString PointConversor::outputFixed16(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixed(16, pointPos);
+    return this->outputGenericFixed(16, pointPos, signedness);
 }
 
-QString PointConversor::outputFixed32(int16_t pointPos)
+QString PointConversor::outputFixed32(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixed(32, pointPos);
+    return this->outputGenericFixed(32, pointPos, signedness);
 }
 
-QString PointConversor::outputFixed64(int16_t pointPos)
+QString PointConversor::outputFixed64(int16_t pointPos, Signedness signedness)
 {
-    return this->outputGenericFixed(64, pointPos);
+    return this->outputGenericFixed(64, pointPos, signedness);
 }
 
 PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize)
@@ -169,8 +169,7 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
             digits |= finalBit;
             normality = PointConversor::NORMAL;
         }
-        digits <<= 64 - mantissaSize - 1;
-        exponent = exponent - (exponentMask >> 1);
+        exponent = exponent - (exponentMask >> 1) - mantissaSize;
     } else if (digits == 0) {
         normality = PointConversor::INFINITY_NAN;
     } else {
@@ -180,12 +179,22 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
     return *this;
 }
 
-PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, uint16_t width, int16_t pointPos)
+PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t width, int16_t pointPos, Signedness signedness)
 {
     uint64_t sign_mask = (uint64_t) 1 << (width - 1);
 
+    if (width < 0) {
+        throw InvalidConversorInput("Largura não pode ser negativa.");
+    }
+    if (width > MAX_BIT_COUNT) {
+        throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_BIT_COUNT));
+    }
+    if (pointPos > width || pointPos < 0) {
+        throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
+    }
+
     normality = PointConversor::NORMAL;
-    sign = (number & sign_mask) != 0;
+    sign = signedness == TWOS_COMPL && (number & sign_mask) != 0;
     exponent = -pointPos;
 
     digits = number;
@@ -195,8 +204,6 @@ PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, uint16_t w
 
     return *this;
 }
-
-#include <iostream>
 
 uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize)
 {
@@ -208,14 +215,17 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
 
     switch (normality) {
     case PointConversor::NORMAL:
-        numExponent = exponent + (exponentMask >> 1);
+        numExponent = exponent + (exponentMask >> 1) + mantissaSize;
         numDigits = digits;
+
         while (numDigits < finalBit && numDigits > 0) {
             numDigits <<= 1;
+            numExponent -= 1;
         }
 
         while (numDigits >= (finalBit << 1)) {
             numDigits >>= 1;
+            numExponent += 1;
         }
 
         numDigits &= ~finalBit;
@@ -280,7 +290,7 @@ PointConversor& PointConversor::inputGenericFloat(QString const &number, uint16_
     return this->inputGenericFloatRaw(bits, mantissaSize, exponentSize);
 }
 
-PointConversor& PointConversor::inputGenericFixed(QString const &number, uint16_t width)
+PointConversor& PointConversor::inputGenericFixed(QString const &number, int16_t width, Signedness signedness)
 {
     uint64_t bits = 0;
     bool hasChars = false;
@@ -314,13 +324,24 @@ PointConversor& PointConversor::inputGenericFixed(QString const &number, uint16_
         throw InvalidConversorInput("Entrada não pode ser vazia");
     }
 
-    return this->inputGenericFixedRaw(bits, width, count - pointPos);
+    return this->inputGenericFixedRaw(bits, width, count - pointPos, signedness);
 }
 
-uint64_t PointConversor::outputGenericFixedRaw(uint16_t width, int16_t pointPos)
+uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, Signedness signedness)
 {
     uint64_t number = digits;
     int16_t numExponent = exponent;
+
+    if (width < 0) {
+        throw InvalidConversorInput("Largura não pode ser negativa.");
+    }
+    if (width > MAX_BIT_COUNT) {
+        throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_BIT_COUNT));
+    }
+    if (pointPos > width || pointPos < 0) {
+        throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
+    }
+
     while (numExponent > -pointPos) {
         numExponent -= 1;
         number <<= 1;
@@ -330,8 +351,15 @@ uint64_t PointConversor::outputGenericFixedRaw(uint16_t width, int16_t pointPos)
         number >>= 1;
     }
     if (sign) {
-        number = ~number + 1;
+        switch (signedness) {
+        case UNSIGNED:
+            throw InvalidConversorInput("Formato de saída é sem sinal, mas entrada é negativa.");
+        case TWOS_COMPL:
+            number = ~number + 1;
+            break;
+        }
     }
+
     return number;
 }
 
@@ -347,9 +375,9 @@ QString PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t expon
     return output;
 }
 
-QString PointConversor::outputGenericFixed(uint16_t width, int16_t pointPos)
+QString PointConversor::outputGenericFixed(int16_t width, int16_t pointPos, Signedness signedness)
 {
-    uint64_t bits = this->outputGenericFixedRaw(width, pointPos);
+    uint64_t bits = this->outputGenericFixedRaw(width, pointPos, signedness);
     QString output;
 
     for (int i = width - 1; i >= pointPos; i--) {
