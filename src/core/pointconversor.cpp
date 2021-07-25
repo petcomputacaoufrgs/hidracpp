@@ -165,11 +165,13 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
     digits = number & mantissaMask;
     exponent = (number >> mantissaSize) & exponentMask;
     if (exponent != exponentMask) {
-        if (exponent != 0) {
+        if (exponent == 0) {
+            exponent++;
+        } else {
             digits |= finalBit;
-            normality = PointConversor::NORMAL;
         }
-        exponent = exponent - (exponentMask >> 1) - mantissaSize;
+        normality = PointConversor::NORMAL;
+        exponent -= mantissaSize + (exponentMask >> 1);
     } else if (digits == 0) {
         normality = PointConversor::INFINITY_NAN;
     } else {
@@ -212,13 +214,14 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
     uint64_t finalBit = ((uint64_t) 1 << mantissaSize);
     int16_t numExponent;
     uint64_t numDigits;
+    bool hasFinalBit;
 
     switch (normality) {
     case PointConversor::NORMAL:
         numExponent = exponent + (exponentMask >> 1) + mantissaSize;
         numDigits = digits;
 
-        while (numDigits < finalBit && numDigits > 0) {
+        while (numDigits < finalBit && numDigits != 0) {
             numDigits <<= 1;
             numExponent -= 1;
         }
@@ -226,8 +229,17 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
         while (numDigits >= (finalBit << 1)) {
             numDigits >>= 1;
             numExponent += 1;
+        }        
+
+        if (numExponent <= 0) {
+            while (numExponent < 0) {
+                numExponent += 1;
+                numDigits >>= 1;
+            }
+            numDigits >>= 1;
         }
 
+        hasFinalBit = numDigits & finalBit;
         numDigits &= ~finalBit;
 
         while (numExponent > exponentMask) {
@@ -235,14 +247,11 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
             numExponent -= 1;
         }
 
-        if (numDigits == 0) {
+        if (!hasFinalBit && numDigits == 0) {
             numExponent = 0;
         } else if (numExponent >= exponentMask) {
             numExponent = exponentMask;
             numDigits = 0;
-        } else if (numExponent <= 0) {
-            numExponent += 1;
-            numDigits >>= 1;
         }
         break;
     case PointConversor::INFINITY_NAN:
@@ -256,7 +265,7 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
     }
 
     uint64_t number = numDigits & mantissaMask;
-    number |= (uint64_t) numExponent << mantissaSize;
+    number |= (uint64_t) (numExponent & exponentMask) << mantissaSize;
     number |= (uint64_t) sign << (mantissaSize + exponentSize);
     return number;
 }
