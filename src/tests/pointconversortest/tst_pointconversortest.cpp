@@ -28,6 +28,9 @@ private slots:
 
     void test_subnormalToFloat();
     void test_subnormalToFixed();
+
+    void test_floatToFloatOverflow();
+    void test_floatToFloatUnderflow();
 };
 
 PointConversorTest::PointConversorTest()
@@ -122,9 +125,20 @@ void PointConversorTest::test_subnormalToFloat()
 
 void PointConversorTest::test_subnormalToFixed()
 {
-
     QCOMPARE(conversor.inputHalfFloat("0000000000010011").outputFixed32(26, PointConversor::UNSIGNED),
              "000000.00000000000000000001001100");
+}
+
+void PointConversorTest::test_floatToFloatOverflow()
+{
+    QCOMPARE(conversor.inputDoubleFloat("0100001000000010011001011000000010110111010100000111110101110001").outputSingleFloat(),
+             "01010000000100110010110000000110");
+}
+
+void PointConversorTest::test_floatToFloatUnderflow()
+{
+    QCOMPARE(conversor.inputDoubleFloat("0011110100111011110011001100110010100110001101110001010111100100").outputSingleFloat(),
+             "00101001110111100110011001100101");
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)

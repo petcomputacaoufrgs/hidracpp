@@ -215,6 +215,7 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
     int16_t numExponent;
     uint64_t numDigits;
     bool hasFinalBit;
+    bool roundUp = false;
 
     switch (normality) {
     case PointConversor::NORMAL:
@@ -227,20 +228,24 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
         }
 
         while (numDigits >= (finalBit << 1)) {
+            roundUp = (numDigits & 1) != 0;
             numDigits >>= 1;
             numExponent += 1;
         }        
 
         if (numExponent <= 0) {
             while (numExponent < 0) {
-                numExponent += 1;
+                roundUp = (numDigits & 1) != 0;
                 numDigits >>= 1;
+                numExponent += 1;
             }
+            roundUp = (numDigits & 1) != 0;
             numDigits >>= 1;
         }
 
         hasFinalBit = numDigits & finalBit;
         numDigits &= ~finalBit;
+        numDigits += roundUp;
 
         while (numExponent > exponentMask) {
             numDigits <<= 1;
