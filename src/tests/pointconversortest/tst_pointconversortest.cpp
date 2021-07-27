@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "pointconversor.h"
+#include "invalidconversorinput.h"
 
 class PointConversorTest : public QObject
 {
@@ -56,6 +57,8 @@ private slots:
     void test_infiniteToFixedTwosCompl();
 
     void test_nanToFloat();
+
+    void test_badFixedPointPos();
 };
 
 PointConversorTest::PointConversorTest()
@@ -120,8 +123,8 @@ void PointConversorTest::test_fixedZerosRight()
 
 void PointConversorTest::test_fixedZerosLeft()
 {
-    QCOMPARE(conversor.inputFixed8("00000.01010011", PointConversor::UNSIGNED).outputFixed64(9, PointConversor::UNSIGNED),
-             "0000000000000000000000000000000000000000000000000000000.010100110");
+    QCOMPARE(conversor.inputFixed8("00000.0110010", PointConversor::UNSIGNED).outputFixed64(9, PointConversor::UNSIGNED),
+             "0000000000000000000000000000000000000000000000000000000.011001000");
 }
 
 void PointConversorTest::test_floatToFloat()
@@ -171,8 +174,8 @@ void PointConversorTest::test_fixedToFloat()
     QCOMPARE(conversor.inputFixed32("100001010.00010101000", PointConversor::UNSIGNED).outputDoubleFloat(),
              "0100000001110000101000010101000000000000000000000000000000000000");
 
-    QCOMPARE(conversor.inputFixed16("01100010101100000.0", PointConversor::UNSIGNED).outputHalfFloat(),
-             "0111101000101011");
+    QCOMPARE(conversor.inputFixed16("011000101011000.0", PointConversor::UNSIGNED).outputHalfFloat(),
+             "0111001000101011");
 }
 
 void PointConversorTest::test_fixedToFloatTwosCompl()
@@ -282,25 +285,25 @@ void PointConversorTest::test_fixedOverflowTwosCompl()
 
 void PointConversorTest::test_fixedUnderflow()
 {
-    QCOMPARE(conversor.inputFixed16("0.0111111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
+    QCOMPARE(conversor.inputFixed16("0.011111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
              "00000.100");
 
-    QCOMPARE(conversor.inputFixed16("0.0101111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
+    QCOMPARE(conversor.inputFixed16("0.010111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
              "00000.011");
 
-    QCOMPARE(conversor.inputFixed16("0.0110111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
+    QCOMPARE(conversor.inputFixed16("0.011011111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
              "00000.011");
 }
 
 void PointConversorTest::test_fixedUnderflowTwosCompl()
 {
-    QCOMPARE(conversor.inputFixed16("0.0111111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+    QCOMPARE(conversor.inputFixed16("0.011111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
              "00000.100");
 
-    QCOMPARE(conversor.inputFixed16("0.0101111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+    QCOMPARE(conversor.inputFixed16("0.010111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
              "00000.011");
 
-    QCOMPARE(conversor.inputFixed16("0.0110111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+    QCOMPARE(conversor.inputFixed16("0.011011111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
              "00000.011");
 
     QCOMPARE(conversor.inputFixed16("10.00000000000001", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
@@ -356,6 +359,12 @@ void PointConversorTest::test_nanToFloat()
 
     QCOMPARE(conversor.inputSingleFloat("01111111100000000000000001000000").outputDoubleFloat(),
              "0111111111110000000000000000000000000000000000000000000000000001");
+}
+
+void PointConversorTest::test_badFixedPointPos()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("0.00000001", PointConversor::UNSIGNED), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("100000001.0", PointConversor::UNSIGNED), InvalidConversorInput);
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)

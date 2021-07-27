@@ -348,6 +348,12 @@ PointConversor& PointConversor::inputGenericFixed(QString const &number, int16_t
     if (!hasChars) {
         throw InvalidConversorInput("Entrada não pode ser vazia");
     }
+    if (!pointFound) {
+        throw InvalidConversorInput("O número em ponto fixo deve conter um ponto.");
+    }
+    if (pointPos >= width || count - pointPos >= width) {
+        throw InvalidConversorInput("O ponto não pode estar fora dos limites.");
+    }
 
     return this->inputGenericFixedRaw(bits, width, count - pointPos, signedness);
 }
