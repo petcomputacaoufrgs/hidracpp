@@ -34,6 +34,11 @@ private slots:
 
     void test_fixedOverflow();
     void test_fixedUnderflow();
+
+    void test_infiniteToFloat();
+    void test_infiniteToFixed();
+
+    void test_nanToFloat();
 };
 
 PointConversorTest::PointConversorTest()
@@ -172,6 +177,33 @@ void PointConversorTest::test_fixedUnderflow()
 
     QCOMPARE(conversor.inputFixed16("0.0110111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
              "00000.011");
+}
+
+void PointConversorTest::test_infiniteToFloat()
+{
+    QCOMPARE(conversor.inputHalfFloat("0111110000000000").outputSingleFloat(),
+             "01111111100000000000000000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("0111111111110000000000000000000000000000000000000000000000000000").outputHalfFloat(),
+             "0111110000000000");
+}
+
+void PointConversorTest::test_infiniteToFixed()
+{
+    QCOMPARE(conversor.inputHalfFloat("0111110000000000").outputFixed8(5, PointConversor::UNSIGNED),
+             "111.11111");
+}
+
+void PointConversorTest::test_nanToFloat()
+{
+    QCOMPARE(conversor.inputHalfFloat("0111110001110010").outputSingleFloat(),
+             "01111111100000000000000000000001");
+
+    QCOMPARE(conversor.inputDoubleFloat("0111111111110000000000000000000000000000000000000000000000110000").outputSingleFloat(),
+             "01111111100000000000000000000001");
+
+    QCOMPARE(conversor.inputSingleFloat("01111111100000000000000001000000").outputDoubleFloat(),
+             "0111111111110000000000000000000000000000000000000000000000000001");
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)

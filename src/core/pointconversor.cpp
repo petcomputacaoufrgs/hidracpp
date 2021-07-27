@@ -351,31 +351,50 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
     uint64_t roundLeft = 0;
     uint64_t roundRight = 0;
 
-    if (width < 0) {
-        throw InvalidConversorInput("Largura não pode ser negativa.");
-    }
-    if (width > MAX_BIT_COUNT) {
-        throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_BIT_COUNT));
-    }
-    if (pointPos > width || pointPos < 0) {
-        throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
+    switch (normality) {
+    case NORMAL:
+        if (width < 0) {
+            throw InvalidConversorInput("Largura não pode ser negativa.");
+        }
+        if (width > MAX_BIT_COUNT) {
+            throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_BIT_COUNT));
+        }
+        if (pointPos > width || pointPos < 0) {
+            throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
+        }
+
+        while (numExponent > -pointPos) {
+            roundLeft |= number & finalBit;
+            numExponent -= 1;
+            number <<= 1;
+        }
+
+        number |= roundLeft;
+
+        while (numExponent < -pointPos) {
+            roundRight = (number & 1) != 0;
+            numExponent += 1;
+            number >>= 1;
+        }
+
+        number += roundRight;
+        break;
+
+    case INFINITY_NAN:
+        switch (signedness) {
+        case UNSIGNED:
+            number = ~((uint64_t) 0) >> (64 - width);
+            break;
+        case TWOS_COMPL:
+            number = ((uint64_t) 1 << (width - 1)) - 1;
+            break;
+        }
+        break;
+
+    case NOT_A_NUMBER:
+        throw InvalidConversorInput("Entrada é um NAN (Not A Number)");
     }
 
-    while (numExponent > -pointPos) {
-        roundLeft |= number & finalBit;
-        numExponent -= 1;
-        number <<= 1;
-    }
-
-    number |= roundLeft;
-
-    while (numExponent < -pointPos) {
-        roundRight = (number & 1) != 0;
-        numExponent += 1;
-        number >>= 1;
-    }
-
-    number += roundRight;
 
     if (sign) {
         switch (signedness) {
