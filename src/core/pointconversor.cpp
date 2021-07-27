@@ -209,13 +209,15 @@ PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t wi
 
 uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize)
 {
-    uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
-    int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
-    uint64_t finalBit = ((uint64_t) 1 << mantissaSize);
     int16_t numExponent;
     uint64_t numDigits;
+
+    uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
+    int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
+    uint64_t finalBit = (uint64_t) 1 << mantissaSize;
+
     bool hasFinalBit;
-    bool roundUp = false;
+    uint64_t roundRight = 0;
 
     switch (normality) {
     case PointConversor::NORMAL:
@@ -228,24 +230,23 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
         }
 
         while (numDigits >= (finalBit << 1)) {
-            roundUp = (numDigits & 1) != 0;
+            roundRight = numDigits & 1;
             numDigits >>= 1;
             numExponent += 1;
-        }        
+        }
 
         if (numExponent <= 0) {
             while (numExponent < 0) {
-                roundUp = (numDigits & 1) != 0;
                 numDigits >>= 1;
                 numExponent += 1;
             }
-            roundUp = (numDigits & 1) != 0;
+            roundRight = numDigits & 1;
             numDigits >>= 1;
         }
 
         hasFinalBit = numDigits & finalBit;
         numDigits &= ~finalBit;
-        numDigits += roundUp;
+        numDigits += roundRight;
 
         while (numExponent > exponentMask) {
             numDigits <<= 1;
@@ -346,6 +347,10 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
     uint64_t number = digits;
     int16_t numExponent = exponent;
 
+    uint64_t finalBit = (uint64_t) 1 << (width - 1);
+    uint64_t roundLeft = 0;
+    uint64_t roundRight = 0;
+
     if (width < 0) {
         throw InvalidConversorInput("Largura não pode ser negativa.");
     }
@@ -357,13 +362,21 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
     }
 
     while (numExponent > -pointPos) {
+        roundLeft |= number & finalBit;
         numExponent -= 1;
         number <<= 1;
     }
+
+    number |= roundLeft;
+
     while (numExponent < -pointPos) {
+        roundRight = (number & 1) != 0;
         numExponent += 1;
         number >>= 1;
     }
+
+    number += roundRight;
+
     if (sign) {
         switch (signedness) {
         case UNSIGNED:

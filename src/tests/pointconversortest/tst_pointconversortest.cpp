@@ -29,8 +29,11 @@ private slots:
     void test_subnormalToFloat();
     void test_subnormalToFixed();
 
-    void test_floatToFloatOverflow();
-    void test_floatToFloatUnderflow();
+    void test_floatOverflow();
+    void test_floatUnderflow();
+
+    void test_fixedOverflow();
+    void test_fixedUnderflow();
 };
 
 PointConversorTest::PointConversorTest()
@@ -129,16 +132,46 @@ void PointConversorTest::test_subnormalToFixed()
              "000000.00000000000000000001001100");
 }
 
-void PointConversorTest::test_floatToFloatOverflow()
+void PointConversorTest::test_floatOverflow()
 {
+    QCOMPARE(conversor.inputDoubleFloat("0100001000000010011001011000000010010111010100000111110101110001").outputSingleFloat(),
+             "01010000000100110010110000000101");
+
     QCOMPARE(conversor.inputDoubleFloat("0100001000000010011001011000000010110111010100000111110101110001").outputSingleFloat(),
              "01010000000100110010110000000110");
 }
 
-void PointConversorTest::test_floatToFloatUnderflow()
+void PointConversorTest::test_floatUnderflow()
 {
     QCOMPARE(conversor.inputDoubleFloat("0011110100111011110011001100110010100110001101110001010111100100").outputSingleFloat(),
              "00101001110111100110011001100101");
+
+    QCOMPARE(conversor.inputDoubleFloat("0011110100111011110011001100110010110110001101110001010111100100").outputSingleFloat(),
+             "00101001110111100110011001100110");
+}
+
+void PointConversorTest::test_fixedOverflow()
+{
+    QCOMPARE(conversor.inputFixed16("111111111111111.1", PointConversor::UNSIGNED).outputFixed8(6, PointConversor::UNSIGNED),
+             "11.100000");
+
+    QCOMPARE(conversor.inputFixed16("111111111111101.1", PointConversor::UNSIGNED).outputFixed8(6, PointConversor::UNSIGNED),
+             "11.100000");
+
+    QCOMPARE(conversor.inputFixed16("111111111111001.1", PointConversor::UNSIGNED).outputFixed8(6, PointConversor::UNSIGNED),
+             "11.100000");
+}
+
+void PointConversorTest::test_fixedUnderflow()
+{
+    QCOMPARE(conversor.inputFixed16("0.0111111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
+             "00000.100");
+
+    QCOMPARE(conversor.inputFixed16("0.0101111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
+             "00000.011");
+
+    QCOMPARE(conversor.inputFixed16("0.0110111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
+             "00000.011");
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)
