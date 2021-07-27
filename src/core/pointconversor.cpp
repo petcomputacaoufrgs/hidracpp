@@ -357,9 +357,21 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
     uint64_t number = digits;
     int16_t numExponent = exponent;
 
-    uint64_t finalBit = (uint64_t) 1 << (width - 1);
+    uint64_t finalBit;
+    uint64_t mantissaMask;
+    uint64_t digitsMask = ~((uint64_t) 0) >> (64 - width);
     uint64_t roundLeft = 0;
     uint64_t roundRight = 0;
+
+    switch (signedness) {
+    case UNSIGNED:
+        finalBit = (uint64_t) 1 << (width - 1);
+        break;
+    case TWOS_COMPL:
+        finalBit = (uint64_t) 1 << (width - 2);
+        break;
+    }
+    mantissaMask = (finalBit << 1) - 1;
 
     switch (normality) {
     case NORMAL:
@@ -387,33 +399,37 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
             number >>= 1;
         }
 
-        number += roundRight;
+        number &= mantissaMask;
+
+        if (digitsMask != number) {
+            number += roundRight;
+        }
+        if (sign) {
+            switch (signedness) {
+            case UNSIGNED:
+                throw InvalidConversorInput("Formato de saída é sem sinal, mas entrada é negativa.");
+            case TWOS_COMPL:
+                number = (~number + 1) & digitsMask;
+                break;
+            }
+        }
         break;
 
     case INFINITY_NAN:
-        switch (signedness) {
-        case UNSIGNED:
-            number = ~((uint64_t) 0) >> (64 - width);
-            break;
-        case TWOS_COMPL:
-            number = ((uint64_t) 1 << (width - 1)) - 1;
-            break;
+        number = mantissaMask;
+        if (sign) {
+            switch (signedness) {
+            case UNSIGNED:
+                throw InvalidConversorInput("Formato de saída é sem sinal, mas entrada é negativa.");
+            case TWOS_COMPL:
+                number = ((~number + 1) & digitsMask) - 1;
+                break;
+            }
         }
         break;
 
     case NOT_A_NUMBER:
         throw InvalidConversorInput("Entrada é um NAN (Not A Number)");
-    }
-
-
-    if (sign) {
-        switch (signedness) {
-        case UNSIGNED:
-            throw InvalidConversorInput("Formato de saída é sem sinal, mas entrada é negativa.");
-        case TWOS_COMPL:
-            number = ~number + 1;
-            break;
-        }
     }
 
     return number;

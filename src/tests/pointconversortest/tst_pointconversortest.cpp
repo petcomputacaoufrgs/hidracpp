@@ -29,19 +29,31 @@ private slots:
     void test_floatToFloatSigned();
 
     void test_floatToFixed();
+    void test_floatToFixedTwosCompl();
+
     void test_fixedToFloat();
+    void test_fixedToFloatTwosCompl();
 
     void test_subnormalToFloat();
+    void test_subnormalToFloatSigned();
+
     void test_subnormalToFixed();
+    void test_subnormalToFixedTwosCompl();
 
     void test_floatOverflow();
     void test_floatUnderflow();
 
     void test_fixedOverflow();
+    void test_fixedOverflowTwosCompl();
+
     void test_fixedUnderflow();
+    void test_fixedUnderflowTwosCompl();
 
     void test_infiniteToFloat();
+    void test_infiniteToFloatSigned();
+
     void test_infiniteToFixed();
+    void test_infiniteToFixedTwosCompl();
 
     void test_nanToFloat();
 };
@@ -145,6 +157,15 @@ void PointConversorTest::test_floatToFixed()
              "000000000000000000000000000000000000000000000000.0000000001010011");
 }
 
+void PointConversorTest::test_floatToFixedTwosCompl()
+{
+    QCOMPARE(conversor.inputSingleFloat("01000001110000010100100000000000").outputFixed16(10, PointConversor::TWOS_COMPL),
+             "011000.0010100100");
+
+    QCOMPARE(conversor.inputSingleFloat("11000001110000010100100000000000").outputFixed16(10, PointConversor::TWOS_COMPL),
+             "100111.1101011100");
+}
+
 void PointConversorTest::test_fixedToFloat()
 {
     QCOMPARE(conversor.inputFixed32("100001010.00010101000", PointConversor::UNSIGNED).outputDoubleFloat(),
@@ -154,9 +175,18 @@ void PointConversorTest::test_fixedToFloat()
              "0111101000101011");
 }
 
+void PointConversorTest::test_fixedToFloatTwosCompl()
+{
+    QCOMPARE(conversor.inputFixed32("0100001010.0001010100", PointConversor::TWOS_COMPL).outputDoubleFloat(),
+             "0100000001110000101000010101000000000000000000000000000000000000");
+
+    QCOMPARE(conversor.inputFixed32("1111111111111011110101.1110101100", PointConversor::TWOS_COMPL).outputDoubleFloat(),
+             "1100000001110000101000010101000000000000000000000000000000000000");
+}
+
 void PointConversorTest::test_subnormalToFloat()
 {
-    QCOMPARE(conversor.inputSingleFloat("00000000000000000000000000000000010").outputDoubleFloat(),
+    QCOMPARE(conversor.inputSingleFloat("00000000000000000000000000000010").outputDoubleFloat(),
              "0011011010110000000000000000000000000000000000000000000000000000");
 
     QCOMPARE(conversor.inputDoubleFloat("0011011010110000000000000000000000000000000000000000000000000000").outputSingleFloat(),
@@ -169,10 +199,34 @@ void PointConversorTest::test_subnormalToFloat()
              "0000000000010011");
 }
 
+void PointConversorTest::test_subnormalToFloatSigned()
+{
+    QCOMPARE(conversor.inputSingleFloat("10000000000000000000000000000010").outputDoubleFloat(),
+             "1011011010110000000000000000000000000000000000000000000000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("1011011010110000000000000000000000000000000000000000000000000000").outputSingleFloat(),
+             "10000000000000000000000000000010");
+
+    QCOMPARE(conversor.inputHalfFloat("1000000000010011").outputSingleFloat(),
+             "10110101100110000000000000000000");
+
+    QCOMPARE(conversor.inputSingleFloat("10110101100110000000000000000000").outputHalfFloat(),
+             "1000000000010011");
+}
+
 void PointConversorTest::test_subnormalToFixed()
 {
     QCOMPARE(conversor.inputHalfFloat("0000000000010011").outputFixed32(26, PointConversor::UNSIGNED),
              "000000.00000000000000000001001100");
+}
+
+void PointConversorTest::test_subnormalToFixedTwosCompl()
+{
+    QCOMPARE(conversor.inputHalfFloat("0000000000010011").outputFixed32(26, PointConversor::TWOS_COMPL),
+             "000000.00000000000000000001001100");
+
+    QCOMPARE(conversor.inputHalfFloat("1000000000010011").outputFixed32(26, PointConversor::TWOS_COMPL),
+             "111111.11111111111111111110110100");
 }
 
 void PointConversorTest::test_floatOverflow()
@@ -205,6 +259,27 @@ void PointConversorTest::test_fixedOverflow()
              "11.100000");
 }
 
+void PointConversorTest::test_fixedOverflowTwosCompl()
+{
+    QCOMPARE(conversor.inputFixed16("011111111111111.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
+             "01.100000");
+
+    QCOMPARE(conversor.inputFixed16("011111111111101.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
+             "01.100000");
+
+    QCOMPARE(conversor.inputFixed16("011111111111001.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
+             "01.100000");
+
+    QCOMPARE(conversor.inputFixed16("100000000000000.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
+             "10.100000");
+
+    QCOMPARE(conversor.inputFixed16("100000000000010.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
+             "10.100000");
+
+    QCOMPARE(conversor.inputFixed16("100000000000110.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
+             "10.100000");
+}
+
 void PointConversorTest::test_fixedUnderflow()
 {
     QCOMPARE(conversor.inputFixed16("0.0111111111111111", PointConversor::UNSIGNED).outputFixed8(3, PointConversor::UNSIGNED),
@@ -217,6 +292,27 @@ void PointConversorTest::test_fixedUnderflow()
              "00000.011");
 }
 
+void PointConversorTest::test_fixedUnderflowTwosCompl()
+{
+    QCOMPARE(conversor.inputFixed16("0.0111111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+             "00000.100");
+
+    QCOMPARE(conversor.inputFixed16("0.0101111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+             "00000.011");
+
+    QCOMPARE(conversor.inputFixed16("0.0110111111111111", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+             "00000.011");
+
+    QCOMPARE(conversor.inputFixed16("10.00000000000001", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+             "11110.000");
+
+    QCOMPARE(conversor.inputFixed16("10.10000000000001", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+             "11110.100");
+
+    QCOMPARE(conversor.inputFixed16("10.01000000000001", PointConversor::TWOS_COMPL).outputFixed8(3, PointConversor::TWOS_COMPL),
+             "11110.010");
+}
+
 void PointConversorTest::test_infiniteToFloat()
 {
     QCOMPARE(conversor.inputHalfFloat("0111110000000000").outputSingleFloat(),
@@ -226,10 +322,28 @@ void PointConversorTest::test_infiniteToFloat()
              "0111110000000000");
 }
 
+void PointConversorTest::test_infiniteToFloatSigned()
+{
+    QCOMPARE(conversor.inputHalfFloat("1111110000000000").outputSingleFloat(),
+             "11111111100000000000000000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("1111111111110000000000000000000000000000000000000000000000000000").outputHalfFloat(),
+             "1111110000000000");
+}
+
 void PointConversorTest::test_infiniteToFixed()
 {
     QCOMPARE(conversor.inputHalfFloat("0111110000000000").outputFixed8(5, PointConversor::UNSIGNED),
              "111.11111");
+}
+
+void PointConversorTest::test_infiniteToFixedTwosCompl()
+{
+    QCOMPARE(conversor.inputHalfFloat("0111110000000000").outputFixed8(5, PointConversor::TWOS_COMPL),
+             "011.11111");
+
+    QCOMPARE(conversor.inputHalfFloat("1111110000000000").outputFixed8(5, PointConversor::TWOS_COMPL),
+             "100.00000");
 }
 
 void PointConversorTest::test_nanToFloat()
