@@ -183,7 +183,8 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
 
 PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t width, int16_t pointPos, Signedness signedness)
 {
-    uint64_t sign_mask = (uint64_t) 1 << (width - 1);
+    uint64_t signMask = (uint64_t) 1 << (width - 1);
+    uint64_t extendMask = ~((uint64_t) 0) >> (64 - width);
 
     if (width < 0) {
         throw InvalidConversorInput("Largura não pode ser negativa.");
@@ -196,12 +197,21 @@ PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t wi
     }
 
     normality = PointConversor::NORMAL;
-    sign = signedness == TWOS_COMPL && (number & sign_mask) != 0;
+
+    switch (signedness) {
+    case UNSIGNED:
+        sign = false;
+        break;
+    case TWOS_COMPL:
+        sign = (number & signMask) != 0;
+        break;
+    }
+
     exponent = -pointPos;
 
     digits = number;
     if (sign) {
-        digits = ~digits + 1;
+        digits = (~digits + 1) & extendMask;
     }
 
     return *this;
