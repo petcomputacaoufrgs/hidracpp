@@ -57,6 +57,12 @@ private:
     bool sign;
     Normality normality;
 
+    static const int MAX_WIDTH = 64;
+
+    static const int MIN_FIXED_WIDTH = 2;
+    static const int MIN_EXPONENT_SIZE = 1;
+    static const int MIN_MANTISSA_SIZE = 1;
+
     PointConversor& inputGenericFloatRaw(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize);
     PointConversor& inputGenericFixedRaw(uint64_t number, int16_t width, int16_t pointPos, Signedness signedness);
 
@@ -69,7 +75,8 @@ private:
     QString outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize);
     QString outputGenericFixed(int16_t width, int16_t pointPos, Signedness signedness);
 
-    static const int MAX_BIT_COUNT = 64;
+    void validateFloatSpec(uint16_t mantissaSize, uint16_t exponentSize);
+    void validateFixedSpec(int16_t width, int16_t pointPos, Signedness signedness);
 };
 
 #endif // POINTCONVERSOR_H

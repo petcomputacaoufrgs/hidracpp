@@ -59,6 +59,7 @@ private slots:
     void test_nanToFloat();
 
     void test_badFixedPointPos();
+    void test_badNanToFixed();
 };
 
 PointConversorTest::PointConversorTest()
@@ -365,6 +366,11 @@ void PointConversorTest::test_badFixedPointPos()
 {
     QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("0.00000001", PointConversor::UNSIGNED), InvalidConversorInput);
     QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("100000001.0", PointConversor::UNSIGNED), InvalidConversorInput);
+}
+
+void PointConversorTest::test_badNanToFixed()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputHalfFloat("0111110001110010").outputFixed64(32, PointConversor::UNSIGNED), InvalidConversorInput);
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)

@@ -161,6 +161,8 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
     int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
     uint64_t finalBit = ((uint64_t) 1 << mantissaSize);
 
+    validateFloatSpec(mantissaSize, exponentSize);
+
     sign = number >> (exponentSize + mantissaSize);
     digits = number & mantissaMask;
     exponent = (number >> mantissaSize) & exponentMask;
@@ -184,17 +186,9 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
 PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t width, int16_t pointPos, Signedness signedness)
 {
     uint64_t signMask = (uint64_t) 1 << (width - 1);
-    uint64_t extendMask = ~((uint64_t) 0) >> (64 - width);
+    uint64_t extendMask = ~((uint64_t) 0) >> (MAX_WIDTH - width);
 
-    if (width < 0) {
-        throw InvalidConversorInput("Largura não pode ser negativa.");
-    }
-    if (width > MAX_BIT_COUNT) {
-        throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_BIT_COUNT));
-    }
-    if (pointPos > width || pointPos < 0) {
-        throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
-    }
+    validateFixedSpec(width, pointPos, signedness);
 
     normality = PointConversor::NORMAL;
 
@@ -228,6 +222,8 @@ uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t e
 
     bool hasFinalBit;
     uint64_t roundRight = 0;
+
+    validateFloatSpec(mantissaSize, exponentSize);
 
     switch (normality) {
     case PointConversor::NORMAL:
@@ -365,9 +361,11 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
 
     uint64_t finalBit;
     uint64_t mantissaMask;
-    uint64_t digitsMask = ~((uint64_t) 0) >> (64 - width);
+    uint64_t digitsMask = ~((uint64_t) 0) >> (MAX_WIDTH - width);
     uint64_t roundLeft = 0;
     uint64_t roundRight = 0;
+
+    validateFixedSpec(width, pointPos, signedness);
 
     switch (signedness) {
     case UNSIGNED:
@@ -381,16 +379,6 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
 
     switch (normality) {
     case NORMAL:
-        if (width < 0) {
-            throw InvalidConversorInput("Largura não pode ser negativa.");
-        }
-        if (width > MAX_BIT_COUNT) {
-            throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_BIT_COUNT));
-        }
-        if (pointPos > width || pointPos < 0) {
-            throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
-        }
-
         while (numExponent > -pointPos) {
             roundLeft |= number & finalBit;
             numExponent -= 1;
@@ -479,4 +467,46 @@ QString PointConversor::outputGenericFixed(int16_t width, int16_t pointPos, Sign
     }
 
     return output;
+}
+
+void PointConversor::validateFloatSpec(uint16_t mantissaSize, uint16_t exponentSize)
+{
+    if (mantissaSize < MIN_MANTISSA_SIZE) {
+        throw InvalidConversorInput(QString("Tamanho da mantissa não pode ser menor que ") + QString::number(MIN_MANTISSA_SIZE));
+    }
+    if (exponentSize < MIN_EXPONENT_SIZE) {
+        throw InvalidConversorInput(QString("Tamanho do expoente não pode ser menor que ") + QString::number(MIN_EXPONENT_SIZE));
+    }
+    if (mantissaSize + exponentSize > MAX_WIDTH - 1) {
+        throw InvalidConversorInput(
+                    QString("É necessário um bit de sinal, mantissa e expoente juntos devem ser menor que ")
+                    + QString::number(MAX_WIDTH - 1));
+    }
+}
+
+void PointConversor::validateFixedSpec(int16_t width, int16_t pointPos, Signedness signedness)
+{
+    if (width < MIN_FIXED_WIDTH) {
+        throw InvalidConversorInput(QString("Largura não pode ser menor que ") + QString::number(MIN_FIXED_WIDTH));
+    }
+    if (width > MAX_WIDTH) {
+        throw InvalidConversorInput(QString("Largura não pode ser maior que ") +  QString::number(MAX_WIDTH));
+    }
+    if (pointPos > width || pointPos < 0) {
+        throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
+    }
+
+    switch (signedness) {
+    case UNSIGNED:
+        if (pointPos > width || pointPos < 0) {
+            throw InvalidConversorInput("Ponto fora da quantidade de bits disponíveis.");
+        }
+        break;
+
+    case TWOS_COMPL:
+        if (pointPos > width - 1 || pointPos < 0) {
+            throw InvalidConversorInput("Ponto fora da quantidade de bits significativos disponíveis.");
+        }
+        break;
+    }
 }
