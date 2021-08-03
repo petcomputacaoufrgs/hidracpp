@@ -34,6 +34,7 @@ public:
     PointConversor& inputFixed16(QString const& number, Signedness signedness);
     PointConversor& inputFixed32(QString const& number, Signedness signedness);
     PointConversor& inputFixed64(QString const& number, Signedness signedness);
+    PointConversor& inputHumanNotation(QString const& number);
 
     uint16_t outputHalfFloatRaw();
     float outputSingleFloatRaw();
@@ -50,6 +51,7 @@ public:
     QString outputFixed16(int16_t pointPos, Signedness signedness);
     QString outputFixed32(int16_t pointPos, Signedness signedness);
     QString outputFixed64(int16_t pointPos, Signedness signedness);
+    QString outputHumanNotation();
 
 private:
     uint64_t digits;
@@ -77,6 +79,8 @@ private:
 
     void validateFloatSpec(uint16_t mantissaSize, uint16_t exponentSize);
     void validateFixedSpec(int16_t width, int16_t pointPos, Signedness signedness);
+
+    int16_t exponentModTen(int16_t numExponent);
 };
 
 #endif // POINTCONVERSOR_H

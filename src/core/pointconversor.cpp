@@ -1,6 +1,10 @@
 #include "pointconversor.h"
 #include "invalidconversorinput.h"
 
+// TODO: implement human notation WIHTOUT double float (or any float).
+// With float, there are some 64 bits numbers which cannot be represented
+// because double float only really has 52 bits for mantissa.
+
 PointConversor::PointConversor()
 {
     digits = 0;
@@ -81,6 +85,16 @@ PointConversor& PointConversor::inputFixed64(QString const& number, Signedness s
     return this->inputGenericFixed(number, 64, signedness);
 }
 
+PointConversor& PointConversor::inputHumanNotation(QString const& number)
+{
+    bool ok = true;
+    double asDoubleFloat = number.toDouble(&ok);
+    if (!ok) {
+        throw InvalidConversorInput("Número não está na notação humana adequada");
+    }
+    return this->inputDoubleFloatRaw(asDoubleFloat);
+}
+
 uint16_t PointConversor::outputHalfFloatRaw()
 {
     return this->outputGenericFloatRaw(10, 5);
@@ -153,6 +167,22 @@ QString PointConversor::outputFixed32(int16_t pointPos, Signedness signedness)
 QString PointConversor::outputFixed64(int16_t pointPos, Signedness signedness)
 {
     return this->outputGenericFixed(64, pointPos, signedness);
+}
+
+QString PointConversor::outputHumanNotation()
+{
+    double asDoubleFloat = this->outputDoubleFloatRaw();
+    QString rendered = QString::number(asDoubleFloat, 'f', 50);
+
+    if (rendered.contains('.')) {
+        int trailingPos = rendered.length() - 1;
+        while (trailingPos > 3 && rendered[trailingPos] == '0') {
+            trailingPos--;
+        }
+        rendered.truncate(trailingPos + 1);
+    }
+
+    return rendered;
 }
 
 PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize)
@@ -509,4 +539,18 @@ void PointConversor::validateFixedSpec(int16_t width, int16_t pointPos, Signedne
         }
         break;
     }
+}
+
+int16_t PointConversor::exponentModTen(int16_t numExponent)
+{
+    int16_t table[] = { 6, 2, 4, 8 };
+    int16_t table_size = sizeof(table) / sizeof(table[0]);
+
+    if (numExponent > 0) {
+        return table[numExponent % table_size];
+    }
+    if (numExponent < 0) {
+        return table[-numExponent % table_size];
+    }
+    return 1;
 }

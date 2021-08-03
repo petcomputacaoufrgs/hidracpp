@@ -60,6 +60,11 @@ private slots:
 
     void test_badFixedPointPos();
     void test_badNanToFixed();
+
+    void test_humanNotationToFloat();
+    void test_floatToHumanNotation();
+    void test_nanToHumanNotation();
+    void test_humanNotationToNan();
 };
 
 PointConversorTest::PointConversorTest()
@@ -371,6 +376,36 @@ void PointConversorTest::test_badFixedPointPos()
 void PointConversorTest::test_badNanToFixed()
 {
     QVERIFY_EXCEPTION_THROWN(conversor.inputHalfFloat("0111110001110010").outputFixed64(32, PointConversor::UNSIGNED), InvalidConversorInput);
+}
+
+void PointConversorTest::test_humanNotationToFloat()
+{
+    QCOMPARE(conversor.inputHumanNotation("0.04296875").outputDoubleFloat(),
+             "0011111110100110000000000000000000000000000000000000000000000000");
+
+    QCOMPARE(conversor.inputHumanNotation("-0.04296875").outputDoubleFloat(),
+             "1011111110100110000000000000000000000000000000000000000000000000");
+}
+
+void PointConversorTest::test_floatToHumanNotation()
+{
+    QCOMPARE(conversor.inputDoubleFloat("0011111110100110000000000000000000000000000000000000000000000000").outputHumanNotation(),
+             "0.04296875");
+
+    QCOMPARE(conversor.inputDoubleFloat("1011111110100110000000000000000000000000000000000000000000000000").outputHumanNotation(),
+             "-0.04296875");
+}
+
+void PointConversorTest::test_nanToHumanNotation()
+{
+    QCOMPARE(conversor.inputHalfFloat("0111110001110010").outputHumanNotation(),
+             "nan");
+}
+
+void PointConversorTest::test_humanNotationToNan()
+{
+    QCOMPARE(conversor.inputHumanNotation("nan").outputHalfFloat(),
+             "0111110000000001");
 }
 
 QTEST_APPLESS_MAIN(PointConversorTest)
