@@ -176,7 +176,7 @@ QString PointConversor::outputHumanNotation()
 
     if (rendered.contains('.')) {
         int trailingPos = rendered.length() - 1;
-        while (trailingPos > 3 && rendered[trailingPos] == '0') {
+        while (trailingPos > 2 && rendered[trailingPos] == '0') {
             trailingPos--;
         }
         rendered.truncate(trailingPos + 1);

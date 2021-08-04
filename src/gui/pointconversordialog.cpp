@@ -1,13 +1,15 @@
 #include "pointconversordialog.h"
 #include "ui_pointconversordialog.h"
+#include "../core/pointconversor.h"
+#include "../core/invalidconversorinput.h"
 
 PointConversorDialog::PointConversorDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PointConversorDialog)
 {
     ui->setupUi(this);
-    input = 0.0;
-    output = 0.0;
+    this->on_inputFormat_currentIndexChanged(ui->inputFormat->currentIndex());
+    this->on_outputFormat_currentIndexChanged(ui->outputFormat->currentIndex());
 }
 
 PointConversorDialog::~PointConversorDialog()
@@ -17,7 +19,71 @@ PointConversorDialog::~PointConversorDialog()
 
 void PointConversorDialog::on_convertButton_clicked()
 {
+    PointConversor conversor;
+    QString input = ui->lineEditInput->text();
+    QString output;
 
+    try {
+        switch (ui->inputFormat->currentIndex()) {
+        case HUMAN:
+            conversor.inputHumanNotation(input);
+            break;
+        case FLOAT16:
+            conversor.inputHalfFloat(input);
+            break;
+        case FLOAT32:
+            conversor.inputSingleFloat(input);
+            break;
+        case FLOAT64:
+            conversor.inputDoubleFloat(input);
+            break;
+        case FIXED8:
+            conversor.inputFixed8(input, this->signednessFromUser(ui->inputSignedness));
+            break;
+        case FIXED16:
+            conversor.inputFixed16(input, this->signednessFromUser(ui->inputSignedness));
+            break;
+        case FIXED32:
+            conversor.inputFixed32(input, this->signednessFromUser(ui->inputSignedness));
+            break;
+        case FIXED64:
+            conversor.inputFixed64(input, this->signednessFromUser(ui->inputSignedness));
+            break;
+        }
+
+        switch (ui->outputFormat->currentIndex()) {
+        case HUMAN:
+            output = conversor.outputHumanNotation();
+            break;
+        case FLOAT16:
+            output = conversor.outputHalfFloat();
+            break;
+        case FLOAT32:
+            output = conversor.outputSingleFloat();
+            break;
+        case FLOAT64:
+            output = conversor.outputDoubleFloat();
+            break;
+        case FIXED8:
+            output = conversor.outputFixed8(ui->outputPointPos->value(), this->signednessFromUser(ui->outputSignedness));
+            break;
+        case FIXED16:
+            output = conversor.outputFixed16(ui->outputPointPos->value(), this->signednessFromUser(ui->outputSignedness));
+            break;
+        case FIXED32:
+            output = conversor.outputFixed32(ui->outputPointPos->value(), this->signednessFromUser(ui->outputSignedness));
+            break;
+        case FIXED64:
+            output = conversor.outputFixed64(ui->outputPointPos->value(), this->signednessFromUser(ui->outputSignedness));
+            break;
+        }
+
+        ui->errorMessage->setText("Ok");
+    } catch (InvalidConversorInput exc) {
+        ui->errorMessage->setText(exc.getMessage());
+    }
+
+    ui->lineEditOutput->setText(output);
 }
 
 void PointConversorDialog::on_invertButton_clicked()
@@ -27,101 +93,59 @@ void PointConversorDialog::on_invertButton_clicked()
     ui->lineEditOutput->setText(input);
 }
 
-void PointConversorDialog::parseInput()
+void PointConversorDialog::on_inputFormat_currentIndexChanged(int index)
 {
-    QString inputFormat = ui->comboBoxInput->currentText();
-    if (inputFormat == "Notação Humana")
-    {
-        // TODO: check if OK is actually OK.
-        bool ok = 0;
-        input = ui->lineEditInput->text().toDouble(&ok);
-    }
-    else if (inputFormat == "Float 16 Bits")
-    {
-        // Half precision floating point format.
-        parseFloat16();
-    }
-    else if (inputFormat == "Float 32 Bits")
-    {
-        // Evil bit manipulation here. If you know a better way, improve this,
-        // please.
-        uint32_t bits = parseBin();
-        input = *reinterpret_cast<float*>(&bits);
-    }
-    else if (inputFormat == "Float 64 Bits")
-    {
-        // Evil bit manipulation here again. If you know a better way, improve
-        // this, please.
-        uint64_t bits = parseBin();
-        input = *reinterpret_cast<double*>(&bits);
-    }
-    else if (inputFormat == "Ponto Fixo 8 Bits")
-    {
-
-    }
-    else if (inputFormat == "Ponto Fixo 16 Bits")
-    {
-
-    }
-    else if (inputFormat == "Ponto Fixo 32 Bits")
-    {
-
-    }
-    else if (inputFormat == "Ponto Fixo 64 Bits")
-    {
-
+    switch (index) {
+    case HUMAN:
+    case FLOAT16:
+    case FLOAT32:
+    case FLOAT64:
+        this->ui->inputSignedness->setEnabled(false);
+        this->ui->labelInputSignedness->setEnabled(false);
+        break;
+    case FIXED8:
+    case FIXED16:
+    case FIXED32:
+    case FIXED64:
+        this->ui->inputSignedness->setEnabled(true);
+        this->ui->labelInputSignedness->setEnabled(true);
+        break;
     }
 }
 
-uint64_t PointConversorDialog::parseBin()
+
+void PointConversorDialog::on_outputFormat_currentIndexChanged(int index)
 {
-    uint64_t bits = 0;
-    QString inputText = ui->lineEditInput->text().trimmed();
-
-    // TODO: check for errors.
-    foreach (QChar digit, inputText) {
-        bits <<= 1;
-        bits |= digit.toLatin1() - '0';
+    switch (index) {
+    case HUMAN:
+    case FLOAT16:
+    case FLOAT32:
+    case FLOAT64:
+        this->ui->outputSignedness->setEnabled(false);
+        this->ui->labelOutputSignedness->setEnabled(false);
+        this->ui->outputPointPos->setEnabled(false);
+        this->ui->labelOutputPointPos->setEnabled(false);
+        break;
+    case FIXED8:
+    case FIXED16:
+    case FIXED32:
+    case FIXED64:
+        this->ui->outputSignedness->setEnabled(true);
+        this->ui->labelOutputSignedness->setEnabled(true);
+        this->ui->outputPointPos->setEnabled(true);
+        this->ui->labelOutputPointPos->setEnabled(true);
+        break;
     }
-
-    return bits;
 }
 
-void PointConversorDialog::parseFloat16()
+PointConversor::Signedness PointConversorDialog::signednessFromUser(QComboBox *input)
 {
-    // Parse a binary unsigned number.
-    uint16_t bits = parseBin();
-    // Get bits [10, 14] (starting to count from 0). Remember:
-    // - 0x1F = 0001 1111
-    uint64_t exponent = (bits >> 10) & 0x1F;
-
-    // Test for maximum exponent.
-    if (exponent == 0x1F)
-    {
-        // Maximum exponent, meaning NaN or Infinity.
-        exponent = 0x7FF;
+    switch (input->currentIndex()) {
+    case PointConversor::UNSIGNED:
+        return PointConversor::UNSIGNED;
+    case PointConversor::TWOS_COMPL:
+        return PointConversor::TWOS_COMPL;
+    default:
+        throw std::string("Bad signedness index");
     }
-    // Only do this if exponent is not minimum. If minimum, the number is
-    // either zero or subnormal.
-    else if (exponent != 0)
-    {
-        // Remember:
-        // - 0x1F = 0001 1111
-        // - 0x3FF = 0011 1111 1111
-        // - 0x3FF is double's encoding for an exponent zero.
-        // - 0xF is half's encoding for an exponent zero.
-        exponent = 0x3FF - 0xF + exponent;
-    }
-    // Get the mantissa (the digits). Remember:
-    // - 0x3FF = 0011 1111 1111
-    // Get bits [0, 9] (starting to count from 0).
-    uint64_t mantissa = bits & 0x3FF;
-    // Shift mantisssa to fit it in double representation
-    // (filling with zeroes to the right).
-    mantissa = mantissa << 42;
-    // Get the sign bit.
-    uint64_t sign = bits >> 15;
-    // Mount everything in an encoded double precision floating point number.
-    uint64_t bitsDouble = sign << 63 | exponent << 52 | mantissa;
-    input = *reinterpret_cast<double*>(&bitsDouble);
 }

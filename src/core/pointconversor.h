@@ -14,8 +14,8 @@ private:
     };
 public:
     enum Signedness {
-        TWOS_COMPL,
-        UNSIGNED,
+        UNSIGNED = 0,
+        TWOS_COMPL = 1,
     };
 
     PointConversor();
