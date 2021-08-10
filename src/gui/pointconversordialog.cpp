@@ -91,6 +91,19 @@ void PointConversorDialog::on_invertButton_clicked()
     QString input = ui->lineEditInput->text();
     ui->lineEditInput->setText(ui->lineEditOutput->text());
     ui->lineEditOutput->setText(input);
+
+    int inputFormat = ui->inputFormat->currentIndex();
+    ui->inputFormat->setCurrentIndex(ui->outputFormat->currentIndex());
+    ui->outputFormat->setCurrentIndex(inputFormat);
+
+    int inputSignedness = ui->inputSignedness->currentIndex();
+    ui->inputSignedness->setCurrentIndex(ui->outputSignedness->currentIndex());
+    ui->outputSignedness->setCurrentIndex(inputSignedness);
+
+    int pointPos = input.indexOf('.');
+    if (pointPos >= ui->outputPointPos->minimum() && pointPos <= ui->outputPointPos->maximum()) {
+        ui->outputPointPos->setValue(pointPos);
+    }
 }
 
 void PointConversorDialog::on_inputFormat_currentIndexChanged(int index)
@@ -146,6 +159,6 @@ PointConversor::Signedness PointConversorDialog::signednessFromUser(QComboBox *i
     case PointConversor::TWOS_COMPL:
         return PointConversor::TWOS_COMPL;
     default:
-        throw std::string("Bad signedness index");
+        throw InvalidConversorInput("Tipo inválido de sinal");
     }
 }

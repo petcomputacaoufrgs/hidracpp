@@ -25,10 +25,13 @@ private slots:
 private:
     Ui::BaseConversorDialog *ui;
 
-    static const int TYPE_POSITIVE = 0;
-    static const int TYPE_SIGN_MAGNITUDE = 1;
-    static const int TYPE_ONES_COMPLEMENT = 2;
-    static const int TYPE_TWOS_COMPLEMENT = 3;
+    enum Signedness
+    {
+        TYPE_POSITIVE = 0,
+        TYPE_SIGN_MAGNITUDE = 1,
+        TYPE_ONES_COMPLEMENT = 2,
+        TYPE_TWOS_COMPLEMENT = 3
+    };
 };
 
 

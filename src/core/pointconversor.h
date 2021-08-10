@@ -7,13 +7,15 @@
 class PointConversor
 {
 private:
-    enum Normality {
+    enum Normality
+    {
         NORMAL,
         NOT_A_NUMBER,
         INFINITY_NAN
     };
 public:
-    enum Signedness {
+    enum Signedness
+    {
         UNSIGNED = 0,
         TWOS_COMPL = 1,
     };

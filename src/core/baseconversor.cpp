@@ -1,237 +1,226 @@
 #include "baseconversor.h"
+#include "invalidconversorinput.h"
 
 BaseConversor::BaseConversor()
 {
     bits = 0;
-    negativeSignal = false;
-    signalMagnitude = false;
+    sign = false;
 }
 
-long long unsigned BaseConversor::getBits()
+uint64_t BaseConversor::mapInput(QChar character, uint64_t base)
 {
-    return bits;
+    int codepoint = character.unicode();
+    uint64_t digit = base;
+
+    if (codepoint >= '0' && codepoint <= '9') {
+        digit = codepoint - '0';
+    } else if (codepoint >= 'a' && codepoint <= 'z') {
+        digit = codepoint - 'a' + 10;
+    } else if (codepoint >= 'A' && codepoint <= 'Z') {
+        digit = codepoint - 'A' + 10;
+    }
+
+    if (digit >= base) {
+        throw InvalidConversorInput("Dígito inválido para a base");
+    }
+
+    return digit;
 }
 
-void BaseConversor::setBits(long long unsigned input){
-    bits = input;
-}
-
-bool BaseConversor::getNegativeSignal(){
-    return negativeSignal;
-}
-
-int BaseConversor::mapInput(char i)
-{
-    if(i>='0' && i<='9') return i-48;
-    else if (i>='a' && i<='z') return i-87;
-    else if (i>='A' && i<='Z') return i-55;
-    else return -1;
-}
-
-char BaseConversor::mapOutput(int i)
+QChar BaseConversor::mapOutput(uint64_t digit)
 {
     char map[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    return map[i];
+    return map[digit];
 }
 
+uint64_t BaseConversor::maxValue(uint64_t base, uint64_t width)
+{
+    uint64_t result = 0;
+    uint64_t tmpResult = 0;
+
+    for (uint64_t i = 0; i < width; i++) {
+        tmpResult = result * base;
+        if (tmpResult < result) {
+            throw InvalidConversorInput("Entrada é muito grande.");
+        }
+        result = tmpResult;
+        tmpResult = result + (base - 1);
+        if (tmpResult < result) {
+            throw InvalidConversorInput("Entrada é muito grande.");
+        }
+        result = tmpResult;
+    }
+
+    return result;
+}
 
 // Input functions
 
-long long unsigned BaseConversor::getDec(QString digitsQ, int base)
+void BaseConversor::decode(QString const &digitsQ, uint64_t base, uint64_t *width)
 {
-    long long unsigned current, exp, decimalResult = 0;
-    std::string digits = digitsQ.toStdString();
+    uint64_t result;
+    bits = 0;
+    *width = 0;
 
-    for(int i=digits.size()-1; i>=0; i--){
-        current = mapInput(digits[i]);
-        exp=digits.size()-i-1;
-        decimalResult += current * pow(base, exp);
-     }
-
-    return decimalResult;
-}
-
-long long unsigned BaseConversor::getComplement(QString digitsQ, int base)
-{
-    std::string digits=digitsQ.toStdString();
-    unsigned long long inputValue = getDec(digitsQ, base);
-    unsigned int length = digits.length();
-
-    // Case the base is even just check msb
-    if(base % 2 == 0) {
-        if(mapInput(digits[0]) < base/2){
-            bits = inputValue;
-            negativeSignal = false;
-        }
-        else {
-            bits = pow(base, length) - 1 - inputValue;
-            negativeSignal  = true;
+    for (QChar ch : digitsQ) {
+        if (ch != ' ') {
+            result = bits * base;
+            if (result < bits) {
+                throw InvalidConversorInput("Entrada é muito grande.");
+            }
+            bits = result;
+            result = bits + mapInput(ch, base);
+            if (result < bits) {
+                throw InvalidConversorInput("Entrada é muito grande.");
+            }
+            bits = result;
+            (*width)++;
         }
     }
 
-    // Case the base is odd, check each digit starting from the msb
-    // until find one that's is greater or less than base/2
-    else {
-        unsigned int i=0;
-        do{
-            if(mapInput(digits[i]) < base/2 ||
-                    (i == length-1 && mapInput(digits[i]) == base/2)){
-                bits = inputValue;
-                negativeSignal = false;
-                break;
-            }
-            else if(mapInput(digits[i]) > base/2){
-                bits = pow(base, length) - 1 - inputValue;
-                negativeSignal  = true;
-                break;
-            }
-
-            i++;
-            if (i == length) break;
-
-        }while(1);
+    if (*width > MAX_WIDTH) {
+        throw InvalidConversorInput(
+                    QString("Largura do inteiro não pode ser maior que ")
+                    + QString::number(MAX_WIDTH));
     }
-    return bits;
+    if (*width < MIN_WIDTH) {
+        throw InvalidConversorInput(
+                    QString("Largura do inteiro não pode ser menor que ")
+                    + QString::number(MIN_WIDTH));
+    }
 }
 
-BaseConversor& BaseConversor::inputPositive(QString digitsQ, int base)
+QString BaseConversor::encode(uint64_t inputBits, uint64_t base, uint64_t width, QChar fill)
 {
-    bits = getDec(digitsQ, base);
-    negativeSignal = false;
+    QString output;
+    uint64_t current = 0;
+
+    while (current < width && inputBits > 0) {
+        output.append(mapOutput(inputBits % base));
+        inputBits /= base;
+        current++;
+    }
+
+    while (current < width) {
+        output.append(fill);
+        current++;
+    }
+
+    std::reverse(output.begin(), output.end());
+    return output;
+}
+
+BaseConversor& BaseConversor::inputPositive(QString digitsQ, uint64_t base)
+{
+    uint64_t width;
+    decode(digitsQ, base, &width);
+    sign = false;
     return *this;
 }
 
-BaseConversor& BaseConversor::inputSignMagnitude(QString digitsQ, int base)
+#include <iostream>
+
+BaseConversor& BaseConversor::inputSignMagnitude(QString digitsQ, uint64_t base)
 {
-    long long unsigned current, exp, decimalResult = 0;
-    std::string digits=digitsQ.toStdString();
+    uint64_t width;
+    QString digitsTrimmed = digitsQ.trimmed();
 
-    for(int i=digits.size()-1; i>0; i--){
-        current = mapInput(digits[i]);
-        exp=digits.size()-i-1;
-        decimalResult += current * pow(base, exp);
-     }
+    if (digitsTrimmed.length() == 0) {
+        throw InvalidConversorInput("Sinal magnitude precisa de um dígito para sinal.");
+    }
 
-    if(digits[0] == '1')
-        negativeSignal = true;
-    else
-        negativeSignal = false;
+    switch (digitsTrimmed[0].unicode()) {
+    case '0':
+        sign = false;
+        break;
+    case '1':
+        sign = true;
+        break;
+    default:
+        throw InvalidConversorInput("Dígito inválido para a base");
+        break;
+    }
 
-    bits = decimalResult;
-    signalMagnitude = true;
+    digitsTrimmed.remove(0, 1);
+    decode(digitsTrimmed, base, &width);
     return *this;
 }
 
-
-BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, int base)
+BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, uint64_t base)
 {
-   bits =getComplement(digitsQ, base);
-   return *this;
-}
+    uint64_t width;
+    uint64_t maxValue;
+    decode(digitsQ, base, &width);
 
+    maxValue = this->maxValue(base, width);
 
-BaseConversor& BaseConversor::inputTwosComplement(QString digitsQ, int base)
-{
-    bits = getComplement(digitsQ, base);
-    if(negativeSignal == true)
-        bits += 1;
-
+    sign = bits >= (maxValue / 2 + maxValue % 2);
+    if (sign) {
+        bits = maxValue - bits;
+    }
     return *this;
 }
 
+BaseConversor& BaseConversor::inputTwosComplement(QString digitsQ, uint64_t base)
+{
+    uint64_t width;
+    uint64_t maxValue;
+    decode(digitsQ, base, &width);
 
+    maxValue = this->maxValue(base, width);
 
+    sign = bits > maxValue / 2;
+    if (sign) {
+        bits = maxValue - bits + 1;
+    }
+    return *this;
+}
 
 // Output functions
 
-QString BaseConversor::outputPositive(int base)
+QString BaseConversor::outputPositive(uint64_t base, uint64_t width)
 {
-    std::string outputResult = "";
-    long long unsigned decimalInput = getBits();
+    if (sign) {
+        throw InvalidConversorInput("Inteiro positivo não admite valores negativos.");
+    }
 
-    do{
-        outputResult.insert(outputResult.begin(), (mapOutput(decimalInput % base)));
-        decimalInput /= base;
-    } while(decimalInput != 0);
-
-    return QString::fromStdString(outputResult);
+    return this->encode(bits, base, width, '0');
 }
 
-QString BaseConversor::outputSignMagnitude(int base)
+QString BaseConversor::outputSignMagnitude(uint64_t base, uint64_t width)
 {
-    QString outputResultQ = outputPositive(base);
-    std::string outputResult = outputResultQ.toStdString();
-
-    if(negativeSignal == true)
-        outputResult.insert(outputResult.begin(), '-');
-    else
-        outputResult.insert(outputResult.begin(), '+');
-
-    return QString::fromStdString(outputResult);
+    QString output = this->encode(bits, base, width, '0');
+    output.prepend(sign ? '1' : '0');
+    return output;
 }
 
-QString BaseConversor::outputOnesComplement(int base)
+QString BaseConversor::outputOnesComplement(uint64_t base, uint64_t width)
 {
-    QString stringValue = outputPositive(base);
-    if(negativeSignal == true) {
-        unsigned long long maxValue = pow(base, stringValue.length());
-        //if(signalMagnitude != false)
-          //  maxValue += base;
-        bits = maxValue - 1 - bits;
-        stringValue = outputPositive(base);
+    uint64_t outputBits = bits;
+    uint64_t maxValue = 0;
+    QChar fill = '0';
+
+    if (sign) {
+        maxValue = this->maxValue(base, width);
+        outputBits = maxValue - outputBits;
+        fill = '1';
     }
-    else{
-        stringValue.insert(0, "0");
-    }
-    return stringValue;
+
+    return this->encode(outputBits, base, width, fill);
 }
 
 
-QString BaseConversor::outputTwosComplement(int base)
+QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width)
 {
-    QString stringValue = outputPositive(base);
-    if(negativeSignal == true) {
-        unsigned long long maxValue = pow(base, stringValue.length());
-        bits = maxValue - bits;
-        stringValue = outputPositive(base);
-    }
-    else {
-        stringValue.insert(0, "0");
-    }
-    return stringValue;
-}
+    uint64_t outputBits = bits;
+    uint64_t maxValue = 0;
+    QChar fill = '0';
 
-
-
-
-// Validation functions
-
-QString BaseConversor::validate(int baseIn, int baseOut, QString digits)
-{
-    if (baseIn < 2 || baseIn > 36)
-        return "Base de entrada deve ser entre 2 e 36!";
-    if (baseOut < 2 || baseOut > 36)
-        return "Base de saída deve ser entre 2 e 36!";
-
-    std::string inputValor = digits.toStdString();
-    int current;
-    for(unsigned int i=0; i<inputValor.size(); i++){
-        current = mapInput(inputValor[i]);
-        if(current<0 || current>=baseIn)
-            return "Entrada contem digitos inválidos!";
+    if (sign) {
+        maxValue = this->maxValue(base, width);
+        outputBits = maxValue - outputBits + 1;
+        fill = '1';
     }
 
-    return "";
-}
-
-QString BaseConversor::validateSignMagnitude(int baseIn, int baseOut, QString digits)
-{
-    QString error = validate(baseIn, baseOut, digits);
-
-    if(digits[0] != '1' && digits[0] != '0')
-        error = "Em sinal magnitude o primeiro digito deve ser 0(+) ou 1(-)";
-    else if(digits.length() < 2)
-        error = "É necessário ter no mínimo dois dígitos (um para o sinal)";
-
-    return error;
+    return this->encode(outputBits, base, width, fill);
 }
