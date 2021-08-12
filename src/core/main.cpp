@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * Copyright (C) 2015, 2016 PET Computação UFRGS
+ * Copyright (C) 2014-2021 PET Computação UFRGS
  *
  * Este arquivo é parte do programa Hidra.
  *
@@ -17,6 +17,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+
+    a.setOrganizationName("PET Computação UFRGS");
+    a.setApplicationName("Hidra");
 
     HidraGui w;
 

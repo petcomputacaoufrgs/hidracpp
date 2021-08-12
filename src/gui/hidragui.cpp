@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * Copyright (C) 2015, 2016 PET Computação UFRGS
+ * Copyright (C) 2014-2021 PET Computação UFRGS
  *
  * Este arquivo é parte do programa Hidra.
  *
@@ -38,6 +38,7 @@ HidraGui::HidraGui(QWidget *parent) :
 
     codeEditor  = new HidraCodeEditor();
     highlighter = new HidraHighlighter(codeEditor->document());
+    findReplaceDialog = new FindReplaceDialog(codeEditor);
     ui->layoutSourceCodeHolder->addWidget(codeEditor);
     connect(codeEditor, SIGNAL(textChanged()), this, SLOT(sourceCodeChanged()));
     about = new About();
@@ -98,6 +99,7 @@ HidraGui::~HidraGui()
 {
     delete about;
     delete ui;
+    delete findReplaceDialog;
 }
 
 
@@ -169,6 +171,21 @@ void HidraGui::scrollToCurrentLine()
     }
 }
 
+void HidraGui::loadConfFile()
+{
+    showHexValues  = settings.value("showHexValues", false).toBool();
+    showSignedData = settings.value("showSignedData", false).toBool();
+    showCharacters = settings.value("showCharacters", false).toBool();
+    fastExecute    = settings.value("fastExecute", false).toBool();
+    followPC       = settings.value("followPC", true).toBool();
+
+    ui->actionHexadecimalMode->setChecked(showHexValues);
+    ui->actionSignedMode->setChecked(showSignedData);
+    ui->actionShowCharacters->setChecked(showCharacters);
+    ui->actionFastExecuteMode->setChecked(fastExecute);
+    ui->actionFollowPCMode->setChecked(followPC);
+}
+
 
 
 //////////////////////////////////////////////////
@@ -184,6 +201,7 @@ void HidraGui::initializeMachineInterfaceComponents()
     initializeHighlighter();
     initializeInstructionsList();
     initializeAddressingModesList();
+    loadConfFile();
 }
 
 void HidraGui::initializeMemoryTable()
@@ -801,12 +819,22 @@ void HidraGui::saveAs()
     else if (currentMachineName == "Volta")
         extension = "Fonte do Volta (*.vod)";
 
+    QString saveDir = settings.value("saveDir", "").toString();
+
     QString filename = QFileDialog::getSaveFileName(this,
-                                                   "Salvar código-fonte", "",
+                                                   "Salvar código-fonte", saveDir,
                                                    extension);
 
-    if (!filename.isEmpty())
-        save(filename); // Resets fileModified to false if successful
+    if (!filename.isEmpty()){
+        // Setting dir of save in config file
+        saveDir = filename.left(filename.lastIndexOf(QChar('/')));
+        settings.setValue("saveDir", saveDir);
+
+        if(filename.contains('.'))
+            save(filename);
+        else
+            save(filename + extension.mid(extension.length()-5, 4)); // Puts the extension
+    }
 }
 
 void HidraGui::saveChangesDialog(bool &cancelled, bool *answeredNo = nullptr)
@@ -1083,15 +1111,17 @@ void HidraGui::on_actionOpen_triggered()
     QString allExtensions = "Fontes do Hidra (*.ned *.ahd *.rad *.cro *.qpd *.ptd *.prd *.red *.vod)";
     QString filename;
 
-    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", "", allExtensions);
+    filename = QFileDialog::getOpenFileName(this, "Abrir código-fonte", settings.value("saveDir", "").toString(), allExtensions);
 
     if (!filename.isEmpty())
     {
         bool cancelled;
         saveChangesDialog(cancelled);
 
-        if (!cancelled)
+        if (!cancelled){
+            settings.setValue("saveDir", filename.left(filename.lastIndexOf(QChar('/'))));
             load(filename);
+       }
     }
 }
 
@@ -1304,6 +1334,8 @@ void HidraGui::on_actionSetBreakpoint_triggered()
 
 void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 {
+    settings.setValue("showHexValues", checked);
+
     showHexValues = checked;
 
     if (checked)
@@ -1318,6 +1350,8 @@ void HidraGui::on_actionHexadecimalMode_toggled(bool checked)
 
 void HidraGui::on_actionSignedMode_toggled(bool checked)
 {
+    settings.setValue("showSignedData", checked);
+
     showSignedData = checked;
 
     if (checked)
@@ -1332,6 +1366,8 @@ void HidraGui::on_actionSignedMode_toggled(bool checked)
 
 void HidraGui::on_actionShowCharacters_toggled(bool checked)
 {
+    settings.setValue("showCharacters", checked);
+
     showCharacters = checked;
 
     ui->tableViewMemoryData->setColumnHidden(ColumnCharacter, !showCharacters);
@@ -1340,11 +1376,15 @@ void HidraGui::on_actionShowCharacters_toggled(bool checked)
 
 void HidraGui::on_actionFastExecuteMode_toggled(bool checked)
 {
+    settings.setValue("fastExecute", checked);
+
     fastExecute = checked;
 }
 
 void HidraGui::on_actionFollowPCMode_toggled(bool checked)
 {
+    settings.setValue("followPC", checked);
+
     followPC = checked;
 }
 
@@ -1367,13 +1407,6 @@ void HidraGui::on_actionReference_triggered()
 void HidraGui::on_actionAbout_triggered()
 {
     about->show();
-//    QMessageBox::about(this, "Sobre o Hidra",
-//                       "<p align='center'>Hidra v1.0.0 (" + QString(__DATE__) + ")<br><br>"
-//                       "Copyright © PET Computação UFRGS"
-//                       "Universidade Federal do Rio Grande do Sul<br><br>"
-//                       "Desenvolvido pelo grupo <a href=inf.ufrgs.br/pet>PET Computação UFRGS</a>.<br><br>"
-//                       "Máquinas teóricas criadas pelos professores<br>Raul Fernando Weber e Taisy Silva Weber.<br><br>"
-//                       "Código-fonte disponível em: <a href=https://github.com/petcomputacaoufrgs/hidracpp>github.com/petcomputacaoufrgs/hidracpp</a></p>");
 }
 
 
@@ -1444,4 +1477,32 @@ void HidraGui::on_actionBaseConversor_triggered()
 void HidraGui::on_actionPointConversor_triggered()
 {
     pointConversor->show();
+}
+
+void HidraGui::on_actionDefaultValues_triggered()
+{
+
+    settings.setValue("showHexValues", false);
+    showHexValues = false;
+    settings.setValue("showSignedData", false);
+    showSignedData = false;
+    settings.setValue("showCharacters", false);
+    showCharacters = false;
+    settings.setValue("fastExecute", false);
+    fastExecute = false;
+    settings.setValue("followPC", true);
+    followPC = true;
+
+    ui->actionHexadecimalMode->setChecked(showHexValues);
+    ui->actionSignedMode->setChecked(showSignedData);
+    ui->actionShowCharacters->setChecked(showCharacters);
+    ui->actionFastExecuteMode->setChecked(fastExecute);
+    ui->actionFollowPCMode->setChecked(followPC);
+
+    updateMachineInterface(true);
+}
+
+void HidraGui::on_actionFindReplace_triggered()
+{
+    findReplaceDialog->show();
 }

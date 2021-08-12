@@ -11,12 +11,14 @@
 #include <QDebug>
 #include <QVector>
 #include <QColor>
+#include <QSettings>
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "baseconversordialog.h"
 #include "pointconversordialog.h"
 #include "registerwidget.h"
+#include "findreplacedialog.h"
 #include "flagwidget.h"
 #include "about.h"
 #include "machines/neandermachine.h"
@@ -133,6 +135,8 @@ private slots:
     void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
     void on_actionPointConversor_triggered();
+    void on_actionDefaultValues_triggered();
+    void on_actionFindReplace_triggered();
 
 private:
     // Internal initialize methods (called by initializeMachineInterface)
@@ -173,6 +177,11 @@ private:
     QString valueToString(int value, bool isHexadecimal, bool isSigned);
     QString getValueDescription(int value, bool isSigned);
 
+    // Config file
+    void loadConfFile();
+    QSettings settings;
+
+
     // Interface elements
     Ui::HidraGui *ui;
     BaseConversorDialog *baseConversor;
@@ -181,6 +190,7 @@ private:
     Machine *machine;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
+    FindReplaceDialog *findReplaceDialog;
     QVector<FlagWidget*> flagWidgets;
     QVector<RegisterWidget*> registerWidgets;
     About *about;

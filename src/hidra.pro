@@ -19,6 +19,7 @@ SOURCES += \
     core/invalidconversorinput.cpp \
     core/pointconversor.cpp \
     gui/baseconversordialog.cpp \
+    gui/findreplacedialog.cpp \
     gui/flagwidget.cpp \
     gui/hidracodeeditor.cpp \
     gui/hidragui.cpp \
@@ -48,6 +49,7 @@ HEADERS  += \
     core/invalidconversorinput.h \
     core/pointconversor.h \
     gui/baseconversordialog.h \
+    gui/findreplacedialog.h \
     gui/flagwidget.h \
     gui/hidracodeeditor.h \
     gui/hidragui.h \
@@ -73,6 +75,7 @@ HEADERS  += \
 
 FORMS    += \
     gui/baseconversordialog.ui \
+    gui/findreplacedialog.ui \
     gui/flagwidget.ui \
     gui/hidragui.ui \
     gui/pointconversordialog.ui \

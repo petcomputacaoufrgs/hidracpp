@@ -748,6 +748,10 @@
     <addaction name="separator"/>
     <addaction name="actionBaseConversor"/>
     <addaction name="actionPointConversor"/>
+    <addaction name="separator"/>
+    <addaction name="actionFindReplace"/>
+    <addaction name="separator"/>
+    <addaction name="actionDefaultValues"/>
    </widget>
    <addaction name="menuProgram"/>
    <addaction name="menuMemory"/>
@@ -1037,6 +1041,19 @@
    </property>
    <property name="text">
     <string>Conversor de base</string>
+   </property>
+  </action>
+  <action name="actionDefaultValues">
+   <property name="text">
+    <string>Restaurar  Opções Padrões</string>
+   </property>
+  </action>
+  <action name="actionFindReplace">
+   <property name="text">
+    <string>Buscar e Substituir</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

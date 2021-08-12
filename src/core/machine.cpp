@@ -1,6 +1,6 @@
 /********************************************************************************
  *
- * Copyright (C) 2015, 2016 PET Computação UFRGS
+ * Copyright (C) 2014-2021 PET Computação UFRGS
  *
  * Este arquivo é parte do programa Hidra.
  *
@@ -555,7 +555,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
         if (!isValidOrg(argumentList.first()))
             throw invalidAddress;
 
-        PC->setValue(argumentList.first().toInt(0));
+        PC->setValue(stringToInt(argumentList.first()));
     }
     else if (QRegExp("db|dw|dab|daw").exactMatch(mnemonic))
     {
