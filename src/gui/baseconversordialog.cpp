@@ -23,11 +23,8 @@ void BaseConversorDialog::on_convertButton_clicked()
 
     // Getting inputs
     QString inputValorStringQ = ui->lineEditInputValor->text();
-    QString baseInQ = ui->lineEditInputBase->text();
-    QString baseOutQ = ui->lineEditOutputBase->text();
-    // converting bases from QString to int
-    int baseOut = baseOutQ.toInt();
-    int baseIn = baseInQ.toInt();
+    int baseIn = ui->inputBase->value();
+    int baseOut = ui->outputBase->value();
 
     try {
         switch (inputTypeIndex) {
@@ -59,7 +56,7 @@ void BaseConversorDialog::on_convertButton_clicked()
                 stringOut = baseConversor.outputTwosComplement(baseOut, ui->minDigits->value());
                 break;
         }
-    } catch (InvalidConversorInput err) {
+    } catch (InvalidConversorInput const &err) {
         ui->labelError->setText(err.getMessage());
     }
 
@@ -68,7 +65,15 @@ void BaseConversorDialog::on_convertButton_clicked()
 
 void BaseConversorDialog::on_invertButton_clicked()
 {
-    QString inputBaseStringQ = ui->lineEditInputBase->text();
-    ui->lineEditInputBase->setText(ui->lineEditOutputBase->text());
-    ui->lineEditOutputBase->setText(inputBaseStringQ);
+    int inputBase = ui->inputBase->value();
+    QString inputNumber = ui->lineEditInputValor->text();
+    int inputFormat = ui->inputType->currentIndex();
+
+    ui->inputBase->setValue(ui->outputBase->value());
+    ui->outputBase->setValue(inputBase);
+    ui->lineEditInputValor->setText(ui->lineEditOutputValor->text());
+    ui->lineEditOutputValor->setText(inputNumber);
+    ui->inputType->setCurrentIndex(ui->outputType->currentIndex());
+    ui->outputType->setCurrentIndex(inputFormat);
+    ui->minDigits->setValue(inputNumber.length());
 }

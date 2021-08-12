@@ -10,7 +10,7 @@ class InvalidConversorInput: public std::exception
 public:
     InvalidConversorInput(QString message);
 
-    QString getMessage();
+    QString getMessage() const;
 
     virtual char const *what() const noexcept;
 

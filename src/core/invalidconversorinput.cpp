@@ -6,7 +6,7 @@ InvalidConversorInput::InvalidConversorInput(QString message):
 {
 }
 
-QString InvalidConversorInput::getMessage()
+QString InvalidConversorInput::getMessage() const
 {
     return this->message;
 }
