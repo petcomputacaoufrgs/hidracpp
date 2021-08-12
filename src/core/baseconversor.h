@@ -30,7 +30,7 @@ private:
     uint64_t mapInput(QChar character, uint64_t base);
     QChar mapOutput(uint64_t digit);
 
-    uint64_t maxValue(uint64_t base, uint64_t width);
+    uint64_t maxValue(uint64_t base, uint64_t *width, uint64_t atLeast);
 
     void decode(QString const &digitsQ, uint64_t base, uint64_t *width);
     QString encode(uint64_t bits, uint64_t base, uint64_t width, QChar fill);

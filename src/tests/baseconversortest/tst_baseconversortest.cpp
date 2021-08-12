@@ -14,13 +14,40 @@ private slots:
     void initTestCase();
     void cleanupTestCase();
 
-    void test_positiveBaseTwoToDec();
+    void test_positiveToSignMagnitudeBaseTwo();
+    void test_positiveToOnesComplBaseTwo();
+    void test_positiveToTwosComplBaseTwo();
 
-    void test_signMagnitudeToTwosComplBaseTwo();
+    void test_signMagnitudeToPositiveBaseTwo();
     void test_signMagnitudeToOnesComplBaseTwo();
+    void test_signMagnitudeToTwosComplBaseTwo();
 
+    void test_onesComplToPositiveBaseTwo();
     void test_onesComplToTwosComplBaseTwo();
+    void test_onesComplToSignMagnitudeBaseTwo();
 
+    void test_twosComplToPositiveBaseTwo();
+    void test_twosComplToOnesComplBaseTwo();
+    void test_twosComplToSignMagnitudeBaseTwo();
+
+    void test_positiveBaseTwoToDec();
+    void test_positiveBaseTwoToThree();
+    void test_positiveBaseHexToFive();
+
+    void test_signMagnitudeBaseTenToTwelve();
+    void test_signMagnitudeBaseTwoToFive();
+
+    void test_onesComplBaseFourToSix();
+    void test_onesComplBaseSevenToTen();
+
+    void test_twosComplBaseThreeToFive();
+    void test_twosComplBaseEightToEleven();
+
+    void test_onesComplLimitsEven();
+    void test_onesComplLimitsOdd();
+
+    void test_twosComplLimitsEven();
+    void test_twosComplLimitsOdd();
 private:
     BaseConversor conversor;
 };
@@ -43,10 +70,37 @@ void BaseConversorTest::cleanupTestCase()
 {
 }
 
-void BaseConversorTest::test_positiveBaseTwoToDec()
+void BaseConversorTest::test_positiveToSignMagnitudeBaseTwo()
 {
-    QString output = conversor.inputPositive("11011", 2).outputPositive(10, 2);
-    QCOMPARE(output, "27");
+    QString output = conversor.inputPositive("100", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "00100");
+}
+
+void BaseConversorTest::test_positiveToOnesComplBaseTwo()
+{
+    QString output = conversor.inputPositive("101", 2).outputOnesComplement(2, 4);
+    QCOMPARE(output, "0101");
+}
+
+void BaseConversorTest::test_positiveToTwosComplBaseTwo()
+{
+    QString output = conversor.inputPositive("101", 2).outputOnesComplement(2, 4);
+    QCOMPARE(output, "0101");
+}
+
+void BaseConversorTest::test_signMagnitudeToOnesComplBaseTwo()
+{
+    QString output = conversor.inputSignMagnitude("1010", 2).outputOnesComplement(2, 3);
+    QCOMPARE(output, "101");
+
+    output = conversor.inputSignMagnitude("0010", 2).outputOnesComplement(2, 3);
+    QCOMPARE(output, "010");
+
+    output = conversor.inputSignMagnitude("0001", 2).outputOnesComplement(2, 5);
+    QCOMPARE(output, "00001");
+
+    output = conversor.inputSignMagnitude("1001", 2).outputOnesComplement(2, 5);
+    QCOMPARE(output, "11110");
 }
 
 void BaseConversorTest::test_signMagnitudeToTwosComplBaseTwo()
@@ -56,14 +110,18 @@ void BaseConversorTest::test_signMagnitudeToTwosComplBaseTwo()
 
     output = conversor.inputSignMagnitude("0001", 2).outputTwosComplement(2, 3);
     QCOMPARE(output, "001");
+
+    output = conversor.inputSignMagnitude("0001", 2).outputTwosComplement(2, 5);
+    QCOMPARE(output, "00001");
+
+    output = conversor.inputSignMagnitude("1001", 2).outputTwosComplement(2, 5);
+    QCOMPARE(output, "11111");
 }
 
-void BaseConversorTest::test_signMagnitudeToOnesComplBaseTwo()
+void BaseConversorTest::test_signMagnitudeToPositiveBaseTwo()
 {
-    QString output = conversor.inputSignMagnitude("1010", 2).outputOnesComplement(2, 3);
-    QCOMPARE(output, "101");
-    output = conversor.inputSignMagnitude("0010", 2).outputOnesComplement(2, 3);
-    QCOMPARE(output, "010");
+    QString output = conversor.inputSignMagnitude("00100", 2).outputPositive(2, 4);
+    QCOMPARE(output, "0100");
 }
 
 void BaseConversorTest::test_onesComplToTwosComplBaseTwo()
@@ -79,6 +137,210 @@ void BaseConversorTest::test_onesComplToTwosComplBaseTwo()
 
     output = conversor.inputOnesComplement("000010", 2).outputTwosComplement(2, 3);
     QCOMPARE(output, "010");
+}
+
+void BaseConversorTest::test_onesComplToSignMagnitudeBaseTwo()
+{
+    QString output = conversor.inputOnesComplement("101", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "10010");
+
+    output = conversor.inputOnesComplement("010", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "00010");
+
+    output = conversor.inputOnesComplement("00010", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "00010");
+
+    output = conversor.inputOnesComplement("11101", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "10010");
+}
+
+void BaseConversorTest::test_onesComplToPositiveBaseTwo()
+{
+    QString output = conversor.inputOnesComplement("00110", 2).outputPositive(2, 3);
+    QCOMPARE(output, "110");
+}
+
+void BaseConversorTest::test_twosComplToSignMagnitudeBaseTwo()
+{
+    QString output = conversor.inputTwosComplement("111", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "10001");
+
+    output = conversor.inputTwosComplement("001", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "00001");
+
+    output = conversor.inputTwosComplement("00001", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "00001");
+
+    output = conversor.inputTwosComplement("11111", 2).outputSignMagnitude(2, 4);
+    QCOMPARE(output, "10001");
+}
+
+void BaseConversorTest::test_twosComplToOnesComplBaseTwo()
+{
+    QString output = conversor.inputTwosComplement("111101", 2).outputOnesComplement(2, 4);
+    QCOMPARE(output, "1100");
+
+    output = conversor.inputTwosComplement("000100", 2).outputOnesComplement(2, 4);
+    QCOMPARE(output, "0100");
+
+    output = conversor.inputTwosComplement("111", 2).outputOnesComplement(2, 4);
+    QCOMPARE(output, "1110");
+
+    output = conversor.inputOnesComplement("010", 2).outputTwosComplement(2, 6);
+    QCOMPARE(output, "000010");
+}
+
+void BaseConversorTest::test_twosComplToPositiveBaseTwo()
+{
+    QString output = conversor.inputOnesComplement("011", 2).outputPositive(2, 5);
+    QCOMPARE(output, "00011");
+}
+
+void BaseConversorTest::test_positiveBaseTwoToDec()
+{
+    QString output = conversor.inputPositive("11011", 2).outputPositive(10, 2);
+    QCOMPARE(output, "27");
+
+    output = conversor.inputPositive("11010", 2).outputPositive(10, 6);
+    QCOMPARE(output, "000026");
+}
+
+void BaseConversorTest::test_positiveBaseTwoToThree()
+{
+    QString output = conversor.inputPositive("100", 2).outputPositive(3, 5);
+    QCOMPARE(output, "00011");
+
+    output = conversor.inputPositive("00101", 2).outputPositive(3, 2);
+    QCOMPARE(output, "12");
+}
+
+void BaseConversorTest::test_positiveBaseHexToFive()
+{
+    QString output = conversor.inputPositive("6b9f", 16).outputPositive(5, 9);
+    QCOMPARE(output, "001340201");
+
+    output = conversor.inputPositive("cafebabe", 16).outputPositive(5, 17);
+    QCOMPARE(output, "00023433324112312");
+}
+
+void BaseConversorTest::test_signMagnitudeBaseTenToTwelve()
+{
+    QString output = conversor.inputSignMagnitude("0095", 10).outputSignMagnitude(12, 5);
+    QCOMPARE(output, "00007B");
+
+    output = conversor.inputSignMagnitude("1095", 10).outputSignMagnitude(12, 5);
+    QCOMPARE(output, "10007B");
+}
+
+void BaseConversorTest::test_signMagnitudeBaseTwoToFive()
+{
+    QString output = conversor.inputSignMagnitude("0010", 2).outputSignMagnitude(5, 2);
+    QCOMPARE(output, "002");
+
+    output = conversor.inputSignMagnitude("1010", 2).outputSignMagnitude(5, 2);
+    QCOMPARE(output, "102");
+}
+
+void BaseConversorTest::test_onesComplBaseFourToSix()
+{
+    QString output = conversor.inputOnesComplement("1302", 4).outputOnesComplement(6, 1);
+    QCOMPARE(output, "0310");
+
+    output = conversor.inputOnesComplement("2311", 4).outputOnesComplement(6, 4);
+    QCOMPARE(output, "5353");
+}
+
+void BaseConversorTest::test_onesComplBaseSevenToTen()
+{
+    QString output = conversor.inputOnesComplement("0613", 7).outputOnesComplement(10, 5);
+    QCOMPARE(output, "00304");
+
+    output = conversor.inputOnesComplement("5162", 7).outputOnesComplement(10, 5);
+    QCOMPARE(output, "99407");
+}
+
+void BaseConversorTest::test_twosComplBaseThreeToFive()
+{
+    QString output = conversor.inputTwosComplement("102211", 3).outputOnesComplement(5, 2);
+    QCOMPARE(output, "02234");
+
+    output = conversor.inputOnesComplement("2001", 3).outputOnesComplement(5, 5);
+    QCOMPARE(output, "44344");
+}
+
+void BaseConversorTest::test_twosComplBaseEightToEleven()
+{
+    QString output = conversor.inputTwosComplement("307674", 8).outputTwosComplement(11, 2);
+    QCOMPARE(output, "06A97A");
+
+    output = conversor.inputTwosComplement("507674", 8).outputTwosComplement(11, 8);
+    QCOMPARE(output, "AAA46195");
+}
+
+void BaseConversorTest::test_onesComplLimitsEven()
+{
+    QString output = conversor.inputOnesComplement("333", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1000");
+
+    output = conversor.inputOnesComplement("332", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1001");
+
+    output = conversor.inputOnesComplement("000", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0000");
+
+    output = conversor.inputOnesComplement("133", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0031");
+
+    output = conversor.inputOnesComplement("200", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1031");
+}
+
+void BaseConversorTest::test_onesComplLimitsOdd()
+{
+    QString output = conversor.inputOnesComplement("222", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1000");
+
+    output = conversor.inputOnesComplement("221", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1001");
+
+    output = conversor.inputOnesComplement("000", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0000");
+
+    output = conversor.inputOnesComplement("110", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0012");
+
+    output = conversor.inputOnesComplement("111", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1013");
+}
+
+void BaseConversorTest::test_twosComplLimitsEven()
+{
+    QString output = conversor.inputTwosComplement("333", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1001");
+
+    output = conversor.inputTwosComplement("000", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0000");
+
+    output = conversor.inputTwosComplement("133", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0031");
+
+    output = conversor.inputTwosComplement("200", 4).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1032");
+}
+
+void BaseConversorTest::test_twosComplLimitsOdd()
+{
+    QString output = conversor.inputTwosComplement("222", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1001");
+
+    output = conversor.inputTwosComplement("000", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0000");
+
+    output = conversor.inputTwosComplement("111", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "0013");
+
+    output = conversor.inputTwosComplement("112", 3).outputSignMagnitude(10, 3);
+    QCOMPARE(output, "1013");
 }
 
 QTEST_APPLESS_MAIN(BaseConversorTest)

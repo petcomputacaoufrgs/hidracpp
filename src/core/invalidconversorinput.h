@@ -5,7 +5,7 @@
 #include <string>
 #include <QString>
 
-class InvalidConversorInput: std::exception
+class InvalidConversorInput: public std::exception
 {
 public:
     InvalidConversorInput(QString message);

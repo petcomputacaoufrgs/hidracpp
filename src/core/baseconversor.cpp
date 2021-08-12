@@ -30,15 +30,21 @@ uint64_t BaseConversor::mapInput(QChar character, uint64_t base)
 QChar BaseConversor::mapOutput(uint64_t digit)
 {
     char map[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    if (digit >= sizeof(map)) {
+        throw InvalidConversorInput("Base inválida");
+    }
+
     return map[digit];
 }
 
-uint64_t BaseConversor::maxValue(uint64_t base, uint64_t width)
+uint64_t BaseConversor::maxValue(uint64_t base, uint64_t *width, uint64_t atLeast)
 {
     uint64_t result = 0;
     uint64_t tmpResult = 0;
+    uint64_t i = 0;
 
-    for (uint64_t i = 0; i < width; i++) {
+    while (i < *width || result < atLeast) {
         tmpResult = result * base;
         if (tmpResult < result) {
             throw InvalidConversorInput("Entrada é muito grande.");
@@ -49,8 +55,10 @@ uint64_t BaseConversor::maxValue(uint64_t base, uint64_t width)
             throw InvalidConversorInput("Entrada é muito grande.");
         }
         result = tmpResult;
+        i++;
     }
 
+    *width = i;
     return result;
 }
 
@@ -95,7 +103,7 @@ QString BaseConversor::encode(uint64_t inputBits, uint64_t base, uint64_t width,
     QString output;
     uint64_t current = 0;
 
-    while (current < width && inputBits > 0) {
+    while (current < width || inputBits > 0) {
         output.append(mapOutput(inputBits % base));
         inputBits /= base;
         current++;
@@ -152,12 +160,13 @@ BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, uint64_t base
     uint64_t maxValue;
     decode(digitsQ, base, &width);
 
-    maxValue = this->maxValue(base, width);
+    maxValue = this->maxValue(base, &width, 0);
 
     sign = bits >= (maxValue / 2 + maxValue % 2);
     if (sign) {
         bits = maxValue - bits;
     }
+
     return *this;
 }
 
@@ -167,7 +176,7 @@ BaseConversor& BaseConversor::inputTwosComplement(QString digitsQ, uint64_t base
     uint64_t maxValue;
     decode(digitsQ, base, &width);
 
-    maxValue = this->maxValue(base, width);
+    maxValue = this->maxValue(base, &width, 0);
 
     sign = bits > maxValue / 2;
     if (sign) {
@@ -196,31 +205,45 @@ QString BaseConversor::outputSignMagnitude(uint64_t base, uint64_t width)
 
 QString BaseConversor::outputOnesComplement(uint64_t base, uint64_t width)
 {
+    uint64_t outputWidth = width;
     uint64_t outputBits = bits;
-    uint64_t maxValue = 0;
+    uint64_t maxValue, atLeast;
     QChar fill = '0';
 
     if (sign) {
-        maxValue = this->maxValue(base, width);
+        maxValue = this->maxValue(base, &outputWidth, outputBits);
         outputBits = maxValue - outputBits;
-        fill = '1';
+        fill = mapOutput(base - 1);
+    } else {
+        atLeast = outputBits * 2;
+        if (atLeast < outputBits) {
+            throw InvalidConversorInput("Entrada é muito grande.");
+        }
+        this->maxValue(base, &outputWidth, outputBits * 2);
     }
 
-    return this->encode(outputBits, base, width, fill);
+    return this->encode(outputBits, base, outputWidth, fill);
 }
 
 
 QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width)
 {
+    uint64_t outputWidth = width;
     uint64_t outputBits = bits;
-    uint64_t maxValue = 0;
+    uint64_t maxValue, atLeast;
     QChar fill = '0';
 
     if (sign) {
-        maxValue = this->maxValue(base, width);
+        maxValue = this->maxValue(base, &outputWidth, outputBits);
         outputBits = maxValue - outputBits + 1;
-        fill = '1';
+        fill = mapOutput(base - 1);
+    } else {
+        atLeast = outputBits * 2;
+        if (atLeast < outputBits) {
+            throw InvalidConversorInput("Entrada é muito grande.");
+        }
+        this->maxValue(base, &outputWidth, outputBits * 2);
     }
 
-    return this->encode(outputBits, base, width, fill);
+    return this->encode(outputBits, base, outputWidth, fill);
 }
