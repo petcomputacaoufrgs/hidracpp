@@ -35,7 +35,7 @@ private:
     void decode(QString const &digitsQ, uint64_t base, uint64_t *width);
     QString encode(uint64_t bits, uint64_t base, uint64_t width, QChar fill);
 
-    void validateBase(u_int64_t base);
+    void validateBase(uint64_t base);
 
     static const int MAX_WIDTH = 64;
     static const int MIN_WIDTH = 1;

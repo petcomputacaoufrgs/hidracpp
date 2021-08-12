@@ -250,7 +250,7 @@ QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width)
     return this->encode(outputBits, base, outputWidth, fill);
 }
 
-void BaseConversor::validateBase(u_int64_t base)
+void BaseConversor::validateBase(uint64_t base)
 {
     if (base < MIN_BASE) {
         throw InvalidConversorInput(QString("Base precisa ser no mínimo ") + QString::number(MIN_BASE));
