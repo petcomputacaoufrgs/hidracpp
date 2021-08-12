@@ -67,6 +67,8 @@ uint64_t BaseConversor::maxValue(uint64_t base, uint64_t *width, uint64_t atLeas
 void BaseConversor::decode(QString const &digitsQ, uint64_t base, uint64_t *width)
 {
     uint64_t result;
+    validateBase(base);
+
     bits = 0;
     *width = 0;
 
@@ -103,6 +105,8 @@ QString BaseConversor::encode(uint64_t inputBits, uint64_t base, uint64_t width,
     QString output;
     uint64_t current = 0;
 
+    validateBase(base);
+
     while (current < width || inputBits > 0) {
         output.append(mapOutput(inputBits % base));
         inputBits /= base;
@@ -125,8 +129,6 @@ BaseConversor& BaseConversor::inputPositive(QString digitsQ, uint64_t base)
     sign = false;
     return *this;
 }
-
-#include <iostream>
 
 BaseConversor& BaseConversor::inputSignMagnitude(QString digitsQ, uint64_t base)
 {
@@ -246,4 +248,15 @@ QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width)
     }
 
     return this->encode(outputBits, base, outputWidth, fill);
+}
+
+void BaseConversor::validateBase(u_int64_t base)
+{
+    if (base < MIN_BASE) {
+        throw InvalidConversorInput(QString("Base precisa ser no mínimo ") + QString::number(MIN_BASE));
+    }
+
+    if (base > MAX_BASE) {
+        throw InvalidConversorInput(QString("Base precisa ser no máximo ") + QString::number(MAX_BASE));
+    }
 }

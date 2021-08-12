@@ -1,6 +1,7 @@
 #include <QtTest>
 
 #include "baseconversor.h"
+#include "invalidconversorinput.h"
 
 class BaseConversorTest : public QObject
 {
@@ -48,6 +49,16 @@ private slots:
 
     void test_twosComplLimitsEven();
     void test_twosComplLimitsOdd();
+
+    void test_signMagnitBinToTwosComplThirteen();
+    void test_onesComplThirteenToSignMagnitBin();
+
+    void test_badBase();
+    void test_badDigit();
+    void test_empty();
+
+    void test_badSize();
+    void test_badSizeToCompl();
 private:
     BaseConversor conversor;
 };
@@ -341,6 +352,50 @@ void BaseConversorTest::test_twosComplLimitsOdd()
 
     output = conversor.inputTwosComplement("112", 3).outputSignMagnitude(10, 3);
     QCOMPARE(output, "1013");
+}
+
+void BaseConversorTest::test_signMagnitBinToTwosComplThirteen()
+{
+    QString output = conversor.inputSignMagnitude("1001011", 2).outputTwosComplement(13, 4);
+    QCOMPARE(output, "CCC2");
+}
+
+void BaseConversorTest::test_onesComplThirteenToSignMagnitBin()
+{
+    QString output =  conversor.inputOnesComplement("CCC1", 13).outputSignMagnitude(2, 6);
+    QCOMPARE(output, "1001011");
+}
+
+void BaseConversorTest::test_badBase()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputOnesComplement("1", 37), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("1", 1), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputSignMagnitude("100", 2).outputPositive(27, 2), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputTwosComplement("1", 2).outputPositive(1, 2), InvalidConversorInput);
+}
+
+void BaseConversorTest::test_badDigit()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputTwosComplement("11012", 2), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputOnesComplement("885b1f", 15), InvalidConversorInput);
+}
+
+void BaseConversorTest::test_empty()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("", 2), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputSignMagnitude("1", 10), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputSignMagnitude("0", 20), InvalidConversorInput);
+}
+
+void BaseConversorTest::test_badSize()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("zzzzzzzzzzzzzzzz", 37), InvalidConversorInput);
+}
+
+void BaseConversorTest::test_badSizeToCompl()
+{
+    QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("ffff ffff ffff ffff", 16).outputTwosComplement(2, 64), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("ffff ffff ffff ffff", 16).outputOnesComplement(3, 64), InvalidConversorInput);
 }
 
 QTEST_APPLESS_MAIN(BaseConversorTest)
