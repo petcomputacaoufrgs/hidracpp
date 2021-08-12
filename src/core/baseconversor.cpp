@@ -66,7 +66,7 @@ uint64_t BaseConversor::maxValue(uint64_t base, uint64_t *width, uint64_t atLeas
 
 void BaseConversor::decode(QString const &digitsQ, uint64_t base, uint64_t *width)
 {
-    uint64_t result;
+    uint64_t result = 0;
     validateBase(base);
 
     bits = 0;
@@ -158,8 +158,8 @@ BaseConversor& BaseConversor::inputSignMagnitude(QString digitsQ, uint64_t base)
 
 BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, uint64_t base)
 {
-    uint64_t width;
-    uint64_t maxValue;
+    uint64_t width = 0;
+    uint64_t maxValue = 0;
     decode(digitsQ, base, &width);
 
     maxValue = this->maxValue(base, &width, 0);
@@ -174,8 +174,8 @@ BaseConversor& BaseConversor::inputOnesComplement(QString digitsQ, uint64_t base
 
 BaseConversor& BaseConversor::inputTwosComplement(QString digitsQ, uint64_t base)
 {
-    uint64_t width;
-    uint64_t maxValue;
+    uint64_t width = 0;
+    uint64_t maxValue = 0;
     decode(digitsQ, base, &width);
 
     maxValue = this->maxValue(base, &width, 0);

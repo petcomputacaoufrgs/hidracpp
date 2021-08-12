@@ -243,14 +243,14 @@ PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t wi
 
 uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize)
 {
-    int16_t numExponent;
-    uint64_t numDigits;
+    int16_t numExponent = 0;
+    uint64_t numDigits = 0;
 
     uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
     int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
     uint64_t finalBit = (uint64_t) 1 << mantissaSize;
 
-    bool hasFinalBit;
+    bool hasFinalBit = false;
     uint64_t roundRight = 0;
 
     validateFloatSpec(mantissaSize, exponentSize);
@@ -389,8 +389,8 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
     uint64_t number = digits;
     int16_t numExponent = exponent;
 
-    uint64_t finalBit;
-    uint64_t mantissaMask;
+    uint64_t finalBit = 0;
+    uint64_t mantissaMask = 0;
     uint64_t digitsMask = ~((uint64_t) 0) >> (MAX_WIDTH - width);
     uint64_t roundLeft = 0;
     uint64_t roundRight = 0;
