@@ -46,6 +46,8 @@ private slots:
 
     void test_floatOverflow();
     void test_floatUnderflow();
+    void test_floatOverflowExp();
+    void test_floatUnderflowExp();
 
     void test_fixedOverflow();
     void test_fixedOverflowTwosCompl();
@@ -270,8 +272,8 @@ void PointConversorTest::test_floatOverflow()
     QCOMPARE(conversor.inputDoubleFloat("0100001000000010011001011000000010010111010100000111110101110001").outputSingleFloat(),
              "01010000000100110010110000000101");
 
-    QCOMPARE(conversor.inputDoubleFloat("0100001000000010011001011000000010110111010100000111110101110001").outputSingleFloat(),
-             "01010000000100110010110000000110");
+    QCOMPARE(conversor.inputDoubleFloat("1100001000000010011001011000000010110111010100000111110101110001").outputSingleFloat(),
+             "11010000000100110010110000000110");
 }
 
 void PointConversorTest::test_floatUnderflow()
@@ -279,8 +281,35 @@ void PointConversorTest::test_floatUnderflow()
     QCOMPARE(conversor.inputDoubleFloat("0011110100111011110011001100110010100110001101110001010111100100").outputSingleFloat(),
              "00101001110111100110011001100101");
 
-    QCOMPARE(conversor.inputDoubleFloat("0011110100111011110011001100110010110110001101110001010111100100").outputSingleFloat(),
-             "00101001110111100110011001100110");
+    QCOMPARE(conversor.inputDoubleFloat("1011110100111011110011001100110010110110001101110001010111100100").outputSingleFloat(),
+             "10101001110111100110011001100110");
+}
+
+void PointConversorTest::test_floatOverflowExp()
+{
+    QCOMPARE(conversor.inputDoubleFloat("0100111111110010001111001000000000000000000000000000000000000000").outputSingleFloat(),
+             "01111111100000000000000000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("0101000000000010001111001000000000000000000000000000000000000000").outputSingleFloat(),
+             "01111111100000000000000000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("1110001000000000001010001100000000000000000000000000000000000000").outputSingleFloat(),
+             "11111111100000000000000000000000");
+}
+
+void PointConversorTest::test_floatUnderflowExp()
+{
+    QCOMPARE(conversor.inputDoubleFloat("0011100000000010001111001000000000000000000000000000000000000000").outputSingleFloat(),
+             "00000000010010001111001000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("0001100000000001000100010000100000000000000000000000000000000111").outputSingleFloat(),
+             "00000000000000000000000000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("1011100000000010001111001000000000000000000000000000000000000000").outputSingleFloat(),
+             "10000000010010001111001000000000");
+
+    QCOMPARE(conversor.inputDoubleFloat("1000000001000010001111001000000000000000000000000000000000000000").outputSingleFloat(),
+             "10000000000000000000000000000000");
 }
 
 void PointConversorTest::test_fixedOverflow()
