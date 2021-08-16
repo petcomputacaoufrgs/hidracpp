@@ -26,6 +26,9 @@ private slots:
     void test_fixedZerosRight();
     void test_fixedZerosLeft();
 
+    void test_fixedPosZero();
+    void test_fixedPosWidth();
+
     void test_floatToFloat();
     void test_floatToFloatSigned();
 
@@ -131,6 +134,30 @@ void PointConversorTest::test_fixedZerosLeft()
 {
     QCOMPARE(conversor.inputFixed8("00000.0110010", PointConversor::UNSIGNED).outputFixed64(9, PointConversor::UNSIGNED),
              "0000000000000000000000000000000000000000000000000000000.011001000");
+}
+
+void PointConversorTest::test_fixedPosZero()
+{
+    QCOMPARE(conversor.inputFixed8("10000110.0", PointConversor::UNSIGNED).outputFixed16(8, PointConversor::UNSIGNED),
+             "10000110.00000000");
+
+    QCOMPARE(conversor.inputFixed8("01100100.", PointConversor::TWOS_COMPL).outputFixed16(8, PointConversor::TWOS_COMPL),
+             "01100100.00000000");
+
+    QCOMPARE(conversor.inputFixed8("11100100.0", PointConversor::TWOS_COMPL).outputFixed16(8, PointConversor::TWOS_COMPL),
+             "11100100.00000000");
+}
+
+void PointConversorTest::test_fixedPosWidth()
+{
+    QCOMPARE(conversor.inputFixed8("0.10000110", PointConversor::UNSIGNED).outputFixed16(8, PointConversor::UNSIGNED),
+             "00000000.10000110");
+
+    QCOMPARE(conversor.inputFixed8("0.01100100", PointConversor::TWOS_COMPL).outputFixed16(8, PointConversor::TWOS_COMPL),
+             "00000000.01100100");
+
+    QCOMPARE(conversor.inputFixed8("0.11100100", PointConversor::TWOS_COMPL).outputFixed16(8, PointConversor::TWOS_COMPL),
+             "11111111.11100100");
 }
 
 void PointConversorTest::test_floatToFloat()
@@ -369,8 +396,10 @@ void PointConversorTest::test_nanToFloat()
 
 void PointConversorTest::test_badFixedPointPos()
 {
-    QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("0.00000001", PointConversor::UNSIGNED), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("0.000000001", PointConversor::UNSIGNED), InvalidConversorInput);
     QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("100000001.0", PointConversor::UNSIGNED), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("100000001.0", PointConversor::TWOS_COMPL), InvalidConversorInput);
+    QVERIFY_EXCEPTION_THROWN(conversor.inputFixed8("100000001.00000", PointConversor::TWOS_COMPL), InvalidConversorInput);
 }
 
 void PointConversorTest::test_badNanToFixed()
