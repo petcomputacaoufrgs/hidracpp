@@ -7,6 +7,8 @@ BaseConversor::BaseConversor():
 {
 }
 
+// Low-level encoding and decoding functions
+
 uint64_t BaseConversor::mapInput(QChar character, uint64_t base) const
 {
     int codepoint = character.unicode();
@@ -66,8 +68,6 @@ uint64_t BaseConversor::maxValue(uint64_t base, uint64_t *width, uint64_t atLeas
     *width = i;
     return result;
 }
-
-// Input functions
 
 uint64_t BaseConversor::decode(QString const &digitsQ, uint64_t base, uint64_t *width) const
 {
@@ -313,6 +313,8 @@ QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width) const
     // If no error was thrown, just convert the complemented number to string.
     return this->encode(outputBits, base, outputWidth, fill);
 }
+
+// Validation functions
 
 void BaseConversor::validateBase(uint64_t base) const
 {

@@ -5,13 +5,15 @@
 // With float, there are some 64 bits numbers which cannot be represented
 // because double float only really has 52 bits for mantissa.
 
-PointConversor::PointConversor()
+PointConversor::PointConversor():
+    bits(0),
+    exponent(0),
+    sign(false),
+    normality(PointConversor::NORMAL)
 {
-    digits = 0;
-    sign = false;
-    exponent = 0;
-    normality = PointConversor::NORMAL;
 }
+
+// Raw input functions
 
 PointConversor& PointConversor::inputHalfFloatRaw(uint16_t number)
 {
@@ -50,6 +52,8 @@ PointConversor& PointConversor::inputFixed64Raw(uint64_t number, int16_t pointPo
     return this->inputGenericFixedRaw(number, 64, pointPos, signedness);
 }
 
+// String input functions
+
 PointConversor& PointConversor::inputHalfFloat(QString const& number)
 {
     return this->inputGenericFloat(number, 10, 5);
@@ -87,6 +91,10 @@ PointConversor& PointConversor::inputFixed64(QString const& number, Signedness s
 
 PointConversor& PointConversor::inputHumanNotation(QString const& number)
 {
+    // For now, we are decoding human notation via double float. This means we
+    // are losing some precision, since double has only 52 bits of significant
+    // digits, and our class stores 64 bits of significant digits, but that's
+    // perhaps acceptable.
     bool ok = true;
     double asDoubleFloat = number.toDouble(&ok);
     if (!ok) {
@@ -95,81 +103,85 @@ PointConversor& PointConversor::inputHumanNotation(QString const& number)
     return this->inputDoubleFloatRaw(asDoubleFloat);
 }
 
-uint16_t PointConversor::outputHalfFloatRaw()
+// Raw output functions
+
+uint16_t PointConversor::outputHalfFloatRaw() const
 {
     return this->outputGenericFloatRaw(10, 5);
 }
 
-float PointConversor::outputSingleFloatRaw()
+float PointConversor::outputSingleFloatRaw() const
 {
     uint32_t number = this->outputGenericFloatRaw(23, 8);
     union { uint32_t bits; float number; } bitCast { number };
     return bitCast.number;
 }
 
-double PointConversor::outputDoubleFloatRaw()
+double PointConversor::outputDoubleFloatRaw() const
 {
     uint64_t number = this->outputGenericFloatRaw(52, 11);
     union { uint64_t bits; double number; } bitCast { number };
     return bitCast.number;
 }
 
-uint8_t PointConversor::outputFixed8Raw(int16_t pointPos, Signedness signedness)
+uint8_t PointConversor::outputFixed8Raw(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixedRaw(8, pointPos, signedness);
 }
 
-uint16_t PointConversor::outputFixed16Raw(int16_t pointPos, Signedness signedness)
+uint16_t PointConversor::outputFixed16Raw(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixedRaw(16, pointPos, signedness);
 }
 
-uint32_t PointConversor::outputFixed32Raw(int16_t pointPos, Signedness signedness)
+uint32_t PointConversor::outputFixed32Raw(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixedRaw(32, pointPos, signedness);
 }
 
-uint64_t PointConversor::outputFixed64Raw(int16_t pointPos, Signedness signedness)
+uint64_t PointConversor::outputFixed64Raw(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixedRaw(64, pointPos, signedness);
 }
 
-QString PointConversor::outputHalfFloat()
+QString PointConversor::outputHalfFloat() const
 {
     return this->outputGenericFloat(10, 5);
 }
 
-QString PointConversor::outputSingleFloat()
+QString PointConversor::outputSingleFloat() const
 {
     return this->outputGenericFloat(23, 8);
 }
 
-QString PointConversor::outputDoubleFloat()
+QString PointConversor::outputDoubleFloat() const
 {
     return this->outputGenericFloat(52, 11);
 }
 
-QString PointConversor::outputFixed8(int16_t pointPos, Signedness signedness)
+// String output function
+
+QString PointConversor::outputFixed8(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixed(8, pointPos, signedness);
 }
 
-QString PointConversor::outputFixed16(int16_t pointPos, Signedness signedness)
+QString PointConversor::outputFixed16(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixed(16, pointPos, signedness);
 }
 
-QString PointConversor::outputFixed32(int16_t pointPos, Signedness signedness)
+QString PointConversor::outputFixed32(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixed(32, pointPos, signedness);
 }
 
-QString PointConversor::outputFixed64(int16_t pointPos, Signedness signedness)
+QString PointConversor::outputFixed64(int16_t pointPos, Signedness signedness) const
 {
     return this->outputGenericFixed(64, pointPos, signedness);
 }
 
-QString PointConversor::outputHumanNotation()
+QString PointConversor::outputHumanNotation() const
 {
     double asDoubleFloat = this->outputDoubleFloatRaw();
     QString rendered = QString::number(asDoubleFloat, 'f', 50);
@@ -185,6 +197,8 @@ QString PointConversor::outputHumanNotation()
     return rendered;
 }
 
+// Generic input functions
+
 PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t mantissaSize, uint16_t exponentSize)
 {
     uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
@@ -193,21 +207,36 @@ PointConversor& PointConversor::inputGenericFloatRaw(uint64_t number, uint16_t m
 
     validateFloatSpec(mantissaSize, exponentSize);
 
-    sign = number >> (exponentSize + mantissaSize);
-    digits = number & mantissaMask;
-    exponent = (number >> mantissaSize) & exponentMask;
+    // Sign is the last bit.
+    this->sign = number >> (exponentSize + mantissaSize);
+    // We store the mantissa bits (lower bits) as the significant bits.
+    this->bits = number & mantissaMask;
+    // Exponent is between the mantissa and the sign.
+    this->exponent = (number >> mantissaSize) & exponentMask;
     if (exponent != exponentMask) {
+        // Exponent being `< maximum` exponent means it is normal.
         if (exponent == 0) {
+            // But if the exponent is zero, it is actually subnormal.
             exponent++;
         } else {
-            digits |= finalBit;
+            // Otherwise, `0 < exponent < max` means it is really normal.
+            //
+            // There is an extra high bit, because a normal number is in this
+            // format:
+            //
+            // 1.xxxxxxx... * 2**e
+            //
+            // And this "1" is not stored, only the xxxxxx...
+            //
+            // So, we need to introduce it.
+            this->bits |= finalBit;
         }
-        normality = PointConversor::NORMAL;
-        exponent -= mantissaSize + (exponentMask >> 1);
-    } else if (digits == 0) {
-        normality = PointConversor::INFINITY_NAN;
+        this->normality = PointConversor::NORMAL;
+        this->exponent -= mantissaSize + (exponentMask >> 1);
+    } else if (bits == 0) {
+        this->normality = PointConversor::INFINITY_NAN;
     } else {
-        normality = PointConversor::NOT_A_NUMBER;
+        this->normality = PointConversor::NOT_A_NUMBER;
     }
 
     return *this;
@@ -220,97 +249,27 @@ PointConversor& PointConversor::inputGenericFixedRaw(uint64_t number, int16_t wi
 
     validateFixedSpec(width, pointPos, signedness);
 
-    normality = PointConversor::NORMAL;
+    this->normality = PointConversor::NORMAL;
 
     switch (signedness) {
     case UNSIGNED:
-        sign = false;
+        this->sign = false;
         break;
     case TWOS_COMPL:
-        sign = (number & signMask) != 0;
+        this->sign = (number & signMask) != 0;
         break;
     }
 
-    exponent = -pointPos;
+    this->exponent = -pointPos;
 
-    digits = number;
+    this->bits = number;
     if (sign) {
-        digits = (~digits + 1) & extendMask;
+        this->bits = (~bits + 1) & extendMask;
     }
 
     return *this;
 }
 
-uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize)
-{
-    int16_t numExponent = 0;
-    uint64_t numDigits = 0;
-
-    uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
-    int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
-    uint64_t finalBit = (uint64_t) 1 << mantissaSize;
-
-    bool hasFinalBit = false;
-    uint64_t roundRight = 0;
-
-    validateFloatSpec(mantissaSize, exponentSize);
-
-    switch (normality) {
-    case PointConversor::NORMAL:
-        numExponent = exponent + (exponentMask >> 1) + mantissaSize;
-        numDigits = digits;
-
-        while (numDigits < finalBit && numDigits != 0) {
-            numDigits <<= 1;
-            numExponent -= 1;
-        }
-
-        while (numDigits >= (finalBit << 1)) {
-            roundRight = numDigits & 1;
-            numDigits >>= 1;
-            numExponent += 1;
-        }
-
-        if (numExponent <= 0) {
-            while (numExponent < 0) {
-                numDigits >>= 1;
-                numExponent += 1;
-            }
-            roundRight = numDigits & 1;
-            numDigits >>= 1;
-        }
-
-        hasFinalBit = numDigits & finalBit;
-        numDigits &= ~finalBit;
-        numDigits += roundRight;
-
-        while (numExponent > exponentMask) {
-            numDigits <<= 1;
-            numExponent -= 1;
-        }
-
-        if (!hasFinalBit && numDigits == 0) {
-            numExponent = 0;
-        } else if (numExponent >= exponentMask) {
-            numExponent = exponentMask;
-            numDigits = 0;
-        }
-        break;
-    case PointConversor::INFINITY_NAN:
-        numExponent = exponentMask;
-        numDigits = 0;
-        break;
-    case PointConversor::NOT_A_NUMBER:
-        numExponent = exponentMask;
-        numDigits = 1;
-        break;
-    }
-
-    uint64_t number = numDigits & mantissaMask;
-    number |= (uint64_t) (numExponent & exponentMask) << mantissaSize;
-    number |= (uint64_t) sign << (mantissaSize + exponentSize);
-    return number;
-}
 
 PointConversor& PointConversor::inputGenericFloat(QString const &number, uint16_t mantissaSize, uint16_t exponentSize)
 {
@@ -384,9 +343,82 @@ PointConversor& PointConversor::inputGenericFixed(QString const &number, int16_t
     return this->inputGenericFixedRaw(bits, width, count - pointPos, signedness);
 }
 
-uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, Signedness signedness)
+// Generic output functions
+
+uint64_t PointConversor::outputGenericFloatRaw(uint16_t mantissaSize, uint16_t exponentSize) const
 {
-    uint64_t number = digits;
+    int16_t numExponent = 0;
+    uint64_t numDigits = 0;
+
+    uint64_t mantissaMask = ((uint64_t) 1 << mantissaSize) - 1;
+    int16_t exponentMask = ((uint64_t) 1 << exponentSize) - 1;
+    uint64_t finalBit = (uint64_t) 1 << mantissaSize;
+
+    bool hasFinalBit = false;
+    uint64_t roundRight = 0;
+
+    validateFloatSpec(mantissaSize, exponentSize);
+
+    switch (normality) {
+    case PointConversor::NORMAL:
+        numExponent = this->exponent + (exponentMask >> 1) + mantissaSize;
+        numDigits = bits;
+
+        while (numDigits < finalBit && numDigits != 0) {
+            numDigits <<= 1;
+            numExponent -= 1;
+        }
+
+        while (numDigits >= (finalBit << 1)) {
+            roundRight = numDigits & 1;
+            numDigits >>= 1;
+            numExponent += 1;
+        }
+
+        if (numExponent <= 0) {
+            while (numExponent < 0) {
+                numDigits >>= 1;
+                numExponent += 1;
+            }
+            roundRight = numDigits & 1;
+            numDigits >>= 1;
+        }
+
+        hasFinalBit = numDigits & finalBit;
+        numDigits &= ~finalBit;
+        numDigits += roundRight;
+
+        while (numExponent > exponentMask) {
+            numDigits <<= 1;
+            numExponent -= 1;
+        }
+
+        if (!hasFinalBit && numDigits == 0) {
+            numExponent = 0;
+        } else if (numExponent >= exponentMask) {
+            numExponent = exponentMask;
+            numDigits = 0;
+        }
+        break;
+    case PointConversor::INFINITY_NAN:
+        numExponent = exponentMask;
+        numDigits = 0;
+        break;
+    case PointConversor::NOT_A_NUMBER:
+        numExponent = exponentMask;
+        numDigits = 1;
+        break;
+    }
+
+    uint64_t number = numDigits & mantissaMask;
+    number |= (uint64_t) (numExponent & exponentMask) << mantissaSize;
+    number |= (uint64_t) this->sign << (mantissaSize + exponentSize);
+    return number;
+}
+
+uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, Signedness signedness) const
+{
+    uint64_t number = bits;
     int16_t numExponent = exponent;
 
     uint64_t finalBit = 0;
@@ -459,7 +491,7 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
     return number;
 }
 
-QString PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize)
+QString PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t exponentSize) const
 {
     uint64_t bits = this->outputGenericFloatRaw(mantissaSize, exponentSize);
     QString output;
@@ -471,7 +503,7 @@ QString PointConversor::outputGenericFloat(uint16_t mantissaSize, uint16_t expon
     return output;
 }
 
-QString PointConversor::outputGenericFixed(int16_t width, int16_t pointPos, Signedness signedness)
+QString PointConversor::outputGenericFixed(int16_t width, int16_t pointPos, Signedness signedness) const
 {
     uint64_t bits = this->outputGenericFixedRaw(width, pointPos, signedness);
     QString output;
@@ -499,7 +531,9 @@ QString PointConversor::outputGenericFixed(int16_t width, int16_t pointPos, Sign
     return output;
 }
 
-void PointConversor::validateFloatSpec(uint16_t mantissaSize, uint16_t exponentSize)
+// Validation functions
+
+void PointConversor::validateFloatSpec(uint16_t mantissaSize, uint16_t exponentSize) const
 {
     if (mantissaSize < MIN_MANTISSA_SIZE) {
         throw InvalidConversorInput(QString("Tamanho da mantissa não pode ser menor que ") + QString::number(MIN_MANTISSA_SIZE));
@@ -514,7 +548,7 @@ void PointConversor::validateFloatSpec(uint16_t mantissaSize, uint16_t exponentS
     }
 }
 
-void PointConversor::validateFixedSpec(int16_t width, int16_t pointPos, Signedness signedness)
+void PointConversor::validateFixedSpec(int16_t width, int16_t pointPos, Signedness signedness) const
 {
     if (width < MIN_FIXED_WIDTH) {
         throw InvalidConversorInput(QString("Largura não pode ser menor que ") + QString::number(MIN_FIXED_WIDTH));
@@ -539,18 +573,4 @@ void PointConversor::validateFixedSpec(int16_t width, int16_t pointPos, Signedne
         }
         break;
     }
-}
-
-int16_t PointConversor::exponentModTen(int16_t numExponent)
-{
-    int16_t table[] = { 6, 2, 4, 8 };
-    int16_t table_size = sizeof(table) / sizeof(table[0]);
-
-    if (numExponent > 0) {
-        return table[numExponent % table_size];
-    }
-    if (numExponent < 0) {
-        return table[-numExponent % table_size];
-    }
-    return 1;
 }
