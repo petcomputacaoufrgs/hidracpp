@@ -25,11 +25,16 @@ private slots:
 private:
     Ui::BaseConversorDialog *ui;
 
+    /// Helper to convert user input into method calls based on signedness.
     enum Signedness
     {
+        /// Positive integers.
         TYPE_POSITIVE = 0,
+        /// Sign magnitude format ([+-] and digits).
         TYPE_SIGN_MAGNITUDE = 1,
+        /// B-1's complement (or 1's complement): B**n - 1 - y
         TYPE_ONES_COMPLEMENT = 2,
+        /// B's complement (or 2's complement): B**n - y
         TYPE_TWOS_COMPLEMENT = 3
     };
 };

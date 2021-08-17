@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>538</width>
-    <height>366</height>
+    <height>368</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -306,6 +306,9 @@
          <widget class="QLabel" name="labelError">
           <property name="text">
            <string/>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
           </property>
          </widget>
         </item>

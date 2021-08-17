@@ -27,39 +27,45 @@ void BaseConversorDialog::on_convertButton_clicked()
     int baseOut = ui->outputBase->value();
 
     try {
+        // Translates input format into a method call.
         switch (inputTypeIndex) {
-            case TYPE_POSITIVE:
-                baseConversor.inputPositive(inputValorStringQ, baseIn);
-                break;
-            case TYPE_SIGN_MAGNITUDE:
-                baseConversor.inputSignMagnitude(inputValorStringQ, baseIn);
-                break;
-            case TYPE_ONES_COMPLEMENT:
-                baseConversor.inputOnesComplement(inputValorStringQ, baseIn);
-                break;
-            case TYPE_TWOS_COMPLEMENT:
-                baseConversor.inputTwosComplement(inputValorStringQ, baseIn);
-                break;
+        case TYPE_POSITIVE:
+            baseConversor.inputPositive(inputValorStringQ, baseIn);
+            break;
+        case TYPE_SIGN_MAGNITUDE:
+            baseConversor.inputSignMagnitude(inputValorStringQ, baseIn);
+            break;
+        case TYPE_ONES_COMPLEMENT:
+            baseConversor.inputOnesComplement(inputValorStringQ, baseIn);
+            break;
+        case TYPE_TWOS_COMPLEMENT:
+            baseConversor.inputTwosComplement(inputValorStringQ, baseIn);
+            break;
         }
 
+        // Translates output format into a method call.
         switch (outputTypeIndex) {
-            case TYPE_POSITIVE:
-                stringOut = baseConversor.outputPositive(baseOut, ui->minDigits->value());
-                break;
-            case TYPE_SIGN_MAGNITUDE:
-                stringOut = baseConversor.outputSignMagnitude(baseOut, ui->minDigits->value());
-                break;
-            case TYPE_ONES_COMPLEMENT:
-                stringOut = baseConversor.outputOnesComplement(baseOut, ui->minDigits->value());
-                break;
-            case TYPE_TWOS_COMPLEMENT:
-                stringOut = baseConversor.outputTwosComplement(baseOut, ui->minDigits->value());
-                break;
+        case TYPE_POSITIVE:
+            stringOut = baseConversor.outputPositive(baseOut, ui->minDigits->value());
+            break;
+        case TYPE_SIGN_MAGNITUDE:
+            stringOut = baseConversor.outputSignMagnitude(baseOut, ui->minDigits->value());
+            break;
+        case TYPE_ONES_COMPLEMENT:
+            stringOut = baseConversor.outputOnesComplement(baseOut, ui->minDigits->value());
+            break;
+        case TYPE_TWOS_COMPLEMENT:
+            stringOut = baseConversor.outputTwosComplement(baseOut, ui->minDigits->value());
+            break;
         }
+
+        ui->labelError->setText("Ok");
     } catch (InvalidConversorInput const &err) {
+        // Shows error to the user.
         ui->labelError->setText(err.getMessage());
     }
 
+    // Even on error, this will run. In such case, output box will be cleared.
     ui->lineEditOutputValor->setText(stringOut);
 }
 
@@ -69,11 +75,15 @@ void BaseConversorDialog::on_invertButton_clicked()
     QString inputNumber = ui->lineEditInputValor->text();
     int inputFormat = ui->inputType->currentIndex();
 
+    // Inverts base.
     ui->inputBase->setValue(ui->outputBase->value());
     ui->outputBase->setValue(inputBase);
+    // Inverts number.
     ui->lineEditInputValor->setText(ui->lineEditOutputValor->text());
     ui->lineEditOutputValor->setText(inputNumber);
+    // Inverts format/type.
     ui->inputType->setCurrentIndex(ui->outputType->currentIndex());
     ui->outputType->setCurrentIndex(inputFormat);
+    // Inverts(?) minimum digits.
     ui->minDigits->setValue(inputNumber.length());
 }

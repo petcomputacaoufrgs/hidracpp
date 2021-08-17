@@ -20,17 +20,6 @@ public:
     explicit PointConversorDialog(QWidget *parent = nullptr);
     ~PointConversorDialog();
 
-    enum Notation {
-        HUMAN = 0,
-        FLOAT16 = 1,
-        FLOAT32 = 2,
-        FLOAT64 = 3,
-        FIXED8 = 4,
-        FIXED16 = 5,
-        FIXED32 = 6,
-        FIXED64 = 7
-    };
-
 private slots:
     void on_convertButton_clicked();
     void on_invertButton_clicked();
@@ -42,6 +31,30 @@ private slots:
 private:
     Ui::PointConversorDialog *ui;
 
+    /// Helper to convert conversion input and output formats conversor's
+    /// into method calls.
+    enum Notation
+    {
+        /// Human notation, e.g. -23.54544901
+        HUMAN = 0,
+        /// 16-bit float aka half precision floating point number, in a binary string.
+        FLOAT16 = 1,
+        /// 32-bit float aka single precision floating point number, in a binary string.
+        FLOAT32 = 2,
+        /// 64-bit float aka double precision floating point number, in a binary string.
+        FLOAT64 = 3,
+        /// 8-bit fixed point number, in a binary string with a point.
+        FIXED8 = 4,
+        /// 16-bit fixed point number, in a binary string with a point.
+        FIXED16 = 5,
+        /// 32-bit fixed point number, in a binary string with a point.
+        FIXED32 = 6,
+        /// 64-bit fixed point number, in a binary string with a point.
+        FIXED64 = 7
+    };
+
+    /// Converts the selected index of the given signedness input widget
+    /// into point conversor's signedness.
     PointConversor::Signedness signednessFromUser(QComboBox *input);
 };
 
