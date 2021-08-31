@@ -55,6 +55,8 @@ private slots:
     void test_fixedUnderflow();
     void test_fixedUnderflowTwosCompl();
 
+    void test_humanToFixedOverflowTwosCompl();
+
     void test_infiniteToFloat();
     void test_infiniteToFloatSigned();
 
@@ -343,6 +345,12 @@ void PointConversorTest::test_fixedOverflowTwosCompl()
 
     QCOMPARE(conversor.inputFixed16("100000000000110.1", PointConversor::TWOS_COMPL).outputFixed8(6, PointConversor::TWOS_COMPL),
              "10.100000");
+}
+
+void PointConversorTest::test_humanToFixedOverflowTwosCompl()
+{
+    QCOMPARE(conversor.inputHumanNotation("11.625").outputFixed8(4, PointConversor::TWOS_COMPL),
+             "0111.1010");
 }
 
 void PointConversorTest::test_fixedUnderflow()

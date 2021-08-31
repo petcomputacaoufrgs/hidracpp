@@ -507,13 +507,12 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
         // We need to normalize the exponent to the point position.
         while (numExponent > -pointPos) {
             // We might need to round the number in the left.
-            roundLeft |= number & finalBit;
+            if (number >= finalBit) {
+                roundLeft = finalBit;
+            }
             numExponent -= 1;
             number <<= 1;
         }
-
-        // Potential rounding.
-        number |= roundLeft;
 
         // If the exponent was not too big, it could be too small.
         while (numExponent < -pointPos) {
@@ -523,10 +522,17 @@ uint64_t PointConversor::outputGenericFixedRaw(int16_t width, int16_t pointPos, 
             number >>= 1;
         }
 
+        if (number > mantissaMask) {
+            roundLeft = finalBit;
+        }
+
+        // Potential rounding at left position (most significant).
+        number |= roundLeft;
+
         // Truncating the number.
         number &= mantissaMask;
         if (digitsMask != number) {
-            // But that's ok because we will round it here if required.
+            // But that's ok because we will round right (less significant) it here if required.
             number += roundRight;
         }
 
