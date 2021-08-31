@@ -79,6 +79,9 @@ HidraGui::HidraGui(QWidget *parent) :
     codeEditor->setAcceptDrops(false);
     setAcceptDrops(true);
 
+    baseConversor = new BaseConversorDialog();
+    pointConversor = new PointConversorDialog();
+
     // Open recovery file (if existing)
     /*if (QFile::exists("__Recovery__.txt"))
     {
@@ -377,7 +380,6 @@ void HidraGui::initializeInstructionsList()
     {
         QLabel *instructionText = new QLabel(this);
         instructionText->setTextFormat(Qt::RichText);
-        instructionText->setEnabled(false); // Grayed out
 
         // Label text
         instructionText->setText(instruction->getMnemonic().toUpper());
@@ -387,7 +389,6 @@ void HidraGui::initializeInstructionsList()
                           instruction->getArguments().join(" ") + "<br>" +
                           machine->getDescription(instruction->getAssemblyFormat());
         instructionText->setToolTip(toolTip);
-
         ui->layoutInstructions->addWidget(instructionText, i/6, i%6);
         i += 1;
     }
@@ -406,7 +407,6 @@ void HidraGui::initializeAddressingModesList()
 
         QLabel *addressingModeText = new QLabel(this);
         addressingModeText->setTextFormat(Qt::RichText);
-        addressingModeText->setEnabled(false); // Grayed out
 
         // Label text
         addressingModeText->setText(acronym);
@@ -1467,6 +1467,16 @@ void HidraGui::on_tableViewMemoryData_doubleClicked(const QModelIndex &index)
 
     if (addressCorrespondingSourceLine != -1)
         codeEditor->setCurrentLine(addressCorrespondingSourceLine);
+}
+
+void HidraGui::on_actionBaseConversor_triggered()
+{
+    baseConversor->show();
+}
+
+void HidraGui::on_actionPointConversor_triggered()
+{
+    pointConversor->show();
 }
 
 void HidraGui::on_actionDefaultValues_triggered()

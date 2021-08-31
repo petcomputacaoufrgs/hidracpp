@@ -105,7 +105,8 @@ public:
     bool isValidOrg(QString offsetString);
 
     // Auxiliary methods
-    QStringList splitArguments(QString arguments);
+    QStringList splitDirectiveArguments(QString arguments);
+    QStringList splitInstructionArguments(QString const& arguments, Instruction const& instruction);
     void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
     int argumentToValue(QString argument, bool isImmediate, int immediateNumBytes = 1);

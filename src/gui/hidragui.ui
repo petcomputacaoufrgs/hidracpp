@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1115</width>
-    <height>505</height>
+    <height>521</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -746,6 +746,9 @@
     <addaction name="actionFastExecuteMode"/>
     <addaction name="actionFollowPCMode"/>
     <addaction name="separator"/>
+    <addaction name="actionBaseConversor"/>
+    <addaction name="actionPointConversor"/>
+    <addaction name="separator"/>
     <addaction name="actionFindReplace"/>
     <addaction name="separator"/>
     <addaction name="actionDefaultValues"/>
@@ -1022,6 +1025,22 @@
    </property>
    <property name="shortcut">
     <string>F6</string>
+   </property>
+  </action>
+  <action name="actionPointConversor">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Conversor de pontos flutuante e fixo</string>
+   </property>
+  </action>
+  <action name="actionBaseConversor">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Conversor de base</string>
    </property>
   </action>
   <action name="actionDefaultValues">

@@ -560,7 +560,7 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
     else if (QRegExp("db|dw|dab|daw").exactMatch(mnemonic))
     {
         QStringList argumentList;
-        argumentList = splitArguments(arguments);
+        argumentList = splitDirectiveArguments(arguments);
 
         int numberOfArguments = argumentList.size();
         int bytesPerArgument = (mnemonic == "db" || mnemonic == "dab") ? 1 : 2;
@@ -632,20 +632,15 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
 
 void Machine::buildInstruction(QString mnemonic, QString arguments)
 {
-    static QRegExp whitespace("\\s+");
-
     Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
+    QStringList argumentList = splitInstructionArguments(arguments, *instruction);
+
     AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT; // Default mode
     QStringList instructionArguments = instruction->getArguments();
     bool isImmediate = false;
 
     int registerBitCode = 0b00000000;
     int addressingModeBitCode = 0b00000000;
-
-    // Check if number of arguments is correct:
-    if (argumentList.size() != instruction->getNumberOfArguments())
-        throw wrongNumberOfArguments;
 
     // If argumentList contains a register:
     if (instructionArguments.contains("r"))
@@ -663,8 +658,6 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
         addressingModeBitCode = getAddressingModeBitCode(addressingModeCode);
         isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE);
     }
-
-
 
     // Write first byte (instruction with register and addressing mode):
     setAssemblerMemoryNext(instruction->getByteValue() | registerBitCode | addressingModeBitCode);
@@ -688,6 +681,70 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
         setAssemblerMemoryNext(argumentToValue(argumentList.at(instructionArguments.indexOf("a0")), false));
         setAssemblerMemoryNext(argumentToValue(argumentList.at(instructionArguments.indexOf("a1")), false));
     }
+}
+
+QStringList Machine::splitInstructionArguments(QString const& arguments, Instruction const& instruction)
+{
+    // Regex to split.
+    static QRegExp separator("\\s*(\\s|,)\\s*");
+    // Regex to detect if two arguments in final position are actually two arguments or an address.
+    static QRegExp whitespace("\\s");
+
+    // To be returned.
+    QStringList argumentList;
+    // Specification of the instruction's arguments.
+    QStringList instructionArgs = instruction.getArguments();
+    // To keep track of the last separator, so we can combine two final arguments in one address,
+    // if the instruction can take addressing mode, and we exceed the number of arguments.
+    QString lastSeparator;
+    // To keep track if we actually have a last separator.
+    bool hasLastSep = false;
+    // To keep track on where we are in the arguments' string.
+    int index = 0;
+
+    // The split loop.
+    while (index < arguments.size() && argumentList.length() <= instruction.getNumberOfArguments())
+    {
+        QString argument;
+        // Find where there is a separator.
+        int newIndex = arguments.indexOf(separator, index);
+        if (newIndex >= 0)
+        {
+            // Then there is a separator.
+            hasLastSep = true;
+            // Save this separator.
+            lastSeparator = arguments.mid(newIndex, separator.matchedLength());
+            // Take the argument part.
+            argument = arguments.mid(index, newIndex - index);;
+            // Update index beyond the separator.s
+            index = newIndex + separator.matchedLength();
+        }
+        else
+        {
+            // The last argument.
+            argument = arguments.right(arguments.size() - index);
+            index = arguments.size();
+        }
+        argumentList.push_back(argument);
+    }
+
+    // Detecting if found < expected or found > expected + 1.
+    if (index < arguments.size() || argumentList.length() < instruction.getNumberOfArguments())
+        throw wrongNumberOfArguments;
+
+    if (argumentList.length() == instruction.getNumberOfArguments() + 1)
+    {
+        // Found == expected + 1 only allowed if addressing mode is allowed, and we have a last
+        // separator. Also, it must not contain whitespace.
+        if (!instructionArgs.contains("a") || !hasLastSep || lastSeparator.contains(whitespace))
+            throw wrongNumberOfArguments;
+        // Joining two last arguments with separator, probably an addressing mode.
+        QString last = argumentList.takeLast();
+        argumentList.back() += lastSeparator;
+        argumentList.back() += last;
+    }
+
+    return argumentList;
 }
 
 void Machine::emitError(int lineNumber, Machine::ErrorCode errorCode)
@@ -809,7 +866,7 @@ bool Machine::isValidOrg(QString offsetString)
     return isValidValue(offsetString, 0, memory.size()-1);
 }
 
-QStringList Machine::splitArguments(QString arguments)
+QStringList Machine::splitDirectiveArguments(QString arguments)
 {
     QStringList finalArgumentList;
 
@@ -1138,19 +1195,25 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
         memoryString += " " + ((registerName != "") ? registerName : "?");
 
     // Argument value (with addressing mode)
-    if (instruction->getNumBytes() != 1) // Size can be 0 (variable number of bytes)
-        memoryString += " " + generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+    // Size can be 0 (variable number of bytes)
+    if (instruction->getNumBytes() != 1)
+    {
+        QString argumentString = generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+        if (argumentString.length() > 0) {
+            memoryString += " " + argumentString;
+        }
+    }
 
     return memoryString;
 }
 
 QString Machine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
 {
-    QString argument = QString::number(getMemoryValue(address + 1));
+    QString argument;
     QString addressingModePattern = getAddressingModePattern(addressingModeCode);
 
     if (addressingModePattern != AddressingMode::NO_PATTERN)
-        argument = addressingModePattern.replace("(.*)", argument).toUpper(); // Surround argument string with the corresponding addressing mode syntax
+        argument = addressingModePattern.replace("(.*)", "").toUpper(); // Surround argument string with the corresponding addressing mode syntax
 
     argumentsSize = instruction->getNumBytes() - 1;
     return argument;

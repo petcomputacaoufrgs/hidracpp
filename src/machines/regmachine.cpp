@@ -47,8 +47,7 @@ RegMachine::RegMachine()
 
 QString RegMachine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode, int &argumentsSize)
 {
-    QString argument = QString::number(getMemoryValue(address + 1)) + " " + QString::number(getMemoryValue(address + 2)); // If instruction's arguments
     argumentsSize = instruction->getNumBytes() - 1;
 
-    return argument;
+    return QString();
 }

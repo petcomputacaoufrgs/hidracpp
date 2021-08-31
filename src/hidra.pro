@@ -15,11 +15,16 @@ CONFIG  += \
     c++11
 
 SOURCES += \
+    core/baseconversor.cpp \
+    core/invalidconversorinput.cpp \
+    core/pointconversor.cpp \
+    gui/baseconversordialog.cpp \
     gui/findreplacedialog.cpp \
     gui/flagwidget.cpp \
     gui/hidracodeeditor.cpp \
     gui/hidragui.cpp \
     gui/hidrahighlighter.cpp \
+    gui/pointconversordialog.cpp \
     gui/registerwidget.cpp \
     core/byte.cpp \
     core/flag.cpp \
@@ -40,11 +45,16 @@ SOURCES += \
     gui/about.cpp
 
 HEADERS  += \
+    core/baseconversor.h \
+    core/invalidconversorinput.h \
+    core/pointconversor.h \
+    gui/baseconversordialog.h \
     gui/findreplacedialog.h \
     gui/flagwidget.h \
     gui/hidracodeeditor.h \
     gui/hidragui.h \
     gui/hidrahighlighter.h \
+    gui/pointconversordialog.h \
     gui/registerwidget.h \
     core/byte.h \
     core/flag.h \
@@ -64,9 +74,11 @@ HEADERS  += \
     gui/about.h
 
 FORMS    += \
+    gui/baseconversordialog.ui \
     gui/findreplacedialog.ui \
     gui/flagwidget.ui \
     gui/hidragui.ui \
+    gui/pointconversordialog.ui \
     gui/registerwidget.ui \
     gui/about.ui
 

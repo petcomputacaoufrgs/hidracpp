@@ -15,6 +15,8 @@
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
+#include "baseconversordialog.h"
+#include "pointconversordialog.h"
 #include "registerwidget.h"
 #include "findreplacedialog.h"
 #include "flagwidget.h"
@@ -116,6 +118,7 @@ private slots:
     void on_actionShowCharacters_toggled(bool checked);
     void on_actionFastExecuteMode_toggled(bool checked);
     void on_actionFollowPCMode_toggled(bool checked);
+    void on_actionBaseConversor_triggered();
 
     // Help menu
     void on_actionQuickGuide_triggered();
@@ -131,6 +134,7 @@ private slots:
     void on_tableViewMemoryInstructions_doubleClicked(const QModelIndex &index);
     void on_tableViewMemoryData_doubleClicked(const QModelIndex &index);
 
+    void on_actionPointConversor_triggered();
     void on_actionDefaultValues_triggered();
     void on_actionFindReplace_triggered();
 
@@ -180,6 +184,9 @@ private:
 
     // Interface elements
     Ui::HidraGui *ui;
+    BaseConversorDialog *baseConversor;
+    PointConversorDialog *pointConversor;
+
     Machine *machine;
     HidraHighlighter *highlighter;
     HidraCodeEditor *codeEditor;
