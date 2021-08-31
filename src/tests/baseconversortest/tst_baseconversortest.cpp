@@ -59,6 +59,9 @@ private slots:
 
     void test_badSize();
     void test_badSizeToCompl();
+
+    void test_signMagToOnesComplWidth();
+    void test_signMagToTwosComplWidth();
 private:
     BaseConversor conversor;
 };
@@ -396,6 +399,18 @@ void BaseConversorTest::test_badSizeToCompl()
 {
     QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("ffff ffff ffff ffff", 16).outputTwosComplement(2, 64), InvalidConversorInput);
     QVERIFY_EXCEPTION_THROWN(conversor.inputPositive("ffff ffff ffff ffff", 16).outputOnesComplement(3, 64), InvalidConversorInput);
+}
+
+void BaseConversorTest::test_signMagToOnesComplWidth()
+{
+    QString output = conversor.inputSignMagnitude("111122", 3).outputOnesComplement(2, 3);
+    QCOMPARE(output, "10000010");
+}
+
+void BaseConversorTest::test_signMagToTwosComplWidth()
+{
+    QString output = conversor.inputSignMagnitude("111122", 3).outputTwosComplement(2, 3);
+    QCOMPARE(output, "10000011");
 }
 
 QTEST_APPLESS_MAIN(BaseConversorTest)

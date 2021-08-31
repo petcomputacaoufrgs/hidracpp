@@ -255,30 +255,29 @@ QString BaseConversor::outputOnesComplement(uint64_t base, uint64_t width) const
     // Only if positive sign.
     QChar fill = '0';
 
+
+    // Width must be at least enough to store the complement.
+    atLeast = outputBits * 2;
+    if (atLeast < outputBits) {
+        // A positive number might be too large for B's complement.
+        // Check overflow.
+        throw InvalidConversorInput("Entrada é muito grande.");
+    }
+
+    // Computes the width and B**width - 1 (the complement). Width must be at least
+    // enough to store the complement.
+    maxValue = this->maxValue(base, &outputWidth, outputBits * 2);
+
     if (this->sign) {
-        // Computes B**width - 1 (the complement). Width must be at least
-        // enough to store the complement.
-        maxValue = this->maxValue(base, &outputWidth, outputBits);
         // Computes the complement of the stored bits.
         outputBits = maxValue - outputBits;
         // Fill is the highest digit if negative.
         fill = mapOutput(base - 1);
-    } else {
-        // Width must be at least enough to store the complement.
-        atLeast = outputBits * 2;
-        if (atLeast < outputBits) {
-            // A positive number might be too large for B-1's complement.
-            // Check overflow.
-            throw InvalidConversorInput("Entrada é muito grande.");
-        }
-        // Computes the width.
-        this->maxValue(base, &outputWidth, outputBits * 2);
     }
 
     // If no error was thrown, just convert the complemented number to string.
     return this->encode(outputBits, base, outputWidth, fill);
 }
-
 
 QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width) const
 {
@@ -290,24 +289,23 @@ QString BaseConversor::outputTwosComplement(uint64_t base, uint64_t width) const
     // Only if positive sign.
     QChar fill = '0';
 
+    // Width must be at least enough to store the complement.
+    atLeast = outputBits * 2;
+    if (atLeast < outputBits) {
+        // A positive number might be too large for B's complement.
+        // Check overflow.
+        throw InvalidConversorInput("Entrada é muito grande.");
+    }
+
+    // Computes the width and B**width - 1 (the complement - 1). Width must be at least
+    // enough to store the complement.
+    maxValue = this->maxValue(base, &outputWidth, atLeast);
+
     if (this->sign) {
-        // Computes B**width - 1 (the complement - 1). Width must be at least
-        // enough to store the complement.
-        maxValue = this->maxValue(base, &outputWidth, outputBits);
         // Computes the complement of the stored bits.
         outputBits = maxValue - outputBits + 1;
         // Fill is the highest digit if negative.
         fill = mapOutput(base - 1);
-    } else {
-        // Width must be at least enough to store the complement.
-        atLeast = outputBits * 2;
-        if (atLeast < outputBits) {
-            // A positive number might be too large for B's complement.
-            // Check overflow.
-            throw InvalidConversorInput("Entrada é muito grande.");
-        }
-        // Computes the width.
-        this->maxValue(base, &outputWidth, outputBits * 2);
     }
 
     // If no error was thrown, just convert the complemented number to string.
