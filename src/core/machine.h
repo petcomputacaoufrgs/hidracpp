@@ -61,21 +61,28 @@ public:
     // Step
     //////////////////////////////////////////////////
 
+    ///Do a step of the simulation
     void step();
+    ///Get next instruction
     void fetchInstruction(int &fetchedValue, Instruction *&instruction);
-
+    ///Decode the instruction
     virtual void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &immediateAddress);
+    ///Execute the instruction
     virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
 
+    ///Get the adressing mode code from a memory value
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
+    ///Get the register's name
     QString extractRegisterName(int fetchedValue);
 
+    //Flag setting
     void setOverflow(bool state);
     void setCarry(bool state);
     void setBorrowOrCarry(bool borrowState); // Some machines use carry as not borrow
     void updateFlags(int value); // Updates N and Z
 
-    int address(int value); // Returns a valid address based on a value, removing excess bits (overflow)
+    /// Returns a valid address based on a value, removing excess bits (overflow)
+    int address(int value);
     int toSigned(int unsignedByte);
 
 
@@ -132,7 +139,9 @@ public:
     // Import/Export memory
     //////////////////////////////////////////////////
 
+    ///Set up the machine's memory from a .mem file
     FileErrorCode::FileErrorCode importMemory(QString filename);
+    ///Save the machine's memory in a .mem file
     FileErrorCode::FileErrorCode exportMemory(QString filename);
 
 
@@ -141,6 +150,7 @@ public:
     // Instruction strings
     //////////////////////////////////////////////////
 
+    ///Given the current position of the program counter, update the interpretation of the bytes
     void updateInstructionStrings();
     QString generateInstructionString(int address, int &argumentsSize); // TODO: Fix Pericles
     virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
@@ -224,28 +234,50 @@ public:
     void getAddressingModeDescription(AddressingMode::AddressingModeCode addressingModeCode, QString &acronym, QString &name, QString &format, QString &description);
 
 protected:
+    ///Machine identifier string for file opening
     QString identifier;
+    ///The machine's registers
     QVector<Register*> registers;
+    ///Program counter
     Register *PC;
+    ///Simulated memory
     QVector<Byte*> memory;
+    ///Simulated memory configuration created by the assembler
     QVector<Byte*> assemblerMemory;
+    ///Interpretation of each memory adress as an instruction based on PC position
     QVector<QString> instructionStrings;
+    ///Reserved memory
     QVector<bool> reserved;
-    QVector<int> addressCorrespondingSourceLine, sourceLineCorrespondingAddress; // Each address may be associated with a line of code
+    // Each address may be associated with a line of code
+    QVector<int> addressCorrespondingSourceLine, sourceLineCorrespondingAddress;
+    ///Each adress' corresponding label
     QVector<QString> addressCorrespondingLabel;
+    ///True values indicate the memory adress associated to this position has been changed
     QVector<bool> changed;
+    ///The machine's flags
     QVector<Flag*> flags;
+    ///The machine's instructions
     QVector<Instruction*> instructions;
+    ///The machine's adressing modes
     QVector<AddressingMode*> addressingModes;
+    ///Map of labels to adresses
     QHash<QString, int> labelPCMap;
+    ///Instruction descriptions
     QHash<QString, QString> descriptions;
+
+
     bool buildSuccessful;
     bool running;
     bool littleEndian;
     int firstErrorLine;
+
+    ///Breakpoint position
     int breakpoint;
+    ///Amount of instructions executed during simulation
     int instructionCount;
+    ///Number of memory acesses done during simulation
     int accessCount;
+    ///Used to "cut down" memory adresses to the machine's maximum address
     int memoryMask;
 
 signals:

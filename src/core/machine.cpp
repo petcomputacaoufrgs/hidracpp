@@ -1075,6 +1075,7 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
     // Open file
     memFile.open(QFile::ReadOnly);
 
+    // The file must contain the identifier's length, the machine's identifier and twice the amount of memory
     if (memFile.size() != 1 + identifier.length() + memory.size() * 2)
         return FileErrorCode::incorrectSize;
 
