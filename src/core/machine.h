@@ -24,6 +24,7 @@ namespace FileErrorCode
         inputOutput,
         incorrectSize,
         invalidIdentifier,
+        invalidAddress
     };
 }
 
@@ -140,7 +141,7 @@ public:
     //////////////////////////////////////////////////
 
     ///Set up the machine's memory from a .mem file
-    FileErrorCode::FileErrorCode importMemory(QString filename);
+    FileErrorCode::FileErrorCode importMemory(QString filename, int start, int end, int dest);
     ///Save the machine's memory in a .mem file
     FileErrorCode::FileErrorCode exportMemory(QString filename);
 
