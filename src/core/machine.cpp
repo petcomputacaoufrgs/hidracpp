@@ -1067,8 +1067,12 @@ int Machine::memoryGetJumpAddress(int immediateAddress, AddressingMode::Addressi
 //////////////////////////////////////////////////
 
 // Returns true if successful
-FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
+FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, int end, int dest)
 {
+    if(start < 0 || end > memory.size()){
+        return FileErrorCode::invalidAddress;
+    }
+    
     char byte;
     QFile memFile(filename); // Implicitly closed
 
@@ -1094,7 +1098,10 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
     }
 
     // Read memory
-    for (int address = 0; address < memory.size(); address++)
+    memFile.seek(1 + identifier.length() + (2 * start)); //Set loaded file read starting point
+    int read_size = qMin<int>(end - start, getMemorySize() - dest); //Put the maximum amount of bytes read possible
+
+    for (int address = dest; address < (dest + read_size); address++)
     {
         memFile.getChar(&byte);
         setMemoryValue(address, byte);

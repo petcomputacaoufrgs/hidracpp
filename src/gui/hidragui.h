@@ -108,6 +108,7 @@ private slots:
     void on_actionRun_triggered();
     void on_actionStep_triggered();
     void on_actionImportMemory_triggered();
+    void on_actionImportMemoryPartial_triggered();
     void on_actionExportMemory_triggered();
     void on_actionResetRegisters_triggered();
     void on_actionSetBreakpoint_triggered();
