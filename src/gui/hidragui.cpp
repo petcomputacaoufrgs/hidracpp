@@ -133,6 +133,8 @@ void HidraGui::selectMachine(QString machineName)
             machine = new RegMachine();
         else if (machineName == "Volta")
             machine = new VoltaMachine();
+        else if (machineName == "Cesar")
+            machine = new CesarMachine();
         else
             return; // Error
 

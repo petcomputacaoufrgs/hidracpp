@@ -30,6 +30,7 @@
 #include "machines/periclesmachine.h"
 #include "machines/regmachine.h"
 #include "machines/voltamachine.h"
+#include "machines/cesarmachine.h"
 
 namespace Ui {
 class HidraGui;
