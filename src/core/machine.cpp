@@ -1076,15 +1076,18 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, 
     if(start < 0 || end > memory.size()){
         return FileErrorCode::invalidAddress;
     }
-    
+
     char byte;
     QFile memFile(filename); // Implicitly closed
+
+    // Machines that fetch bytes should skip every second byte
+    int byte_step_size = fetchByteSize > 1 ? 1 : 2;
 
     // Open file
     memFile.open(QFile::ReadOnly);
 
     // The file must contain the identifier's length, the machine's identifier and twice the amount of memory
-    if (memFile.size() != 1 + identifier.length() + memory.size() * 2)
+    if (memFile.size() != 1 + identifier.length() + memory.size() * byte_step_size)
         return FileErrorCode::incorrectSize;
 
     // Read identifier length
@@ -1102,14 +1105,17 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, 
     }
 
     // Read memory
-    memFile.seek(1 + identifier.length() + (2 * start)); //Set loaded file read starting point
+    memFile.seek(1 + identifier.length() + (byte_step_size * start)); //Set loaded file read starting point
     int read_size = qMin<int>(end - start, getMemorySize() - dest); //Put the maximum amount of bytes read possible
 
     for (int address = dest; address < (dest + read_size); address++)
     {
-        memFile.getChar(&byte);
+        memFile.getChar(&byte); 
         setMemoryValue(address, byte);
-        memFile.getChar(&byte); // Skip byte
+        
+        if(byte_step_size > 1){ //Skip byte
+            memFile.getChar(&byte);
+        }
     }
 
     // Return error status

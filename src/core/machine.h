@@ -286,6 +286,8 @@ protected:
     QHash<QString, int> labelPCMap;
     ///Instruction descriptions
     QHash<QString, QString> descriptions;
+    ///Amount of bytes retrieved when fetching
+    int fetchByteSize = 1;
 
 
     bool buildSuccessful;

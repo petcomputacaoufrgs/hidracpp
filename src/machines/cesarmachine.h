@@ -3,7 +3,7 @@
 
 #include "core/machine.h"
 
-class CesarMachine : Machine
+class CesarMachine : public Machine
 {
     public:
     CesarMachine();
