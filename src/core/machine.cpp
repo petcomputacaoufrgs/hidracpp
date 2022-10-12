@@ -1028,12 +1028,7 @@ int Machine::memoryReadNext()
 
 int Machine::memoryReadTwoByteAddress(int address)
 {
-    if (littleEndian){
-        return memoryRead(address) + (memoryRead(address + 1) << 8);
-    }
-    else{
-        return (memoryRead(address) << 8) + memoryRead(address + 1);
-    }
+    return memoryRead(address) + (memoryRead(address + 1) << 8);
 }
 
 int Machine::getMemoryTwoByteAddress(int address)

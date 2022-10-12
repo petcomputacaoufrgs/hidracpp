@@ -107,7 +107,7 @@ void CesarMachine::fetchInstruction(int &fetchedValue, Instruction *&instruction
     fetchedValue = memoryReadNext();  // has to read two bytes
     instruction = getInstructionFromValue(fetchedValue);
     // Shift fetchedValue 1 byte to the left and read second byte using or mask
-    fetchedValue = fetchedValue << 8 | memoryReadNext();
+    fetchedValue = memoryReadTwoByteAddress();
 }    
     
 void CesarMachine::decodeInstruction(int fetchedValue, Instruction *&instruction, int &addressingMode1,
