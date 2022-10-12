@@ -1026,6 +1026,17 @@ int Machine::memoryReadNext()
     return value;
 }
 
+int Machine::memoryReadTwoByteAddress(int address)
+{
+    return memoryRead(address) + (memoryRead(address + 1) << 8);
+}
+
+int Machine::getMemoryTwoByteAddress(int address)
+{
+    return getMemoryValue(address) + (getMemoryValue(address + 1) << 8);
+}
+
+
 int Machine::GetCurrentOperandAddress()
 {
 

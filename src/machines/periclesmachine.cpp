@@ -180,13 +180,3 @@ QString PericlesMachine::generateArgumentsString(int address, Instruction *instr
 
     return argument;
 }
-
-int PericlesMachine::memoryReadTwoByteAddress(int address)
-{
-    return memoryRead(address) + (memoryRead(address + 1) << 8);
-}
-
-int PericlesMachine::getMemoryTwoByteAddress(int address)
-{
-    return getMemoryValue(address) + (getMemoryValue(address + 1) << 8);
-}

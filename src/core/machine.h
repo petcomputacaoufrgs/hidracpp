@@ -133,11 +133,13 @@ public:
     virtual int GetCurrentOperandAddress(); // increments accessCount
     int GetCurrentOperandValue(); // increments accessCount
     int GetCurrentJumpAddress(); // increments accessCount
+    int memoryReadTwoByteAddress(int address);
+
+    int getMemoryTwoByteAddress(int address);
 
 
 
     //////////////////////////////////////////////////
-    // Import/Export memory
     //////////////////////////////////////////////////
 
     ///Set up the machine's memory from a .mem file
