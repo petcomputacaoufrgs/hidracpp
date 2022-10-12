@@ -5,7 +5,7 @@ Instruction::Instruction()
 {
 }
 
-Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat)
+Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup = NO_GROUP)
 {
     this->numBytes = numBytes; // 0 if variable
     this->bitPattern = bitPattern;
@@ -18,6 +18,7 @@ Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instr
     assemblyFormatList.removeFirst();
     this->arguments = assemblyFormatList; // Mnemonic not included
     this->assemblyFormat = assemblyFormat;
+    this->instructionGroup = instructionGroup;
 }
 
 bool Instruction::matchByte(int byte)
@@ -63,4 +64,8 @@ Instruction::InstructionCode Instruction::getInstructionCode() const
 QString Instruction::getBitPattern() const
 {
     return bitPattern;
+}
+Instruction::InstructionGroup Instruction:: getInstructionGroup() const
+{
+    return instructionGroup;
 }

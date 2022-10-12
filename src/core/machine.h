@@ -63,7 +63,7 @@ public:
     //////////////////////////////////////////////////
 
     ///Do a step of the simulation
-    void step();
+    virtual void step();
     ///Get next instruction
     void fetchInstruction();
     ///Decode the instruction

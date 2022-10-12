@@ -21,7 +21,7 @@ CesarMachine::CesarMachine()
     registers.append(new Register("PC", "", 16, false));
 
     PC = registers.last();
-
+    
     //////////////////////////////////////////////////
     // Initialize memory
     //////////////////////////////////////////////////
@@ -73,3 +73,146 @@ CesarMachine::CesarMachine()
     addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN));
 
 }
+
+
+void CesarMachine::step()
+{
+    int fetchedValue, immediateAddress;
+    int reg1, reg2;
+    int am1, am2;
+    int extra;
+    Instruction *instruction = nullptr;
+
+    fetchInstruction(fetchedValue, instruction);
+    decodeInstruction(fetchedValue, instruction, am1, am2, reg1, reg2, extra, immediateAddress); // Outputs addressing mode, register and immediate address
+    executeInstruction(instruction, am1, am2, reg1, reg2, extra, immediateAddress);
+
+    if (getPCValue() == getBreakpoint())
+        setRunning(false);    
+
+}    
+
+
+
+/*
+Cesar's way to fetch, decode and execute instructions
+
+-- Always fetches 2 bytes, even if the instruction only uses one
+
+*/        
+    
+void CesarMachine::fetchInstruction(int &fetchedValue, Instruction *&instruction)
+{
+    // Read first byte
+    fetchedValue = memoryReadNext();  // has to read two bytes
+    instruction = getInstructionFromValue(fetchedValue);
+    // Shift fetchedValue 1 byte to the left and read second byte using or mask
+    fetchedValue = fetchedValue << 8 | memoryReadNext();
+}    
+    
+void CesarMachine::decodeInstruction(int fetchedValue, Instruction *&instruction, int &addressingMode1,
+        int &addressingMode2, int &registerId1,
+        int &registerId2, int &extraValues, int &immediateAddress)
+{
+
+    Instruction::InstructionGroup instructionGroup = instruction->getInstructionGroup();
+    switch(instructionGroup){
+        case Instruction::InstructionGroup::GROUP_NOP:
+            addressingMode1 = 0; //Adressing mode not used
+            addressingMode2 = 0; //
+            registerId1 = 0;//Pass the first register, with no intention to use it
+            registerId2 = 0;//
+            extraValues = 0;// extraValues not used
+            break;
+        case Instruction::InstructionGroup::GROUP_CONDITIONAL_CODES:
+            addressingMode1 = 0; //Adressing mode not used
+            addressingMode2 = 0; //
+            registerId1 = 0;//Pass the first register, with no intention to use it
+            registerId2 = 0;//
+            extraValues = ((1111 << 8) & fetchedValue) >> 8;//Mask to get flag values
+            break; 
+
+        case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
+            addressingMode1 = 0; //Adressing mode not used
+            addressingMode2 = 0; //
+            registerId1 = 0;//Pass the first register, with no intention to use it
+            registerId2 = 0;//
+            extraValues = fetchedValue & 0b11111111;//Mask to get branch adress to jump to
+            break;
+
+        case Instruction::InstructionGroup::GROUP_JUMP:
+            addressingMode1 = (fetchedValue & 0b00111000) >> 3;
+            addressingMode2 = 0;
+            registerId1 = (fetchedValue & 0b00000111);
+            registerId2 = 0;
+            break;
+            
+        case Instruction::InstructionGroup::GROUP_LOOP_CONTROL:
+            addressingMode1 = 0;//Adressing mode not used
+            addressingMode2 = 0;//
+            registerId1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
+            registerId2 = 0;//Pass the second register, with no intention to use it
+            extraValues = fetchedValue & 0b11111111;//Get displacement
+            break;
+
+        case Instruction::InstructionGroup::GROUP_JUMP_SUBROUTINE:
+            addressingMode1 = (fetchedValue >> 3) & 0b111;//Get adressing mode
+            addressingMode2 = 0; //Adressing mode not used
+            registerId1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
+            registerId2 = fetchedValue & 0b111;//mask to get register
+            extraValues = 0;// extraValues not used
+            break;
+
+        case Instruction::InstructionGroup::GROUP_RETURN_SUBROUTINE:
+            addressingMode1 = 0;
+            addressingMode2 = 0;
+            registerId1 = (fetchedValue  & 0b111);
+            registerId2 = 0;
+            extraValues = 0;
+            break;
+
+        case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
+            addressingMode1 = (fetchedValue >> 3) & 0b111;//Get adressing mode
+            addressingMode2 = 0;//Adressing mode not used
+            registerId1 = (fetchedValue  & 0b111);//Mask to get register
+            registerId2 = 0;//Pass the second register, with no intention to use it
+            extraValues = 0;// extraValues not used
+            break;
+
+        case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
+            addressingMode1 = (fetchedValue >> 9) & 0b111;//
+            addressingMode2 = (fetchedValue >> 3) & 0b111;
+            registerId1 = (fetchedValue >> 6) & 0b111;
+            registerId2 = (fetchedValue  & 0b111);
+            break;
+        /*
+        case default:
+            throw Instrução sem grupo n pode*/
+    }
+
+
+    //IF INSTRUCTION.GROUP = INSTRUCAO 1 PARAMETRO
+    //Então o formato é cccc mmm aaa
+    //IF OPCODE MATCHES 0001XXXX
+    //IF OPECODE M
+
+}
+     
+void CesarMachine::executeInstruction(Instruction *&instruction, 
+        int addressingModeCode1,
+        int addressingModeCode2, 
+        int registerName1,
+        int registerName2, 
+        int extraValue,
+        int immediateAddress)
+{
+
+    
+}
+
+void CesarMachine::extractAddressingModeCodes(int fetchedValue, AddressingMode::AddressingModeCode&)
+{
+
+}
+           
+        

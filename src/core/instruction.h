@@ -27,8 +27,24 @@ public:
         VOLTA_RTS, VOLTA_PSH, VOLTA_POP, VOLTA_JMP, VOLTA_JSR, VOLTA_HLT
     };
 
+    enum InstructionGroup
+    {
+        NO_GROUP,
+        //Cesar
+        GROUP_NOP, 
+        GROUP_CONDITIONAL_CODES, 
+        GROUP_CONDITIONAL_BRANCHES,
+        GROUP_JUMP,
+        GROUP_LOOP_CONTROL,
+        GROUP_JUMP_SUBROUTINE,
+        GROUP_RETURN_SUBROUTINE,
+        GROUP_ONE_OPERAND,
+        GROUP_TWO_OPERAND
+
+    };
+ 
     Instruction();
-    Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat);
+    Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup = NO_GROUP);
     bool matchByte(int byte);
 
     QString getMnemonic() const;
@@ -40,6 +56,7 @@ public:
 
     InstructionCode getInstructionCode() const;
     QString getBitPattern() const;
+    InstructionGroup getInstructionGroup() const;
 
 private:
     int numBytes;
@@ -49,6 +66,7 @@ private:
     QString mnemonic;
     QString assemblyFormat;
     QStringList arguments;
+    InstructionGroup instructionGroup;
 
     InstructionCode instructionCode;
 };
