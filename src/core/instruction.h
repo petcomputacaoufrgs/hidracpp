@@ -11,7 +11,7 @@ public:
     enum InstructionCode
     {
         NOP,
-        STR, LDR,
+        STR, LDR, MOV,
         ADD, OR, AND, NOT, SUB, INC, DEC,
         JMP, JN, JP, JV, JNV, JZ, JNZ, JC, JNC, JB, JNB, JSR,
         NEG, SHR, SHL, ROR, ROL,
@@ -44,7 +44,7 @@ public:
     };
  
     Instruction();
-    Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup = NO_GROUP);
+    Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup = InstructionGroup::NO_GROUP);
     bool matchByte(int byte);
 
     QString getMnemonic() const;
