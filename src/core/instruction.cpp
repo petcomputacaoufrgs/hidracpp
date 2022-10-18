@@ -5,7 +5,7 @@ Instruction::Instruction()
 {
 }
 
-Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup = NO_GROUP)
+Instruction::Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup)
 {
     this->numBytes = numBytes; // 0 if variable
     this->bitPattern = bitPattern;
