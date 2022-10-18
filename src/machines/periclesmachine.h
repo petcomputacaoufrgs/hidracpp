@@ -14,8 +14,6 @@ public:
     virtual void getNextOperandAddress(int &intermediateAddress, int &intermediateAddress2, int &finalOperandAddress);
     virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 
-    int memoryReadTwoByteAddress(int address);
-    int getMemoryTwoByteAddress(int address);
 };
 
 #endif // PERICLESMACHINE_H
