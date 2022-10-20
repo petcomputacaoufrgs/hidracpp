@@ -93,14 +93,14 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
     //////////////////////////////////////////////////
 
     case Instruction::LDR:
-        result = memoryGetOperandValue();
+        result = GetCurrentOperandValue();
         setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::STR:
         result = getRegisterValue(registerName);
-        memoryWrite(memoryGetOperandAddress(), result);
+        memoryWrite(GetCurrentOperandAddress(), result);
         break;
 
 
@@ -111,7 +111,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::ADD:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue();
+        value2 = GetCurrentOperandValue();
         result = (value1 + value2) & 0xFF;
 
         setRegisterValue(registerName, result);
@@ -122,7 +122,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::OR:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue();
+        value2 = GetCurrentOperandValue();
         result = (value1 | value2);
 
         setRegisterValue(registerName, result);
@@ -131,7 +131,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::AND:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue();
+        value2 = GetCurrentOperandValue();
         result = (value1 & value2);
 
         setRegisterValue(registerName, result);
@@ -148,7 +148,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::SUB:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue();
+        value2 = GetCurrentOperandValue();
         result = (value1 - value2) & 0xFF;
 
         setRegisterValue(registerName, result);
@@ -217,63 +217,63 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::JMP:
         if (!isImmediate) // Invalidate immediate jumps
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JN:
         if (getFlagValue("N") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JP:
         if (getFlagValue("N") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JV:
         if (getFlagValue("V") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNV:
         if (getFlagValue("V") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JZ:
         if (getFlagValue("Z") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNZ:
         if (getFlagValue("Z") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JC:
         if (getFlagValue("C") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNC:
         if (getFlagValue("C") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JB:
         if (getFlagValue("B") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNB:
         if (getFlagValue("B") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress());
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JSR:
         if (!isImmediate)
         {
-            int jumpAddress = memoryGetJumpAddress();
+            int jumpAddress = GetCurrentJumpAddress();
             memoryWrite(jumpAddress, getPCValue());
             setPCValue(jumpAddress+1);
         }
@@ -1027,7 +1027,7 @@ int Machine::memoryReadNext()
     return value;
 }
 
-int Machine::memoryGetOperandAddress()
+int Machine::GetCurrentOperandAddress()
 {
 
     int immediateAddress = decodedImmediateAddress; 
@@ -1055,14 +1055,14 @@ int Machine::memoryGetOperandAddress()
     }
 }
 
-int Machine::memoryGetOperandValue()
+int Machine::GetCurrentOperandValue()
 {
-    return memoryRead(memoryGetOperandAddress()); // Return 1-byte value
+    return memoryRead(GetCurrentOperandAddress()); // Return 1-byte value
 }
 
-int Machine::memoryGetJumpAddress()
+int Machine::GetCurrentJumpAddress()
 {
-    return memoryGetOperandAddress();
+    return GetCurrentOperandAddress();
 }
 
 

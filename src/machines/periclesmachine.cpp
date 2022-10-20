@@ -94,7 +94,7 @@ void PericlesMachine::decodeInstruction(){
     }
 }
 
-int PericlesMachine::memoryGetOperandAddress()
+int PericlesMachine::GetCurrentOperandAddress()
 {
     int immediateAddress = decodedImmediateAddress;
     AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
