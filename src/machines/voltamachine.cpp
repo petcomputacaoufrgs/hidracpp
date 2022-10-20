@@ -282,22 +282,22 @@ void VoltaMachine::executeInstruction()
         break;
 
     case Instruction::VOLTA_PSH:
-        value1 = memoryGetOperandValue();
+        value1 = GetCurrentOperandValue();
         stackPush(value1);
         break;
 
     case Instruction::VOLTA_POP:
         value1 = stackPop();
-        memoryWrite(memoryGetOperandAddress(), value1);
+        memoryWrite(GetCurrentOperandAddress(), value1);
         break;
 
     case Instruction::VOLTA_JMP:
-        setPCValue(memoryGetJumpAddress());
+        setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::VOLTA_JSR:
         stackPush(getPCValue());
-        setPCValue(memoryGetJumpAddress());
+        setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::VOLTA_HLT:

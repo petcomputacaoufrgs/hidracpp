@@ -10,7 +10,7 @@ public:
 
     void decodeInstruction();
     virtual int calculateBytesToReserve(QString addressArgument);
-    virtual int memoryGetOperandAddress(); // increments accessCount
+    virtual int GetCurrentOperandAddress(); // increments accessCount
     virtual void getNextOperandAddress(int &intermediateAddress, int &intermediateAddress2, int &finalOperandAddress);
     virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 
