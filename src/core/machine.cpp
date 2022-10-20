@@ -21,7 +21,7 @@ Machine::Machine(QObject *parent) :
 {
     PC = nullptr;
     littleEndian = false;
-
+ 
     clearCounters();
     setBreakpoint(-1);
     setRunning(false);
@@ -45,44 +45,44 @@ Machine::~Machine()
 
 void Machine::step()
 {
-    int fetchedValue, immediateAddress;
-    QString registerName;
-    AddressingMode::AddressingModeCode addressingModeCode;
-    Instruction *instruction = nullptr;
 
-    fetchInstruction(fetchedValue, instruction); // Outputs fetched value (byte or word) and corresponding instruction
-    decodeInstruction(fetchedValue, instruction, addressingModeCode, registerName, immediateAddress); // Outputs addressing mode, register and immediate address
-    executeInstruction(instruction, addressingModeCode, registerName, immediateAddress);
+    fetchInstruction(); // Fetches values from memory
+    decodeInstruction (); // Fetches addressing mode, register, immediate address and any other relevant data
+    executeInstruction(); // Uses the values above to execute an instruction
 
     if (getPCValue() == getBreakpoint())
         setRunning(false);
 }
 
-void Machine::fetchInstruction(int &fetchedValue, Instruction *&instruction)
+void Machine::fetchInstruction()
 {
     // Read first byte
     fetchedValue = memoryReadNext();
-    instruction = getInstructionFromValue(fetchedValue);
+    currentInstruction = getInstructionFromValue(fetchedValue);
 }
 
-void Machine::decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &immediateAddress)
+void Machine::decodeInstruction()
 {
-    addressingModeCode = extractAddressingModeCode(fetchedValue);
-    registerName = extractRegisterName(fetchedValue);
+    decodedAdressingModeCode1 = extractAddressingModeCode(fetchedValue);
+    decodedRegisterName1 = extractRegisterName(fetchedValue);
 
-    if (instruction && instruction->getNumBytes() > 1)
+    if (currentInstruction && currentInstruction->getNumBytes() > 1)
     {
-        immediateAddress = getPCValue(); // Address that contains first argument byte
-        incrementPCValue(instruction->getNumBytes() - 1); // Skip argument bytes
+        decodedImmediateAddress = getPCValue(); // Address that contains first argument byte
+        incrementPCValue(currentInstruction->getNumBytes() - 1); // Skip argument bytes
     }
 }
 
-void Machine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress)
+void Machine::executeInstruction()
 {
     int value1, value2, result;
     Instruction::InstructionCode instructionCode;
-    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
-    bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+    instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
+    bool isImmediate = (decodedAdressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+
+    int immediateAddress = decodedImmediateAddress;
+    QString registerName = decodedRegisterName1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
 
     switch (instructionCode)
     {
