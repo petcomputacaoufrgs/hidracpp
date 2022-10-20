@@ -130,9 +130,9 @@ public:
     void memoryWrite(int address, int value); // Increments accessCount
     int  memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
 
-    virtual int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
-    int memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
-    int memoryGetJumpAddress( int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    virtual int memoryGetOperandAddress(); // increments accessCount
+    int memoryGetOperandValue(); // increments accessCount
+    int memoryGetJumpAddress(); // increments accessCount
 
 
 
