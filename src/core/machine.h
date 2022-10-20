@@ -65,11 +65,11 @@ public:
     ///Do a step of the simulation
     void step();
     ///Get next instruction
-    void fetchInstruction();
+    void fetchInstruction(int &fetchedValue, Instruction *&instruction);
     ///Decode the instruction
-    virtual void decodeInstruction();
+    virtual void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &immediateAddress);
     ///Execute the instruction
-    virtual void executeInstruction();
+    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
 
     ///Get the adressing mode code from a memory value
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
@@ -235,27 +235,6 @@ public:
     void getAddressingModeDescription(AddressingMode::AddressingModeCode addressingModeCode, QString &acronym, QString &name, QString &format, QString &description);
 
 protected:
-
-    /*
-    
-        Simulation state variables - updated every simulation step
-        These 
-    
-    */
-    int fetchedValue;
-
-    AddressingMode::AddressingModeCode decodedAdressingModeCode1;
-    AddressingMode::AddressingModeCode decodedAdressingModeCode2;
-    QString decodedRegisterName1;
-    QString decodedRegisterName2;
-    int decodedExtraValue;
-
-    int decodedImmediateAddress;
-    Instruction *currentInstruction;
-    
-    
-
-    //////////////////////////////////////////////////////
     ///Machine identifier string for file opening
     QString identifier;
     ///The machine's registers
@@ -301,7 +280,7 @@ protected:
     int accessCount;
     ///Used to "cut down" memory adresses to the machine's maximum address
     int memoryMask;
-    
+
 signals:
     void buildErrorDetected(QString);
 };
