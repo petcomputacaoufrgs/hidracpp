@@ -14,6 +14,7 @@
 #include "hidragui.h"
 #include "ui_hidragui.h"
 #include <QSizeGrip>
+#include <QInputDialog>
 
 #define DEBUG_INT(value) qDebug(QString::number(value).toStdString().c_str());
 #define DEBUG_STRING(value) qDebug(value.toStdString().c_str());
@@ -1265,7 +1266,55 @@ void HidraGui::on_actionImportMemory_triggered()
     {
         QString errorMessage;
 
-        switch (machine->importMemory(filename))
+        switch (machine->importMemory(filename, 0, machine->getMemorySize(), 0))
+        {
+            case FileErrorCode::noError:
+                break;
+
+            case FileErrorCode::inputOutput:
+                errorMessage = "Erro na leitura do arquivo.";
+                break;
+
+            case FileErrorCode::incorrectSize:
+                errorMessage = "Arquivo de tamanho incorreto.";
+                break;
+
+            case FileErrorCode::invalidIdentifier:
+                errorMessage = "Arquivo incompatível com a máquina selecionada.";
+                break;
+
+            default:
+                errorMessage = "Erro não especificado.";
+                break;
+        }
+
+        if (!errorMessage.isEmpty())
+            QMessageBox::information(this, "Erro ao importar memória.", errorMessage);
+    }
+
+    updateMachineInterface();
+}
+
+void HidraGui::on_actionImportMemoryPartial_triggered()
+{
+        QString filename = QFileDialog::getOpenFileName(this,
+                                                    "Carregamento Parcial de Memória", "",
+                                                    "Arquivo de memória (*.mem)");
+
+    if (!filename.isEmpty())
+    {
+        QString errorMessage;
+        int start, end, dest;
+        bool ok;
+
+        start = QInputDialog::getInt(this, tr("Carga Parcial de memória"), tr("Entre com o endereço inicial"), 0, 0, machine->getMemorySize(), 1, &ok);
+        if(!ok){return;}
+        end = QInputDialog::getInt(this, tr("Carga Parcial de memória"), tr("Entre com o endereço final"), machine->getMemorySize(), 0, machine->getMemorySize(), 1, &ok);
+        if(!ok){return;}
+        dest = QInputDialog::getInt(this, tr("Carga Parcial de memória"), tr("Entre com o endereço de destino (Memória)"), 0, 0, machine->getMemorySize(), 1, &ok);
+        if(!ok){return;}
+        
+        switch (machine->importMemory(filename, start, end, dest))
         {
             case FileErrorCode::noError:
                 break;

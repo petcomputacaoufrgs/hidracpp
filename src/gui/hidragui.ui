@@ -325,8 +325,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>275</width>
-               <height>68</height>
+               <width>279</width>
+               <height>75</height>
               </rect>
              </property>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -697,7 +697,7 @@
      <x>0</x>
      <y>0</y>
      <width>1115</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuProgram">
@@ -733,6 +733,7 @@
     <addaction name="actionSetBreakpoint"/>
     <addaction name="separator"/>
     <addaction name="actionImportMemory"/>
+    <addaction name="actionImportMemoryPartial"/>
     <addaction name="actionExportMemory"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -1054,6 +1055,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionImportMemoryPartial">
+   <property name="text">
+    <string>Carga parcial...</string>
    </property>
   </action>
  </widget>

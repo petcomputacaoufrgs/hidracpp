@@ -21,7 +21,7 @@ Machine::Machine(QObject *parent) :
 {
     PC = nullptr;
     littleEndian = false;
-
+ 
     clearCounters();
     setBreakpoint(-1);
     setRunning(false);
@@ -45,44 +45,45 @@ Machine::~Machine()
 
 void Machine::step()
 {
-    int fetchedValue, immediateAddress;
-    QString registerName;
-    AddressingMode::AddressingModeCode addressingModeCode;
-    Instruction *instruction = nullptr;
 
-    fetchInstruction(fetchedValue, instruction); // Outputs fetched value (byte or word) and corresponding instruction
-    decodeInstruction(fetchedValue, instruction, addressingModeCode, registerName, immediateAddress); // Outputs addressing mode, register and immediate address
-    executeInstruction(instruction, addressingModeCode, registerName, immediateAddress);
+    fetchInstruction(); // Fetches values from memory
+    decodeInstruction (); // Fetches addressing mode, register, immediate address and any other relevant data
+    executeInstruction(); // Uses the values above to execute an instruction
 
     if (getPCValue() == getBreakpoint())
         setRunning(false);
 }
 
-void Machine::fetchInstruction(int &fetchedValue, Instruction *&instruction)
+void Machine::fetchInstruction()
 {
     // Read first byte
     fetchedValue = memoryReadNext();
-    instruction = getInstructionFromValue(fetchedValue);
+    currentInstruction = getInstructionFromValue(fetchedValue);
 }
 
-void Machine::decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &immediateAddress)
+void Machine::decodeInstruction()
 {
-    addressingModeCode = extractAddressingModeCode(fetchedValue);
-    registerName = extractRegisterName(fetchedValue);
+    decodedAdressingModeCode1 = extractAddressingModeCode(fetchedValue);
+    decodedRegisterName1 = extractRegisterName(fetchedValue);
 
-    if (instruction && instruction->getNumBytes() > 1)
+    if (currentInstruction && currentInstruction->getNumBytes() > 1)
     {
-        immediateAddress = getPCValue(); // Address that contains first argument byte
-        incrementPCValue(instruction->getNumBytes() - 1); // Skip argument bytes
+        decodedImmediateAddress = getPCValue(); // Address that contains first argument byte
+        incrementPCValue(currentInstruction->getNumBytes() - 1); // Skip argument bytes
     }
 }
 
-void Machine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress)
+void Machine::executeInstruction()
 {
     int value1, value2, result;
+    int immediateAddress = decodedImmediateAddress;
     Instruction::InstructionCode instructionCode;
-    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
-    bool isImmediate = (addressingModeCode == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+    instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
+    bool isImmediate = (decodedAdressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+
+    int immediateAddress = decodedImmediateAddress;
+    QString registerName = decodedRegisterName1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
 
     switch (instructionCode)
     {
@@ -92,14 +93,14 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
     //////////////////////////////////////////////////
 
     case Instruction::LDR:
-        result = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        result = GetCurrentOperandValue();
         setRegisterValue(registerName, result);
         updateFlags(result);
         break;
 
     case Instruction::STR:
         result = getRegisterValue(registerName);
-        memoryWrite(memoryGetOperandAddress(immediateAddress, addressingModeCode), result);
+        memoryWrite(GetCurrentOperandAddress(), result);
         break;
 
 
@@ -110,7 +111,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::ADD:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value2 = GetCurrentOperandValue();
         result = (value1 + value2) & 0xFF;
 
         setRegisterValue(registerName, result);
@@ -121,7 +122,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::OR:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value2 = GetCurrentOperandValue();
         result = (value1 | value2);
 
         setRegisterValue(registerName, result);
@@ -130,7 +131,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::AND:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value2 = GetCurrentOperandValue();
         result = (value1 & value2);
 
         setRegisterValue(registerName, result);
@@ -147,7 +148,7 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::SUB:
         value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value2 = GetCurrentOperandValue();
         result = (value1 - value2) & 0xFF;
 
         setRegisterValue(registerName, result);
@@ -216,63 +217,63 @@ void Machine::executeInstruction(Instruction *&instruction, AddressingMode::Addr
 
     case Instruction::JMP:
         if (!isImmediate) // Invalidate immediate jumps
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JN:
         if (getFlagValue("N") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JP:
         if (getFlagValue("N") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JV:
         if (getFlagValue("V") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNV:
         if (getFlagValue("V") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JZ:
         if (getFlagValue("Z") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNZ:
         if (getFlagValue("Z") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JC:
         if (getFlagValue("C") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNC:
         if (getFlagValue("C") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JB:
         if (getFlagValue("B") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JNB:
         if (getFlagValue("B") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
+            setPCValue(GetCurrentJumpAddress());
         break;
 
     case Instruction::JSR:
         if (!isImmediate)
         {
-            int jumpAddress = memoryGetJumpAddress(immediateAddress, addressingModeCode);
+            int jumpAddress = GetCurrentJumpAddress();
             memoryWrite(jumpAddress, getPCValue());
             setPCValue(jumpAddress+1);
         }
@@ -1026,8 +1027,12 @@ int Machine::memoryReadNext()
     return value;
 }
 
-int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+int Machine::GetCurrentOperandAddress()
 {
+
+    int immediateAddress = decodedImmediateAddress; 
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+
     switch (addressingModeCode)
     {
         case AddressingMode::DIRECT:
@@ -1050,14 +1055,14 @@ int Machine::memoryGetOperandAddress(int immediateAddress, AddressingMode::Addre
     }
 }
 
-int Machine::memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+int Machine::GetCurrentOperandValue()
 {
-    return memoryRead(memoryGetOperandAddress(immediateAddress, addressingModeCode)); // Return 1-byte value
+    return memoryRead(GetCurrentOperandAddress()); // Return 1-byte value
 }
 
-int Machine::memoryGetJumpAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+int Machine::GetCurrentJumpAddress()
 {
-    return memoryGetOperandAddress(immediateAddress, addressingModeCode);
+    return GetCurrentOperandAddress();
 }
 
 
@@ -1067,8 +1072,12 @@ int Machine::memoryGetJumpAddress(int immediateAddress, AddressingMode::Addressi
 //////////////////////////////////////////////////
 
 // Returns true if successful
-FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
+FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, int end, int dest)
 {
+    if(start < 0 || end > memory.size()){
+        return FileErrorCode::invalidAddress;
+    }
+    
     char byte;
     QFile memFile(filename); // Implicitly closed
 
@@ -1094,7 +1103,10 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename)
     }
 
     // Read memory
-    for (int address = 0; address < memory.size(); address++)
+    memFile.seek(1 + identifier.length() + (2 * start)); //Set loaded file read starting point
+    int read_size = qMin<int>(end - start, getMemorySize() - dest); //Put the maximum amount of bytes read possible
+
+    for (int address = dest; address < (dest + read_size); address++)
     {
         memFile.getChar(&byte);
         setMemoryValue(address, byte);

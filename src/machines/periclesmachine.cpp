@@ -78,24 +78,28 @@ int PericlesMachine::calculateBytesToReserve(QString addressArgument)
     return (addressingModeCode == AddressingMode::IMMEDIATE) ? 2 : 3; // Immediate requires only 2 bytes
 }
 
-void PericlesMachine::decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingModeCode, QString &registerName, int &immediateAddress)
-{
-    addressingModeCode = extractAddressingModeCode(fetchedValue);
-    registerName = extractRegisterName(fetchedValue);
+void PericlesMachine::decodeInstruction(){
+    
+    decodedAdressingModeCode1 = extractAddressingModeCode(fetchedValue);
+    decodedRegisterName1 = extractRegisterName(fetchedValue);
 
-    if (instruction && instruction->getNumBytes() == 0) // If instruction has variable number of bytes
+    if (currentInstruction && currentInstruction->getNumBytes() == 0) // If instruction has variable number of bytes
     {
-        immediateAddress = getPCValue(); // Address that contains first argument byte
+        decodedImmediateAddress = getPCValue(); // Address that contains first argument byte
 
         // Skip argument bytes
         incrementPCValue();
-        if (addressingModeCode != AddressingMode::IMMEDIATE) // Immediate argument has only 1 byte
+        if (decodedAdressingModeCode1 != AddressingMode::IMMEDIATE) // Immediate argument has only 1 byte
             incrementPCValue();
     }
 }
 
-int PericlesMachine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode)
+int PericlesMachine::GetCurrentOperandAddress()
 {
+    int immediateAddress = decodedImmediateAddress;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+
+    
     switch (addressingModeCode)
     {
         case AddressingMode::DIRECT:
