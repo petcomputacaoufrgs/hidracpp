@@ -24,7 +24,6 @@ namespace FileErrorCode
         inputOutput,
         incorrectSize,
         invalidIdentifier,
-        invalidAddress
     };
 }
 
@@ -65,11 +64,11 @@ public:
     ///Do a step of the simulation
     void step();
     ///Get next instruction
-    void fetchInstruction();
+    void fetchInstruction(int &fetchedValue, Instruction *&instruction);
     ///Decode the instruction
-    virtual void decodeInstruction();
+    virtual void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &immediateAddress);
     ///Execute the instruction
-    virtual void executeInstruction();
+    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString registerName, int immediateAddress);
 
     ///Get the adressing mode code from a memory value
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
@@ -130,9 +129,9 @@ public:
     void memoryWrite(int address, int value); // Increments accessCount
     int  memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
 
-    virtual int GetCurrentOperandAddress(); // increments accessCount
-    int GetCurrentOperandValue(); // increments accessCount
-    int GetCurrentJumpAddress(); // increments accessCount
+    virtual int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    int memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
+    int memoryGetJumpAddress( int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
 
 
 
@@ -141,7 +140,7 @@ public:
     //////////////////////////////////////////////////
 
     ///Set up the machine's memory from a .mem file
-    FileErrorCode::FileErrorCode importMemory(QString filename, int start, int end, int dest);
+    FileErrorCode::FileErrorCode importMemory(QString filename);
     ///Save the machine's memory in a .mem file
     FileErrorCode::FileErrorCode exportMemory(QString filename);
 
@@ -235,27 +234,6 @@ public:
     void getAddressingModeDescription(AddressingMode::AddressingModeCode addressingModeCode, QString &acronym, QString &name, QString &format, QString &description);
 
 protected:
-
-    /*
-    
-        Simulation state variables - updated every simulation step
-        These 
-    
-    */
-    int fetchedValue;
-
-    AddressingMode::AddressingModeCode decodedAdressingModeCode1;
-    AddressingMode::AddressingModeCode decodedAdressingModeCode2;
-    QString decodedRegisterName1;
-    QString decodedRegisterName2;
-    int decodedExtraValue;
-
-    int decodedImmediateAddress;
-    Instruction *currentInstruction;
-    
-    
-
-    //////////////////////////////////////////////////////
     ///Machine identifier string for file opening
     QString identifier;
     ///The machine's registers
@@ -301,7 +279,7 @@ protected:
     int accessCount;
     ///Used to "cut down" memory adresses to the machine's maximum address
     int memoryMask;
-    
+
 signals:
     void buildErrorDetected(QString);
 };

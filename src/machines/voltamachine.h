@@ -7,8 +7,8 @@ class VoltaMachine : public Machine
 {
 public:
     VoltaMachine();
-    
-    void executeInstruction();
+
+    virtual void executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString, int immediateAddress);
     void skipNextInstruction();
 
     virtual void generateDescriptions();

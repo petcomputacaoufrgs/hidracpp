@@ -74,14 +74,11 @@ VoltaMachine::VoltaMachine()
     addressingModes.append(new AddressingMode("......11", AddressingMode::INDEXED_BY_PC, "(.*),pc"));
 }
 
-void VoltaMachine::executeInstruction()
+void VoltaMachine::executeInstruction(Instruction *&instruction, AddressingMode::AddressingModeCode addressingModeCode, QString, int immediateAddress)
 {
     int value1, value2, result, bit;
     Instruction::InstructionCode instructionCode;
-    instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
-
-    int immediateAddress = decodedImmediateAddress;
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
 
     switch (instructionCode)
     {
@@ -282,22 +279,22 @@ void VoltaMachine::executeInstruction()
         break;
 
     case Instruction::VOLTA_PSH:
-        value1 = GetCurrentOperandValue();
+        value1 = memoryGetOperandValue(immediateAddress, addressingModeCode);
         stackPush(value1);
         break;
 
     case Instruction::VOLTA_POP:
         value1 = stackPop();
-        memoryWrite(GetCurrentOperandAddress(), value1);
+        memoryWrite(memoryGetOperandAddress(immediateAddress, addressingModeCode), value1);
         break;
 
     case Instruction::VOLTA_JMP:
-        setPCValue(GetCurrentJumpAddress());
+        setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
         break;
 
     case Instruction::VOLTA_JSR:
         stackPush(getPCValue());
-        setPCValue(GetCurrentJumpAddress());
+        setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
         break;
 
     case Instruction::VOLTA_HLT:

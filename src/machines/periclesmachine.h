@@ -8,9 +8,9 @@ class PericlesMachine : public Machine
 public:
     PericlesMachine();
 
-    void decodeInstruction();
+    virtual void decodeInstruction(int fetchedValue, Instruction *&instruction, AddressingMode::AddressingModeCode &addressingMode, QString &registerId, int &immediateAddress);
     virtual int calculateBytesToReserve(QString addressArgument);
-    virtual int GetCurrentOperandAddress(); // increments accessCount
+    virtual int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode); // increments accessCount
     virtual void getNextOperandAddress(int &intermediateAddress, int &intermediateAddress2, int &finalOperandAddress);
     virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 
