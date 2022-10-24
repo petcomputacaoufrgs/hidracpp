@@ -81,7 +81,6 @@ void Machine::executeInstruction()
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
     bool isImmediate = (decodedAdressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
 
-    int immediateAddress = decodedImmediateAddress;
     QString registerName = decodedRegisterName1;
     AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
 
