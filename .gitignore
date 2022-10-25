@@ -28,4 +28,6 @@
 hidra-build*/
 build*/
 .vscode
-CMakeLists.txt
+
+# Exclude top CMakeLists for manual config
+/CMakeLists.txt
