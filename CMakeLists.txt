@@ -10,8 +10,16 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+# Can be set through the command line using -DQT_PATH={your path to qt}
+if (NOT DEFINED QT_PATH)
+    # Default Qt path
+    set(QT_PATH "C:\\Qt\\5.15.2\\mingw81_64")
+endif()
+message(STATUS "Qt Path is set to " ${QT_PATH})
+
+
 # Set prefix for find_package
-set(CMAKE_PREFIX_PATH "Path/to/Qt")
+set(CMAKE_PREFIX_PATH ${QT_PATH})
 
 enable_testing(true)
 
