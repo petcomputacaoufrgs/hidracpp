@@ -562,7 +562,7 @@ int CesarMachine::memoryGetOperandValue(int immediateAddress, AddressingMode::Ad
     //However, were R5 to be in any other addressing mode, we'd use the contents of R5
     //as an address
     if(addressingModeCode == AddressingMode::REGISTER){
-        return memoryGetOperandAddress(immediateAddress, addressingModeCode, registerName)
+        return memoryGetOperandAddress(immediateAddress, addressingModeCode, registerName);
     }
     else{
         return memoryReadTwoByteAddress(memoryGetOperandAddress(immediateAddress, addressingModeCode, registerName));
