@@ -10,6 +10,7 @@ find_package(Qt5 COMPONENTS REQUIRED Widgets) # Qt COMPONENTS // Core and Gui ar
 add_executable(${PROJECT_NAME}
     WIN32 # If you need a terminal for debug, please comment this statement 
     MACOSX_BUNDLE
+    main.cpp
     ${core}
     ${gui}
     ${machines} 
