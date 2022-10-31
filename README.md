@@ -1,11 +1,9 @@
 Hidra
 =====
 
-O Hidra é um ambiente de desenvolvimento integrado para as máquinas teóricas estudadas nas disciplinas de Arquitetura de Computadores da UFRGS.
+O Hidra é um ambiente de desenvolvimento integrado para as máquinas teóricas estudadas nas disciplinas de Arquitetura de Computadores da UFRGS, unificando as tarefas de montagem, simulação e depuração em um ambiente favorável ao desenvolvimento, permitindo que o aluno possa se concentrar nas diferentes características de cada arquitetura. 
 
-O software unifica as tarefas de montagem, simulação e depuração em um ambiente favorável ao desenvolvimento, permitindo que o estudante possa se concentrar nas diferentes características de cada arquitetura. 
-
-Além das máquinas Neander, Ahmes e Ramses, o Hidra traz a simulação da máquina de registradores REG e da máquina de pilha Volta, bem como das demais arquiteturas hipotéticas descritas ao final do livro Fundamentos de Arquitetura de Computadores, do Prof. Raul Fernando Weber.
+Além das máquinas Neander, Ahmes e Ramses, o Hidra traz a simulação da máquina de registradores REG e da máquina de pilha Volta, bem como das demais arquiteturas hipotéticas descritas ao final do livro Fundamentos de Arquitetura de Computadores, do Prof. Raul Fernando Weber, com a <ins>notável exceção da máquina Cesar</ins>, a qual está <ins>atualmente em desenvolvimento.</ins>
 
 Download
 ========
@@ -16,26 +14,47 @@ https://github.com/petcomputacaoufrgs/hidracpp/releases/
 Para desenvolver
 ================
 
-O projeto é desenvolvido na linguagem C++, utilizando o framework Qt versão 5.3 e o ambiente Qt Creator.
+O projeto é desenvolvido na linguagem C++, utilizando o framework Qt versão 5.15.2. Atualmente, o desenvolvimento é realizado utilizando a plataforma [VS Code](https://code.visualstudio.com/) e a ferramenta de build utilizada é o [CMake](https://cmake.org/)
 
-Desenvolver usando Windows
---------------------------
+### Baixando o framework Qt
+O [framework Qt](https://www.qt.io/product) é a base na qual o Hidra é construído, auxiliando na criação da interface gráfica, estruturação do programa, automatização de testes, entre outros.
 
-Para desenvolver em Windows, primeiro instale o Qt 5.3 com MinGW (que inclui o ambiente Qt Creator), através do link:<br/>
-https://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-windows-x86-mingw482_opengl-5.3.2.exe
+#### Passos
+* Baixe o [Qt Open Source](https://www.qt.io/download-qt-installer?hsCtaTracking=99d9dd4f-5681-48d2-b096-470725510d34%7C074ddad0-fdef-4e53-8aa8-5e8a876d6ab4)
+  * Lembre que, para utilizar o Qt Open Source, é necessário seguir as obrigações das licenças GPL/LGPL
+  * Caso queira montar as bibliotecas manualmente, [siga este guia](https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_source_code)
+* Rode o instalador do Qt
+  * Caso esteja utilizando Linux, é possível que seja necessário instalar o package "libxcb-xinerama0"
+* Crie uma conta Qt, caso já não tenha uma, e insira o nome e senha na tela inicial
+* No passo *Installation Folder*, determine o caminho onde o Qt será instalado e selecione a opção *Instalação Personalizada*
+* No passo *Select Components*, clique na aba *Qt* e após na aba *Qt 5.15.2*
+* Selecione o componente que reflita o compilador que você irá usar (por exemplo, *Desktop gcc 64-bit* no Ubuntu)
+* Na aba *Developer and Designer Tools*, clique na caixa *Qt Design Studio*, assim como em qualquer outra ferramenta utilizada posteriormente já não instalada em seu computador (por exemplo, o CMake, ou o compilador que você selecionou)
+* Prossiga com o resto da instalação até o fim.
 
-Em seguida, clone o projeto através do software Git de sua preferência (ex: GitHub for Windows) e abra o arquivo <i>src/hidra.pro</i>.
+### Fazendo o build do projeto com o VS Code
+Ao abrir a pasta "hidracpp" com o VSCode, instale as extensões recomendadas, em especial a extensão [CMake Tools](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cmake-tools). Uma janela pedindo para configurar o projeto aparecerá; clique sim (ou, se quiser, use o comando *CMake: Configure*)
+A extensão então pedirá que você selecione um kit; por padrão, ela irá buscar por compiladores em algumas pastas específicas. Selecione o kit que corresponde ao compilador que você escolheu durante a instalação do Qt.
+* Se você instalou o compilador pelo Qt também, execute o comando da extensão *CMake: Edit User-Local CMake Kits*. Isso abrirá um arquivo JSON, onde você poderá manualmente adicionar um kit.
+Exemplo:
+```
+{
+    "name": "Qt MinGW 64",
+    "compilers": {
+      "C": "C:\\Qt\\Tools\\mingw810_64\\bin\\gcc.exe",
+      "CXX": "C:\\Qt\\Tools\\mingw810_64\\bin\\g++.exe"
+    },
+    "preferredGenerator": {
+      "name": "MinGW Makefiles"
+    },
+    "environmentVariables": {
+      "CMT_MINGW_PATH": "C:\\MinGW\\bin"
+    }
+  },
+  ```
 
-Desenvolver usando Linux
-------------------------
-
-Para desenvolver usando Linux, faça o download do Qt através deste link:<br/>
-https://download.qt.io/archive/qt/5.3/5.3.2/qt-opensource-linux-x86-5.3.2.run
-
-Em seguida, siga o tutorial para instalação em sua distribuição Linux, por exemplo:<br/>
-https://wiki.qt.io/Install_Qt_5_on_Ubuntu
-
-Por fim, clone o projeto através do software Git de sua preferência (ex: Git GUI) e utilize o Qt Creator instalado para abrir o arquivo <i>src/hidra.pro</i>.
+Feito isso, você provavelmente visualizará na barra inferior do vscode alguns botões provenientes da extensão, os quais permitem o build de targets específicas, iniciar o debugger, rodar o programa, entre outras funcionalidades.
+  
 
 Cross-Compile: compilar no Linux para Windows
 ---------------------------------------------
