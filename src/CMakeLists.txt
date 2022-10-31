@@ -1,21 +1,33 @@
-# Collects source file names
-aux_source_directory(./core core)
-aux_source_directory(./gui gui)
-aux_source_directory(./machines machines)
+
+set(EXECUTABLE_NAME ${PROJECT_NAME})
 
 # Qt package location
 # Core and Gui are included because Widgets depends on it
 find_package(Qt5 COMPONENTS REQUIRED Widgets) # Qt COMPONENTS // Core and Gui are included becuase Widgets depends on it
 
-add_executable(${PROJECT_NAME}
+
+# Collects source file names
+
+aux_source_directory(./core core)
+aux_source_directory(./gui gui)
+aux_source_directory(./machines machines)
+
+add_library(hidracore STATIC ${core})
+add_library(hidramachines STATIC ${machines})
+add_library(hidragui STATIC ${gui})
+
+# hidracore depends on widgets
+target_link_libraries(hidracore Qt5::Widgets)
+# hidramachines depends on hidracore and widgets
+target_link_libraries(hidramachines hidracore)
+# hidragui depends on hidramachines and hidracore and widgets
+target_link_libraries(hidragui hidramachines)
+
+
+add_executable(${EXECUTABLE_NAME}
     WIN32 # If you need a terminal for debug, please comment this statement 
     MACOSX_BUNDLE
-    ${core}
-    ${gui}
-    ${machines} 
-) 
+    main.cpp
+)
 
-# Link the Qt library
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    Qt5::Widgets # Widgets include Core and Gui
-) # Qt5 Shared Library
+target_link_libraries(${EXECUTABLE_NAME} hidragui)
