@@ -16,14 +16,4 @@ target_include_directories(TestQueops PUBLIC ../../gui PUBLIC ../../core PUBLIC 
 add_test(NAME TestQueops COMMAND TestQueops)
 
 
-#add_subdirectory(Header)
-#add_subdirectory(External/glfw)
-#target_include_directories(${PROJECT_NAME} 
-#    PUBLIC Header 
-#    PUBLIC External/glfw/include
-#)
 
-#target_link_directories(${PROJECT_NAME} 
-#    PUBLIC Header
-#    PRIVATE External/glfw/src 
-#)

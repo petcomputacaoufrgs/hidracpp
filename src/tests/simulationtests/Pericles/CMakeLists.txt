@@ -16,14 +16,4 @@ target_include_directories(TestPericles PUBLIC ../../gui PUBLIC ../../core PUBLI
 add_test(NAME TestPericles COMMAND TestPericles
 
 
-#add_subdirectory(Header)
-#add_subdirectory(External/glfw)
-#target_include_directories(${PROJECT_NAME} 
-#    PUBLIC Header 
-#    PUBLIC External/glfw/include
-#)
 
-#target_link_directories(${PROJECT_NAME} 
-#    PUBLIC Header
-#    PRIVATE External/glfw/src 
-#)

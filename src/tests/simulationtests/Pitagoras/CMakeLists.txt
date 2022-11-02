@@ -16,14 +16,4 @@ target_include_directories(TestPitagoras PUBLIC ../../gui PUBLIC ../../core PUBL
 add_test(NAME TestPitagoras COMMAND TestPitagoras)
 
 
-#add_subdirectory(Header)
-#add_subdirectory(External/glfw)
-#target_include_directories(${PROJECT_NAME} 
-#    PUBLIC Header 
-#    PUBLIC External/glfw/include
-#)
 
-#target_link_directories(${PROJECT_NAME} 
-#    PUBLIC Header
-#    PRIVATE External/glfw/src 
-#)

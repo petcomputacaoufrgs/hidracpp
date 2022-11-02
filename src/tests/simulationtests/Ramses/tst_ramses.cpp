@@ -200,15 +200,6 @@ void RamsesMachineTest::test_return_address_JSR()
     QCOMPARE(returnAddress, 2);
 }
 
-void RamsesMachineTest::test_return_JSR()
-{   
-    //int PCValue;
-    //testedMachine.setPCValue();
-    //testedMachine.step();
-    // Get PC value (after end of subroutine)
-    //PCValue = testedMachine.getPCValue();
-    //QCOMPARE(PCValue, );
-}
 void RamsesMachineTest::test_NEG()
 {
     int regValue;
