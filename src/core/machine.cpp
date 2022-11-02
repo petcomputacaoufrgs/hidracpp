@@ -63,7 +63,7 @@ void Machine::fetchInstruction()
 
 void Machine::decodeInstruction()
 {
-    decodedAdressingModeCode1 = extractAddressingModeCode(fetchedValue);
+    decodedAddressingModeCode1 = extractAddressingModeCode(fetchedValue);
     decodedRegisterName1 = extractRegisterName(fetchedValue);
 
     if (currentInstruction && currentInstruction->getNumBytes() > 1)
@@ -79,10 +79,10 @@ void Machine::executeInstruction()
     int immediateAddress = decodedImmediateAddress;
     Instruction::InstructionCode instructionCode;
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
-    bool isImmediate = (decodedAdressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+    bool isImmediate = (decodedAddressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
 
     QString registerName = decodedRegisterName1;
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
 
     switch (instructionCode)
     {
@@ -1046,7 +1046,7 @@ int Machine::GetCurrentOperandAddress()
 {
 
     int immediateAddress = decodedImmediateAddress; 
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
 
     switch (addressingModeCode)
     {

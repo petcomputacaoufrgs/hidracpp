@@ -17,31 +17,11 @@ class CesarMachine : public Machine
     public:
     CesarMachine();
 
-    void step();
-
-    ///Get next instruction
-    void fetchInstruction(int &fetchedValue, Instruction *&instruction);
-    ///Decode the instruction
-    void decodeInstruction(int fetchedValue, Instruction *&instruction, 
-        AddressingMode::AddressingModeCode &addressingMode1,
-        AddressingMode::AddressingModeCode &addressingMode2,  
-        int &registerId1,
-        int &registerId2,
-        int &extraValues,
-        int &immediateAddress);
-
-    ///Execute the instruction
-    void executeInstruction (Instruction *&instruction, 
-        AddressingMode::AddressingModeCode addressingModeCode1,
-        AddressingMode::AddressingModeCode addressingModeCode2, 
-        int registerName1,
-        int registerName2, 
-        int extraValue,
-        int immediateAddress);
+    void fetchInstruction();
+    void decodeInstruction();
+    void executeInstruction();
     
-
-    int memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode,  int registerName);
-    int memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode, int registerName);
+    int GetCurrentOperandValue(int operand = 1);
 
     ///Necessary Conversion methods
     AddressingMode::AddressingModeCode convertInstructionStringAddressingMode(int extract_am);

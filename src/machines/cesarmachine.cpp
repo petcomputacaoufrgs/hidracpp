@@ -55,25 +55,6 @@ CesarMachine::CesarMachine()
 }
 
 
-void CesarMachine::step()
-{
-    int fetchedValue, immediateAddress;
-    int reg1, reg2;
-    AddressingMode::AddressingModeCode am1, am2;
-    int extra;
-    Instruction *instruction = nullptr;
-
-    fetchInstruction(fetchedValue, instruction);
-    decodeInstruction(fetchedValue, instruction, am1, am2, reg1, reg2, extra, immediateAddress); // Outputs addressing mode, register and immediate address
-    executeInstruction(instruction, am1, am2, reg1, reg2, extra, immediateAddress);
-
-    if (getPCValue() == getBreakpoint())
-        setRunning(false);    
-
-}    
-
-
-
 /*
 Cesar's way to fetch, decode and execute instructions
 
@@ -91,7 +72,7 @@ AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddress
 {
     switch(extract_am){
         case CESAR_ADDRESSING_MODE_REG:
-            return AddressingMode::DIRECT;
+            return AddressingMode::REGISTER;
 
         case CESAR_ADDRESSING_MODE_REG_POSTINC: 
             return AddressingMode::AFTER_INCREMENTED;
@@ -122,97 +103,92 @@ AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddress
 }
 
 
-void CesarMachine::fetchInstruction(int &fetchedValue, Instruction *&instruction)
+void CesarMachine::fetchInstruction()
 {
     // Read first byte
+    
     fetchedValue = memoryReadNext();  // has to read two bytes
-    instruction = getInstructionFromValue(fetchedValue);
-    if(instruction->getNumBytes() > 1){
+    currentInstruction = getInstructionFromValue(fetchedValue);
+    if(currentInstruction->getNumBytes() > 1){
         // Shift fetchedValue 1 byte to the left and read second byte using or mask
         fetchedValue = (fetchedValue << 8) | memoryReadNext();
     }
 }    
     
-void CesarMachine::decodeInstruction(int fetchedValue, Instruction *&instruction, 
-        AddressingMode::AddressingModeCode &addressingMode1,
-        AddressingMode::AddressingModeCode &addressingMode2, 
-        int &registerId1,
-        int &registerId2, 
-        int &extraValues, 
-        int &immediateAddress)
+void CesarMachine::decodeInstruction()
 {
 
     static AddressingMode::AddressingModeCode default_am = AddressingMode::REGISTER;
 
-    Instruction::InstructionGroup instructionGroup = instruction->getInstructionGroup();
+    Instruction::InstructionGroup instructionGroup = currentInstruction->getInstructionGroup();
     switch(instructionGroup){
         case Instruction::InstructionGroup::GROUP_NOP:
-            addressingMode1 = default_am; //Adressing mode not used
-            addressingMode2 = default_am; //
-            registerId1 = 0;//Pass the first register, with no intention to use it
-            registerId2 = 0;//
-            extraValues = 0;// extraValues not used
+            decodedAddressingModeCode1 = default_am; //Adressing mode not used
+            decodedAddressingModeCode2 = default_am; //
+            decodedRegisterCode1 = 0;//Pass the first register, with no intention to use it
+            decodedRegisterCode2 = 0;//
+            decodedExtraValue = 0;// decodedExtraValue not used
             break;
         case Instruction::InstructionGroup::GROUP_CONDITIONAL_CODES:
-            addressingMode1 = default_am; //Adressing mode not used
-            addressingMode2 = default_am; //
-            registerId1 = 0;//Pass the first register, with no intention to use it
-            registerId2 = 0;//
-            extraValues = ((1111 << 8) & fetchedValue) >> 8;//Mask to get flag values
+            decodedAddressingModeCode1 = default_am; //Adressing mode not used
+            decodedAddressingModeCode2 = default_am; //
+            decodedRegisterCode1 = 0;//Pass the first register, with no intention to use it
+            decodedRegisterCode2 = 0;//
+            decodedExtraValue = ((1111 << 8) & fetchedValue) >> 8;//Mask to get flag values
             break; 
 
         case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
-            addressingMode1 = default_am; //Adressing mode not used
-            addressingMode2 = default_am; //
-            registerId1 = 0;//Pass the first register, with no intention to use it
-            registerId2 = 0;//
-            extraValues = fetchedValue & 0b11111111;//Mask to get branch adress to jump to
+            decodedAddressingModeCode1 = default_am; //Adressing mode not used
+            decodedAddressingModeCode2 = default_am; //
+            decodedRegisterCode1 = 0;//Pass the first register, with no intention to use it
+            decodedRegisterCode2 = 0;//
+            decodedExtraValue = fetchedValue & 0b11111111;//Mask to get branch adress to jump to
             break;
 
         case Instruction::InstructionGroup::GROUP_JUMP:
-            addressingMode1 = convertInstructionStringAddressingMode((fetchedValue & 0b00111000) >> 3);
-            addressingMode2 = default_am;
-            registerId1 = (fetchedValue & 0b00000111);
-            registerId2 = 0;
+            decodedAddressingModeCode1 = convertInstructionStringAddressingMode((fetchedValue & 0b00111000) >> 3);
+            decodedAddressingModeCode2 = default_am;
+            decodedRegisterCode1 = (fetchedValue & 0b00000111);
+            decodedRegisterCode2 = 0;
             break;
             
         case Instruction::InstructionGroup::GROUP_LOOP_CONTROL:
-            addressingMode1 = default_am;//Adressing mode not used
-            addressingMode2 = default_am;//
-            registerId1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
-            registerId2 = 0;//Pass the second register, with no intention to use it
-            extraValues = fetchedValue & 0b11111111;//Get displacement
+            decodedAddressingModeCode1 = default_am;//Adressing mode not used
+            decodedAddressingModeCode2 = default_am;//
+            decodedRegisterCode1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
+            decodedRegisterCode2 = 0;//Pass the second register, with no intention to use it
+            decodedExtraValue = fetchedValue & 0b11111111;//Get displacement
             break;
 
         case Instruction::InstructionGroup::GROUP_JUMP_SUBROUTINE:
-            addressingMode1 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);//Get adressing mode
-            addressingMode2 = default_am; //Adressing mode not used
-            registerId1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
-            registerId2 = fetchedValue & 0b111;//mask to get register
-            extraValues = 0;// extraValues not used
+            decodedAddressingModeCode1 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);//Get adressing mode
+            decodedAddressingModeCode2 = default_am; //Adressing mode not used
+            decodedRegisterCode1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
+            decodedRegisterCode2 = fetchedValue & 0b111;//mask to get register
+            decodedExtraValue = 0;// decodedExtraValue not used
             break;
 
         case Instruction::InstructionGroup::GROUP_RETURN_SUBROUTINE:
-            addressingMode1 = default_am;
-            addressingMode2 = default_am;
-            registerId1 = (fetchedValue  & 0b111);
-            registerId2 = 0;
-            extraValues = 0;
+            decodedAddressingModeCode1 = default_am;
+            decodedAddressingModeCode2 = default_am;
+            decodedRegisterCode1 = (fetchedValue  & 0b111);
+            decodedRegisterCode2 = 0;
+            decodedExtraValue = 0;
             break;
 
         case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
-            addressingMode1 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);//Get adressing mode
-            addressingMode2 = default_am;//Adressing mode not used
-            registerId1 = (fetchedValue  & 0b111);//Mask to get register
-            registerId2 = 0;//Pass the second register, with no intention to use it
-            extraValues = 0;// extraValues not used
+            decodedAddressingModeCode1 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);//Get adressing mode
+            decodedAddressingModeCode2 = default_am;//Adressing mode not used
+            decodedRegisterCode1 = (fetchedValue  & 0b111);//Mask to get register
+            decodedRegisterCode2 = 0;//Pass the second register, with no intention to use it
+            decodedExtraValue = 0;// decodedExtraValue not used
             break;
 
         case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
-            addressingMode1 = convertInstructionStringAddressingMode((fetchedValue >> 9) & 0b111);//
-            addressingMode2 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);
-            registerId1 = (fetchedValue >> 6) & 0b111;
-            registerId2 = (fetchedValue  & 0b111);
+            decodedAddressingModeCode1 = convertInstructionStringAddressingMode((fetchedValue >> 9) & 0b111);//
+            decodedAddressingModeCode2 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);
+            decodedRegisterCode1 = (fetchedValue >> 6) & 0b111;
+            decodedRegisterCode2 = (fetchedValue & 0b111);
             break;
         /*
         case default:
@@ -227,18 +203,12 @@ void CesarMachine::decodeInstruction(int fetchedValue, Instruction *&instruction
 
 }
      
-void CesarMachine::executeInstruction (Instruction *&instruction, 
-        AddressingMode::AddressingModeCode addressingModeCode1,
-        AddressingMode::AddressingModeCode addressingModeCode2, 
-        int registerName1,
-        int registerName2, 
-        int extraValue,
-        int immediateAddress){
+void CesarMachine::executeInstruction(){
 
     int reg_value1, reg_value2, src, dst, result;
     Instruction::InstructionCode instructionCode;
-    instructionCode = (instruction) ? instruction->getInstructionCode() : Instruction::NOP;
-    bool isImmediate = (addressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+    instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
+    bool isImmediate = (decodedAddressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
 
     switch (instructionCode)
     {
@@ -247,126 +217,120 @@ void CesarMachine::executeInstruction (Instruction *&instruction,
     // Move
     //////////////////////////////////////////////////
     case Instruction::MOV:
-        reg_value1 = getRegisterValue(registerName1);
-        reg_value2 = getRegisterValue(registerName2);
-        
-        dst = memoryGetOperandValue(reg_value2, addressingModeCode2, registerName2);
-        
-        //Move the value from dst to a register
-        if(addressingModeCode1 == AddressingMode::REGISTER){
-            setRegisterValue(registerName1, dst);
+        src = GetCurrentOperandValue(1);
+        if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
+        {
+            setRegisterValue(decodedRegisterCode2, src);
         }
-        //Move the value from dst to a memory address
-        else{
-            src = memoryGetOperandValue(reg_value1, addressingModeCode1, registerName1);
+        else
+        {
+            dst = GetCurrentOperandValue(2);
             setMemoryValue(src, dst);
         }
         break;
-
-
 
     //////////////////////////////////////////////////
     // Arithmetic and logic
     //////////////////////////////////////////////////
 
     /*case Instruction::ADD:
-        value1 = getRegisterValue(registerName1);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode1);
+        value1 = getRegisterValue(decodedRegisterCode1);
+        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode1);
         result = (value1 + value2) & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         setCarry(value1 + value2 > 0xFF);
         setOverflow(toSigned(value1) + toSigned(value2) != toSigned(result));
         updateFlags(result);
         break;
 
     case Instruction::OR:
-        value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value1 = getRegisterValue(registerCode);
+        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode);
         result = (value1 | value2);
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         updateFlags(result);
         break;
 
     case Instruction::AND:
-        value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value1 = getRegisterValue(registerCode);
+        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode);
         result = (value1 & value2);
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         updateFlags(result);
         break;
 
     case Instruction::NOT:
-        value1 = getRegisterValue(registerName);
+        value1 = getRegisterValue(registerCode);
         result = ~value1 & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         updateFlags(result);
         break;
 
     case Instruction::SUB:
-        value1 = getRegisterValue(registerName);
-        value2 = memoryGetOperandValue(immediateAddress, addressingModeCode);
+        value1 = getRegisterValue(registerCode);
+        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode);
         result = (value1 - value2) & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         setBorrowOrCarry(value1 < value2);
         setOverflow(toSigned(value1) - toSigned(value2) != toSigned(result));
         updateFlags(result);
         break;
 
     case Instruction::NEG:
-        value1 = getRegisterValue(registerName);
+        value1 = getRegisterValue(registerCode);
         result = (-value1) & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         updateFlags(result);
         break;
 
     case Instruction::SHR:
-        value1 = getRegisterValue(registerName);
+        value1 = getRegisterValue(registerCode);
         result = (value1 >> 1) & 0xFF; // Logical shift (unsigned)
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         setCarry(value1 & 0x01);
         updateFlags(result);
         break;
 
     case Instruction::SHL:
-        value1 = getRegisterValue(registerName);
+        value1 = getRegisterValue(registerCode);
         result = (value1 << 1) & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         setCarry((value1 & 0x80) ? 1 : 0);
         updateFlags(result);
         break;
 
     case Instruction::ROR:
-        value1 = getRegisterValue(registerName);
+        value1 = getRegisterValue(registerCode);
         result = ((value1 >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         setCarry(value1 & 0x01);
         updateFlags(result);
         break;
 
     case Instruction::ROL:
-        value1 = getRegisterValue(registerName);
+        value1 = getRegisterValue(registerCode);
         result = ((value1 << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
 
-        setRegisterValue(registerName, result);
+        setRegisterValue(registerCode, result);
         setCarry((value1 & 0x80) ? 1 : 0);
         updateFlags(result);
         break;
 
     case Instruction::INC:
-        setRegisterValue(registerName, getRegisterValue(registerName) + 1);
+        setRegisterValue(registerCode, getRegisterValue(registerCode) + 1);
         break;
 
     case Instruction::DEC:
-        setRegisterValue(registerName, getRegisterValue(registerName) - 1);
+        setRegisterValue(registerCode, getRegisterValue(registerCode) - 1);
         break;
 
 
@@ -440,7 +404,7 @@ void CesarMachine::executeInstruction (Instruction *&instruction,
         break;
 
     case Instruction::REG_IF:
-        if (getRegisterValue(registerName) == 0)
+        if (getRegisterValue(registerCode) == 0)
             setPCValue(getMemoryValue(immediateAddress));
         else
             setPCValue(getMemoryValue(immediateAddress + 1));
@@ -470,46 +434,48 @@ void CesarMachine::executeInstruction (Instruction *&instruction,
 // {
 
 // }
-
-//Returns an address       
-int CesarMachine::memoryGetOperandAddress(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode,  int registerName)
+  
+int CesarMachine::GetCurrentOperandValue(int operand)
 {
-    int registerValue = getRegisterValue(registerName);
+    int registerValue;
+    int registerCode = (operand == 1 ? decodedRegisterCode1 : decodedRegisterCode2);
+    int addressingModeCode = (operand == 1 ? decodedAddressingModeCode1 : decodedAddressingModeCode2);
     int r_value;
 
     switch (addressingModeCode)
     {
         //REGISTER
         case AddressingMode::REGISTER:
+            registerValue = getRegisterValue(registerCode);
             return registerValue;
 
         //POST INCREMENTED
         case AddressingMode::AFTER_INCREMENTED:
             // Get register value
-            registerValue = getRegisterValue(registerName);
+            registerValue = getRegisterValue(registerCode);
             // Read 2 bytes
             r_value = registerValue;
             // Increment register value by 2
             registerValue += 2;
 
-            setRegisterValue(registerName, registerValue);
+            setRegisterValue(registerCode, registerValue);
             return r_value;
 
         //PRE DECREMENTED
         case AddressingMode::PRE_DECREMENTED:
             // Get register value
-            registerValue = getRegisterValue(registerName);
+            registerValue = getRegisterValue(registerCode);
             // Decrement registerValue by 2
             registerValue -= 2;
 
-            setRegisterValue(registerName,registerValue);
+            setRegisterValue(registerCode,registerValue);
             r_value = registerValue;
             return r_value;
 
         //INDEXED
         case AddressingMode::INDEXED_BY_REG:
             // Register value + value in next byte
-            r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerName);
+            r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
             // Increment PC by 2 bytes
             incrementPCValue(2);
         
@@ -526,13 +492,13 @@ int CesarMachine::memoryGetOperandAddress(int immediateAddress, AddressingMode::
              // Increment registerValue by 2
              registerValue += 2;
              
-             setRegisterValue(registerName,registerValue);
+             setRegisterValue(registerCode,registerValue);
              return r_value;
 
         //INDIRECT PRE DECREMENT
         case AddressingMode::PRE_DECREMENTED_INDIRECT:
             // Get register value
-            registerValue = getRegisterValue(registerName);
+            registerValue = getRegisterValue(registerCode);
             // Decrement registerValue by 2
             registerValue -= 2;
     
@@ -543,7 +509,7 @@ int CesarMachine::memoryGetOperandAddress(int immediateAddress, AddressingMode::
 
         case AddressingMode::INDIRECT_INDEXED_BY_REG:
             // Register value + value in next byte
-            r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerName);
+            r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
             // Increment PC by 2 bytes
             incrementPCValue(2);
         
@@ -552,20 +518,4 @@ int CesarMachine::memoryGetOperandAddress(int immediateAddress, AddressingMode::
         default:
             return 0;
     }
-}
-
-int CesarMachine::memoryGetOperandValue(int immediateAddress, AddressingMode::AddressingModeCode addressingModeCode, int registerName)
-{
-    //When getting an operand value from a register using the "register" addressing mode,
-    //we don't need to access memory.
-    //Ex: MOV R5 R6 places the values of R5 in R6
-    //However, were R5 to be in any other addressing mode, we'd use the contents of R5
-    //as an address
-    if(addressingModeCode == AddressingMode::REGISTER){
-        return memoryGetOperandAddress(immediateAddress, addressingModeCode, registerName);
-    }
-    else{
-        return memoryReadTwoByteAddress(memoryGetOperandAddress(immediateAddress, addressingModeCode, registerName));
-    }
-
 }

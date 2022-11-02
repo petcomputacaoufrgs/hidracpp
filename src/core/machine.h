@@ -65,7 +65,7 @@ public:
     ///Do a step of the simulation
     virtual void step();
     ///Get next instruction
-    void fetchInstruction();
+    virtual void fetchInstruction();
     ///Decode the instruction
     virtual void decodeInstruction();
     ///Execute the instruction
@@ -246,10 +246,12 @@ protected:
     */
     int fetchedValue;
 
-    AddressingMode::AddressingModeCode decodedAdressingModeCode1;
-    AddressingMode::AddressingModeCode decodedAdressingModeCode2;
+    AddressingMode::AddressingModeCode decodedAddressingModeCode1;
+    AddressingMode::AddressingModeCode decodedAddressingModeCode2;
     QString decodedRegisterName1;
     QString decodedRegisterName2;
+    int decodedRegisterCode1;
+    int decodedRegisterCode2;
     int decodedExtraValue;
 
     int decodedImmediateAddress;
