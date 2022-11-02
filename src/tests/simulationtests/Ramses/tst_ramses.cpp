@@ -26,7 +26,6 @@ private slots:
     void test_JC();
     void test_jump_JSR();
     void test_return_address_JSR();
-    void test_return_JSR();
     void test_NEG();
     void test_SHR();
     void test_HLT();
