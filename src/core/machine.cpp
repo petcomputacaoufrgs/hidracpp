@@ -1019,6 +1019,25 @@ void Machine::memoryWrite(int address, int value)
     setMemoryValue(address, value);
 }
 
+void Machine::memoryWriteTwoByte(int address, int value)
+{
+    accessCount += 2;
+    int first_byte, second_byte;
+    if(littleEndian)
+    {
+        first_byte = value & 0b11111111;
+        second_byte = (value & 0b1111111100000000) >> 8; 
+    }
+    else
+    {
+        first_byte = (value & 0b1111111100000000) >> 8;
+        second_byte = value & 0b11111111;         
+    }
+
+    setMemoryValue(address, first_byte);
+    setMemoryValue(address+1, second_byte);
+}
+
 int Machine::memoryReadNext()
 {
     int value = memoryRead(getPCValue());

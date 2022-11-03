@@ -128,6 +128,7 @@ public:
 
     int  memoryRead(int address); // Increments accessCount
     void memoryWrite(int address, int value); // Increments accessCount
+    void memoryWriteTwoByte(int address, int value);
     int  memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
 
     virtual int GetCurrentOperandAddress(); // increments accessCount

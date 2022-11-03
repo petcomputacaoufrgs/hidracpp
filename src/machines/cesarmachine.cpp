@@ -225,7 +225,7 @@ void CesarMachine::executeInstruction(){
         else
         {
             dst = GetCurrentOperandValue(2);
-            setMemoryValue(src, dst);
+            memoryWriteTwoByte(dst, src);
         }
         break;
 
