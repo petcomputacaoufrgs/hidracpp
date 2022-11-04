@@ -44,7 +44,53 @@ CesarMachine::CesarMachine()
     // Initialize instructions
     //////////////////////////////////////////////////
 
-    instructions.append(new Instruction(2, "1001....", Instruction::MOV, "mov R1 R2", Instruction::GROUP_TWO_OPERAND));
+    instructions.append(new Instruction(2, "1001....", Instruction::MOV,       "mov R1 R2", Instruction::GROUP_TWO_OPERAND));
+    instructions.append(new Instruction(2, "1010....", Instruction::CESAR_ADD, "add R1 R2", Instruction::GROUP_TWO_OPERAND));
+    instructions.append(new Instruction(2, "1011....", Instruction::CESAR_SUB, "sub R1 R2", Instruction::GROUP_TWO_OPERAND));
+    instructions.append(new Instruction(2, "1100....", Instruction::CESAR_CMP, "cmp R1 R2", Instruction::GROUP_TWO_OPERAND));
+    instructions.append(new Instruction(2, "1101....", Instruction::CESAR_AND, "and R1 R2", Instruction::GROUP_TWO_OPERAND));
+    instructions.append(new Instruction(2, "1110....", Instruction::CESAR_OR,  "or R1 R2" , Instruction::GROUP_TWO_OPERAND));
+    ///////////////////////////////////////////////////////////////////////
+    //one operand instructions   //funcoes ainda nao feitas, arrumar grupos
+    ///////////////////////////////////////////////////////////////////////
+    instructions.append(new Instruction(1, "10000000", Instruction::CESAR_CLR, "clr R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000001", Instruction::CESAR_NOT, "not R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000010", Instruction::CESAR_INC, "inc R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000011", Instruction::CESAR_DEC, "dec R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000100", Instruction::CESAR_NEG, "neg R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000101", Instruction::CESAR_TST, "tst R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000110", Instruction::CESAR_ROR, "ror R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10000111", Instruction::CESAR_ROL, "rol R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10001000", Instruction::CESAR_ASR, "asr R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10001001", Instruction::CESAR_ASL, "asl R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10001010", Instruction::CESAR_ADC, "adc R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "10001011", Instruction::CESAR_SDC, "sdc R1 ", Instruction::GROUP_ONE_OPERAND));
+    //////////////////////////////////////////////////
+    //flow control
+    //////////////////////////////////////////////////
+    instructions.append(new Instruction(2, "0100....", Instruction::CESAR_JMP, "jmp R1 ", Instruction::GROUP_JUMP));
+    instructions.append(new Instruction(2, "00110000", Instruction::CESAR_BR,  "br R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110001", Instruction::CESAR_BNE, "bne R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110010", Instruction::CESAR_BEQ, "beq R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110100", Instruction::CESAR_BPL, "bpl R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110101", Instruction::CESAR_BVC, "bvc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110110", Instruction::CESAR_BVS, "bvs R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110111", Instruction::CESAR_BCC, "bcc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111000", Instruction::CESAR_BCS, "bcs R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111001", Instruction::CESAR_BGE, "bge R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111010", Instruction::CESAR_BLT, "blt R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111011", Instruction::CESAR_BGT, "bgt R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111100", Instruction::CESAR_BLE, "ble R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111101", Instruction::CESAR_BHI, "bhi R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111110", Instruction::CESAR_BLS, "bls R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "0110....", Instruction::CESAR_JSR, "jsr R1 ", Instruction::GROUP_JUMP_SUBROUTINE));
+    instructions.append(new Instruction(2, "0111....", Instruction::CESAR_RTS, "rts R1 ", Instruction::GROUP_RETURN_SUBROUTINE));
+    ////////////////////////
+    //special instructions
+    ////////////////////////
+    instructions.append(new Instruction(2, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
 
     //////////////////////////////////////////////////
     // Initialize addressing modes
@@ -229,201 +275,148 @@ void CesarMachine::executeInstruction(){
         }
         break;
 
+    case Instruction:: CESAR_SUB:
+        src = GetCurrentOperandValue(1);   
+        dst = GetCurrentOperandValue(2);
+        result = dst - src;
+        setRegisterValue(decodedRegisterCode2, result);
+        updateFlags(result);
+        break;
+
+    case Instruction:: CESAR_ADD:
+        src = GetCurrentOperandValue(1);   
+        dst = GetCurrentOperandValue(2);
+        result = dst + src;
+        setRegisterValue(decodedRegisterCode2, result);
+        updateFlags(result);
+        break;
+
+    case Instruction:: CESAR_CMP:
+        src = GetCurrentOperandValue(1);   
+        dst = GetCurrentOperandValue(2);
+        result = dst + src;
+        updateFlags(result);
+        break;
+
+    case Instruction::CESAR_AND:
+        src = GetCurrentOperandValue(1);
+        dst = GetCurrentOperandValue(2);
+        result = src & dst;
+        setRegisterValue(decodedRegisterCode2,result);
+        updateFlags(result);
+        break;
+
+    case Instruction::CESAR_OR:
+        src = GetCurrentOperandValue(1);
+        dst = GetCurrentOperandValue(2);
+        result = src | dst;
+        setRegisterValue(decodedRegisterCode2,result);
+        updateFlags(result);
+        break;
+
+    case Instruction:: CESAR_CLR:
+        setRegisterValue(decodedRegisterCode1,0);
+        updateFlags(0);
+        break;
+
+    case Instruction:: CESAR_NOT:
+        src = getRegisterValue(decodedRegisterCode1);
+        result = ~src & 0xFF;
+
+        setRegisterValue(decodedRegisterCode1, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::CESAR_INC:
+        src = GetCurrentOperandValue(1);
+        result += src;
+        if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
+            setRegisterValue(decodedRegisterCode1,result);
+        else
+            dst = GetCurrentOperandValue(2);
+            memoryWriteTwoByte(dst, result);
+        break;
+
+    case Instruction::CESAR_DEC:
+        src = GetCurrentOperandValue(1);
+        result -= src;
+        if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
+            setRegisterValue(decodedRegisterCode1,result);
+        else
+            dst = GetCurrentOperandValue(2);
+            memoryWriteTwoByte(dst, result);
+        break;
+
+    case Instruction::CESAR_NEG:
+        src = GetCurrentOperandValue(1);
+        result = (-src) & 0xFF;
+
+        setRegisterValue(src, result);
+        updateFlags(result);
+        break;
+
+    case Instruction::CESAR_TST:
+        updateFlags(getRegisterValue(decodedRegisterCode1));
+        break;
+
+    case Instruction:: CESAR_ROR:
+        src = getRegisterValue(decodedRegisterCode1);
+        result = ((src >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
+        setRegisterValue(decodedRegisterCode1,result);
+        setCarry(src & 0b00000001);
+        break;
+
+    case Instruction:: CESAR_ROL:
+        src = getRegisterValue(decodedRegisterCode1);
+        result = ((src << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
+        setRegisterValue(decodedRegisterCode1, result);
+        setCarry((src & 0x80) ? 1 : 0);
+        updateFlags(result);
+        break;
+
+    case Instruction::CESAR_ASL:
+        src = getRegisterValue(decodedRegisterCode1);
+        result = (src << 1);
+        setRegisterValue(decodedRegisterCode1,result);
+        break;
+    
+    case Instruction::CESAR_ASR:
+        src = getRegisterValue(decodedRegisterCode1);
+        result = (src >> 1);
+        setRegisterValue(decodedRegisterCode1,result);
+        break;
+
+    case Instruction:: CESAR_ADC:
+        int carry;
+        src = GetCurrentOperandValue(1);
+        carry = getFlagValue("C");
+        src += carry;
+        setRegisterValue(decodedRegisterCode1,src);
+        break;
+
+    case Instruction::CESAR_SDC:
+        src = GetCurrentOperandValue(1);
+        carry = getFlagValue("C");
+        src -= carry;
+        setRegisterValue(decodedRegisterCode1,src);
+        break;
+
+    case Instruction:: CESAR_JMP:
+         if (!isImmediate) // Invalidate immediate jumps
+            setPCValue(fetchedValue & 0b0000000011111111);
+        break;
+
+    case Instruction:: CESAR_BR:
+        break;
+        
+    }
+
     //////////////////////////////////////////////////
     // Arithmetic and logic
     //////////////////////////////////////////////////
 
-    /*case Instruction::ADD:
-        value1 = getRegisterValue(decodedRegisterCode1);
-        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode1);
-        result = (value1 + value2) & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        setCarry(value1 + value2 > 0xFF);
-        setOverflow(toSigned(value1) + toSigned(value2) != toSigned(result));
-        updateFlags(result);
-        break;
-
-    case Instruction::OR:
-        value1 = getRegisterValue(registerCode);
-        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode);
-        result = (value1 | value2);
-
-        setRegisterValue(registerCode, result);
-        updateFlags(result);
-        break;
-
-    case Instruction::AND:
-        value1 = getRegisterValue(registerCode);
-        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode);
-        result = (value1 & value2);
-
-        setRegisterValue(registerCode, result);
-        updateFlags(result);
-        break;
-
-    case Instruction::NOT:
-        value1 = getRegisterValue(registerCode);
-        result = ~value1 & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        updateFlags(result);
-        break;
-
-    case Instruction::SUB:
-        value1 = getRegisterValue(registerCode);
-        value2 = GetCurrentOperandValue(immediateAddress, addressingModeCode);
-        result = (value1 - value2) & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        setBorrowOrCarry(value1 < value2);
-        setOverflow(toSigned(value1) - toSigned(value2) != toSigned(result));
-        updateFlags(result);
-        break;
-
-    case Instruction::NEG:
-        value1 = getRegisterValue(registerCode);
-        result = (-value1) & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        updateFlags(result);
-        break;
-
-    case Instruction::SHR:
-        value1 = getRegisterValue(registerCode);
-        result = (value1 >> 1) & 0xFF; // Logical shift (unsigned)
-
-        setRegisterValue(registerCode, result);
-        setCarry(value1 & 0x01);
-        updateFlags(result);
-        break;
-
-    case Instruction::SHL:
-        value1 = getRegisterValue(registerCode);
-        result = (value1 << 1) & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        setCarry((value1 & 0x80) ? 1 : 0);
-        updateFlags(result);
-        break;
-
-    case Instruction::ROR:
-        value1 = getRegisterValue(registerCode);
-        result = ((value1 >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        setCarry(value1 & 0x01);
-        updateFlags(result);
-        break;
-
-    case Instruction::ROL:
-        value1 = getRegisterValue(registerCode);
-        result = ((value1 << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
-
-        setRegisterValue(registerCode, result);
-        setCarry((value1 & 0x80) ? 1 : 0);
-        updateFlags(result);
-        break;
-
-    case Instruction::INC:
-        setRegisterValue(registerCode, getRegisterValue(registerCode) + 1);
-        break;
-
-    case Instruction::DEC:
-        setRegisterValue(registerCode, getRegisterValue(registerCode) - 1);
-        break;
-
-
-
-    //////////////////////////////////////////////////
-    // Jumps
-    //////////////////////////////////////////////////
-
-    case Instruction::JMP:
-        if (!isImmediate) // Invalidate immediate jumps
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JN:
-        if (getFlagValue("N") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JP:
-        if (getFlagValue("N") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JV:
-        if (getFlagValue("V") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JNV:
-        if (getFlagValue("V") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JZ:
-        if (getFlagValue("Z") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JNZ:
-        if (getFlagValue("Z") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JC:
-        if (getFlagValue("C") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JNC:
-        if (getFlagValue("C") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JB:
-        if (getFlagValue("B") == true && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JNB:
-        if (getFlagValue("B") == false && !isImmediate)
-            setPCValue(memoryGetJumpAddress(immediateAddress, addressingModeCode));
-        break;
-
-    case Instruction::JSR:
-        if (!isImmediate)
-        {
-            int jumpAddress = memoryGetJumpAddress(immediateAddress, addressingModeCode);
-            memoryWrite(jumpAddress, getPCValue());
-            setPCValue(jumpAddress+1);
-        }
-        break;
-
-    case Instruction::REG_IF:
-        if (getRegisterValue(registerCode) == 0)
-            setPCValue(getMemoryValue(immediateAddress));
-        else
-            setPCValue(getMemoryValue(immediateAddress + 1));
-        break;
-
-
-
-    //////////////////////////////////////////////////
-    // Halt
-    //////////////////////////////////////////////////
-
-    case Instruction::HLT:
-        setRunning(false);
-        break;
-
-    default: // NOP etc.
-        break;
-    */
-    }
+    
+    
     instructionCount++;
 }
 
