@@ -1111,7 +1111,6 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, 
     if(start < 0 || end > memory.size()){
         return FileErrorCode::invalidAddress;
     }
-
     char byte;
     QFile memFile(filename); // Implicitly closed
 
