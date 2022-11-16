@@ -84,7 +84,7 @@ public:
 
     /// Returns a valid address based on a value, removing excess bits (overflow)
     int address(int value);
-    int toSigned(int unsignedByte);
+    virtual int toSigned(int unsignedByte);
 
 
 
