@@ -17,7 +17,7 @@ private slots:
     // Execution tests
 
     // GROUP_NOP
-    // void test_NOP();
+     void test_CESAR_NOP();
     // // GROUP_CONDITIONAL_CODES
     // void test_CESAR_CCC();
     // void test_CESAR_SCC(); 
@@ -55,12 +55,20 @@ private slots:
     // void test_CESAR_NEG();
     void test_CESAR_TST_data();
     void test_CESAR_TST();
-    // void test_CESAR_ROR();
-    // void test_CESAR_ROL();
-    // void test_CESAR_ASR();
-    // void test_CESAR_ASL();
-    // void test_CESAR_ADC();
-    // void test_CESAR_SDC();
+    //gale
+    //void test_CESAR_ROR();
+    //void test_CESAR_ROR_data();
+    //void test_CESAR_ROL();
+    //void test_CESAR_ROL_data();
+    //void test_CESAR_ASR();
+    //void test_CESAR_ASR_data();
+    //void test_CESAR_ASL();
+    //void test_CESAR_ASL_data();
+    //void test_CESAR_ADC();
+    //void test_CESAR_ADC_data();
+    //void test_CESAR_SDC();
+    //void test_CESAR_SDC_data();
+    //gale end
     // GROUP_TWO_OPERAND
     void test_MOV_data();
     void test_MOV();
@@ -128,9 +136,6 @@ void CesarMachineTest::test_MOV()
     testedMachine.setRegisterValue("R1", dst_value);
     int opcode = 0b1001000000000000;
     opcode |= 1;
-    opcode |= 0 << 3;
-    opcode |= 0 << 6;
-    opcode |= 0 << 9;
     testedMachine.memoryWriteTwoByte(0, opcode);
     testedMachine.step();
     
@@ -488,5 +493,112 @@ void CesarMachineTest::test_CESAR_TST()
     QCOMPARE(testedMachine.getFlagValue("C"), flag_C);
 }
 
+void CesarMachineTest::test_CESAR_NOP()
+{
+    int opcode = 0b00001011;
+    testedMachine.setRegisterValue("R0", MAX_POSITIVE);
+    testedMachine.setPCValue(0xFFFF);
+    testedMachine.setFlagValue("N", 1);
+    testedMachine.setFlagValue("Z", 1);
+    testedMachine.setFlagValue("V", 1);
+    testedMachine.setFlagValue("C", 1);
+
+    testedMachine.memoryWriteTwoByte(0, opcode);
+
+    testedMachine.step();
+
+    QCOMPARE(testedMachine.getRegisterValue("R0"), MAX_POSITIVE);
+    QCOMPARE(testedMachine.getPCValue(), 0);
+    QCOMPARE(testedMachine.getFlagValue("N"), 1);
+    QCOMPARE(testedMachine.getFlagValue("Z"), 1);
+    QCOMPARE(testedMachine.getFlagValue("V"), 1);
+    QCOMPARE(testedMachine.getFlagValue("C"), 1);
+}
+
+//void CesarMachineTest::test_CESAR_ROR_data() //NOT DONE
+//{
+//    QTest::addColumn<int>("src_value");
+//    QTest::addColumn<int>("src_result");
+//    QTest::addColumn<int>("flag_N");
+//    QTest::addColumn<int>("flag_Z");
+//    QTest::addColumn<int>("flag_V");
+//    QTest::addColumn<int>("flag_C");
+//                                    /*   src_val    src_res     N     Z     V      C       */                              
+//    QTest::newRow("No_flags")             << 10     << 10    <<  0  << 0   << 0  << 0;
+//    QTest::newRow("N_flags")              << 40000  << 40000 <<  1  << 0   << 0  << 0;
+//    QTest::newRow("Z_flags")              << 0      << 0     <<  0  << 1   << 0  << 0;
+//}
+// 
+//
+//void CesarMachineTest::test_CESAR_ROL_data() //NOT DONE
+//{
+//    QTest::addColumn<int>("src_value");
+//    QTest::addColumn<int>("src_result");
+//    QTest::addColumn<int>("flag_N");
+//    QTest::addColumn<int>("flag_Z");
+//    QTest::addColumn<int>("flag_V");
+//    QTest::addColumn<int>("flag_C");
+//                                    /*   src_val    src_res     N     Z     V      C       */                              
+//    QTest::newRow("No_flags")             << 10     << 10    <<  0  << 0   << 0  << 0;
+//    QTest::newRow("N_flags")              << 40000  << 40000 <<  1  << 0   << 0  << 0;
+//    QTest::newRow("Z_flags")              << 0      << 0     <<  0  << 1   << 0  << 0;
+//}
+//
+//void CesarMachineTest::test_CESAR_ASL_data() //NOT DONE
+//{
+//    QTest::addColumn<int>("src_value");
+//    QTest::addColumn<int>("src_result");
+//    QTest::addColumn<int>("flag_N");
+//    QTest::addColumn<int>("flag_Z");
+//    QTest::addColumn<int>("flag_V");
+//    QTest::addColumn<int>("flag_C");
+//                                    /*   src_val    src_res     N     Z     V      C       */                              
+//    QTest::newRow("No_flags")             << 10     << 10    <<  0  << 0   << 0  << 0;
+//    QTest::newRow("N_flags")              << 40000  << 40000 <<  1  << 0   << 0  << 0;
+//    QTest::newRow("Z_flags")              << 0      << 0     <<  0  << 1   << 0  << 0;
+//}
+//
+//void CesarMachineTest::test_CESAR_ASR_data() //NOT DONE 
+//{
+//    QTest::addColumn<int>("src_value");
+//    QTest::addColumn<int>("src_result");
+//    QTest::addColumn<int>("flag_N");
+//    QTest::addColumn<int>("flag_Z");
+//    QTest::addColumn<int>("flag_V");
+//    QTest::addColumn<int>("flag_C");
+//                                    /*   src_val    src_res     N     Z     V      C       */                              
+//    QTest::newRow("No_flags")             << 10     << 10    <<  0  << 0   << 0  << 0;
+//    QTest::newRow("N_flags")              << 40000  << 40000 <<  1  << 0   << 0  << 0;
+//    QTest::newRow("Z_flags")              << 0      << 0     <<  0  << 1   << 0  << 0;
+//}
+//
+//void CesarMachineTest::test_CESAR_ADC_data() // NOT DONE
+//{
+//    QTest::addColumn<int>("src_value");
+//    QTest::addColumn<int>("src_result");
+//    QTest::addColumn<int>("flag_N");
+//    QTest::addColumn<int>("flag_Z");
+//    QTest::addColumn<int>("flag_V");
+//    QTest::addColumn<int>("flag_C");
+//                                    /*   src_val    src_res     N     Z     V      C       */                              
+//    QTest::newRow("No_flags")             << 10     << 10    <<  0  << 0   << 0  << 0;
+//    QTest::newRow("N_flags")              << 40000  << 40000 <<  1  << 0   << 0  << 0;
+//    QTest::newRow("Z_flags")              << 0      << 0     <<  0  << 1   << 0  << 0;
+//}
+//
+//void CesarMachineTest::test_CESAR_SDC_data() //NOT DONE
+//{
+//    QTest::addColumn<int>("src_value");
+//    QTest::addColumn<int>("src_result");
+//    QTest::addColumn<int>("flag_N");
+//    QTest::addColumn<int>("flag_Z");
+//    QTest::addColumn<int>("flag_V");
+//    QTest::addColumn<int>("flag_C");
+//                                    /*   src_val    src_res     N     Z     V      C       */                              
+//    QTest::newRow("No_flags")             << 10     << 10    <<  0  << 0   << 0  << 0;
+//    QTest::newRow("N_flags")              << 40000  << 40000 <<  1  << 0   << 0  << 0;
+//    QTest::newRow("Z_flags")              << 0      << 0     <<  0  << 1   << 0  << 0;
+//}
+//
 #include "tst_cesar.moc"
 QTEST_APPLESS_MAIN(CesarMachineTest)

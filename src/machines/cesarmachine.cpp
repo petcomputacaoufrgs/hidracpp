@@ -88,6 +88,7 @@ CesarMachine::CesarMachine()
     ////////////////////////
     //special instructions
     ////////////////////////
+    instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
     instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
@@ -501,9 +502,11 @@ void CesarMachine::executeInstruction(){
     case Instruction:: CESAR_BR:
         break;
         
-    }
 
-    
+    case Instruction::CESAR_NOP:
+        break;
+
+    }
     instructionCount++;
 }
 
