@@ -71,11 +71,18 @@ PericlesMachine::PericlesMachine()
 }
 
 // Returns number of bytes reserved
-int PericlesMachine::calculateBytesToReserve(QString addressArgument)
+int PericlesMachine::calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments)
 {
-    AddressingMode::AddressingModeCode addressingModeCode;
-    extractArgumentAddressingModeCode(addressArgument, addressingModeCode);
-    return (addressingModeCode == AddressingMode::IMMEDIATE) ? 2 : 3; // Immediate requires only 2 bytes
+    int numBytes = instruction->getNumBytes();
+    if(numBytes == 0){    
+        QString addressArgument = arguments.last();
+        AddressingMode::AddressingModeCode addressingModeCode;
+        extractArgumentAddressingModeCode(addressArgument, addressingModeCode);
+        return (addressingModeCode == AddressingMode::IMMEDIATE) ? 2 : 3; // Immediate requires only 2 bytes
+    }
+    else{
+        return numBytes;
+    }
 }
 
 void PericlesMachine::decodeInstruction(){

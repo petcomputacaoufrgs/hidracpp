@@ -103,7 +103,8 @@ public:
     void setAssemblerMemoryNext(int value); // Increments PC
     void copyAssemblerMemoryToMemory();
     void reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine);
-    virtual int calculateBytesToReserve(QString addressArgument);
+    bool isAssemblerMemoryReserved(int address); //Checks if an address in the assembler memory is reserved
+    virtual int calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments);
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);

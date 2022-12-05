@@ -462,14 +462,8 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    int numBytes = instruction->getNumBytes();
-
-                    if (numBytes == 0) // If instruction has variable number of bytes
-                    {
-                        QString addressArgument = sourceLines[lineNumber].section(whitespace, -1); // Last argument
-                        numBytes = calculateBytesToReserve(addressArgument);
-                    }
-
+                    QStringList arguments = sourceLines[lineNumber].split(whitespace);
+                    int numBytes = calculateBytesToReserve(instruction, arguments);
                     reserveAssemblerMemory(numBytes, lineNumber);
                 }
                 else // Directive
@@ -822,10 +816,15 @@ void Machine::reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine
     }
 }
 
-// Method for machines that require the addressing mode to reserve memory.
-int Machine::calculateBytesToReserve(QString)
+bool Machine::isAssemblerMemoryReserved(int address)
 {
-    return 0;
+    return reserved[address];
+}
+
+// Calculates the amount of bytes an instruction should reserve.
+int Machine::calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments)
+{
+    return instruction->getNumBytes();
 }
 
 bool Machine::isValidValue(QString valueString, int min, int max)
