@@ -504,10 +504,11 @@ void Machine::assemble(QString sourceCode)
                 QString mnemonic  = sourceLines[lineNumber].section(whitespace, 0, 0).toLower();
                 QString arguments = sourceLines[lineNumber].section(whitespace, 1); // Everything after mnemonic
 
-                const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+                Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    buildInstruction(mnemonic, arguments);
+                    QStringList argumentList = splitInstructionArguments(arguments, *instruction);
+                    buildInstruction(instruction, argumentList);
                 }
                 else // Directive
                 {
@@ -624,11 +625,8 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
     }
 }
 
-void Machine::buildInstruction(QString mnemonic, QString arguments)
+void Machine::buildInstruction(Instruction* instruction, QStringList argumentList)
 {
-    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = splitInstructionArguments(arguments, *instruction);
-
     AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT; // Default mode
     QStringList instructionArguments = instruction->getArguments();
     bool isImmediate = false;
