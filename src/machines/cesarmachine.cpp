@@ -64,7 +64,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "10001000", Instruction::CESAR_ASR, "asr R1 ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "10001001", Instruction::CESAR_ASL, "asl R1 ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "10001010", Instruction::CESAR_ADC, "adc R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SBC, "sdc R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SDC, "sdc R1 ", Instruction::GROUP_ONE_OPERAND));
     //////////////////////////////////////////////////
     //flow control
     //////////////////////////////////////////////////
@@ -421,7 +421,7 @@ void CesarMachine::executeInstruction(){
         //11111111
         //       1
         //is the only situation where there is carry (and thus, no borrow)
-        setOverflow(src == 0x8000 );
+        setOverflow(src == 0x8000);
         updateFlags(result);
         break;
 
@@ -443,7 +443,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_ROR:
         src = getRegisterValue(decodedRegisterCode1);
-        result = ((src >> 1) | (getFlagValue("C") == true ? 0x8000 : 0x00)) & 0xFFFF;
+        result = ((src >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
         setRegisterValue(decodedRegisterCode1,result);
         setCarry(src & 1);
         updateFlags(result);
@@ -452,9 +452,9 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_ROL:
         src = getRegisterValue(decodedRegisterCode1);
-        result = ((src << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFFFF;
+        result = ((src << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
         setRegisterValue(decodedRegisterCode1, result);
-        setCarry(src & 0x8000);
+        setCarry(src & 1);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
@@ -472,7 +472,7 @@ void CesarMachine::executeInstruction(){
         src = getRegisterValue(decodedRegisterCode1);
         result = (src >> 1);
         setRegisterValue(decodedRegisterCode1,result);
-        setCarry(src & 1);
+        setCarry(src & 0x8000);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
@@ -481,24 +481,15 @@ void CesarMachine::executeInstruction(){
         int carry;
         src = GetCurrentOperandValue(1);
         carry = getFlagValue("C");
-        src += carry;
-        result = src & 0xFFFF;
-        setCarry((src + 1) > 0xFFFF);
-        setOverflow(src == 0x8000 && carry == true);
-        updateFlags(result);
-        setRegisterValue(decodedRegisterCode1,result);
+        src = carry++;
+        setRegisterValue(decodedRegisterCode1,src);
         break;
 
-    case Instruction::CESAR_SBC:
+    case Instruction::CESAR_SDC:
         src = GetCurrentOperandValue(1);
         carry = getFlagValue("C");
-        result =  src - carry;
-        result = result & 0xFFFF;
-        setCarry(src == 0);
-        setOverflow((result == 0x7FFF) && (carry = true));
-        updateFlags(result);
-        setRegisterValue(decodedRegisterCode1,result);
-        
+        src = carry--;
+        setRegisterValue(decodedRegisterCode1,src);
         break;
 
     case Instruction:: CESAR_JMP:
