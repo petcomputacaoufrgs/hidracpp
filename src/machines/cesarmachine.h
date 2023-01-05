@@ -23,6 +23,8 @@ class CesarMachine : public Machine
     
     int GetCurrentOperandValue(int operand = 1);
     int toSigned(int unsignedByte);
+
+    void buildInstruction(Instruction* instruction, QStringList argumentList);
     
     void PutOnStack(int registerValue);
     void GetOffStack(int registerId);

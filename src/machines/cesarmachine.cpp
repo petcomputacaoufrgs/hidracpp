@@ -98,7 +98,7 @@ CesarMachine::CesarMachine()
     //////////////////////////////////////////////////
     // Initialize addressing modes
     //////////////////////////////////////////////////
-    //to-do: check if is needed
+    
     addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN));
 
 }
@@ -121,11 +121,6 @@ Cesar's way to fetch, decode and execute instructions
 
 */        
 
-/*
-bool CesarMachine::IsOneByteInstruction()
-{
-
-}*/
 
 AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddressingMode(int extract_am)
 {
@@ -814,3 +809,68 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 }
 
 
+/*
+
+    Assembler functions
+
+*/
+
+void CesarMachine::buildInstruction(Instruction* instruction, QStringList argumentList)
+{
+
+    static QRegExp conditional_codes_regex("N?Z?V?C?");
+
+    // CESAR does not rely on the instruction description to determine
+    // how it should build the instruction, using GROUPS instead
+    // TO-DO: Rewrite other machines to rely on groups
+    int byte1, byte2;
+    QString aux_str;
+
+    switch (instruction->getInstructionGroup())
+    {
+    case Instruction::InstructionGroup::GROUP_NOP:
+        setAssemblerMemoryNext(0);
+        break;
+
+    case Instruction::InstructionGroup::GROUP_CONDITIONAL_CODES:
+        byte1 = instruction->getByteValue();
+        aux_str = argumentList.first();
+        if(!conditional_codes_regex.exactMatch(aux_str))
+        {
+            throw invalidArgument;
+        }
+
+        if(aux_str.contains("N")){byte1 |= 0b1000;}
+        if(aux_str.contains("Z")){byte1 |= 0b0100;}
+        if(aux_str.contains("V")){byte1 |= 0b0010;}
+        if(aux_str.contains("C")){byte1 |= 0b0001;}
+
+        setAssemblerMemoryNext(byte1);
+        break;
+
+    case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
+        break;
+
+    case Instruction::InstructionGroup::GROUP_JUMP:
+        break;
+
+    case Instruction::InstructionGroup::GROUP_LOOP_CONTROL:
+        break;
+
+    case Instruction::InstructionGroup::GROUP_JUMP_SUBROUTINE:
+        break;
+
+    case Instruction::InstructionGroup::GROUP_RETURN_SUBROUTINE:
+        break;
+
+    case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
+        break;
+
+    case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
+        break;
+    
+    default:
+        break;
+    }
+
+}
