@@ -678,62 +678,34 @@ void Machine::buildInstruction(Instruction* instruction, QStringList argumentLis
 QStringList Machine::splitInstructionArguments(QString const& arguments, Instruction const& instruction)
 {
     // Regex to split.
-    static QRegExp separator("\\s*(\\s|,)\\s*");
-    // Regex to detect if two arguments in final position are actually two arguments or an address.
-    static QRegExp whitespace("\\s");
+    // Daedalus treats both commas and whitespaces as interchangeable separators
+    static QRegExp separator("(\\s|,)+");
+    QStringList argumentList = arguments.split(separator, Qt::SkipEmptyParts);
 
-    // To be returned.
-    QStringList argumentList;
-    // Specification of the instruction's arguments.
-    QStringList instructionArgs = instruction.getArguments();
-    // To keep track of the last separator, so we can combine two final arguments in one address,
-    // if the instruction can take addressing mode, and we exceed the number of arguments.
-    QString lastSeparator;
-    // To keep track if we actually have a last separator.
-    bool hasLastSep = false;
-    // To keep track on where we are in the arguments' string.
-    int index = 0;
-
-    // The split loop.
-    while (index < arguments.size() && argumentList.length() <= instruction.getNumberOfArguments())
+    // Detecting if found less arguments than expected or more than one extra argument
+    int n_found_args = argumentList.length();
+    int n_expected_args = instruction.getNumberOfArguments();
+    if((n_found_args < n_expected_args) || (n_found_args > n_expected_args + 1))
     {
-        QString argument;
-        // Find where there is a separator.
-        int newIndex = arguments.indexOf(separator, index);
-        if (newIndex >= 0)
+        throw wrongNumberOfArguments;
+    }
+    // If an additional argument was found, check if the instruction allows it
+    // if it does, it's treated as an addressing mode symbol
+    if(n_found_args == n_expected_args + 1)
+    {
+        if(!instruction.getArguments().contains("a"))
         {
-            // Then there is a separator.
-            hasLastSep = true;
-            // Save this separator.
-            lastSeparator = arguments.mid(newIndex, separator.matchedLength());
-            // Take the argument part.
-            argument = arguments.mid(index, newIndex - index);;
-            // Update index beyond the separator.s
-            index = newIndex + separator.matchedLength();
+            throw wrongNumberOfArguments;    
         }
         else
         {
-            // The last argument.
-            argument = arguments.right(arguments.size() - index);
-            index = arguments.size();
+            // The "third argument" is actually an addressing mode symbol
+            // (that contains a separator such as ,/\\s), so
+            // it is actually part of the second parameter.
+            QString last_arg = argumentList.takeLast();
+            argumentList.back() += ","; //The separator doesn't matter, but we use , for the regexes (RAMSES)
+            argumentList.back() += last_arg;
         }
-        argumentList.push_back(argument);
-    }
-
-    // Detecting if found < expected or found > expected + 1.
-    if (index < arguments.size() || argumentList.length() < instruction.getNumberOfArguments())
-        throw wrongNumberOfArguments;
-
-    if (argumentList.length() == instruction.getNumberOfArguments() + 1)
-    {
-        // Found == expected + 1 only allowed if addressing mode is allowed, and we have a last
-        // separator. Also, it must not contain whitespace.
-        if (!instructionArgs.contains("a") || !hasLastSep || lastSeparator.contains(whitespace))
-            throw wrongNumberOfArguments;
-        // Joining two last arguments with separator, probably an addressing mode.
-        QString last = argumentList.takeLast();
-        argumentList.back() += lastSeparator;
-        argumentList.back() += last;
     }
 
     return argumentList;
