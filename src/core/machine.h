@@ -95,7 +95,7 @@ public:
     // Assembly
     void assemble(QString sourceCode);
     void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine);
-    void buildInstruction(Instruction* instruction, QStringList argumentList);
+    virtual void buildInstruction(Instruction* instruction, QStringList argumentList);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
