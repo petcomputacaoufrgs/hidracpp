@@ -89,8 +89,8 @@ CesarMachine::CesarMachine()
     //special instructions
     ////////////////////////
     instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
-    instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_CONDITIONAL_CODES));
+    instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
 
     //////////////////////////////////////////////////
@@ -191,7 +191,7 @@ void CesarMachine::decodeInstruction()
             decodedAddressingModeCode2 = default_am; //
             decodedRegisterCode1 = 0;//Pass the first register, with no intention to use it
             decodedRegisterCode2 = 0;//
-            decodedExtraValue = ((1111 << 8) & fetchedValue) >> 8;//Mask to get flag values
+            decodedExtraValue = (0b1111  & fetchedValue) ;//Mask to get flag values
             break; 
 
         case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
@@ -263,6 +263,7 @@ void CesarMachine::decodeInstruction()
 void CesarMachine::executeInstruction(){
 
     int reg_value1, reg_value2, src, dst, result;
+    int carry, overflow, zero, negative;
     Instruction::InstructionCode instructionCode;
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
     bool isImmediate = (decodedAddressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
@@ -515,7 +516,42 @@ void CesarMachine::executeInstruction(){
     case Instruction::CESAR_NOP:
         break;
 
+    case Instruction:: CESAR_CCC:
+        
+        carry = decodedExtraValue & 0b1;
+        overflow = decodedExtraValue & 0b10;
+        zero = decodedExtraValue & 0b100;
+        negative = decodedExtraValue & 0b1000;
+        
+        if (negative)
+            setFlagValue("N", !negative);
+        if (zero)
+            setFlagValue("Z", !zero);
+        if (overflow)
+            setFlagValue("V", !overflow);         
+        if (carry)
+            setCarry(!carry);
+        break;
+
+    case Instruction:: CESAR_SCC:
+        carry = decodedExtraValue & 0b1;
+        overflow = decodedExtraValue & 0b10;
+        zero = decodedExtraValue & 0b100;
+        negative = decodedExtraValue & 0b1000;
+        
+        if (negative)
+            setFlagValue("N", negative);
+        if (zero)
+            setFlagValue("Z", zero);
+        if (overflow)
+            setFlagValue("V", overflow);         
+        if (carry)
+            setCarry(carry);
+        break;
+
     }
+    
+
     instructionCount++;
 }
 
