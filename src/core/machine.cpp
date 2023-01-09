@@ -705,7 +705,7 @@ QStringList Machine::splitInstructionArguments(QString const& arguments, Instruc
             QString last_arg = argumentList.takeLast();
             argumentList.back() += ","; //The separator doesn't matter, but we use , for the regexes (RAMSES)
             argumentList.back() += last_arg;
-        }
+        } 
     }
 
     return argumentList;
@@ -757,6 +757,28 @@ void Machine::setAssemblerMemoryNext(int value)
     assemblerMemory[PC->getValue()]->setValue(value);
     incrementPCValue();
 }
+
+void Machine::setAssemblerMemoryNextTwoByte(int value)
+{
+    int first_byte, second_byte;
+    if(littleEndian)
+    {
+        first_byte = value & 0b11111111;
+        second_byte = (value & 0b1111111100000000) >> 8; 
+    }
+    else
+    {
+        first_byte = (value & 0b1111111100000000) >> 8;
+        second_byte = value & 0b11111111;         
+    }
+
+    assemblerMemory[PC->getValue()]->setValue(first_byte);
+    assemblerMemory[PC->getValue() + 1]->setValue(second_byte);
+
+    incrementPCValue(2);
+
+}
+
 
 // Copies assemblerMemory to machine's memory
 void Machine::copyAssemblerMemoryToMemory()
