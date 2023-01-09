@@ -20,8 +20,8 @@ CesarMachine::CesarMachine()
     registers.append(new Register("R3", ".....011", 16));
     registers.append(new Register("R4", ".....100", 16));
     registers.append(new Register("R5", ".....101", 16));
-    registers.append(new Register("SP", ".....110", 16, false));
-    registers.append(new Register("PC", ".....111", 16, false));
+    registers.append(new Register("R6", ".....110", 16, false));
+    registers.append(new Register("R7", ".....111", 16, false));
 
     PC = registers.last();
     
@@ -100,13 +100,13 @@ CesarMachine::CesarMachine()
     //////////////////////////////////////////////////
     
     addressingModes.append(new AddressingMode(".....000", AddressingMode::REGISTER,                     AddressingMode::NO_PATTERN));
-    addressingModes.append(new AddressingMode(".....001", AddressingMode::AFTER_INCREMENTED,            "\\((.*)\\)\\+"));
-    addressingModes.append(new AddressingMode(".....010", AddressingMode::PRE_DECREMENTED,              "\\-\\((.*)\\)"));
-    addressingModes.append(new AddressingMode(".....011", AddressingMode::INDEXED_BY_REG,               "[0-9]{1,5}\\((.*)\\)"));
-    addressingModes.append(new AddressingMode(".....100", AddressingMode::INDIRECT_REGISTER,            "\\((.*)\\)"));
-    addressingModes.append(new AddressingMode(".....101", AddressingMode::AFTER_INCREMENTED_INDIRECT,   "\\(\\((.*)\\)\\+\\)"));
-    addressingModes.append(new AddressingMode(".....110", AddressingMode::PRE_DECREMENTED_INDIRECT,     "\\(\\-\\((.*)\\)\\)"));
-    addressingModes.append(new AddressingMode(".....111", AddressingMode::INDIRECT_INDEXED_BY_REG,      "\\([0-9]{1,5}\\((.*)\\)\\)"));
+    addressingModes.append(new AddressingMode(".....001", AddressingMode::AFTER_INCREMENTED,            "\\((R[0-7])\\)\\+"));
+    addressingModes.append(new AddressingMode(".....010", AddressingMode::PRE_DECREMENTED,              "\\-\\((R[0-7])\\)"));
+    addressingModes.append(new AddressingMode(".....011", AddressingMode::INDEXED_BY_REG,               "[0-9]{1,5}\\((R[0-7])\\)"));
+    addressingModes.append(new AddressingMode(".....100", AddressingMode::INDIRECT_REGISTER,            "\\((R[0-7])\\)"));
+    addressingModes.append(new AddressingMode(".....101", AddressingMode::AFTER_INCREMENTED_INDIRECT,   "\\(\\((R[0-7])\\)\\+\\)"));
+    addressingModes.append(new AddressingMode(".....110", AddressingMode::PRE_DECREMENTED_INDIRECT,     "\\(\\-\\((R[0-7])\\)\\)"));
+    addressingModes.append(new AddressingMode(".....111", AddressingMode::INDIRECT_INDEXED_BY_REG,      "\\([0-9]{1,5}\\((R[0-7])\\)\\)"));
 
 }
 
@@ -830,7 +830,11 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     // CESAR does not rely on the instruction description to determine
     // how it should build the instruction, using GROUPS instead
     // TO-DO: Rewrite other machines to rely on groups
-    int byte1, byte2;
+    int byte1, byte2, reg1, reg2, am1, am2;
+    int offset1, offset2;
+    offset1 = -1;
+    offset2 = -1;
+    
     QString aux_str;
 
     switch (instruction->getInstructionGroup())
@@ -871,6 +875,18 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         break;
 
     case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
+        byte1 = instruction->getByteValue();
+        
+        handleSpecialAddressingModes(argumentList.first(), offset1);
+        extractInstructionParameters(argumentList.first(), reg1, am1, offset1);
+        byte2 = (am1 << 3) | reg1;
+
+        setAssemblerMemoryNext(byte1);
+        setAssemblerMemoryNext(byte2);
+        if(offset1 != -1){ 
+            setAssemblerMemoryNextTwoByte(offset1);
+        }
+
         break;
 
     case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
@@ -878,6 +894,48 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     
     default:
         break;
+    }
+
+}
+
+void CesarMachine::extractInstructionParameters(QString& param, int& reg_code, int& am_code, int& am_offset)
+{
+    AddressingMode::AddressingModeCode aux;
+    QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
+    
+
+    if(number_regex.exactMatch(param))
+    {
+        am_offset = number_regex.cap(1).toInt();
+        if (am_offset > 65535){
+            throw invalidArgument;
+        }
+    }
+
+    extractArgumentAddressingModeCode(param, aux);
+    am_code = getAddressingModeBitCode(aux); //To-do: extract argument addressing mode bit code; skip the extra step
+    reg_code = getRegisterBitCode(param);
+    
+    if (reg_code == Register::NO_BIT_CODE)
+        throw invalidArgument; // Register not found (or invisible)
+}
+
+// Handles the special (R7) addressing modes. The argument is changed to its
+// "true" form.
+void CesarMachine::handleSpecialAddressingModes(QString &argument, int& offset)
+{
+    static QRegExp regex_immediate("#([0-9]{1,5})");
+    static QRegExp regex_absolute("([0-9]{1,5})");
+
+    if(regex_immediate.exactMatch(argument))
+    {
+        argument = "(R7)+";
+        offset = regex_immediate.cap(1).toInt();
+    }
+    if(regex_absolute.exactMatch(argument))
+    {
+        argument = "((R7)+)";
+        offset = regex_absolute.cap(1).toInt();  
     }
 
 }

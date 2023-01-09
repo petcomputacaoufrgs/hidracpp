@@ -101,6 +101,7 @@ public:
     // Assembler memory
     void clearAssemblerData();
     void setAssemblerMemoryNext(int value); // Increments PC
+    void setAssemblerMemoryNextTwoByte(int value);
     void copyAssemblerMemoryToMemory();
     void reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine);
     bool isAssemblerMemoryReserved(int address); //Checks if an address in the assembler memory is reserved
