@@ -14,14 +14,14 @@ CesarMachine::CesarMachine()
     //////////////////////////////////////////////////
 
     //Register bitpatterns are irrelevant; CESAR uses a different decoding method
-    registers.append(new Register("R0", "", 16));
-    registers.append(new Register("R1", "", 16));
-    registers.append(new Register("R2", "", 16));
-    registers.append(new Register("R3", "", 16));
-    registers.append(new Register("R4", "", 16));
-    registers.append(new Register("R5", "", 16));
-    registers.append(new Register("SP", "", 16, false));
-    registers.append(new Register("PC", "", 16, false));
+    registers.append(new Register("R0", ".....000", 16));
+    registers.append(new Register("R1", ".....001", 16));
+    registers.append(new Register("R2", ".....010", 16));
+    registers.append(new Register("R3", ".....011", 16));
+    registers.append(new Register("R4", ".....100", 16));
+    registers.append(new Register("R5", ".....101", 16));
+    registers.append(new Register("SP", ".....110", 16, false));
+    registers.append(new Register("PC", ".....111", 16, false));
 
     PC = registers.last();
     
@@ -99,7 +99,14 @@ CesarMachine::CesarMachine()
     // Initialize addressing modes
     //////////////////////////////////////////////////
     
-    addressingModes.append(new AddressingMode("........", AddressingMode::DIRECT, AddressingMode::NO_PATTERN));
+    addressingModes.append(new AddressingMode(".....000", AddressingMode::REGISTER,                     AddressingMode::NO_PATTERN));
+    addressingModes.append(new AddressingMode(".....001", AddressingMode::AFTER_INCREMENTED,            "\\((.*)\\)\\+"));
+    addressingModes.append(new AddressingMode(".....010", AddressingMode::PRE_DECREMENTED,              "\\-\\((.*)\\)"));
+    addressingModes.append(new AddressingMode(".....011", AddressingMode::INDEXED_BY_REG,               "[0-9]{1,5}\\((.*)\\)"));
+    addressingModes.append(new AddressingMode(".....100", AddressingMode::INDIRECT_REGISTER,            "\\((.*)\\)"));
+    addressingModes.append(new AddressingMode(".....101", AddressingMode::AFTER_INCREMENTED_INDIRECT,   "\\(\\((.*)\\)\\+\\)"));
+    addressingModes.append(new AddressingMode(".....110", AddressingMode::PRE_DECREMENTED_INDIRECT,     "\\(\\-\\((.*)\\)\\)"));
+    addressingModes.append(new AddressingMode(".....111", AddressingMode::INDIRECT_INDEXED_BY_REG,      "\\([0-9]{1,5}\\((.*)\\)\\)"));
 
 }
 

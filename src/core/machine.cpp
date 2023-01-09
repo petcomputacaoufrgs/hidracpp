@@ -64,7 +64,7 @@ void Machine::fetchInstruction()
 void Machine::decodeInstruction()
 {
     decodedAddressingModeCode1 = extractAddressingModeCode(fetchedValue);
-    decodedRegisterName1 = extractRegisterName(fetchedValue);
+    decodedRegisterName1 = extractRegisterName(fetchedValue); //TO-DO: Use decoded register codes
 
     if (currentInstruction && currentInstruction->getNumBytes() > 1)
     {
