@@ -890,6 +890,26 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         break;
 
     case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
+        byte1 = instruction->getByteValue();
+        
+        handleSpecialAddressingModes(argumentList[0], offset1);
+        handleSpecialAddressingModes(argumentList[1], offset2);
+        extractInstructionParameters(argumentList[0], reg1, am1, offset1);
+        extractInstructionParameters(argumentList[1], reg2, am2, offset2);
+        
+        byte1 |= (am1 << 1) | ((reg1 & 0b100) >> 2);
+        byte2 = ((reg1 & 0b011) << 6) | (am2 << 3) | reg2;
+
+        setAssemblerMemoryNext(byte1);
+        setAssemblerMemoryNext(byte2);
+        
+        if(offset1 != -1){ 
+            setAssemblerMemoryNextTwoByte(offset1);
+        }
+        if(offset2 != -1){
+            setAssemblerMemoryNextTwoByte(offset2);
+        }
+
         break;
     
     default:
