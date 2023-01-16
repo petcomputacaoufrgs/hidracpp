@@ -91,7 +91,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
     instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_LOOP_CONTROL));
 
     //////////////////////////////////////////////////
     // Initialize addressing modes
@@ -427,10 +427,19 @@ void CesarMachine::executeInstruction(){
 
     case Instruction::CESAR_NEG:
         src = GetCurrentOperandValue(1);
-        result = (-src) & 0xFF;
+        result = -toSigned(src);
 
-        setRegisterValue(src, result);
-        setCarry(!(src == 0xFFFF));
+        if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
+        {
+            setRegisterValue(decodedRegisterCode1,result);
+            
+        }
+        else
+        {
+            memoryWriteTwoByte(src,result);
+        }
+        
+        setCarry(!(src == 0));
         setOverflow(src == 0x8000);
         updateFlags(result);
         break;
@@ -500,6 +509,81 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_BR:
+        break;
+
+    case Instruction::CESAR_BCS:
+
+        if(getFlagValue("C") == true)
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BGE:
+
+        if(getFlagValue("N") == getFlagValue("V"))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+    
+    case Instruction::CESAR_BLT:
+
+        if(getFlagValue("N") != getFlagValue("V"))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BGT:
+
+        if((getFlagValue("N") == getFlagValue("V")) && (getFlagValue("Z") == 0))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BLE:
+
+        if((getFlagValue("N") != getFlagValue("V")) || (getFlagValue("Z") == 1))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BHI:
+
+        if((getFlagValue("C") == 0) && (getFlagValue("Z") == 0))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BLS:
+
+        if((getFlagValue("C") == 1) || (getFlagValue("Z") == 1))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_SOB:
+
+        src = GetCurrentOperandValue(1) - 1;
+        setRegisterValue(decodedRegisterCode1, src);
+
+        if (src != 0)
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()-pc_jmp);
+        }
         break;
         
 
