@@ -72,7 +72,8 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "00110000", Instruction::CESAR_BR,  "br R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110001", Instruction::CESAR_BNE, "bne R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110010", Instruction::CESAR_BEQ, "beq R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110100", Instruction::CESAR_BPL, "bpl R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110011", Instruction::CESAR_BPL, "bpl R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110100", Instruction::CESAR_BMI, "bmi R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110101", Instruction::CESAR_BVC, "bvc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110110", Instruction::CESAR_BVS, "bvs R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110111", Instruction::CESAR_BCC, "bcc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
@@ -519,6 +520,42 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_BR:
+        setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2); // Calling machine::toSigned from parent becuse we use it for 1byte
+        break;
+
+    case Instruction:: CESAR_BNE:
+        if(getFlagValue("Z") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+        break;
+
+    case Instruction:: CESAR_BEQ:
+        if(getFlagValue("Z") == true)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+        break;
+
+    case Instruction:: CESAR_BPL:
+        if(getFlagValue("N") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+        break;
+
+    case Instruction:: CESAR_BMI:
+        if(getFlagValue("N") == true)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+        break;
+
+    case Instruction:: CESAR_BVC:
+        if(getFlagValue("V") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+        break;
+
+    case Instruction:: CESAR_BVS:
+        if(getFlagValue("V") == true)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+        break;
+
+    case Instruction:: CESAR_BCC:
+        if(getFlagValue("C") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
         break;
 
     case Instruction::CESAR_BCS:
