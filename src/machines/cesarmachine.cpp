@@ -520,42 +520,42 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_BR:
-        setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2); // Calling machine::toSigned from parent becuse we use it for 1byte
+        setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue)); // Calling machine::toSigned from parent becuse we use it for 1byte
         break;
 
     case Instruction:: CESAR_BNE:
         if(getFlagValue("Z") == false)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction:: CESAR_BEQ:
         if(getFlagValue("Z") == true)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction:: CESAR_BPL:
         if(getFlagValue("N") == false)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction:: CESAR_BMI:
         if(getFlagValue("N") == true)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction:: CESAR_BVC:
         if(getFlagValue("V") == false)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction:: CESAR_BVS:
         if(getFlagValue("V") == true)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction:: CESAR_BCC:
         if(getFlagValue("C") == false)
-            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue) - 2);
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
         break;
 
     case Instruction::CESAR_BCS:

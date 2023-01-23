@@ -26,14 +26,14 @@ private slots:
     // // GROUP_CONDITIONAL_BRANCHES
     void test_CESAR_BR_data();
     void test_CESAR_BR();
-    //void test_CESAR_BNE_data();
-    //void test_CESAR_BNE();
-    //void test_CESAR_BEQ_data();
-    //void test_CESAR_BEQ();
-    //void test_CESAR_BPL_data();
-    //void test_CESAR_BPL();
-    //void test_CESAR_BMI_data();
-    //void test_CESAR_BMI();
+    void test_CESAR_BNE_data();
+    void test_CESAR_BNE();
+    void test_CESAR_BEQ_data();
+    void test_CESAR_BEQ();
+    void test_CESAR_BPL_data();
+    void test_CESAR_BPL();
+    void test_CESAR_BMI_data();
+    void test_CESAR_BMI();
     void test_CESAR_BVC_data();
     void test_CESAR_BVC();
     void test_CESAR_BVS_data();
@@ -933,12 +933,13 @@ void CesarMachineTest::test_CESAR_BR_data()
     QTest::addColumn<int>("pc_end_value");
     QTest::addColumn<int>("branch_value");
                             // pc_start   pc_end      brach_value  
-    QTest::newRow("1")      << 0        <<  0      << 0;
-    QTest::newRow("2")      << 0        <<  2      << 0b00000010;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101;
-    QTest::newRow("4")      << 127      <<  254    << 0b01111111;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111;
-    QTest::newRow("6")      << 200      <<  72      << 0b10000000;
+    QTest::newRow("1")      << 0        <<  2       << 0;
+    QTest::newRow("2")      << 0        <<  4       << 0b00000010;
+    QTest::newRow("3")      << 10000    <<  9879    << 0b10000101;
+    QTest::newRow("4")      << 127      <<  256     << 0b01111111;
+    QTest::newRow("5")      << 65534    <<  65535   << 0b11111111;
+    QTest::newRow("6")      << 65535    <<  0       << 0b11111111;
+    QTest::newRow("7")      << 200      <<  74      << 0b10000000;
     
 }
 
@@ -959,19 +960,21 @@ void CesarMachineTest::test_CESAR_BR()
     QCOMPARE(testedMachine.getPCValue(), pc_end_value);
 }
 
-/*void CesarMachineTest::test_CESAR_BNE_data()
+void CesarMachineTest::test_CESAR_BNE_data()
 {
     QTest::addColumn<int>("pc_start_value");
     QTest::addColumn<int>("pc_end_value");
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_z");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 0;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 1;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 0;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 1;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 0;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 0;
+    QTest::newRow("1")      << 0        <<  2      << 0             << 0;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 1;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 0;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 1;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 0;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 0;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 1;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 0;
     
 }
 
@@ -987,7 +990,7 @@ void CesarMachineTest::test_CESAR_BNE()
     testedMachine.memoryWrite(pc_start_value, opcode);
     testedMachine.memoryWrite(pc_start_value + 1, branch_value);
     testedMachine.setPCValue(pc_start_value);
-    testedMachine.setFlagValue("ZERO", flag_z);
+    testedMachine.setFlagValue("Z", flag_z);
 
     testedMachine.step();
 
@@ -1001,13 +1004,14 @@ void CesarMachineTest::test_CESAR_BEQ_data()
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_z");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 1;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 0;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 1;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 0;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 1;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 1;
-    
+    QTest::newRow("1")      << 0        <<  2      << 0             << 1;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 0;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 1;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 0;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 1;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 1;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 0;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 1;
 }
 
 void CesarMachineTest::test_CESAR_BEQ()
@@ -1022,7 +1026,7 @@ void CesarMachineTest::test_CESAR_BEQ()
     testedMachine.memoryWrite(pc_start_value, opcode);
     testedMachine.memoryWrite(pc_start_value + 1, branch_value);
     testedMachine.setPCValue(pc_start_value);
-    testedMachine.setFlagValue("ZERO", flag_z);
+    testedMachine.setFlagValue("Z", flag_z);
 
     testedMachine.step();
 
@@ -1036,12 +1040,14 @@ void CesarMachineTest::test_CESAR_BPL_data()
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_n");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 0;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 1;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 0;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 1;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 0;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 0;
+    QTest::newRow("1")      << 0        <<  2      << 0             << 0;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 1;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 0;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 1;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 0;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 0;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 1;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 0;
     
 }
 
@@ -1057,7 +1063,7 @@ void CesarMachineTest::test_CESAR_BPL()
     testedMachine.memoryWrite(pc_start_value, opcode);
     testedMachine.memoryWrite(pc_start_value + 1, branch_value);
     testedMachine.setPCValue(pc_start_value);
-    testedMachine.setFlagValue("NEGATIVE", flag_n);
+    testedMachine.setFlagValue("N", flag_n);
 
     testedMachine.step();
 
@@ -1071,12 +1077,14 @@ void CesarMachineTest::test_CESAR_BMI_data()
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_n");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 1;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 0;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 1;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 0;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 1;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 1;
+    QTest::newRow("1")      << 0        <<  2      << 0             << 1;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 0;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 1;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 0;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 1;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 1;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 0;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 1;
     
 }
 
@@ -1092,12 +1100,12 @@ void CesarMachineTest::test_CESAR_BMI()
     testedMachine.memoryWrite(pc_start_value, opcode);
     testedMachine.memoryWrite(pc_start_value + 1, branch_value);
     testedMachine.setPCValue(pc_start_value);
-    testedMachine.setFlagValue("NEGATIVE", flag_n);
+    testedMachine.setFlagValue("N", flag_n);
 
     testedMachine.step();
 
     QCOMPARE(testedMachine.getPCValue(), pc_end_value);
-}*/
+}
 
 void CesarMachineTest::test_CESAR_BVC_data()
 {
@@ -1106,12 +1114,14 @@ void CesarMachineTest::test_CESAR_BVC_data()
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_v");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 0;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 1;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 0;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 1;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 0;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 0;
+    QTest::newRow("1")      << 0        <<  2      << 0             << 0;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 1;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 0;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 1;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 0;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 0;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 1;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 0;
     
 }
 
@@ -1127,7 +1137,7 @@ void CesarMachineTest::test_CESAR_BVC()
     testedMachine.memoryWrite(pc_start_value, opcode);
     testedMachine.memoryWrite(pc_start_value + 1, branch_value);
     testedMachine.setPCValue(pc_start_value);
-    testedMachine.setOverflow(flag_v);
+    testedMachine.setFlagValue("V",flag_v);
 
     testedMachine.step();
 
@@ -1141,12 +1151,14 @@ void CesarMachineTest::test_CESAR_BVS_data()
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_v");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 1;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 0;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 1;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 0;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 1;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 1;
+    QTest::newRow("1")      << 0        <<  2      << 0             << 1;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 0;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 1;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 0;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 1;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 1;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 0;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 1;
     
 }
 
@@ -1176,12 +1188,14 @@ void CesarMachineTest::test_CESAR_BCC_data()
     QTest::addColumn<int>("branch_value");
     QTest::addColumn<int>("flag_c");
                             // pc_start   pc_end      brach_value   flag
-    QTest::newRow("1")      << 0        <<  0      << 0             << 1;
-    QTest::newRow("2")      << 0        <<  0      << 0b00000010    << 0;
-    QTest::newRow("3")      << 10000    <<  9877   << 0b10000101    << 1;
-    QTest::newRow("4")      << 127      <<  127    << 0b01111111    << 0;
-    QTest::newRow("5")      << 65536    <<  65535  << 0b11111111    << 1;
-    QTest::newRow("6")      << 200      <<  72     << 0b10000000    << 1;
+    QTest::newRow("1")      << 0        <<  2      << 0             << 0;
+    QTest::newRow("2")      << 0        <<  2      << 0b00000010    << 1;
+    QTest::newRow("3")      << 10000    <<  9879   << 0b10000101    << 0;
+    QTest::newRow("4")      << 127      <<  129    << 0b01111111    << 1;
+    QTest::newRow("5")      << 65534    <<  65535  << 0b11111111    << 0;
+    QTest::newRow("6")      << 65535    <<  0      << 0b11111111    << 0;
+    QTest::newRow("7")      << 65535    <<  1      << 0b11111111    << 1;
+    QTest::newRow("8")      << 200      <<  74     << 0b10000000    << 0;
     
 }
 
