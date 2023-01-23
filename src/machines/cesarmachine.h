@@ -31,7 +31,7 @@ class CesarMachine : public Machine
 
     ///Necessary Conversion methods
     AddressingMode::AddressingModeCode convertInstructionStringAddressingMode(int extract_am);
-    void extractInstructionParameters(QString& param, int& reg_code, int& am_code, int& am_offset);
+    void extractInstructionRegisterParameter(QString& param, int& reg_code, int& am_code, int& am_offset);
 };
 
 
