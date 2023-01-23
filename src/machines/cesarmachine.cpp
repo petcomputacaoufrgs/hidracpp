@@ -876,7 +876,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         break;
 
     case Instruction::InstructionGroup::GROUP_JUMP:
-        extractInstructionParameters(argumentList[0], reg1, am1, offset1);
+        extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);
         
         //Can't use register mode
         if(am1 == CESAR_ADDRESSING_MODE_REG)
@@ -894,7 +894,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_LOOP_CONTROL:
         byte1 = instruction->getByteValue();
-        extractInstructionParameters(argumentList[0], reg1, am1, offset1);        
+        extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);        
         byte1 |= reg1;
         byte2 = argumentList[1].toInt();
 
@@ -910,8 +910,8 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_JUMP_SUBROUTINE:
         byte1 = instruction->getByteValue();
-        extractInstructionParameters(argumentList[0], reg1, am1, offset1);
-        extractInstructionParameters(argumentList[1], reg2, am2, offset2);         
+        extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);
+        extractInstructionRegisterParameter(argumentList[1], reg2, am2, offset2);         
 
         // First register must be in reg am and the second in any other except reg
         if(am1 != CESAR_ADDRESSING_MODE_REG || am2 == CESAR_ADDRESSING_MODE_REG)
@@ -928,7 +928,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_RETURN_SUBROUTINE:
         byte1 = instruction->getByteValue();
-        extractInstructionParameters(argumentList.first(), reg1, am1, offset1);        
+        extractInstructionRegisterParameter(argumentList.first(), reg1, am1, offset1);        
         
         if(am1 != CESAR_ADDRESSING_MODE_REG)
         {
@@ -943,7 +943,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
         byte1 = instruction->getByteValue();
         
-        extractInstructionParameters(argumentList.first(), reg1, am1, offset1);
+        extractInstructionRegisterParameter(argumentList.first(), reg1, am1, offset1);
         byte2 = (am1 << 3) | reg1;
 
         setAssemblerMemoryNext(byte1);
@@ -957,8 +957,8 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
         byte1 = instruction->getByteValue();
         
-        extractInstructionParameters(argumentList[0], reg1, am1, offset1);
-        extractInstructionParameters(argumentList[1], reg2, am2, offset2);
+        extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);
+        extractInstructionRegisterParameter(argumentList[1], reg2, am2, offset2);
         
         byte1 |= (am1 << 1) | ((reg1 & 0b100) >> 2);
         byte2 = ((reg1 & 0b011) << 6) | (am2 << 3) | reg2;
@@ -981,7 +981,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
 }
 
-void CesarMachine::extractInstructionParameters(QString& param, int& reg_code, int& am_code, int& am_offset)
+void CesarMachine::extractInstructionRegisterParameter(QString& param, int& reg_code, int& am_code, int& am_offset)
 {
     AddressingMode::AddressingModeCode aux;
     static QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
