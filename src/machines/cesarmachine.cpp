@@ -830,7 +830,8 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     // CESAR does not rely on the instruction description to determine
     // how it should build the instruction, using GROUPS instead
     // TO-DO: Rewrite other machines to rely on groups
-    int byte1, byte2, reg1, reg2, am1, am2;
+    int byte1, byte2;
+    int reg1, reg2, am1, am2;
     int offset1, offset2;
     offset1 = -1;
     offset2 = -1;
@@ -866,12 +867,51 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         break;
 
     case Instruction::InstructionGroup::GROUP_LOOP_CONTROL:
+        byte1 = instruction->getByteValue();
+        extractInstructionParameters(argumentList[0], reg1, am1, offset1);        
+        byte1 |= reg1;
+        byte2 = argumentList[1].toInt();
+
+        // Value must range from -127 to 128
+        if(byte2 < -127 || byte2 > 128)
+        {
+            throw invalidArgument;
+        }        
+
+        setAssemblerMemoryNext(byte1);
+        setAssemblerMemoryNext(byte2);
         break;
 
     case Instruction::InstructionGroup::GROUP_JUMP_SUBROUTINE:
+        byte1 = instruction->getByteValue();
+        extractInstructionParameters(argumentList[0], reg1, am1, offset1);
+        extractInstructionParameters(argumentList[1], reg2, am2, offset2);         
+
+        // First register must be in reg am and the second in any other except reg
+        if(am1 != CESAR_ADDRESSING_MODE_REG || am2 == CESAR_ADDRESSING_MODE_REG)
+        {
+            throw invalidArgument;  //TO-DO: MORE DETAILED ERRORS FOR ASSEMBLER
+        }
+
+        byte1 |= reg1;
+        byte2 = (am2 << 3) | reg2;
+        setAssemblerMemoryNext(byte1);
+        setAssemblerMemoryNext(byte2);
+        
         break;
 
     case Instruction::InstructionGroup::GROUP_RETURN_SUBROUTINE:
+        byte1 = instruction->getByteValue();
+        extractInstructionParameters(argumentList.first(), reg1, am1, offset1);        
+        
+        if(am1 != CESAR_ADDRESSING_MODE_REG)
+        {
+            throw invalidArgument;
+        }
+
+        byte1 |= reg1;
+        setAssemblerMemoryNext(byte1);
+
         break;
 
     case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
