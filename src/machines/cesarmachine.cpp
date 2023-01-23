@@ -847,6 +847,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_CODES:
         byte1 = instruction->getByteValue();
         aux_str = argumentList.first();
+        
         if(!conditional_codes_regex.exactMatch(aux_str))
         {
             throw invalidArgument;
@@ -861,9 +862,34 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         break;
 
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
+        byte1 = instruction->getByteValue();
+        byte2 = argumentList[0].toInt();
+
+        // Value must range from -128 to 127
+        if(byte2 < -128 || byte2 > 127)
+        {
+            throw invalidArgument;
+        }        
+
+        setAssemblerMemoryNext(byte1);
+        setAssemblerMemoryNext(byte2);
         break;
 
     case Instruction::InstructionGroup::GROUP_JUMP:
+        extractInstructionParameters(argumentList[0], reg1, am1, offset1);
+        
+        //Can't use register mode
+        if(am1 == CESAR_ADDRESSING_MODE_REG)
+        {
+            throw invalidArgument;
+        }        
+
+        byte1 = instruction->getByteValue();
+        byte2 = (am1 << 3) | reg1; 
+
+        setAssemblerMemoryNext(byte1);
+        setAssemblerMemoryNext(byte2);
+
         break;
 
     case Instruction::InstructionGroup::GROUP_LOOP_CONTROL:
@@ -872,8 +898,8 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         byte1 |= reg1;
         byte2 = argumentList[1].toInt();
 
-        // Value must range from -127 to 128
-        if(byte2 < -127 || byte2 > 128)
+        // Value must range from -128 to 127
+        if(byte2 < -128 || byte2 > 127)
         {
             throw invalidArgument;
         }        
@@ -917,7 +943,6 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     case Instruction::InstructionGroup::GROUP_ONE_OPERAND:
         byte1 = instruction->getByteValue();
         
-        handleSpecialAddressingModes(argumentList.first(), offset1);
         extractInstructionParameters(argumentList.first(), reg1, am1, offset1);
         byte2 = (am1 << 3) | reg1;
 
@@ -932,8 +957,6 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     case Instruction::InstructionGroup::GROUP_TWO_OPERAND:
         byte1 = instruction->getByteValue();
         
-        handleSpecialAddressingModes(argumentList[0], offset1);
-        handleSpecialAddressingModes(argumentList[1], offset2);
         extractInstructionParameters(argumentList[0], reg1, am1, offset1);
         extractInstructionParameters(argumentList[1], reg2, am2, offset2);
         
@@ -961,8 +984,21 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 void CesarMachine::extractInstructionParameters(QString& param, int& reg_code, int& am_code, int& am_offset)
 {
     AddressingMode::AddressingModeCode aux;
-    QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
-    
+    static QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
+    static QRegExp regex_immediate("#([0-9]{1,5})");
+    static QRegExp regex_absolute("([0-9]{1,5})");    
+
+    //Converts the R7 addressing modes to their literals
+    if (regex_immediate.exactMatch(param))
+    {
+        param = "(R7)+";
+        am_offset = regex_immediate.cap(1).toInt();
+    }
+    else if(regex_absolute.exactMatch(param))
+    {
+        param = "((R7)+)";
+        am_offset = regex_absolute.cap(1).toInt();  
+    }
 
     if(number_regex.exactMatch(param))
     {
@@ -978,24 +1014,4 @@ void CesarMachine::extractInstructionParameters(QString& param, int& reg_code, i
     
     if (reg_code == Register::NO_BIT_CODE)
         throw invalidArgument; // Register not found (or invisible)
-}
-
-// Handles the special (R7) addressing modes. The argument is changed to its
-// "true" form.
-void CesarMachine::handleSpecialAddressingModes(QString &argument, int& offset)
-{
-    static QRegExp regex_immediate("#([0-9]{1,5})");
-    static QRegExp regex_absolute("([0-9]{1,5})");
-
-    if(regex_immediate.exactMatch(argument))
-    {
-        argument = "(R7)+";
-        offset = regex_immediate.cap(1).toInt();
-    }
-    if(regex_absolute.exactMatch(argument))
-    {
-        argument = "((R7)+)";
-        offset = regex_absolute.cap(1).toInt();  
-    }
-
 }
