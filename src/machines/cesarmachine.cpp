@@ -670,10 +670,39 @@ void CesarMachine::executeInstruction(){
             setCarry(carry);
         break;
 
+    case Instruction:: CESAR_JSR:
+        int currentPC = getPCValue();
+        PutOnStack(decodedRegisterCode1);
+        setRegisterValue(decodedRegisterCode1, currentPC);
+        setPCValue(GetCurrentOperandValue(2));
+        break;
+
+    case Instruction:: CESAR_RTS:
+        int currentPC = getPCValue();
+        setRegisterValue("R7", decodedRegisterCode1);
+        GetOffStack(decodedRegisterCode1);
+        break;
+
     }
     
 
     instructionCount++;
+}
+
+void CesarMachine::PutOnStack (int registerId)
+{
+    int stackValue = getRegisterValue("R6");
+    int registerValue = getRegisterValue(registerId);
+    memoryWrite(stackValue, registerValue);
+    setRegisterValue("R6",stackValue - 2);
+}
+
+void CesarMachine::GetOffStack(int registerId)
+{
+    int stackValue = getRegisterValue("R6");
+    int memoryValue = getMemoryValue(stackValue);
+    setRegisterValue(registerId, memoryValue);
+    setRegisterValue("R6", stackValue + 2);
 }
 
 
