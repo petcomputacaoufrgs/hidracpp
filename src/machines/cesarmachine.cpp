@@ -671,14 +671,15 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_JSR:
+        {
         int currentPC = getPCValue();
         PutOnStack(decodedRegisterCode1);
         setRegisterValue(decodedRegisterCode1, currentPC);
         setPCValue(GetCurrentOperandValue(2));
         break;
+        }
 
     case Instruction:: CESAR_RTS:
-        int currentPC = getPCValue();
         setRegisterValue("R7", decodedRegisterCode1);
         GetOffStack(decodedRegisterCode1);
         break;
