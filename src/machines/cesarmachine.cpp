@@ -863,7 +863,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
         byte1 = instruction->getByteValue();
-        byte2 = argumentList[0].toInt();
+        extractInstructionMemoryParameter(argumentList[0], byte2);
 
         // Value must range from -128 to 127
         if(byte2 < -128 || byte2 > 127)
@@ -896,7 +896,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         byte1 = instruction->getByteValue();
         extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);        
         byte1 |= reg1;
-        byte2 = argumentList[1].toInt();
+        extractInstructionMemoryParameter(argumentList[1], byte2);
 
         // Value must range from -128 to 127
         if(byte2 < -128 || byte2 > 127)
@@ -981,6 +981,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
 }
 
+//Extracts information from a register parameter
 void CesarMachine::extractInstructionRegisterParameter(QString& param, int& reg_code, int& am_code, int& am_offset)
 {
     AddressingMode::AddressingModeCode aux;
@@ -1014,4 +1015,19 @@ void CesarMachine::extractInstructionRegisterParameter(QString& param, int& reg_
     
     if (reg_code == Register::NO_BIT_CODE)
         throw invalidArgument; // Register not found (or invisible)
+}
+
+//Extracts information from a memory address parameter
+void CesarMachine::extractInstructionMemoryParameter(QString& param, int& address)
+{
+    static QRegExp number_regex("-?[0-9]{1,5}");
+    if(number_regex.exactMatch(param))
+    {
+        address = param.toInt();
+        if (address <= 65535){
+            return;
+        }
+    }
+    throw invalidArgument;
+
 }
