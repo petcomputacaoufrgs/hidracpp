@@ -12,12 +12,14 @@
 #include <QVector>
 #include <QColor>
 #include <QSettings>
+#include <QSharedPointer>
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "baseconversordialog.h"
 #include "pointconversordialog.h"
 #include "registerwidget.h"
+#include "visorwidget.h"
 #include "findreplacedialog.h"
 #include "flagwidget.h"
 #include "about.h"
@@ -217,6 +219,9 @@ private:
     QVector<QColor> previousRowColor;    
     bool advanceToNextCell = false;
     const QBrush colorGrayedOut;
+
+    // Cesar Visor
+    VisorWidget visorWidget;
 
     // View options
     bool showHexValues, showSignedData, showCharacters; // Value display modes

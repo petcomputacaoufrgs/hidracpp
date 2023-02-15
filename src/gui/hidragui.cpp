@@ -26,6 +26,7 @@ HidraGui::HidraGui(QWidget *parent) :
 {
     ui->setupUi(this);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    
 
     // Change global font
     QFontDatabase fontDatabase;
@@ -367,6 +368,8 @@ void HidraGui::initializeRegisterWidgets()
         else
             ui->layoutRegisters->addWidget(newRegister, i/2, i%2); // Two per line, alternates left and right columns with i%2
     }
+
+    visorWidget.show();
 }
 
 void HidraGui::initializeHighlighter()
