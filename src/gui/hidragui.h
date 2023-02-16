@@ -227,6 +227,9 @@ private:
     bool showHexValues, showSignedData, showCharacters; // Value display modes
     bool fastExecute; // Don't update memory table on every instruction
     bool followPC;
+
+    // Screen height and width
+    QRect screenGeometry;
 };
 
 #endif // HIDRAGUI_H

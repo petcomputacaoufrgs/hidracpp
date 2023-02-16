@@ -15,6 +15,9 @@
 #include "ui_hidragui.h"
 #include <QSizeGrip>
 #include <QInputDialog>
+#include <QApplication>
+#include <QStyle>
+#include <QDesktopWidget>
 
 #define DEBUG_INT(value) qDebug(QString::number(value).toStdString().c_str());
 #define DEBUG_STRING(value) qDebug(value.toStdString().c_str());
@@ -95,6 +98,11 @@ HidraGui::HidraGui(QWidget *parent) :
     backupTimer.setInterval(3*60000); // Save backup every N minutes
     connect(&backupTimer, SIGNAL(timeout()), this, SLOT(saveBackup()));
     backupTimer.start(); */ // TODO: Only open recovery once
+    
+    screenGeometry = QApplication::desktop()->screenGeometry();
+    QPoint centralizedWindowPos((screenGeometry.width()-width()) / 2,(screenGeometry.height()-height()) / 2 );
+    move(centralizedWindowPos);
+
 }
 
 HidraGui::~HidraGui()
@@ -135,7 +143,11 @@ void HidraGui::selectMachine(QString machineName)
         else if (machineName == "Volta")
             machine = new VoltaMachine();
         else if (machineName == "Cesar")
+        {
             machine = new CesarMachine();
+            visorWidget.show();
+            visorWidget.move(mapToGlobal(QPoint(0,height())));
+        }
         else
             return; // Error
 
@@ -368,8 +380,7 @@ void HidraGui::initializeRegisterWidgets()
         else
             ui->layoutRegisters->addWidget(newRegister, i/2, i%2); // Two per line, alternates left and right columns with i%2
     }
-
-    visorWidget.show();
+    
 }
 
 void HidraGui::initializeHighlighter()
