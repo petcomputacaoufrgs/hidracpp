@@ -225,7 +225,7 @@ private:
 
     // View options
     bool showHexValues, showSignedData, showCharacters; // Value display modes
-    bool fastExecute; // Don't update memory table on every instruction
+    bool fastExecute; // Don't update memory table on every instruction   IMPORTANT ISSUE
     bool followPC;
 
     // Screen height and width
