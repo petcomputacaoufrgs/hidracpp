@@ -10,7 +10,7 @@ class Instruction
 public:
     enum InstructionCode
     {
-        NOP,  CESAR_NOP,
+        NOP,  CESAR_NOP, CESAR_HLT,
         /*cesar TWO OPERANDS*/ 
         CESAR_ADD,CESAR_SUB,CESAR_AND,CESAR_OR,CESAR_CMP,
         /*cesar ONE OPERAND*/

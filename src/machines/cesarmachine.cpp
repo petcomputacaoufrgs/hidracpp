@@ -93,6 +93,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_NOP));
 
     //////////////////////////////////////////////////
     // Initialize addressing modes
@@ -684,6 +685,13 @@ void CesarMachine::executeInstruction(){
         GetOffStack(decodedRegisterCode1);
         break;
 
+    case Instruction:: CESAR_HLT:
+        {
+            setRunning(false);
+            setPCValue(getPCValue() - 1);
+            break;
+        }
+
     }
     
 
@@ -731,7 +739,7 @@ int CesarMachine::GetCurrentOperandValue(int operand)
         //POST INCREMENTED
         case AddressingMode::AFTER_INCREMENTED:
             // Get register value
-            registerValue = getRegisterValue(registerCode);
+            registerValue = getMemoryValue(getRegisterValue(registerCode));
             // Read 2 bytes
             r_value = registerValue;
             // Increment register value by 2
