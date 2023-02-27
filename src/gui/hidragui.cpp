@@ -123,6 +123,7 @@ void HidraGui::selectMachine(QString machineName)
     if (currentMachineName != machineName)
     {
         Machine *previousMachine = machine;
+        visorWidget.hide();
 
         if (machineName == "Neander")
             machine = new NeanderMachine();
