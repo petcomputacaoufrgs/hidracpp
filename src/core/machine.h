@@ -158,7 +158,8 @@ public:
 
     ///Given the current position of the program counter, update the interpretation of the bytes
     void updateInstructionStrings();
-    QString generateInstructionString(int address, int &argumentsSize); // TODO: Fix Pericles
+    ///Get a string containing info about the currently decoded instruction
+    virtual QString getCurrentInstructionString(int &argumentBytes); // TODO: Fix Pericles
     virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 
 

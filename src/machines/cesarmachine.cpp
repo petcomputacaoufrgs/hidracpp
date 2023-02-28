@@ -90,9 +90,9 @@ CesarMachine::CesarMachine()
     //special instructions
     ////////////////////////
     instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
-    instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_CONDITIONAL_CODES));
-    instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_CONDITIONAL_CODES));
-    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
+    instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
+    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_LOOP_CONTROL));
     instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_NOP));
 
     //////////////////////////////////////////////////
@@ -195,7 +195,7 @@ void CesarMachine::decodeInstruction()
             decodedAddressingModeCode2 = default_am; //
             decodedRegisterCode1 = 0;//Pass the first register, with no intention to use it
             decodedRegisterCode2 = 0;//
-            decodedExtraValue = (0b1111  & fetchedValue) ;//Mask to get flag values
+            decodedExtraValue = (0b1111 & fetchedValue);//Mask to get flag values
             break; 
 
         case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
@@ -1029,5 +1029,80 @@ void CesarMachine::extractInstructionMemoryParameter(QString& param, int& addres
         }
     }
     throw invalidArgument;
+
+}
+
+QString CesarMachine::getCurrentInstructionString(int &argumentBytes)
+{
+    QString memoryString;
+    int address = getPCValue();
+    argumentBytes = 0;
+
+    // Fetch and decode instruction
+    Instruction *instruction = currentInstruction;
+    AddressingMode::AddressingModeCode addressingModeCode1 = decodedAddressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode2 = decodedAddressingModeCode2;
+    QString registerName1 = getRegisterName(decodedRegisterCode1);
+    QString registerName2 = getRegisterName(decodedRegisterCode2);
+    int extraValue = decodedExtraValue;
+
+    // Instruction name
+    memoryString = instruction->getMnemonic().toUpper();
+
+    if (instruction->getArguments().contains("NZVC")){
+        memoryString += " ";
+        if (extraValue & 0b1000){ 
+            memoryString += "N";
+        }
+        if (extraValue & 0b0100){ 
+            memoryString += "Z";
+        }
+        if (extraValue & 0b0010){ 
+            memoryString += "V";
+        }
+        if (extraValue & 0b0001){ 
+            memoryString += "C";
+        }
+    }
+
+    if (instruction->getArguments().contains("R1")){
+        wrapAddressingModeToRegister(addressingModeCode1, registerName1, extraValue);
+        memoryString += " " + registerName1;
+    }
+
+    if (instruction->getArguments().contains("R2")){
+        wrapAddressingModeToRegister(addressingModeCode2, registerName2, extraValue);
+        memoryString += " " + registerName2;
+    }
+
+    return memoryString;
+}
+
+void CesarMachine::wrapAddressingModeToRegister(AddressingMode::AddressingModeCode const& am, QString& registerString, int extraValue){
+    switch(am){
+        case AddressingMode::REGISTER:
+        break;
+        case AddressingMode::AFTER_INCREMENTED:
+        registerString = "(" + registerString + ")+";
+        break;
+        case AddressingMode::PRE_DECREMENTED:
+        registerString = "-(" + registerString + ")";
+        break;
+        case AddressingMode::INDEXED_BY_REG:
+        registerString = registerString + "(" + QString::number(extraValue) + ")";
+        break;
+        case AddressingMode::INDIRECT_REGISTER:
+        registerString = "(" + registerString + ")";
+        break;
+        case AddressingMode::AFTER_INCREMENTED_INDIRECT:
+        registerString = "((" + registerString + ")+)";
+        break;
+        case AddressingMode::PRE_DECREMENTED_INDIRECT:
+        registerString = "(-(" + registerString + "))";
+        break;
+        case AddressingMode::INDIRECT_INDEXED_BY_REG:
+        registerString = "(" + registerString + "(" + QString::number(extraValue) + ")" + ")";
+        break;
+    }
 
 }
