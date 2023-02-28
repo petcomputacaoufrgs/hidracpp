@@ -1189,9 +1189,14 @@ FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
 
 void Machine::updateInstructionStrings()
 {
+    // Bruh... (Find better solution?)
+    int og_address = getPCValue();
+    int og_acessCount = accessCount;
+    
     int address = 0, pendingArgumentBytes = 0;
     bool pcReached = false;
 
+    // TO-DO: Reduce this loop (so it doesn't iterate over large empty areas)
     while (address < getMemorySize())
     {
         // Realign interpretation to PC when PC is reached
@@ -1204,7 +1209,10 @@ void Machine::updateInstructionStrings()
 
         if (pendingArgumentBytes == 0) // Used to skip argument lines
         {
-            setInstructionString(address, generateInstructionString(address, pendingArgumentBytes));
+            // Fetch and decode instruction
+            fetchInstruction();
+            decodeInstruction();
+            setInstructionString(address, getCurrentInstructionString(pendingArgumentBytes));
         }
         else // Skip instruction's arguments (leave empty strings)
         {
@@ -1214,21 +1222,22 @@ void Machine::updateInstructionStrings()
 
         address += 1;
     }
+    // Returns to previous state
+    setPCValue(og_address);
+    accessCount = og_acessCount;
 }
 
-QString Machine::generateInstructionString(int address, int &argumentsSize)
+// 
+QString Machine::getCurrentInstructionString(int &argumentBytes)
 {
     QString memoryString;
-    argumentsSize = 0;
+    int address = getPCValue();
+    argumentBytes = 0;
 
     // Fetch and decode instruction
-    int fetchedValue = getMemoryValue(address);
-    Instruction *instruction = getInstructionFromValue(getMemoryValue(address));
-    AddressingMode::AddressingModeCode addressingModeCode = extractAddressingModeCode(fetchedValue);
-    QString registerName = extractRegisterName(fetchedValue);
-
-    if (instruction == nullptr || instruction->getInstructionCode() == Instruction::NOP || instruction->getInstructionCode() == Instruction::VOLTA_NOP)
-        return "";
+    Instruction *instruction = currentInstruction;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
+    QString registerName = decodedRegisterName1;
 
     // Instruction name
     memoryString = instruction->getMnemonic().toUpper();
@@ -1241,7 +1250,7 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     // Size can be 0 (variable number of bytes)
     if (instruction->getNumBytes() != 1)
     {
-        QString argumentString = generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+        QString argumentString = generateArgumentsString(address, instruction, addressingModeCode, argumentBytes);
         if (argumentString.length() > 0) {
             memoryString += " " + argumentString;
         }
@@ -1249,6 +1258,7 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
 
     return memoryString;
 }
+
 
 QString Machine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
 {

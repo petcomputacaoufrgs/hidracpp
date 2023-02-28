@@ -21,13 +21,16 @@ class CesarMachine : public Machine
     void decodeInstruction();
     void executeInstruction();
     
+    void PutOnStack(int registerValue);
+    void GetOffStack(int registerId);
+    
     int GetCurrentOperandValue(int operand = 1);
     int toSigned(int unsignedByte);
 
     void buildInstruction(Instruction* instruction, QStringList argumentList);
     
-    void PutOnStack(int registerValue);
-    void GetOffStack(int registerId);
+    QString getCurrentInstructionString(int &argumentBytes);
+    void wrapAddressingModeToRegister(AddressingMode::AddressingModeCode const& am, QString& registerString, int extraValue);
 
     ///Necessary Conversion methods
     AddressingMode::AddressingModeCode convertInstructionStringAddressingMode(int extract_am);
