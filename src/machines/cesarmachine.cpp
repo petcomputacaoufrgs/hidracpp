@@ -701,8 +701,8 @@ void CesarMachine::executeInstruction(){
 void CesarMachine::PutOnStack (int registerId)
 {
     int stackValue = getRegisterValue("R6");
-    int registerValue = getRegisterValue(registerId);
-    memoryWrite(stackValue, registerValue);
+    int registerValueOffStack = getRegisterValue(registerId);
+    memoryWrite(stackValue, registerValueOffStack);
     setRegisterValue("R6",stackValue - 2);
 }
 
@@ -724,7 +724,8 @@ void CesarMachine::GetOffStack(int registerId)
   
 int CesarMachine::GetCurrentOperandValue(int operand)
 {
-    int registerValue;
+    int registerValueByte1,registerValueByte2,registerValue;
+    int addressRight;
     int registerCode = (operand == 1 ? decodedRegisterCode1 : decodedRegisterCode2);
     int addressingModeCode = (operand == 1 ? decodedAddressingModeCode1 : decodedAddressingModeCode2);
     int r_value;
@@ -739,29 +740,32 @@ int CesarMachine::GetCurrentOperandValue(int operand)
         //POST INCREMENTED
         case AddressingMode::AFTER_INCREMENTED:
             // Get register value
-            registerValue = getMemoryValue(getRegisterValue(registerCode));
-            // Read 2 bytes
-            r_value = registerValue;
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
+
+            // shifts the result of byte 1 eight times to compreehend the full lenght of the word.
+            r_value = registerValueByte1 << 8 | registerValueByte2;
             // Increment register value by 2
-            registerValue += 2;
+            registerValue = getRegisterValue(registerCode)+2;
 
             setRegisterValue(registerCode, registerValue);
             return r_value;
 
         //PRE DECREMENTED
         case AddressingMode::PRE_DECREMENTED:
-            // Get register value
-            registerValue = getRegisterValue(registerCode);
-            // Decrement registerValue by 2
-            registerValue -= 2;
+            // decrement the register's value.
+            setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
+            // Get right operand within the memory.
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
 
-            setRegisterValue(registerCode,registerValue);
-            r_value = registerValue;
+            //join the values
+            r_value = registerValueByte1 << 8 | registerValueByte2;
             return r_value;
 
         //INDEXED
         case AddressingMode::INDEXED_BY_REG:
-            // Register value + value in next byte
+            // Register value + value in next byte.
             r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
             // Increment PC by 2 bytes
             incrementPCValue(2);
@@ -770,12 +774,14 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
         //INDIRECT REGISTER
         case AddressingMode::INDIRECT_REGISTER:
-            return memoryRead(registerValue);
+            //get register value to use as index.
+            registerValue = getRegisterValue(registerCode);
+            return memoryRead(registerValue) << 8 | memoryRead(registerValue+1);
 
         //INDIRECT POST INCREMENT
         case AddressingMode::AFTER_INCREMENTED_INDIRECT:
-             // Read 2 bytes
-             r_value = memoryReadTwoByteAddress(registerValue);
+             // get's the right operand value within the memory.
+             r_value = getMemoryValue(getMemoryValue(getRegisterValue(registerCode))) << 8 | getMemoryValue(getMemoryValue(getRegisterValue(registerCode) + 1)) ;
              // Increment registerValue by 2
              registerValue += 2;
              
@@ -784,12 +790,12 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
         //INDIRECT PRE DECREMENT
         case AddressingMode::PRE_DECREMENTED_INDIRECT:
-            // Get register value
-            registerValue = getRegisterValue(registerCode);
             // Decrement registerValue by 2
-            registerValue -= 2;
-    
-            r_value = memoryReadTwoByteAddress(registerValue);
+            setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
+            
+            
+            //takes the operand within the memory held by the register value
+             r_value = getMemoryValue(getMemoryValue(getRegisterValue(registerCode))) << 8 | getMemoryValue(getMemoryValue(getRegisterValue(registerCode) + 1)) ;
             return r_value;
         
         //INDIRECT INDEXED
