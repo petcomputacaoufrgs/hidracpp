@@ -64,7 +64,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "10001000", Instruction::CESAR_ASR, "asr R1 ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "10001001", Instruction::CESAR_ASL, "asl R1 ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "10001010", Instruction::CESAR_ADC, "adc R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SBC, "sdc R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SBC, "sbc R1 ", Instruction::GROUP_ONE_OPERAND));
     //////////////////////////////////////////////////
     //flow control
     //////////////////////////////////////////////////
