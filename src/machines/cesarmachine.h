@@ -24,6 +24,8 @@ class CesarMachine : public Machine
     int GetCurrentOperandValue(int operand = 1);
     int toSigned(int unsignedByte);
     
+    void PutOnStack(int registerValue);
+    void GetOffStack(int registerId);
 
     ///Necessary Conversion methods
     AddressingMode::AddressingModeCode convertInstructionStringAddressingMode(int extract_am);

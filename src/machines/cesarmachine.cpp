@@ -64,7 +64,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "10001000", Instruction::CESAR_ASR, "asr R1 ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "10001001", Instruction::CESAR_ASL, "asl R1 ", Instruction::GROUP_ONE_OPERAND));
     instructions.append(new Instruction(2, "10001010", Instruction::CESAR_ADC, "adc R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SDC, "sdc R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SBC, "sbc R1 ", Instruction::GROUP_ONE_OPERAND));
     //////////////////////////////////////////////////
     //flow control
     //////////////////////////////////////////////////
@@ -72,7 +72,8 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "00110000", Instruction::CESAR_BR,  "br R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110001", Instruction::CESAR_BNE, "bne R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110010", Instruction::CESAR_BEQ, "beq R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110100", Instruction::CESAR_BPL, "bpl R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110011", Instruction::CESAR_BPL, "bpl R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110100", Instruction::CESAR_BMI, "bmi R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110101", Instruction::CESAR_BVC, "bvc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110110", Instruction::CESAR_BVS, "bvs R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110111", Instruction::CESAR_BCC, "bcc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
@@ -89,9 +90,10 @@ CesarMachine::CesarMachine()
     //special instructions
     ////////////////////////
     instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
-    instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZCV ", Instruction::GROUP_CONDITIONAL_CODES));
+    instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC ", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_NOP));
 
     //////////////////////////////////////////////////
     // Initialize addressing modes
@@ -191,7 +193,7 @@ void CesarMachine::decodeInstruction()
             decodedAddressingModeCode2 = default_am; //
             decodedRegisterCode1 = 0;//Pass the first register, with no intention to use it
             decodedRegisterCode2 = 0;//
-            decodedExtraValue = ((1111 << 8) & fetchedValue) >> 8;//Mask to get flag values
+            decodedExtraValue = (0b1111  & fetchedValue) ;//Mask to get flag values
             break; 
 
         case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
@@ -263,6 +265,7 @@ void CesarMachine::decodeInstruction()
 void CesarMachine::executeInstruction(){
 
     int reg_value1, reg_value2, src, dst, result;
+    int carry, overflow, zero, negative;
     Instruction::InstructionCode instructionCode;
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
     bool isImmediate = (decodedAddressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
@@ -421,16 +424,25 @@ void CesarMachine::executeInstruction(){
         //11111111
         //       1
         //is the only situation where there is carry (and thus, no borrow)
-        setOverflow(src == 0x8000);
+        setOverflow(src == 0x8000 );
         updateFlags(result);
         break;
 
     case Instruction::CESAR_NEG:
         src = GetCurrentOperandValue(1);
-        result = (-src) & 0xFF;
+        result = -toSigned(src);
 
-        setRegisterValue(src, result);
-        setCarry(!(src == 0xFFFF));
+        if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
+        {
+            setRegisterValue(decodedRegisterCode1,result);
+            
+        }
+        else
+        {
+            memoryWriteTwoByte(src,result);
+        }
+        
+        setCarry(!(src == 0));
         setOverflow(src == 0x8000);
         updateFlags(result);
         break;
@@ -443,7 +455,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_ROR:
         src = getRegisterValue(decodedRegisterCode1);
-        result = ((src >> 1) | (getFlagValue("C") == true ? 0x80 : 0x00)) & 0xFF;
+        result = ((src >> 1) | (getFlagValue("C") == true ? 0x8000 : 0x00)) & 0xFFFF;
         setRegisterValue(decodedRegisterCode1,result);
         setCarry(src & 1);
         updateFlags(result);
@@ -452,9 +464,9 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_ROL:
         src = getRegisterValue(decodedRegisterCode1);
-        result = ((src << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFF;
+        result = ((src << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFFFF;
         setRegisterValue(decodedRegisterCode1, result);
-        setCarry(src & 1);
+        setCarry(src & 0x8000);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
@@ -472,7 +484,7 @@ void CesarMachine::executeInstruction(){
         src = getRegisterValue(decodedRegisterCode1);
         result = (src >> 1);
         setRegisterValue(decodedRegisterCode1,result);
-        setCarry(src & 0x8000);
+        setCarry(src & 1);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
@@ -481,15 +493,24 @@ void CesarMachine::executeInstruction(){
         int carry;
         src = GetCurrentOperandValue(1);
         carry = getFlagValue("C");
-        src = carry++;
-        setRegisterValue(decodedRegisterCode1,src);
+        src += carry;
+        result = src & 0xFFFF;
+        setCarry((src + 1) > 0xFFFF);
+        setOverflow(src == 0x8000 && carry == true);
+        updateFlags(result);
+        setRegisterValue(decodedRegisterCode1,result);
         break;
 
-    case Instruction::CESAR_SDC:
+    case Instruction::CESAR_SBC:
         src = GetCurrentOperandValue(1);
         carry = getFlagValue("C");
-        src = carry--;
-        setRegisterValue(decodedRegisterCode1,src);
+        result =  src - carry;
+        result = result & 0xFFFF;
+        setCarry(src == 0);
+        setOverflow((result == 0x7FFF) && (carry = true));
+        updateFlags(result);
+        setRegisterValue(decodedRegisterCode1,result);
+        
         break;
 
     case Instruction:: CESAR_JMP:
@@ -500,14 +521,197 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_BR:
+        setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue)); // Calling machine::toSigned from parent becuse we use it for 1byte
+        break;
+
+    case Instruction:: CESAR_BNE:
+        if(getFlagValue("Z") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction:: CESAR_BEQ:
+        if(getFlagValue("Z") == true)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction:: CESAR_BPL:
+        if(getFlagValue("N") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction:: CESAR_BMI:
+        if(getFlagValue("N") == true)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction:: CESAR_BVC:
+        if(getFlagValue("V") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction:: CESAR_BVS:
+        if(getFlagValue("V") == true)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction:: CESAR_BCC:
+        if(getFlagValue("C") == false)
+            setPCValue(getPCValue() + Machine::toSigned(decodedExtraValue));
+        break;
+
+    case Instruction::CESAR_BCS:
+
+        if(getFlagValue("C") == true)
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BGE:
+
+        if(getFlagValue("N") == getFlagValue("V"))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+    
+    case Instruction::CESAR_BLT:
+
+        if(getFlagValue("N") != getFlagValue("V"))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BGT:
+
+        if((getFlagValue("N") == getFlagValue("V")) && (getFlagValue("Z") == 0))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BLE:
+
+        if((getFlagValue("N") != getFlagValue("V")) || (getFlagValue("Z") == 1))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BHI:
+
+        if((getFlagValue("C") == 0) && (getFlagValue("Z") == 0))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_BLS:
+
+        if((getFlagValue("C") == 1) || (getFlagValue("Z") == 1))
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()+pc_jmp);
+        }
+        break;
+
+    case Instruction::CESAR_SOB:
+
+        src = GetCurrentOperandValue(1) - 1;
+        setRegisterValue(decodedRegisterCode1, src);
+
+        if (src != 0)
+        {
+            int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
+            setPCValue(getPCValue()-pc_jmp);
+        }
         break;
         
 
     case Instruction::CESAR_NOP:
         break;
 
+    case Instruction:: CESAR_CCC:
+        
+        carry = decodedExtraValue & 0b1;
+        overflow = decodedExtraValue & 0b10;
+        zero = decodedExtraValue & 0b100;
+        negative = decodedExtraValue & 0b1000;
+        
+        if (negative)
+            setFlagValue("N", !negative);
+        if (zero)
+            setFlagValue("Z", !zero);
+        if (overflow)
+            setFlagValue("V", !overflow);         
+        if (carry)
+            setCarry(!carry);
+        break;
+
+    case Instruction:: CESAR_SCC:
+        carry = decodedExtraValue & 0b1;
+        overflow = decodedExtraValue & 0b10;
+        zero = decodedExtraValue & 0b100;
+        negative = decodedExtraValue & 0b1000;
+        
+        if (negative)
+            setFlagValue("N", negative);
+        if (zero)
+            setFlagValue("Z", zero);
+        if (overflow)
+            setFlagValue("V", overflow);         
+        if (carry)
+            setCarry(carry);
+        break;
+
+    case Instruction:: CESAR_JSR:
+        {
+        int currentPC = getPCValue();
+        PutOnStack(decodedRegisterCode1);
+        setRegisterValue(decodedRegisterCode1, currentPC);
+        setPCValue(GetCurrentOperandValue(2));
+        break;
+        }
+
+    case Instruction:: CESAR_RTS:
+        setRegisterValue("R7", decodedRegisterCode1);
+        GetOffStack(decodedRegisterCode1);
+        break;
+
+    case Instruction:: CESAR_HLT:
+        {
+            setRunning(false);
+            setPCValue(getPCValue() - 1);
+            break;
+        }
+
     }
+    
+
     instructionCount++;
+}
+
+void CesarMachine::PutOnStack (int registerId)
+{
+    int stackValue = getRegisterValue("R6");
+    int registerValueOffStack = getRegisterValue(registerId);
+    memoryWrite(stackValue, registerValueOffStack);
+    setRegisterValue("R6",stackValue - 2);
+}
+
+void CesarMachine::GetOffStack(int registerId)
+{
+    int stackValue = getRegisterValue("R6");
+    int memoryValue = getMemoryValue(stackValue);
+    setRegisterValue(registerId, memoryValue);
+    setRegisterValue("R6", stackValue + 2);
 }
 
 
@@ -520,7 +724,8 @@ void CesarMachine::executeInstruction(){
   
 int CesarMachine::GetCurrentOperandValue(int operand)
 {
-    int registerValue;
+    int registerValueByte1,registerValueByte2,registerValue;
+    int addressRight;
     int registerCode = (operand == 1 ? decodedRegisterCode1 : decodedRegisterCode2);
     int addressingModeCode = (operand == 1 ? decodedAddressingModeCode1 : decodedAddressingModeCode2);
     int r_value;
@@ -535,29 +740,32 @@ int CesarMachine::GetCurrentOperandValue(int operand)
         //POST INCREMENTED
         case AddressingMode::AFTER_INCREMENTED:
             // Get register value
-            registerValue = getRegisterValue(registerCode);
-            // Read 2 bytes
-            r_value = registerValue;
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
+
+            // shifts the result of byte 1 eight times to compreehend the full lenght of the word.
+            r_value = registerValueByte1 << 8 | registerValueByte2;
             // Increment register value by 2
-            registerValue += 2;
+            registerValue = getRegisterValue(registerCode)+2;
 
             setRegisterValue(registerCode, registerValue);
             return r_value;
 
         //PRE DECREMENTED
         case AddressingMode::PRE_DECREMENTED:
-            // Get register value
-            registerValue = getRegisterValue(registerCode);
-            // Decrement registerValue by 2
-            registerValue -= 2;
+            // decrement the register's value.
+            setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
+            // Get right operand within the memory.
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
 
-            setRegisterValue(registerCode,registerValue);
-            r_value = registerValue;
+            //join the values
+            r_value = registerValueByte1 << 8 | registerValueByte2;
             return r_value;
 
         //INDEXED
         case AddressingMode::INDEXED_BY_REG:
-            // Register value + value in next byte
+            // Register value + value in next byte.
             r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
             // Increment PC by 2 bytes
             incrementPCValue(2);
@@ -566,12 +774,14 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
         //INDIRECT REGISTER
         case AddressingMode::INDIRECT_REGISTER:
-            return memoryRead(registerValue);
+            //get register value to use as index.
+            registerValue = getRegisterValue(registerCode);
+            return memoryRead(registerValue) << 8 | memoryRead(registerValue+1);
 
         //INDIRECT POST INCREMENT
         case AddressingMode::AFTER_INCREMENTED_INDIRECT:
-             // Read 2 bytes
-             r_value = memoryReadTwoByteAddress(registerValue);
+             // get's the right operand value within the memory.
+             r_value = getMemoryValue(getMemoryValue(getRegisterValue(registerCode))) << 8 | getMemoryValue(getMemoryValue(getRegisterValue(registerCode) + 1)) ;
              // Increment registerValue by 2
              registerValue += 2;
              
@@ -580,12 +790,12 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
         //INDIRECT PRE DECREMENT
         case AddressingMode::PRE_DECREMENTED_INDIRECT:
-            // Get register value
-            registerValue = getRegisterValue(registerCode);
             // Decrement registerValue by 2
-            registerValue -= 2;
-    
-            r_value = memoryReadTwoByteAddress(registerValue);
+            setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
+            
+            
+            //takes the operand within the memory held by the register value
+             r_value = getMemoryValue(getMemoryValue(getRegisterValue(registerCode))) << 8 | getMemoryValue(getMemoryValue(getRegisterValue(registerCode) + 1)) ;
             return r_value;
         
         //INDIRECT INDEXED
