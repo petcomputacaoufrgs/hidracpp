@@ -863,7 +863,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
         byte1 = instruction->getByteValue();
-        extractInstructionMemoryParameter(argumentList[0], byte2);
+        argumentToValue(argumentList[0], true, 2);
 
         // Value must range from -128 to 127
         if(byte2 < -128 || byte2 > 127)
@@ -896,7 +896,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         byte1 = instruction->getByteValue();
         extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);        
         byte1 |= reg1;
-        extractInstructionMemoryParameter(argumentList[1], byte2);
+        argumentToValue(argumentList[1], true, 2);
 
         // Value must range from -128 to 127
         if(byte2 < -128 || byte2 > 127)
@@ -985,12 +985,16 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 void CesarMachine::extractInstructionRegisterParameter(QString& param, int& reg_code, int& am_code, int& am_offset)
 {
     AddressingMode::AddressingModeCode aux;
+    static QRegExp regex_label("(.+)(\\+|\\-)(.+)");
     static QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
     static QRegExp regex_immediate("#([0-9]{1,5})");
-    static QRegExp regex_absolute("([0-9]{1,5})");    
+    static QRegExp regex_absolute("([0-9]{1,5})");
+
+    //Replaces labels with values
+    translateLabelToValue(param);
 
     //Converts the R7 addressing modes to their literals
-    if (regex_immediate.exactMatch(param))
+    if(regex_immediate.exactMatch(param))
     {
         param = "(R7)+";
         am_offset = regex_immediate.cap(1).toInt();
@@ -1017,26 +1021,10 @@ void CesarMachine::extractInstructionRegisterParameter(QString& param, int& reg_
         throw invalidArgument; // Register not found (or invisible)
 }
 
-//Extracts information from a memory address parameter
-void CesarMachine::extractInstructionMemoryParameter(QString& param, int& address)
-{
-    static QRegExp number_regex("-?[0-9]{1,5}");
-    if(number_regex.exactMatch(param))
-    {
-        address = param.toInt();
-        if (address <= 65535){
-            return;
-        }
-    }
-    throw invalidArgument;
-
-}
-
 QString CesarMachine::getCurrentInstructionString(int &argumentBytes)
 {
     QString memoryString;
     int address = getPCValue();
-    argumentBytes = 0;
 
     // Fetch and decode instruction
     Instruction *instruction = currentInstruction;
@@ -1046,6 +1034,19 @@ QString CesarMachine::getCurrentInstructionString(int &argumentBytes)
     QString registerName2 = getRegisterName(decodedRegisterCode2);
     int extraValue = decodedExtraValue;
 
+    // Bytes to be skipped
+    argumentBytes = instruction->getNumBytes() - 1;
+    
+    // Special addressing modes
+    if((addressingModeCode1 == AddressingMode::AFTER_INCREMENTED || addressingModeCode1 == AddressingMode::AFTER_INCREMENTED_INDIRECT) &&
+        decodedRegisterCode1 == PC->getBitCode()){
+            argumentBytes += 2;
+        }
+    if((addressingModeCode2 == AddressingMode::AFTER_INCREMENTED || addressingModeCode2 == AddressingMode::AFTER_INCREMENTED_INDIRECT) &&
+        decodedRegisterCode2 == PC->getBitCode()){
+            argumentBytes += 2;
+        }
+    
     // Instruction name
     memoryString = instruction->getMnemonic().toUpper();
 
