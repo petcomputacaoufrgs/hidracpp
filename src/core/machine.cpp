@@ -540,14 +540,30 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
 {
     static QRegExp whitespace("\\s+");
 
-    if (mnemonic == "org")
+    if (mnemonic == "equ"){
+        // Special mnemonic "equ" sets a label to represent a constant value.
+        QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
+        int numberOfArguments = argumentList.size();
+        if (numberOfArguments != 1)
+            throw wrongNumberOfArguments;
+        int value = argumentToValue(argumentList.first(), true, fetchByteSize);
+        // Override assigned label value
+        QString label = addressCorrespondingLabel[PC->getValue()].toLower();
+        labelPCMap[label] = value;
+        addressCorrespondingLabel[PC->getValue()] = ""; 
+
+    }
+    else if (mnemonic == "org")
     {
         QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
         int numberOfArguments = argumentList.size();
 
         if (numberOfArguments != 1)
             throw wrongNumberOfArguments;
-        if (!isValidOrg(argumentList.first()))
+            
+        QString first_arg = argumentList.first();
+        translateLabelToValue(first_arg);
+        if (!isValidOrg(first_arg))
             throw invalidAddress;
 
         PC->setValue(stringToInt(argumentList.first()));
@@ -941,9 +957,8 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
     }
 }
 
-int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNumBytes)
+void Machine::translateLabelToValue(QString& argument)
 {
-    static QRegExp matchChar("'.'");
     static QRegExp labelOffset("(.+)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
 
     // Convert label with +/- offset to number
@@ -963,6 +978,14 @@ int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNu
     // Convert label to number string
     if (labelPCMap.contains(argument.toLower()))
         argument = QString::number(labelPCMap.value(argument.toLower()));
+
+}
+
+int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNumBytes)
+{
+    static QRegExp matchChar("'.'");
+
+    translateLabelToValue(argument);
 
     if (isImmediate)
     {
@@ -1210,6 +1233,7 @@ void Machine::updateInstructionStrings()
         if (pendingArgumentBytes == 0) // Used to skip argument lines
         {
             // Fetch and decode instruction
+            setPCValue(address);
             fetchInstruction();
             decodeInstruction();
             setInstructionString(address, getCurrentInstructionString(pendingArgumentBytes));
@@ -1259,7 +1283,7 @@ QString Machine::getCurrentInstructionString(int &argumentBytes)
     return memoryString;
 }
 
-
+// TO-DO: Move to getCurrentInstructionString?
 QString Machine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
 {
     QString argument;
