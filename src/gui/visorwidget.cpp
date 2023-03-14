@@ -9,7 +9,11 @@ VisorWidget::VisorWidget(QWidget *parent) :
     ui->setupUi(this);
     this->setAttribute(Qt::WA_QuitOnClose, false);
     this->setWindowFlags(Qt::FramelessWindowHint);
+    ui->textBrowser->setPlainText("BOMBA");
+    QFont galeano("Times", 33, QFont::Bold);
+    ui->textBrowser->setFont(galeano);
 }
+
 
 VisorWidget::~VisorWidget()
 {

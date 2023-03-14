@@ -146,11 +146,17 @@ void HidraGui::selectMachine(QString machineName)
         else if (machineName == "Cesar")
         {
             machine = new CesarMachine();
+            // this->adjustSize();
+            int appQwidth = this->width(); 
             this->adjustSize();
-            QPoint centralizedWindowPos((screenGeometry.width()-width()) / 2,(screenGeometry.height()-height()) / 2 );
+            int appQheight = this->height();    
+            resize(appQwidth,appQheight);
+            QPoint centralizedWindowPos((screenGeometry.width()-width()) / 2,(screenGeometry.height()-(height() + visorWidget.height())) / 2);
             move(centralizedWindowPos);
             visorWidget.show();
             visorWidget.move(mapToGlobal(QPoint(0,height())));
+            
+
         }
         else
             return; // Error
