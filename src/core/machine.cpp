@@ -549,8 +549,14 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
         int value = argumentToValue(argumentList.first(), true, fetchByteSize);
         // Override assigned label value
         QString label = addressCorrespondingLabel[PC->getValue()].toLower();
+        
+        // EQU must be preceded by label
+        // TO-DO: We need a better way of sending error messages!
+        if (label == ""){
+            throw invalidLabel;
+        }
+        
         labelPCMap[label] = value;
-        addressCorrespondingLabel[PC->getValue()] = ""; 
 
     }
     else if (mnemonic == "org")
