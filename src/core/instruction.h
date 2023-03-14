@@ -50,7 +50,8 @@ public:
         GROUP_JUMP_SUBROUTINE,
         GROUP_RETURN_SUBROUTINE,
         GROUP_ONE_OPERAND,
-        GROUP_TWO_OPERAND
+        GROUP_TWO_OPERAND,
+        GROUP_HLT
 
     };
  

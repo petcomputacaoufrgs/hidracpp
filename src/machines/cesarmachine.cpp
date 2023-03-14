@@ -93,7 +93,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_LOOP_CONTROL));
-    instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_NOP));
+    instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_HLT));
 
     //////////////////////////////////////////////////
     // Initialize addressing modes
@@ -975,6 +975,10 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
         break;
     
+    case Instruction::InstructionGroup::GROUP_HLT:
+        setAssemblerMemoryNext(0xF0);
+        break;
+
     default:
         break;
     }
