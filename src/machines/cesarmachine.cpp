@@ -53,46 +53,46 @@ CesarMachine::CesarMachine()
     ///////////////////////////////////////////////////////////////////////
     //one operand instructions   //funcoes ainda nao feitas, arrumar grupos
     ///////////////////////////////////////////////////////////////////////
-    instructions.append(new Instruction(2, "10000000", Instruction::CESAR_CLR, "clr R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000001", Instruction::CESAR_NOT, "not R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000010", Instruction::CESAR_INC, "inc R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000011", Instruction::CESAR_DEC, "dec R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000100", Instruction::CESAR_NEG, "neg R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000101", Instruction::CESAR_TST, "tst R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000110", Instruction::CESAR_ROR, "ror R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10000111", Instruction::CESAR_ROL, "rol R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001000", Instruction::CESAR_ASR, "asr R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001001", Instruction::CESAR_ASL, "asl R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001010", Instruction::CESAR_ADC, "adc R1 ", Instruction::GROUP_ONE_OPERAND));
-    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SBC, "sbc R1 ", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000000", Instruction::CESAR_CLR, "clr R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000001", Instruction::CESAR_NOT, "not R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000010", Instruction::CESAR_INC, "inc R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000011", Instruction::CESAR_DEC, "dec R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000100", Instruction::CESAR_NEG, "neg R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000101", Instruction::CESAR_TST, "tst R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000110", Instruction::CESAR_ROR, "ror R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10000111", Instruction::CESAR_ROL, "rol R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001000", Instruction::CESAR_ASR, "asr R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001001", Instruction::CESAR_ASL, "asl R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001010", Instruction::CESAR_ADC, "adc R1", Instruction::GROUP_ONE_OPERAND));
+    instructions.append(new Instruction(2, "10001011", Instruction::CESAR_SBC, "sbc R1", Instruction::GROUP_ONE_OPERAND));
     //////////////////////////////////////////////////
     //flow control
     //////////////////////////////////////////////////
-    instructions.append(new Instruction(2, "0100....", Instruction::CESAR_JMP, "jmp R1 ", Instruction::GROUP_JUMP));
-    instructions.append(new Instruction(2, "00110000", Instruction::CESAR_BR,  "br R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110001", Instruction::CESAR_BNE, "bne R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110010", Instruction::CESAR_BEQ, "beq R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110011", Instruction::CESAR_BPL, "bpl R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "0100....", Instruction::CESAR_JMP, "jmp R1", Instruction::GROUP_JUMP));
+    instructions.append(new Instruction(2, "00110000", Instruction::CESAR_BR,  "br R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110001", Instruction::CESAR_BNE, "bne R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110010", Instruction::CESAR_BEQ, "beq R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110011", Instruction::CESAR_BPL, "bpl R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00110100", Instruction::CESAR_BMI, "bmi R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110101", Instruction::CESAR_BVC, "bvc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110110", Instruction::CESAR_BVS, "bvs R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00110111", Instruction::CESAR_BCC, "bcc R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111000", Instruction::CESAR_BCS, "bcs R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111001", Instruction::CESAR_BGE, "bge R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111010", Instruction::CESAR_BLT, "blt R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111011", Instruction::CESAR_BGT, "bgt R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111100", Instruction::CESAR_BLE, "ble R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111101", Instruction::CESAR_BHI, "bhi R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "00111110", Instruction::CESAR_BLS, "bls R1 ", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "0110....", Instruction::CESAR_JSR, "jsr R1 ", Instruction::GROUP_JUMP_SUBROUTINE));
-    instructions.append(new Instruction(2, "0111....", Instruction::CESAR_RTS, "rts R1 ", Instruction::GROUP_RETURN_SUBROUTINE));
+    instructions.append(new Instruction(2, "00110101", Instruction::CESAR_BVC, "bvc R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110110", Instruction::CESAR_BVS, "bvs R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00110111", Instruction::CESAR_BCC, "bcc R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111000", Instruction::CESAR_BCS, "bcs R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111001", Instruction::CESAR_BGE, "bge R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111010", Instruction::CESAR_BLT, "blt R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111011", Instruction::CESAR_BGT, "bgt R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111100", Instruction::CESAR_BLE, "ble R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111101", Instruction::CESAR_BHI, "bhi R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "00111110", Instruction::CESAR_BLS, "bls R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
+    instructions.append(new Instruction(2, "0110....", Instruction::CESAR_JSR, "jsr R1", Instruction::GROUP_JUMP_SUBROUTINE));
+    instructions.append(new Instruction(2, "0111....", Instruction::CESAR_RTS, "rts R1", Instruction::GROUP_RETURN_SUBROUTINE));
     ////////////////////////
     //special instructions
     ////////////////////////
     instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
     instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
-    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 ", Instruction::GROUP_LOOP_CONTROL));
+    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1", Instruction::GROUP_LOOP_CONTROL));
     instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_HLT));
 
     //////////////////////////////////////////////////
