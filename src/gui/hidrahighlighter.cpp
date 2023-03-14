@@ -87,6 +87,7 @@ void HidraHighlighter::initializeDirectivesHighlightRule()
     // Create new regular expression pattern containing directives
     QString directivesPattern = "(";
 
+    directivesPattern.append("\\b" + QString("equ") + "\\b|");
     directivesPattern.append("\\b" + QString("org") + "\\b|");
     directivesPattern.append("\\b" + QString("db") + "\\b|");
     directivesPattern.append("\\b" + QString("dw") + "\\b|");
