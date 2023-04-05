@@ -782,22 +782,30 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
         //INDIRECT POST INCREMENT
         case AddressingMode::AFTER_INCREMENTED_INDIRECT:
-             // get's the right operand value within the memory.
-             r_value = getMemoryValue(getMemoryValue(getRegisterValue(registerCode))) << 8 | getMemoryValue(getMemoryValue(getRegisterValue(registerCode) + 1)) ;
-             // Increment registerValue by 2
-             registerValue += 2;
-             
-             setRegisterValue(registerCode,registerValue);
-             return r_value;
+            // Get register value
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
+
+            // shifts the result of byte 1 eight times to compreehend the full lenght of the word.
+            r_value = registerValueByte1 << 8 | registerValueByte2;
+            // Increment register value by 2
+            registerValue = getRegisterValue(registerCode)+2;
+
+            setRegisterValue(registerCode, registerValue);
+            r_value = getMemoryTwoByteAddress(r_value);
+            return r_value;
 
         //INDIRECT PRE DECREMENT
         case AddressingMode::PRE_DECREMENTED_INDIRECT:
-            // Decrement registerValue by 2
+            // decrement the register's value.
             setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
-            
-            
-            //takes the operand within the memory held by the register value
-             r_value = getMemoryValue(getMemoryValue(getRegisterValue(registerCode))) << 8 | getMemoryValue(getMemoryValue(getRegisterValue(registerCode) + 1)) ;
+            // Get right operand within the memory.
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
+
+            //join the values
+            r_value = registerValueByte1 << 8 | registerValueByte2;
+            r_value = getMemoryTwoByteAddress(r_value);
             return r_value;
         
         //INDIRECT INDEXED
