@@ -704,7 +704,7 @@ void CesarMachine::PutOnStack (int registerId)
 {
     int stackValue = getRegisterValue("R6");
     int registerValueOffStack = getRegisterValue(registerId);
-    memoryWrite(stackValue, registerValueOffStack);
+    memoryWriteTwoByte(stackValue, registerValueOffStack);
     setRegisterValue("R6",stackValue - 2);
 }
 
