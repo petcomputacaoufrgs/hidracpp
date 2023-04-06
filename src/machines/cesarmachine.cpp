@@ -222,8 +222,8 @@ void CesarMachine::decodeInstruction()
             break;
 
         case Instruction::InstructionGroup::GROUP_JUMP_SUBROUTINE:
-            decodedAddressingModeCode1 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);//Get adressing mode
-            decodedAddressingModeCode2 = default_am; //Adressing mode not used
+            decodedAddressingModeCode1 = default_am; //Adressing mode not used
+            decodedAddressingModeCode2 = convertInstructionStringAddressingMode((fetchedValue >> 3) & 0b111);//Get adressing mode
             decodedRegisterCode1 = (fetchedValue >> 8) & 0b111;//Shift 1 byte to the left and mask to get register
             decodedRegisterCode2 = fetchedValue & 0b111;//mask to get register
             decodedExtraValue = 0;// decodedExtraValue not used
