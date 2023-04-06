@@ -84,7 +84,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "00111100", Instruction::CESAR_BLE, "ble R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00111101", Instruction::CESAR_BHI, "bhi R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00111110", Instruction::CESAR_BLS, "bls R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
-    instructions.append(new Instruction(2, "0110....", Instruction::CESAR_JSR, "jsr R1", Instruction::GROUP_JUMP_SUBROUTINE));
+    instructions.append(new Instruction(2, "0110....", Instruction::CESAR_JSR, "jsr R1 R2", Instruction::GROUP_JUMP_SUBROUTINE));
     instructions.append(new Instruction(2, "0111....", Instruction::CESAR_RTS, "rts R1", Instruction::GROUP_RETURN_SUBROUTINE));
     ////////////////////////
     //special instructions
