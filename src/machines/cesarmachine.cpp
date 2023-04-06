@@ -830,6 +830,52 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
 */
 
+int CesarMachine::calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments){
+    //TO-DO: MAKE THE SPECIAL ADDRESSING MODE CHECKS INDIVIDUAL METHODS TO AVOID REPETITION
+    static QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
+    static QRegExp regex_immediate("([0-9]{1,5})");
+    static QRegExp regex_absolute("#([0-9]{1,5})");
+    // Eugh...
+    QRegExp regex_idx_reg = addressingModes[CESAR_ADDRESSING_MODE_INDEX]->getAssemblyRegExp();
+    QRegExp regex_indirect_idx_reg = addressingModes[CESAR_ADDRESSING_MODE_INDIRECT_INDEX]->getAssemblyRegExp();
+
+    //Adds additional offsets caused by special addressing modes
+    int n_bytes = instruction->getNumBytes();
+
+    for(int i = 0; i < arguments.length(); i++){
+        QString param = arguments[i];
+        int am_offset;
+
+        translateLabelToValue(param);
+
+        if(
+            regex_immediate.exactMatch(param) ||
+            regex_absolute.exactMatch(param) ||
+            number_regex.exactMatch(param) ||
+            regex_idx_reg.exactMatch(param) ||
+            regex_indirect_idx_reg.exactMatch(param)
+            )
+        {
+            n_bytes += 2;
+        }
+    }
+
+    return n_bytes;
+}
+
+void CesarMachine::translateLabelToValue(QString& argument)
+{
+    // Allows the '#' special character to precede the label
+    if(argument[0] == '#'){
+        argument.remove(0, 1);
+        Machine::translateLabelToValue(argument);
+        argument.push_front("#");
+    }
+    else{
+        Machine::translateLabelToValue(argument);
+    }
+    
+}
 void CesarMachine::buildInstruction(Instruction* instruction, QStringList argumentList)
 {
 
