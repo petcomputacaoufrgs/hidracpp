@@ -27,6 +27,8 @@ class CesarMachine : public Machine
     int GetCurrentOperandValue(int operand = 1);
     int toSigned(int unsignedByte);
 
+    void translateLabelToValue(QString& argument);
+    int calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments);
     void buildInstruction(Instruction* instruction, QStringList argumentList);
     
     QString getCurrentInstructionString(int &argumentBytes);
