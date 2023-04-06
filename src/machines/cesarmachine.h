@@ -24,7 +24,11 @@ class CesarMachine : public Machine
     void PutOnStack(int registerValue);
     void GetOffStack(int registerId);
     
+    // Calculates the address and returns the value it holds
     int GetCurrentOperandValue(int operand = 1);
+    // Calculates the address and returns it
+    int GetCurrentOperandAddress(int operand = 1);
+    
     int toSigned(int unsignedByte);
 
     void translateLabelToValue(QString& argument);
