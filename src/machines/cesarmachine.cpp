@@ -287,7 +287,8 @@ void CesarMachine::executeInstruction(){
         }
         else
         {
-            dst = GetCurrentOperandValue(2);
+            // Get the address for writing
+            dst = GetCurrentOperandAddress(2);
             memoryWriteTwoByte(dst, src);
             updateFlags(dst);
         }
@@ -298,7 +299,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_SUB:
         src = GetCurrentOperandValue(1);   
-        dst = GetCurrentOperandValue(2);
+        dst = GetCurrentOperandAddress(2);
         result = (src - dst) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -316,7 +317,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_ADD:
         src = GetCurrentOperandValue(1);   
-        dst = GetCurrentOperandValue(2);
+        dst = GetCurrentOperandAddress(2);
         result = (dst + src) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -334,7 +335,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_CMP:
         src = GetCurrentOperandValue(1);   
-        dst = GetCurrentOperandValue(2);
+        dst = GetCurrentOperandAddress(2);
         result = src - dst;
 
         setCarry(toSigned(src) < toSigned(dst));
@@ -344,7 +345,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction::CESAR_AND:
         src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandValue(2);
+        dst = GetCurrentOperandAddress(2);
         result = src & dst;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -361,7 +362,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction::CESAR_OR:
         src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandValue(2);
+        dst = GetCurrentOperandAddress(2);
         result = (src | dst) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -395,6 +396,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction::CESAR_INC:
         src = GetCurrentOperandValue(1);
+        dst = GetCurrentOperandAddress(1);
         result = (src + 1) & 0xFFFF;
         if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -402,7 +404,7 @@ void CesarMachine::executeInstruction(){
         }
         else
         {
-            memoryWriteTwoByte(src, result);
+            memoryWriteTwoByte(dst, result);
         }
         setCarry((src + 1) > 0xFFFF);
         setOverflow(src == 0x7FFF);
@@ -411,6 +413,7 @@ void CesarMachine::executeInstruction(){
         
     case Instruction::CESAR_DEC:
         src = GetCurrentOperandValue(1);
+        dst = GetCurrentOperandAddress(1);
         result = (src - 1) & 0xFFFF;
         if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -419,7 +422,7 @@ void CesarMachine::executeInstruction(){
         }
         else
         {
-            memoryWriteTwoByte(src,result);
+            memoryWriteTwoByte(dst,result);
         }
         //setCarry(((src + 1) > 0xFFFF));
         setCarry(src == 0);
@@ -432,6 +435,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction::CESAR_NEG:
         src = GetCurrentOperandValue(1);
+        dst = GetCurrentOperandAddress(1);
         result = -toSigned(src);
 
         if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
@@ -441,7 +445,7 @@ void CesarMachine::executeInstruction(){
         }
         else
         {
-            memoryWriteTwoByte(src,result);
+            memoryWriteTwoByte(dst,result);
         }
         
         setCarry(!(src == 0));
@@ -516,10 +520,13 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_JMP:
-        if (!isImmediate) // Invalidate immediate jumps
-        {
-            setPCValue(fetchedValue & 0b0000000011111111);
+        if(decodedAddressingModeCode1 == AddressingMode::REGISTER){
+            break; // Acts as NOP
         }
+        
+        result = GetCurrentOperandAddress(1);
+        setPCValue(result);
+
         break;
 
     case Instruction:: CESAR_BR:
@@ -627,7 +634,14 @@ void CesarMachine::executeInstruction(){
     case Instruction::CESAR_SOB:
 
         src = GetCurrentOperandValue(1) - 1;
-        setRegisterValue(decodedRegisterCode1, src);
+        dst = GetCurrentOperandAddress(1);
+        if(decodedAddressingModeCode1 == AddressingMode::REGISTER){
+            setRegisterValue(decodedRegisterCode1, src);
+        }
+        else{
+            memoryWriteTwoByte(dst, src);
+        }
+
 
         if (src != 0)
         {
@@ -675,10 +689,13 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_JSR:
         {
+        //Acts as NOP if am = register, as per specification
+        if(decodedAddressingModeCode2 == AddressingMode::REGISTER) break;
+
         int currentPC = getPCValue();
         PutOnStack(decodedRegisterCode1);
         setRegisterValue(decodedRegisterCode1, currentPC);
-        setPCValue(GetCurrentOperandValue(2));
+        setPCValue(GetCurrentOperandAddress(2));
         break;
         }
 
@@ -718,12 +735,6 @@ void CesarMachine::GetOffStack(int registerId)
 
 
     
-
-// void CesarMachine::extractAddressingModeCodes(int fetchedValue, AddressingMode::AddressingModeCode&)
-// {
-
-// }
-  
 int CesarMachine::GetCurrentOperandValue(int operand)
 {
     int registerValueByte1,registerValueByte2,registerValue;
@@ -767,8 +778,8 @@ int CesarMachine::GetCurrentOperandValue(int operand)
 
         //INDEXED
         case AddressingMode::INDEXED_BY_REG:
-            // Register value + value in next byte.
-            r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
+            // Read memory at Register value + value in next byte.
+            r_value = memoryReadTwoByteAddress(memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode));
             // Increment PC by 2 bytes
             incrementPCValue(2);
         
@@ -811,7 +822,99 @@ int CesarMachine::GetCurrentOperandValue(int operand)
         //INDIRECT INDEXED
 
         case AddressingMode::INDIRECT_INDEXED_BY_REG:
-            // Register value + value in next byte
+            // Read memory at Register value + value in next byte.
+            r_value = memoryReadTwoByteAddress(memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode));
+            // Increment PC by 2 bytes
+            incrementPCValue(2);
+        
+            return memoryReadTwoByteAddress(r_value);
+        
+        default:
+            return 0;
+    }
+}
+
+int CesarMachine::GetCurrentOperandAddress(int operand)
+{
+    int registerValueByte1,registerValueByte2,registerValue;
+    int addressRight;
+    int registerCode = (operand == 1 ? decodedRegisterCode1 : decodedRegisterCode2);
+    int addressingModeCode = (operand == 1 ? decodedAddressingModeCode1 : decodedAddressingModeCode2);
+    int r_value; // The memory address acessed by the addressing mode
+
+    switch (addressingModeCode)
+    {
+        //REGISTER
+        case AddressingMode::REGISTER:
+            return 0; // No address. This value should be ignored by instructions that use this function
+
+        //POST INCREMENTED
+        case AddressingMode::AFTER_INCREMENTED:
+            r_value = getRegisterValue(registerCode);
+
+            // Increment register value by 2
+            registerValue = getRegisterValue(registerCode)+2;
+            setRegisterValue(registerCode, registerValue);
+            return r_value;
+
+        //PRE DECREMENTED
+        case AddressingMode::PRE_DECREMENTED:
+            // decrement the register's value.
+            setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
+            
+            r_value = getRegisterValue(registerCode);
+
+            return r_value;
+
+        //INDEXED
+        case AddressingMode::INDEXED_BY_REG:
+            // Address acessed is calculated as Register value + value in next byte.
+            r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
+            // Increment PC by 2 bytes
+            incrementPCValue(2);
+        
+            return r_value;
+
+        //INDIRECT REGISTER
+        case AddressingMode::INDIRECT_REGISTER:
+            //Acessed address is the register value.
+            r_value = getRegisterValue(registerCode);
+            return r_value;
+
+        //INDIRECT POST INCREMENT
+        case AddressingMode::AFTER_INCREMENTED_INDIRECT:
+            // Get register value
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
+
+            // shifts the result of byte 1 eight times to compreehend the full lenght of the word.
+            r_value = registerValueByte1 << 8 | registerValueByte2;
+            // Increment register value by 2
+            registerValue = getRegisterValue(registerCode)+2;
+
+            setRegisterValue(registerCode, registerValue);
+
+            // r_value already contains the memory address acessed
+            return r_value;
+
+        //INDIRECT PRE DECREMENT
+        case AddressingMode::PRE_DECREMENTED_INDIRECT:
+            // decrement the register's value.
+            setRegisterValue(registerCode,getRegisterValue(registerCode) - 2);
+            // Get right operand within the memory.
+            registerValueByte1 = getMemoryValue(getRegisterValue(registerCode));
+            registerValueByte2 = getMemoryValue(getRegisterValue(registerCode)+1);
+
+            //join the values
+            r_value = registerValueByte1 << 8 | registerValueByte2;
+
+            // r_value already contains the memory address acessed
+            return r_value;
+        
+        //INDIRECT INDEXED
+
+        case AddressingMode::INDIRECT_INDEXED_BY_REG:
+            // Address acessed is calculated as Register value + value in next byte.
             r_value = memoryReadTwoByteAddress(getPCValue()) + getRegisterValue(registerCode);
             // Increment PC by 2 bytes
             incrementPCValue(2);
@@ -876,6 +979,7 @@ void CesarMachine::translateLabelToValue(QString& argument)
     }
     
 }
+
 void CesarMachine::buildInstruction(Instruction* instruction, QStringList argumentList)
 {
 
@@ -1002,9 +1106,6 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
         setAssemblerMemoryNext(byte1);
         setAssemblerMemoryNext(byte2);
-        if(offset1 != -1){ 
-            setAssemblerMemoryNextTwoByte(offset1);
-        }
 
         break;
 
@@ -1020,13 +1121,6 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         setAssemblerMemoryNext(byte1);
         setAssemblerMemoryNext(byte2);
         
-        if(offset1 != -1){ 
-            setAssemblerMemoryNextTwoByte(offset1);
-        }
-        if(offset2 != -1){
-            setAssemblerMemoryNextTwoByte(offset2);
-        }
-
         break;
     
     case Instruction::InstructionGroup::GROUP_HLT:
@@ -1037,13 +1131,20 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         break;
     }
 
+    // Add offsets
+    if(offset1 != -1){ 
+        setAssemblerMemoryNextTwoByte(offset1);
+    }
+    if(offset2 != -1){
+        setAssemblerMemoryNextTwoByte(offset2);
+    }
+
 }
 
 //Extracts information from a register parameter
 void CesarMachine::extractInstructionRegisterParameter(QString& param, int& reg_code, int& am_code, int& am_offset)
 {
     AddressingMode::AddressingModeCode aux;
-    static QRegExp regex_label("(.+)(\\+|\\-)(.+)");
     static QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
     static QRegExp regex_immediate("#([0-9]{1,5})");
     static QRegExp regex_absolute("([0-9]{1,5})");
