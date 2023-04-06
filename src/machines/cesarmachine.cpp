@@ -92,7 +92,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(1, "0000....", Instruction::CESAR_NOP, "nop", Instruction::GROUP_NOP));
     instructions.append(new Instruction(1, "0001....", Instruction::CESAR_CCC, "ccc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
     instructions.append(new Instruction(1, "0010....", Instruction::CESAR_SCC, "scc NZVC", Instruction::GROUP_CONDITIONAL_CODES));
-    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1", Instruction::GROUP_LOOP_CONTROL));
+    instructions.append(new Instruction(2, "0101....", Instruction::CESAR_SOB, "sob R1 R2", Instruction::GROUP_LOOP_CONTROL));
     instructions.append(new Instruction(1, "1111....", Instruction::CESAR_HLT, "hlt", Instruction::GROUP_HLT));
 
     //////////////////////////////////////////////////
@@ -950,10 +950,10 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         byte1 = instruction->getByteValue();
         extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);        
         byte1 |= reg1;
-        argumentToValue(argumentList[1], true, 2);
+        byte2 = argumentToValue(argumentList[1], true, 2);
 
-        // Value must range from -128 to 127
-        if(byte2 < -128 || byte2 > 127)
+        // Value must range from between 0 and 65535
+        if(byte2 > 65535)
         {
             throw invalidArgument;
         }        
