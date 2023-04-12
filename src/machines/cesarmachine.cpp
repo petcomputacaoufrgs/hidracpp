@@ -85,7 +85,7 @@ CesarMachine::CesarMachine()
     instructions.append(new Instruction(2, "00111101", Instruction::CESAR_BHI, "bhi R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "00111110", Instruction::CESAR_BLS, "bls R1", Instruction::GROUP_CONDITIONAL_BRANCHES));
     instructions.append(new Instruction(2, "0110....", Instruction::CESAR_JSR, "jsr R1 R2", Instruction::GROUP_JUMP_SUBROUTINE));
-    instructions.append(new Instruction(2, "0111....", Instruction::CESAR_RTS, "rts R1", Instruction::GROUP_RETURN_SUBROUTINE));
+    instructions.append(new Instruction(1, "0111....", Instruction::CESAR_RTS, "rts R1", Instruction::GROUP_RETURN_SUBROUTINE));
     ////////////////////////
     //special instructions
     ////////////////////////
@@ -266,7 +266,7 @@ void CesarMachine::decodeInstruction()
      
 void CesarMachine::executeInstruction(){
 
-    int reg_value1, reg_value2, src, dst, result;
+    int reg_value1, reg_value2, src_addr, dst_addr, src_val, dst_val, result;
     int carry, overflow, zero, negative;
     Instruction::InstructionCode instructionCode;
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
@@ -279,18 +279,18 @@ void CesarMachine::executeInstruction(){
     // Move
     //////////////////////////////////////////////////
     case Instruction::MOV:
-        src = GetCurrentOperandValue(1);
+        src_val = GetCurrentOperandValue(1);
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
-            setRegisterValue(decodedRegisterCode2, src);
-            updateFlags(src);
+            setRegisterValue(decodedRegisterCode2, src_val);
+            updateFlags(src_val);
         }
         else
         {
             // Get the address for writing
-            dst = GetCurrentOperandAddress(2);
-            memoryWriteTwoByte(dst, src);
-            updateFlags(dst);
+            dst_addr = GetCurrentOperandAddress(2);
+            memoryWriteTwoByte(dst_addr, src_val);
+            updateFlags(dst_addr);
         }
 
         setOverflow(false);
@@ -298,62 +298,65 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_SUB:
-        src = GetCurrentOperandValue(1);   
-        dst = GetCurrentOperandAddress(2);
-        result = (src - dst) & 0xFFFF;
+        src_val = GetCurrentOperandValue(1);   
+        dst_val = GetCurrentOperandValue(2);
+        dst_addr = GetCurrentOperandAddress(2);
+        result = (src_val - dst_val) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode2, result);
         }
         else
         {
-            memoryWriteTwoByte(dst, result);
+            memoryWriteTwoByte(dst_addr, result);
         }
         // REMEMBER TO REVIEW THE LOGIC BEHIND IT
-        setCarry(toSigned(src) < toSigned(dst));
-        setOverflow(toSigned(src) + toSigned(-dst) != toSigned(result));
+        setCarry(toSigned(src_val) < toSigned(dst_val));
+        setOverflow(toSigned(src_val) + toSigned(-dst_val) != toSigned(result));
         updateFlags(result);
         break;
 
     case Instruction:: CESAR_ADD:
-        src = GetCurrentOperandValue(1);   
-        dst = GetCurrentOperandAddress(2);
-        result = (dst + src) & 0xFFFF;
+        src_val = GetCurrentOperandValue(1);   
+        dst_val = GetCurrentOperandValue(2);
+        dst_addr = GetCurrentOperandAddress(2);
+        result = (dst_val + src_val) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode2, result);
         }
         else
         {
-            memoryWriteTwoByte(dst, result);
+            memoryWriteTwoByte(dst_addr, result);
         }
 
-        setCarry(src + dst > 0xFFFF);
-        setOverflow(toSigned(src) + toSigned(dst) != toSigned(result));
+        setCarry(src_val + dst_val > 0xFFFF);
+        setOverflow(toSigned(src_val) + toSigned(dst_val) != toSigned(result));
         updateFlags(result);
         break;
 
     case Instruction:: CESAR_CMP:
-        src = GetCurrentOperandValue(1);   
-        dst = GetCurrentOperandAddress(2);
-        result = src - dst;
+        src_val = GetCurrentOperandValue(1);   
+        dst_val = GetCurrentOperandValue(2);
+        result = src_val - dst_val;
 
-        setCarry(toSigned(src) < toSigned(dst));
-        setOverflow(toSigned(src) + toSigned(-dst) != toSigned(result));
+        setCarry(toSigned(src_val) < toSigned(dst_val));
+        setOverflow(toSigned(src_val) + toSigned(-dst_val) != toSigned(result));
         updateFlags(result);
         break;
 
     case Instruction::CESAR_AND:
-        src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandAddress(2);
-        result = src & dst;
+        src_val = GetCurrentOperandValue(1);
+        dst_val = GetCurrentOperandValue(2);
+        dst_addr = GetCurrentOperandAddress(2);
+        result = src_val & dst_val;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode2, result);
         }
         else
         {
-            memoryWriteTwoByte(dst, result);
+            memoryWriteTwoByte(dst_addr, result);
         }
 
         setOverflow(false);
@@ -361,16 +364,17 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction::CESAR_OR:
-        src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandAddress(2);
-        result = (src | dst) & 0xFFFF;
+        src_val = GetCurrentOperandValue(1);
+        dst_val = GetCurrentOperandValue(2);
+        dst_addr = GetCurrentOperandAddress(2);
+        result = (src_val | dst_val) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode2, result);
         }
         else
         {
-            memoryWriteTwoByte(dst, result);
+            memoryWriteTwoByte(dst_addr, result);
         }
         
         setOverflow(false);
@@ -385,8 +389,8 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_NOT:
-        src = getRegisterValue(decodedRegisterCode1);
-        result = ~src & 0xFF;
+        src_val = getRegisterValue(decodedRegisterCode1);
+        result = ~src_val & 0xFF;
 
         setRegisterValue(decodedRegisterCode1, result);
         setCarry(true);
@@ -395,26 +399,26 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction::CESAR_INC:
-        src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandAddress(1);
-        result = (src + 1) & 0xFFFF;
+        src_val = GetCurrentOperandValue(1);
+        dst_addr = GetCurrentOperandAddress(1);
+        result = (src_val + 1) & 0xFFFF;
         if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode1, result);
         }
         else
         {
-            memoryWriteTwoByte(dst, result);
+            memoryWriteTwoByte(dst_addr, result);
         }
-        setCarry((src + 1) > 0xFFFF);
-        setOverflow(src == 0x7FFF);
+        setCarry((src_val + 1) > 0xFFFF);
+        setOverflow(src_val == 0x7FFF);
         updateFlags(result);
         break;
         
     case Instruction::CESAR_DEC:
-        src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandAddress(1);
-        result = (src - 1) & 0xFFFF;
+        src_val = GetCurrentOperandValue(1);
+        dst_addr = GetCurrentOperandAddress(1);
+        result = (src_val - 1) & 0xFFFF;
         if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode1,result);
@@ -422,21 +426,21 @@ void CesarMachine::executeInstruction(){
         }
         else
         {
-            memoryWriteTwoByte(dst,result);
+            memoryWriteTwoByte(dst_addr,result);
         }
         //setCarry(((src + 1) > 0xFFFF));
-        setCarry(src == 0);
+        setCarry(src_val == 0);
         //11111111
         //       1
         //is the only situation where there is carry (and thus, no borrow)
-        setOverflow(src == 0x8000 );
+        setOverflow(src_val == 0x8000 );
         updateFlags(result);
         break;
 
     case Instruction::CESAR_NEG:
-        src = GetCurrentOperandValue(1);
-        dst = GetCurrentOperandAddress(1);
-        result = -toSigned(src);
+        src_val = GetCurrentOperandValue(1);
+        dst_addr = GetCurrentOperandAddress(1);
+        result = -toSigned(src_val);
 
         if (decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
@@ -445,11 +449,11 @@ void CesarMachine::executeInstruction(){
         }
         else
         {
-            memoryWriteTwoByte(dst,result);
+            memoryWriteTwoByte(dst_addr,result);
         }
         
-        setCarry(!(src == 0));
-        setOverflow(src == 0x8000);
+        setCarry(!(src_val == 0));
+        setOverflow(src_val == 0x8000);
         updateFlags(result);
         break;
 
@@ -460,59 +464,59 @@ void CesarMachine::executeInstruction(){
         break;
 
     case Instruction:: CESAR_ROR:
-        src = getRegisterValue(decodedRegisterCode1);
-        result = ((src >> 1) | (getFlagValue("C") == true ? 0x8000 : 0x00)) & 0xFFFF;
+        src_val = getRegisterValue(decodedRegisterCode1);
+        result = ((src_val >> 1) | (getFlagValue("C") == true ? 0x8000 : 0x00)) & 0xFFFF;
         setRegisterValue(decodedRegisterCode1,result);
-        setCarry(src & 1);
+        setCarry(src_val & 1);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
 
     case Instruction:: CESAR_ROL:
-        src = getRegisterValue(decodedRegisterCode1);
-        result = ((src << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFFFF;
+        src_val = getRegisterValue(decodedRegisterCode1);
+        result = ((src_val << 1) | (getFlagValue("C") == true ? 0x01 : 0x00)) & 0xFFFF;
         setRegisterValue(decodedRegisterCode1, result);
-        setCarry(src & 0x8000);
+        setCarry(src_val & 0x8000);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
 
     case Instruction::CESAR_ASL:
-        src = getRegisterValue(decodedRegisterCode1);
-        result = (src << 1) & 0xFFFF;
+        src_val = getRegisterValue(decodedRegisterCode1);
+        result = (src_val << 1) & 0xFFFF;
         setRegisterValue(decodedRegisterCode1,result);
-        setCarry(src & 0X8000);
+        setCarry(src_val & 0X8000);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
     
     case Instruction::CESAR_ASR:
-        src = getRegisterValue(decodedRegisterCode1);
-        result = (src >> 1);
+        src_val = getRegisterValue(decodedRegisterCode1);
+        result = (src_val >> 1);
         setRegisterValue(decodedRegisterCode1,result);
-        setCarry(src & 1);
+        setCarry(src_val & 1);
         updateFlags(result);
         setOverflow(getFlagValue("N") ^ getFlagValue("C"));
         break;
 
     case Instruction:: CESAR_ADC:
         int carry;
-        src = GetCurrentOperandValue(1);
+        src_val = GetCurrentOperandValue(1);
         carry = getFlagValue("C");
-        src += carry;
-        result = src & 0xFFFF;
-        setCarry((src + 1) > 0xFFFF);
-        setOverflow(src == 0x8000 && carry == true);
+        src_val += carry;
+        result = src_val & 0xFFFF;
+        setCarry((src_val + 1) > 0xFFFF);
+        setOverflow(src_val == 0x8000 && carry == true);
         updateFlags(result);
         setRegisterValue(decodedRegisterCode1,result);
         break;
 
     case Instruction::CESAR_SBC:
-        src = GetCurrentOperandValue(1);
+        src_val = GetCurrentOperandValue(1);
         carry = getFlagValue("C");
-        result =  src - carry;
+        result =  src_val - carry;
         result = result & 0xFFFF;
-        setCarry(src == 0);
+        setCarry(src_val == 0);
         setOverflow((result == 0x7FFF) && (carry = true));
         updateFlags(result);
         setRegisterValue(decodedRegisterCode1,result);
@@ -633,17 +637,17 @@ void CesarMachine::executeInstruction(){
 
     case Instruction::CESAR_SOB:
 
-        src = GetCurrentOperandValue(1) - 1;
-        dst = GetCurrentOperandAddress(1);
+        src_val = GetCurrentOperandValue(1) - 1;
+        dst_addr = GetCurrentOperandAddress(1);
         if(decodedAddressingModeCode1 == AddressingMode::REGISTER){
-            setRegisterValue(decodedRegisterCode1, src);
+            setRegisterValue(decodedRegisterCode1, src_val);
         }
         else{
-            memoryWriteTwoByte(dst, src);
+            memoryWriteTwoByte(dst_addr, src_val);
         }
 
 
-        if (src != 0)
+        if (src_val != 0)
         {
             int pc_jmp = Machine::toSigned(getMemoryValue(getPCValue()-1));
             setPCValue(getPCValue()-pc_jmp);
@@ -700,7 +704,7 @@ void CesarMachine::executeInstruction(){
         }
 
     case Instruction:: CESAR_RTS:
-        setRegisterValue("R7", decodedRegisterCode1);
+        setRegisterValue("R7", getRegisterValue(decodedRegisterCode1));
         GetOffStack(decodedRegisterCode1);
         break;
 
@@ -935,9 +939,9 @@ int CesarMachine::GetCurrentOperandAddress(int operand)
 
 int CesarMachine::calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments){
     //TO-DO: MAKE THE SPECIAL ADDRESSING MODE CHECKS INDIVIDUAL METHODS TO AVOID REPETITION
-    static QRegExp number_regex("\\(?([0-9]{1,5})\\(.*");
     static QRegExp regex_immediate("([0-9]{1,5})");
     static QRegExp regex_absolute("#([0-9]{1,5})");
+    
     // Eugh...
     QRegExp regex_idx_reg = addressingModes[CESAR_ADDRESSING_MODE_INDEX]->getAssemblyRegExp();
     QRegExp regex_indirect_idx_reg = addressingModes[CESAR_ADDRESSING_MODE_INDIRECT_INDEX]->getAssemblyRegExp();
@@ -947,14 +951,14 @@ int CesarMachine::calculateBytesToReserve(const Instruction* instruction, QStrin
 
     for(int i = 0; i < arguments.length(); i++){
         QString param = arguments[i];
-        int am_offset;
 
+        // It doesn't matter if the assigned value is right or not; as long as the label is
+        // already on the map, we can consider the fact that it will require 2 bytes (due to the R7 AMs)
         translateLabelToValue(param);
 
         if(
             regex_immediate.exactMatch(param) ||
             regex_absolute.exactMatch(param) ||
-            number_regex.exactMatch(param) ||
             regex_idx_reg.exactMatch(param) ||
             regex_indirect_idx_reg.exactMatch(param)
             )
@@ -1054,7 +1058,15 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
         byte1 = instruction->getByteValue();
         extractInstructionRegisterParameter(argumentList[0], reg1, am1, offset1);        
         byte1 |= reg1;
-        byte2 = argumentToValue(argumentList[1], true, 2);
+        //Check if it's a label; if so, get the difference between (previous) PC and it
+        // TO-DO: REFACTOR TO USE A METHOD FOR CHECKING IF A STRING IS A LABEL
+        if(labelPCMap.contains(argumentList[1].toLower())){
+            byte2 = PC->getValue() - argumentToValue(argumentList[1], true, 2) + 2;
+        }
+        else{
+            byte2 = argumentToValue(argumentList[1], true, 2);
+        }
+        
 
         // Value must range from between 0 and 65535
         if(byte2 > 65535)
