@@ -420,23 +420,26 @@ void Machine::assemble(QString sourceCode)
     }
 
 
+    /*
 
-    //////////////////////////////////////////////////
-    // FIRST PASS: Read labels, reserve memory
-    //////////////////////////////////////////////////
+    The assembler does 3 passes to properly assemble all instructions:
+    FIRST PASS: Get all labels
+    SECOND PASS: Reserve bytes for every instruction. Labels have their values updated as bytes are being
+    reserved
+    THIRD PASS: Labels have their proper values and instructions don't overlap. Instructions can now be written
+    to memory
+
+    */
 
     clearAssemblerData();
-    PC->setValue(0);
+
+    //////////////////////////////////////////////////
+    // FIRST PASS: Read labels
+    //////////////////////////////////////////////////
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
-        try
-        {
-            //////////////////////////////////////////////////
-            // Read labels
-            //////////////////////////////////////////////////
-
-            if (sourceLines[lineNumber].contains(":")) // If getLabel found a label
+        if (sourceLines[lineNumber].contains(":")) // If getLabel found a label
             {
                 QString labelName = sourceLines[lineNumber].section(":", 0, 0);
 
@@ -446,7 +449,27 @@ void Machine::assemble(QString sourceCode)
                 if (labelPCMap.contains(labelName.toLower()))
                     throw duplicateLabel;
 
-                labelPCMap.insert(labelName.toLower(), PC->getValue()); // Add to map
+                // Add the label as a new key to the map. The assigned value is not final, being defined during
+                // the second pass
+                labelPCMap.insert(labelName.toLower(), 0);
+            }
+    }
+
+    //////////////////////////////////////////////////
+    // SECOND PASS: Reserve memory, update label values
+    //////////////////////////////////////////////////
+
+    PC->setValue(0);
+
+    for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
+    {
+        try
+        {
+            // Found a label definition; update its value
+            if (sourceLines[lineNumber].contains(":"))
+            {
+                QString labelName = sourceLines[lineNumber].section(":", 0, 0);
+                labelPCMap[labelName.toLower()] = PC->getValue();
                 addressCorrespondingLabel[PC->getValue()] = labelName;
                 sourceLines[lineNumber] = sourceLines[lineNumber].replace(labelName + ":", "").trimmed(); // Remove label from sourceLines
             }
@@ -462,7 +485,7 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    QStringList arguments = sourceLines[lineNumber].split(whitespace);
+                    QStringList arguments = sourceLines[lineNumber].section(whitespace, 1).split(whitespace, Qt::SkipEmptyParts);
                     int numBytes = calculateBytesToReserve(instruction, arguments);
                     reserveAssemblerMemory(numBytes, lineNumber);
                 }
@@ -487,7 +510,7 @@ void Machine::assemble(QString sourceCode)
 
 
     //////////////////////////////////////////////////
-    // SECOND PASS: Build instructions/defines
+    // THIRD PASS: Build instructions/defines
     //////////////////////////////////////////////////
 
     sourceLineCorrespondingAddress.fill(-1, sourceLines.size());
@@ -982,8 +1005,9 @@ void Machine::translateLabelToValue(QString& argument)
     }
 
     // Convert label to number string
-    if (labelPCMap.contains(argument.toLower()))
+    if (labelPCMap.contains(argument.toLower())){
         argument = QString::number(labelPCMap.value(argument.toLower()));
+    }
 
 }
 
