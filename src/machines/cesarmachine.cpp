@@ -163,6 +163,33 @@ AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddress
 
 }
 
+// Return how many bytes immediately after the instruction are used for
+// addressing modes
+int CesarMachine::getDecodedNumberOfExtraBytes(){
+    int numberOfBytes = 0;
+    if(
+        decodedAddressingModeCode1 == AddressingMode::INDEXED_BY_REG ||
+        ((decodedRegisterCode1 == PC->getBitCode()) && 
+        ((decodedAddressingModeCode1 == AddressingMode::AFTER_INCREMENTED) || (decodedAddressingModeCode1 == AddressingMode::AFTER_INCREMENTED_INDIRECT))
+        )
+    )
+    {
+        numberOfBytes += 2;
+    }
+
+    if(
+        decodedAddressingModeCode2 == AddressingMode::INDEXED_BY_REG ||
+        ((decodedRegisterCode2 == PC->getBitCode()) && 
+        ((decodedAddressingModeCode2 == AddressingMode::AFTER_INCREMENTED) || (decodedAddressingModeCode2 == AddressingMode::AFTER_INCREMENTED_INDIRECT))
+        )
+    )
+    {
+        numberOfBytes += 2;
+    }
+
+    return numberOfBytes;
+}
+
 
 void CesarMachine::fetchInstruction()
 {
@@ -696,9 +723,9 @@ void CesarMachine::executeInstruction(){
         //Acts as NOP if am = register, as per specification
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER) break;
 
-        int currentPC = getPCValue();
+        int returnPC = getPCValue() + getDecodedNumberOfExtraBytes();
         PutOnStack(decodedRegisterCode1);
-        setRegisterValue(decodedRegisterCode1, currentPC);
+        setRegisterValue(decodedRegisterCode1, returnPC);
         setPCValue(GetCurrentOperandAddress(2));
         break;
         }
