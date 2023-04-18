@@ -328,7 +328,7 @@ void CesarMachine::executeInstruction(){
         src_val = GetCurrentOperandValue(1);   
         dst_val = GetCurrentOperandValue(2);
         dst_addr = GetCurrentOperandAddress(2);
-        result = (src_val - dst_val) & 0xFFFF;
+        result = (dst_val - src_val) & 0xFFFF;
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER)
         {
             setRegisterValue(decodedRegisterCode2, result);
