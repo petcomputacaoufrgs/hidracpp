@@ -1052,7 +1052,8 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
         byte1 = instruction->getByteValue();
-        argumentToValue(argumentList[0], true, 2);
+        byte2 = argumentToValue(argumentList[0], true, 2);
+        byte2 = byte2 - PC->getValue();
 
         // Value must range from -128 to 127
         if(byte2 < -128 || byte2 > 127)
