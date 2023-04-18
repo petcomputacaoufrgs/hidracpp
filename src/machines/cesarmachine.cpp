@@ -1035,7 +1035,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
 
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_CODES:
         byte1 = instruction->getByteValue();
-        aux_str = argumentList.first();
+        aux_str = argumentList.first().toUpper();
         
         if(!conditional_codes_regex.exactMatch(aux_str))
         {
