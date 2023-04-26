@@ -76,7 +76,8 @@ void HidraHighlighter::initializeInstructionHighlightRule(Machine &machine)
     QTextCharFormat instructionsFormat;
 
     instructionsFormat.setFontWeight(QFont::Bold);
-    instructionsFormat.setForeground(Qt::darkMagenta);
+    //instructionsFormat.setForeground(Qt::darkMagenta);
+    instructionsFormat.setForeground(QColor(237, 175, 2));
 
     // Append to list of rules
     highlightRulesList.push_back(HighlightRule(instructionsPattern, instructionsFormat));
@@ -100,7 +101,7 @@ void HidraHighlighter::initializeDirectivesHighlightRule()
     QTextCharFormat directivesFormat;
 
     directivesFormat.setFontWeight(QFont::Bold);
-    directivesFormat.setForeground(Qt::blue);
+    directivesFormat.setForeground(QColor(68, 119, 176));
 
     // Append to list of rules
     highlightRulesList.push_back(HighlightRule(directivesPattern, directivesFormat));

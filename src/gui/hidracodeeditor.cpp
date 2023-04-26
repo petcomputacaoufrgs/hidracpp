@@ -76,7 +76,7 @@ void HidraCodeEditor::highlightCurrentLine()
     if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(240, 240, 240);
+        QColor lineColor = QColor(30, 30, 30);
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -101,7 +101,7 @@ void HidraCodeEditor::highlightPCLine(int pcLine)
         {
             QTextEdit::ExtraSelection selection;
 
-            QColor lineColor = QColor(255, 244, 128); // Yellow
+            QColor lineColor = QColor(255, 244, 128, 60); // Yellow (with some transparency)
 
             selection.format.setBackground(lineColor);
             selection.format.setProperty(QTextFormat::FullWidthSelection, true);
@@ -230,7 +230,7 @@ void HidraCodeEditor::clear()
 void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(), QColor(240, 240, 240)); // Light gray
+    painter.fillRect(event->rect(), QColor(57, 57, 57)); // Same as window, but slightly lighter
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -254,7 +254,7 @@ void HidraCodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event)
         {
             QString number = QString::number(blockNumber + 1);
             bool onCursorLine = (blockNumber == textCursor().blockNumber());
-            painter.setPen(onCursorLine ? QColor(64, 64, 64) : QColor(128, 128, 128)); // Dark gray (darker for cursor line)
+            painter.setPen(onCursorLine ? QColor(240, 240, 240) : QColor(160, 160, 160)); // Light gray (lighter for cursor line)
             painter.drawText(0, top, lineNumberArea->width() - 1, fontMetrics().height(), Qt::AlignRight, number);
         }
 
