@@ -752,14 +752,17 @@ void CesarMachine::PutOnStack (int registerId)
 {
     int stackValue = getRegisterValue("R6");
     int registerValueOffStack = getRegisterValue(registerId);
-    memoryWriteTwoByte(stackValue, registerValueOffStack);
+    // Stack writes backwards
+    memoryWrite(stackValue, registerValueOffStack & 0xFF00);
+    memoryWrite(stackValue - 1, registerValueOffStack & 0x00FF);
     setRegisterValue("R6",stackValue - 2);
 }
 
 void CesarMachine::GetOffStack(int registerId)
 {
     int stackValue = getRegisterValue("R6");
-    int memoryValue = getMemoryValue(stackValue);
+    // Stack writes backwards, so it must also read backwards
+    int memoryValue = (getMemoryValue(stackValue+2) << 8) |  getMemoryValue(stackValue+1);
     setRegisterValue(registerId, memoryValue);
     setRegisterValue("R6", stackValue + 2);
 }
