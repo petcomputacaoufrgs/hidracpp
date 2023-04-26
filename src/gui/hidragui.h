@@ -12,6 +12,7 @@
 #include <QVector>
 #include <QColor>
 #include <QSettings>
+#include <QPalette>
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
@@ -78,6 +79,10 @@ public:
     void disableDataChangedSignal();
     void enableStatusBarSignal();
     void disableStatusBarSignal();
+
+    // Qt palette configurations
+    static QPalette getDarkModePalette();
+
 
 public slots:
     void selectMachine(QString machineName);
@@ -221,6 +226,9 @@ private:
     bool showHexValues, showSignedData, showCharacters; // Value display modes
     bool fastExecute; // Don't update memory table on every instruction
     bool followPC;
+
+
+    
 };
 
 #endif // HIDRAGUI_H
