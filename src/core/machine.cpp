@@ -394,7 +394,7 @@ void Machine::assemble(QString sourceCode)
     static QRegExp matchComments(commentsPattern);
 
     static QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
-    static QRegExp whitespace("\\s+");
+    static QRegExp whitespace("(\\s|,)+");
 
 
 
@@ -561,7 +561,7 @@ void Machine::assemble(QString sourceCode)
 // Mnemonic must be lowercase
 void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine)
 {
-    static QRegExp whitespace("\\s+");
+    static QRegExp whitespace("(\\s|,)+");
 
     if (mnemonic == "equ"){
         // Special mnemonic "equ" sets a label to represent a constant value.

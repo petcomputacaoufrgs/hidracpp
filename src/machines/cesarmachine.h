@@ -17,8 +17,6 @@ class CesarMachine : public Machine
     public:
     CesarMachine();
 
-    int getDecodedNumberOfExtraBytes();
-
     void fetchInstruction();
     void decodeInstruction();
     void executeInstruction();

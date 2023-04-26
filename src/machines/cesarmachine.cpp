@@ -163,33 +163,6 @@ AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddress
 
 }
 
-// Return how many bytes immediately after the instruction are used for
-// addressing modes
-int CesarMachine::getDecodedNumberOfExtraBytes(){
-    int numberOfBytes = 0;
-    if(
-        decodedAddressingModeCode1 == AddressingMode::INDEXED_BY_REG ||
-        ((decodedRegisterCode1 == PC->getBitCode()) && 
-        ((decodedAddressingModeCode1 == AddressingMode::AFTER_INCREMENTED) || (decodedAddressingModeCode1 == AddressingMode::AFTER_INCREMENTED_INDIRECT))
-        )
-    )
-    {
-        numberOfBytes += 2;
-    }
-
-    if(
-        decodedAddressingModeCode2 == AddressingMode::INDEXED_BY_REG ||
-        ((decodedRegisterCode2 == PC->getBitCode()) && 
-        ((decodedAddressingModeCode2 == AddressingMode::AFTER_INCREMENTED) || (decodedAddressingModeCode2 == AddressingMode::AFTER_INCREMENTED_INDIRECT))
-        )
-    )
-    {
-        numberOfBytes += 2;
-    }
-
-    return numberOfBytes;
-}
-
 
 void CesarMachine::fetchInstruction()
 {
@@ -723,10 +696,14 @@ void CesarMachine::executeInstruction(){
         //Acts as NOP if am = register, as per specification
         if(decodedAddressingModeCode2 == AddressingMode::REGISTER) break;
 
-        int returnPC = getPCValue() + getDecodedNumberOfExtraBytes();
+        //Addressing mode must be executed prior for R7 to work
+        int subroutine_address = GetCurrentOperandAddress(2);
+
+        int returnPC = getPCValue();
         PutOnStack(decodedRegisterCode1);
         setRegisterValue(decodedRegisterCode1, returnPC);
-        setPCValue(GetCurrentOperandAddress(2));
+        
+        setPCValue(subroutine_address);
         break;
         }
 
@@ -753,8 +730,8 @@ void CesarMachine::PutOnStack (int registerId)
     int stackValue = getRegisterValue("R6");
     int registerValueOffStack = getRegisterValue(registerId);
     // Stack writes backwards
-    memoryWrite(stackValue, registerValueOffStack & 0xFF00);
     memoryWrite(stackValue - 1, registerValueOffStack & 0x00FF);
+    memoryWrite(stackValue, (registerValueOffStack & 0xFF00) >> 8);
     setRegisterValue("R6",stackValue - 2);
 }
 
@@ -1056,7 +1033,7 @@ void CesarMachine::buildInstruction(Instruction* instruction, QStringList argume
     case Instruction::InstructionGroup::GROUP_CONDITIONAL_BRANCHES:
         byte1 = instruction->getByteValue();
         byte2 = argumentToValue(argumentList[0], true, 2);
-        byte2 = byte2 - PC->getValue();
+        byte2 = byte2 - PC->getValue(); //BUG TA AQUI AQUI AQUI AQUI
 
         // Value must range from -128 to 127
         if(byte2 < -128 || byte2 > 127)
