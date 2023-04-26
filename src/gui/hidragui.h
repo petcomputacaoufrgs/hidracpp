@@ -172,6 +172,7 @@ private:
     void updateButtons();
     void updateWindowTitle();
     void updateInformation(); // Update counters or tracked value
+    void updateVisorWidget();
 
     void setInformationTrackedAddress(QString addressString); // Address tracked by information box
 

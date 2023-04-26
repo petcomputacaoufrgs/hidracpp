@@ -2,6 +2,7 @@
 #define VISORWIDGET_H
 
 #include <QWidget>
+#include <QLabel>
 
 namespace Ui {
 class VisorWidget;
@@ -18,8 +19,12 @@ public:
     
     void mousePressEvent(QMouseEvent *evt);
     void mouseMoveEvent(QMouseEvent *evt);
+    void initializeVisorArray();
+    void setValue(int position, int value);
 
     QPoint old_pos;
+    float image_width {0};
+    QList<QLabel*> labels;
 
 
 private:

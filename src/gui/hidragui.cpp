@@ -521,6 +521,7 @@ void HidraGui::updateMachineInterfaceComponents(bool force, bool updateInstructi
     updateCodeEditor();
     updateButtons();
     updateInformation();
+    updateVisorWidget();
 }
 
 void HidraGui::updateMemoryTable(bool force, bool updateInstructionStrings)
@@ -763,6 +764,23 @@ void HidraGui::updateInformation()
     }
 
     ui->textInformation->setText(informationString);
+}
+
+void HidraGui::updateVisorWidget()
+{
+    int visor_index = 0;
+    int visor_limit = 36;
+    int visor_range = 65500;
+    
+    for (visor_index = 0; visor_index < visor_limit; visor_index++)
+    {
+        int address = visor_range + visor_index;
+        int value = machine->getMemoryValue(address);
+
+        visorWidget.setValue(visor_index, value);
+        
+    }
+
 }
 
 void HidraGui::setInformationTrackedAddress(QString addressString)
@@ -1582,3 +1600,4 @@ void HidraGui::on_actionFindReplace_triggered()
 {
     findReplaceDialog->show();
 }
+

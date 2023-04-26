@@ -1,17 +1,20 @@
 #include "visorwidget.h"
 #include "ui_visorwidget.h"
 #include <QtGui>
+#include <QLabel>
+#include <QChar>
+#include <iostream>
+
 
 VisorWidget::VisorWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VisorWidget)
 {
     ui->setupUi(this);
+    
     this->setAttribute(Qt::WA_QuitOnClose, false);
     this->setWindowFlags(Qt::FramelessWindowHint);
-    ui->textBrowser->setPlainText("BOMBA");
-    QFont galeano("Times", 33, QFont::Bold);
-    ui->textBrowser->setFont(galeano);
+    initializeVisorArray(); 
 }
 
 
@@ -34,3 +37,41 @@ void  VisorWidget::mouseMoveEvent(QMouseEvent *evt)
     old_pos = evt->globalPos();
 }
 
+void VisorWidget::setValue(int position, int value)
+{
+// Position the QLabel widgets manually
+    int x = 10; // Starting X position
+    int y = 10; // Starting Y position
+    // QString transitionToQString = QChar::fromLatin1(transitionToChar);
+        
+    labels[0]->setGeometry(10,y,width(), height());
+    for (int i = 0; i < labels.size(); i++)
+    {
+        labels[i]->setGeometry((i*position/1.15)+10, y, width(), height()); // Set size to 20x20 (adjust as needed)
+         // Increase X position for the next label
+    }
+
+// Update the text of the QLabel widgets as needed
+    
+    for (int i = 0; i < 36; i++)
+    {
+        labels[i]->setText("Ç"); //
+    }
+
+}
+
+void VisorWidget::initializeVisorArray()
+{
+   // Set up a monospaced font
+    QFont font("Courier", 12); // 12 is a suitable font size for most displays
+    font.setStyleHint(QFont::Monospace);
+    
+
+    // Create QLabel widgets for each position
+    for (int i = 0; i < 36; i++) 
+    {
+        QLabel *label = new QLabel(" ", this); // Set initial text to a space character
+        label->setFont(font);
+        labels.append(label);
+    }
+}
