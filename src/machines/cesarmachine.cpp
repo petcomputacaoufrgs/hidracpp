@@ -311,8 +311,8 @@ void CesarMachine::executeInstruction(){
             memoryWriteTwoByte(dst_addr, result);
         }
         // REMEMBER TO REVIEW THE LOGIC BEHIND IT
-        setCarry(toSigned(src_val) < toSigned(dst_val));
-        setOverflow(toSigned(src_val) + toSigned(-dst_val) != toSigned(result));
+        setCarry(toSigned(dst_val) < toSigned(src_val));
+        setOverflow(toSigned(dst_val) + toSigned(-src_val) != toSigned(result));
         updateFlags(result);
         break;
 

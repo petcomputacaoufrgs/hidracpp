@@ -218,7 +218,7 @@ void CesarMachineTest::test_CESAR_SUB_data()
     QTest::addColumn<int>("flag_V");
     QTest::addColumn<int>("flag_C");
                                     /*   src_val  dst_val   dst_res     N      Z     V       C       */                              
-    QTest::newRow("Register-Register")   << 15      << 5     << 10    << 0  << 0   << 0    << 0;
+    QTest::newRow("Register-Register")   << 5      << 15     << 10    << 0  << 0   << 0    << 0;
     
 } 
 
