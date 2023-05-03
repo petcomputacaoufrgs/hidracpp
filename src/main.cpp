@@ -12,6 +12,7 @@
  *******************************************************************************/
 
 #include <QApplication>
+#include <QPalette>
 #include "gui/hidragui.h"
 
 int main(int argc, char *argv[])
@@ -22,6 +23,13 @@ int main(int argc, char *argv[])
     a.setApplicationName("Hidra");
 
     HidraGui w;
+
+    QPalette dark_mode = HidraGui::getDarkModePalette();
+
+    // Dark mode configuration
+    a.setStyle("Fusion");
+    a.setPalette(dark_mode);
+    a.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
 
     if (argc == 2)
         w.load(QString(argv[1]), false); // Load file

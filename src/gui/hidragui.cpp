@@ -188,7 +188,6 @@ void HidraGui::loadConfFile()
 }
 
 
-
 //////////////////////////////////////////////////
 // Internal initialize methods
 //////////////////////////////////////////////////
@@ -381,7 +380,7 @@ void HidraGui::initializeInstructionsList()
     {
         QLabel *instructionText = new QLabel(this);
         instructionText->setTextFormat(Qt::RichText);
-
+        
         // Label text
         instructionText->setText(instruction->getMnemonic().toUpper());
 
@@ -586,13 +585,13 @@ void HidraGui::updateMemoryTable(bool force, bool updateInstructionStrings)
 
         // Get new color
         if (sourceAndMemoryInSync && row == finalOperandAddress)
-            rowColor = QColor(255, 202, 176); // Red
+            rowColor = QColor(255, 202, 176, 60); // Red
         else if (sourceAndMemoryInSync && (row == intermediateAddress || row == intermediateAddress2))
-            rowColor = QColor(255, 228, 148); // Orange
+            rowColor = QColor(255, 228, 148, 60); // Orange
         else if (sourceAndMemoryInSync && currentLine == machine->getAddressCorrespondingSourceLine(row) && currentLine >= 0)
-            rowColor = QColor(255, 244, 128); // Yellow
+            rowColor = QColor(255, 244, 128, 60); // Yellow
         else
-            rowColor = Qt::white;
+            rowColor = QColor(30, 30, 30); //Must be same as base TO-DO Palette must be held by class
 
         // Update row color if needed
         if (previousRowColor[row] != rowColor)
@@ -650,7 +649,7 @@ void HidraGui::updateStackTable()
         // Column 2: Byte value
         //////////////////////////////////////////////////
 
-        stackModel.item(row, ColumnStackValue)->setForeground((stackAddress > spValue) ? colorGrayedOut : Qt::black); // Inaccessible stack items grayed out
+        stackModel.item(row, ColumnStackValue)->setForeground((stackAddress > spValue) ? colorGrayedOut : Qt::white); // Inaccessible stack items grayed out TO-DO: USE PALETTE
         stackModel.item(row, ColumnStackValue)->setText(valueToString(value, showHexValues, showSignedData));
     }
 
@@ -1001,6 +1000,38 @@ void HidraGui::enableStatusBarSignal()
 void HidraGui::disableStatusBarSignal()
 {
     disconnect(ui->statusBar, SIGNAL(messageChanged(QString)), this, SLOT(statusBarMessageChanged(QString)));
+}
+
+// Creates a dark mode palette
+QPalette HidraGui::getDarkModePalette()
+{
+
+    QPalette palette;
+    palette.setColor(QPalette::Window, QColor(53, 53, 53));
+    palette.setColor(QPalette::WindowText, Qt::white);
+    palette.setColor(QPalette::Inactive, QPalette::ToolTipText, Qt::white);
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, QColor(127, 127, 127));
+    palette.setColor(QPalette::Base, QColor(30, 30, 30));
+    palette.setColor(QPalette::AlternateBase, QColor(66, 66, 66));
+    palette.setColor(QPalette::ToolTipBase, Qt::white);
+    palette.setColor(QPalette::ToolTipText, Qt::white);
+    palette.setColor(QPalette::Text, Qt::white);
+    palette.setColor(QPalette::PlaceholderText, Qt::red);
+    palette.setColor(QPalette::Disabled, QPalette::Text, QColor(127, 127, 127));
+    palette.setColor(QPalette::Dark, QColor(35, 35, 35));
+    palette.setColor(QPalette::Shadow, QColor(20, 20, 20));
+    palette.setColor(QPalette::Button, QColor(53, 53, 53));
+    palette.setColor(QPalette::ButtonText, Qt::white);
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, QColor(127, 127, 127));
+    palette.setColor(QPalette::BrightText, Qt::red);
+    palette.setColor(QPalette::Link, QColor(42, 130, 218));
+    palette.setColor(QPalette::Highlight, QColor(170, 170, 170, 80));
+    palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(80, 80, 80));
+    palette.setColor(QPalette::HighlightedText, Qt::white);
+    palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QColor(127, 127, 127));
+    palette.setColor(QPalette::NoRole, Qt::red);
+    return palette;
+
 }
 
 void HidraGui::clearErrorsField()
