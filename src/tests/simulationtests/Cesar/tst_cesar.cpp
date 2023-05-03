@@ -117,8 +117,7 @@ void CesarMachineTest::init()
     testedMachine.setRegisterValue("R3", 0);
     testedMachine.setRegisterValue("R4", 0);
     testedMachine.setRegisterValue("R5", 0);
-    testedMachine.setRegisterValue("SP", 0);
-    testedMachine.setRegisterValue("PC", 0);
+    testedMachine.setRegisterValue("R6", 0);
     testedMachine.setRunning(true);
 }
 
