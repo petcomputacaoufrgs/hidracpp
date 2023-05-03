@@ -38,56 +38,83 @@ void  VisorWidget::mouseMoveEvent(QMouseEvent *evt)
 }
 
 void VisorWidget::setValue(int position, int value)
-{
-// Position the QLabel widgets manually
-    
+{   
     char toPrint = char(value);
     
     QChar qchar = QChar(toPrint);
-        
-   
 
 // Update the text of the QLabel widgets as needed
-    
     labels[position]->setText(qchar);
+        
+
+    QChar seila = QChar('L');
+    labels[1]->setText(seila);
+    seila = QChar('o');
+    labels[2]->setText(seila);
+    seila = QChar('b');
+    labels[3]->setText(seila);
+    seila = QChar('o');
+    labels[4]->setText(seila);
+    seila = QChar(' ');
+    labels[5]->setText(seila);
+    seila = QChar('P');
+    labels[6]->setText(seila);
+    seila = QChar('i');
+    labels[7]->setText(seila);
+    seila = QChar('d');
+    labels[8]->setText(seila);
+    seila = QChar('a');
+    labels[9]->setText(seila);
+    seila = QChar('o');
+    labels[10]->setText(seila);
 }
+
 
 void VisorWidget::initializeVisorArray()
 {
-    // QPixmap pixmap(":/Images/visor.png");
-   // Set up a monospaced font
-    QFont font("Led Board", 12); // 12 is a suitable font size for most displays
-    font.setStyleHint(QFont::Monospace);
+    // Get custom font
+    int font_id = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
+    QFont font_char = QFontDatabase::applicationFontFamilies(font_id).at(0);
+    QFont font_position = QFontDatabase::applicationFontFamilies(font_id).at(0);
+    font_char.setPointSize(40);
+    font_position.setPointSize(12);
+
+    char_width = width()/36;
 
     int x = 10; // Starting X position
     int y = 10; // Starting Y position
-    
 
-    // Create QLabel widgets for each position
+    // Create vectors of QLabels
+    // Each visor position has its own Qlabel
+    // Position in visor is accessed by its respective position in QLabels vector (example: nth position in visor = label[nth])
     for (int i = 0; i < 36; i++) 
     {
         QLabel *label = new QLabel(" ", this); // Set initial text to a space character
-        label->setFont(font);
+        label->setFont(font_char);
         labels.append(label);
-        label->setStyleSheet("QLabel { background-color : white; color : black; }");
-        // label->setPixmap(pixmap);
+        label->setStyleSheet("QLabel { background-color : black; color : lime; }");
 
         QLabel *label_number = new QLabel(" ", this); // Set initial text to a space character
-        label_number->setFont(font);
+        label_number->setFont(font_position);
         labels_number.append(label_number);
+        label_number->setStyleSheet("QLabel { background-color : black; color : white; }");
     }
 
-    labels[0]->setGeometry(10,y,width(), height());
-    labels_number[0]->setGeometry(10,y+20,width(), height());
      
     for (int i = 0; i < labels.size(); i++)
     {
-        labels[i]->setGeometry((i*35/1.15)+10, y, width(), height()); // Set size to 20x20 (adjust as needed)
-        labels_number[i]->setGeometry((i*35/1.15)+10, y+20, width(), height()); 
-        // Increase X position for the next label
+        labels[i]->setGeometry((i*width())/36, 0, char_width + 1, 70);
+        labels_number[i]->setGeometry(i*width()/36 + 7, 60, char_width + 1, 30); 
 
         QString qchar = QString::number(i);
         labels_number[i]->setText(qchar);
     }
+
+
+    // chinelagem, label to paint balck empty space in labels_number (because of the offset of + 7)
+    offset = new QLabel(" ", this);
+
+    offset->setGeometry(0, 60, 7, 30); 
+    offset->setStyleSheet("QLabel { background-color : black; color : lime; }");
 
 }

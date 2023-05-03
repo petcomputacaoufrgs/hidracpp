@@ -23,9 +23,10 @@ public:
     void setValue(int position, int value);
 
     QPoint old_pos;
-    float image_width {0};
+    int char_width {0};
     QList<QLabel*> labels;
     QList<QLabel*> labels_number;
+    QLabel *offset;
 
 
 private:

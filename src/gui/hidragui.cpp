@@ -30,6 +30,15 @@ HidraGui::HidraGui(QWidget *parent) :
     ui->setupUi(this);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     
+    // 0 if found font, -1 if not found
+   /*  int font_status = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
+    QString family = QFontDatabase::applicationFontFamilies(font_status).at(0);
+    QFont seila ("LEDCalculator", 16); */
+
+    /* int font_id = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
+    QString family = QFontDatabase::applicationFontFamilies(font_id).at(0);
+    QFont monospace(family); */
+
 
     // Change global font
     QFontDatabase fontDatabase;
@@ -40,6 +49,7 @@ HidraGui::HidraGui(QWidget *parent) :
         font.setPointSize(9);
         this->setFont(font);
     }
+
 
     codeEditor  = new HidraCodeEditor();
     highlighter = new HidraHighlighter(codeEditor->document());
