@@ -25,6 +25,7 @@ public:
     QPoint old_pos;
     float image_width {0};
     QList<QLabel*> labels;
+    QList<QLabel*> labels_number;
 
 
 private:

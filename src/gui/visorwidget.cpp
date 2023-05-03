@@ -40,31 +40,27 @@ void  VisorWidget::mouseMoveEvent(QMouseEvent *evt)
 void VisorWidget::setValue(int position, int value)
 {
 // Position the QLabel widgets manually
-    int x = 10; // Starting X position
-    int y = 10; // Starting Y position
-    // QString transitionToQString = QChar::fromLatin1(transitionToChar);
+    
+    char toPrint = char(value);
+    
+    QChar qchar = QChar(toPrint);
         
-    labels[0]->setGeometry(10,y,width(), height());
-    for (int i = 0; i < labels.size(); i++)
-    {
-        labels[i]->setGeometry((i*position/1.15)+10, y, width(), height()); // Set size to 20x20 (adjust as needed)
-         // Increase X position for the next label
-    }
+   
 
 // Update the text of the QLabel widgets as needed
     
-    for (int i = 0; i < 36; i++)
-    {
-        labels[i]->setText("Ç"); //
-    }
-
+    labels[position]->setText(qchar);
 }
 
 void VisorWidget::initializeVisorArray()
 {
+    // QPixmap pixmap(":/Images/visor.png");
    // Set up a monospaced font
-    QFont font("Courier", 12); // 12 is a suitable font size for most displays
+    QFont font("Led Board", 12); // 12 is a suitable font size for most displays
     font.setStyleHint(QFont::Monospace);
+
+    int x = 10; // Starting X position
+    int y = 10; // Starting Y position
     
 
     // Create QLabel widgets for each position
@@ -73,5 +69,25 @@ void VisorWidget::initializeVisorArray()
         QLabel *label = new QLabel(" ", this); // Set initial text to a space character
         label->setFont(font);
         labels.append(label);
+        label->setStyleSheet("QLabel { background-color : white; color : black; }");
+        // label->setPixmap(pixmap);
+
+        QLabel *label_number = new QLabel(" ", this); // Set initial text to a space character
+        label_number->setFont(font);
+        labels_number.append(label_number);
     }
+
+    labels[0]->setGeometry(10,y,width(), height());
+    labels_number[0]->setGeometry(10,y+20,width(), height());
+     
+    for (int i = 0; i < labels.size(); i++)
+    {
+        labels[i]->setGeometry((i*35/1.15)+10, y, width(), height()); // Set size to 20x20 (adjust as needed)
+        labels_number[i]->setGeometry((i*35/1.15)+10, y+20, width(), height()); 
+        // Increase X position for the next label
+
+        QString qchar = QString::number(i);
+        labels_number[i]->setText(qchar);
+    }
+
 }
