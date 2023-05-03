@@ -63,9 +63,9 @@ public:
     //////////////////////////////////////////////////
 
     ///Do a step of the simulation
-    void step();
+    virtual void step();
     ///Get next instruction
-    void fetchInstruction();
+    virtual void fetchInstruction();
     ///Decode the instruction
     virtual void decodeInstruction();
     ///Execute the instruction
@@ -84,7 +84,7 @@ public:
 
     /// Returns a valid address based on a value, removing excess bits (overflow)
     int address(int value);
-    int toSigned(int unsignedByte);
+    virtual int toSigned(int unsignedByte);
 
 
 
@@ -95,15 +95,17 @@ public:
     // Assembly
     void assemble(QString sourceCode);
     void obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine);
-    void buildInstruction(QString mnemonic, QString arguments);
+    virtual void buildInstruction(Instruction* instruction, QStringList argumentList);
     void emitError(int lineNumber, Machine::ErrorCode errorCode);
 
     // Assembler memory
     void clearAssemblerData();
     void setAssemblerMemoryNext(int value); // Increments PC
+    void setAssemblerMemoryNextTwoByte(int value);
     void copyAssemblerMemoryToMemory();
     void reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine);
-    virtual int calculateBytesToReserve(QString addressArgument);
+    bool isAssemblerMemoryReserved(int address); //Checks if an address in the assembler memory is reserved
+    virtual int calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments);
 
     // Assembler checks
     bool isValidValue(QString valueString, int min, int max);
@@ -117,6 +119,7 @@ public:
     QStringList splitInstructionArguments(QString const& arguments, Instruction const& instruction);
     void extractArgumentAddressingModeCode(QString &argument, AddressingMode::AddressingModeCode &addressingModeCode);
     int convertToUnsigned(int value, int numberOfBytes);
+    virtual void translateLabelToValue(QString& argument);
     int argumentToValue(QString argument, bool isImmediate, int immediateNumBytes = 1);
     int stringToInt(QString valueString);
 
@@ -128,16 +131,19 @@ public:
 
     int  memoryRead(int address); // Increments accessCount
     void memoryWrite(int address, int value); // Increments accessCount
+    void memoryWriteTwoByte(int address, int value);
     int  memoryReadNext(); // Returns value pointed to by PC, then increments PC; Increments accessCount
 
     virtual int GetCurrentOperandAddress(); // increments accessCount
     int GetCurrentOperandValue(); // increments accessCount
     int GetCurrentJumpAddress(); // increments accessCount
+    int memoryReadTwoByteAddress(int address);
+
+    int getMemoryTwoByteAddress(int address);
 
 
 
     //////////////////////////////////////////////////
-    // Import/Export memory
     //////////////////////////////////////////////////
 
     ///Set up the machine's memory from a .mem file
@@ -153,7 +159,8 @@ public:
 
     ///Given the current position of the program counter, update the interpretation of the bytes
     void updateInstructionStrings();
-    QString generateInstructionString(int address, int &argumentsSize); // TODO: Fix Pericles
+    ///Get a string containing info about the currently decoded instruction
+    virtual QString getCurrentInstructionString(int &argumentBytes); // TODO: Fix Pericles
     virtual QString generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize);
 
 
@@ -244,10 +251,12 @@ protected:
     */
     int fetchedValue;
 
-    AddressingMode::AddressingModeCode decodedAdressingModeCode1;
-    AddressingMode::AddressingModeCode decodedAdressingModeCode2;
+    AddressingMode::AddressingModeCode decodedAddressingModeCode1;
+    AddressingMode::AddressingModeCode decodedAddressingModeCode2;
     QString decodedRegisterName1;
     QString decodedRegisterName2;
+    int decodedRegisterCode1;
+    int decodedRegisterCode2;
     int decodedExtraValue;
 
     int decodedImmediateAddress;
@@ -286,6 +295,8 @@ protected:
     QHash<QString, int> labelPCMap;
     ///Instruction descriptions
     QHash<QString, QString> descriptions;
+    ///Amount of bytes retrieved when fetching
+    int fetchByteSize = 1;
 
 
     bool buildSuccessful;

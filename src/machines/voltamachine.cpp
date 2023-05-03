@@ -81,7 +81,7 @@ void VoltaMachine::executeInstruction()
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
 
     int immediateAddress = decodedImmediateAddress;
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
 
     switch (instructionCode)
     {

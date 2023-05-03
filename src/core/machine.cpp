@@ -63,8 +63,8 @@ void Machine::fetchInstruction()
 
 void Machine::decodeInstruction()
 {
-    decodedAdressingModeCode1 = extractAddressingModeCode(fetchedValue);
-    decodedRegisterName1 = extractRegisterName(fetchedValue);
+    decodedAddressingModeCode1 = extractAddressingModeCode(fetchedValue);
+    decodedRegisterName1 = extractRegisterName(fetchedValue); //TO-DO: Use decoded register codes
 
     if (currentInstruction && currentInstruction->getNumBytes() > 1)
     {
@@ -79,10 +79,10 @@ void Machine::executeInstruction()
     int immediateAddress = decodedImmediateAddress;
     Instruction::InstructionCode instructionCode;
     instructionCode = (currentInstruction) ? currentInstruction->getInstructionCode() : Instruction::NOP;
-    bool isImmediate = (decodedAdressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
+    bool isImmediate = (decodedAddressingModeCode1 == AddressingMode::IMMEDIATE); // Used to invalidate immediate jumps
 
     QString registerName = decodedRegisterName1;
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
 
     switch (instructionCode)
     {
@@ -394,7 +394,7 @@ void Machine::assemble(QString sourceCode)
     static QRegExp matchComments(commentsPattern);
 
     static QRegExp validLabel("[a-z_][a-z0-9_]*"); // Validates label names (must start with a letter/underline, may have numbers)
-    static QRegExp whitespace("\\s+");
+    static QRegExp whitespace("(\\s|,)+");
 
 
 
@@ -420,23 +420,26 @@ void Machine::assemble(QString sourceCode)
     }
 
 
+    /*
 
-    //////////////////////////////////////////////////
-    // FIRST PASS: Read labels, reserve memory
-    //////////////////////////////////////////////////
+    The assembler does 3 passes to properly assemble all instructions:
+    FIRST PASS: Get all labels
+    SECOND PASS: Reserve bytes for every instruction. Labels have their values updated as bytes are being
+    reserved
+    THIRD PASS: Labels have their proper values and instructions don't overlap. Instructions can now be written
+    to memory
+
+    */
 
     clearAssemblerData();
-    PC->setValue(0);
+
+    //////////////////////////////////////////////////
+    // FIRST PASS: Read labels
+    //////////////////////////////////////////////////
 
     for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
     {
-        try
-        {
-            //////////////////////////////////////////////////
-            // Read labels
-            //////////////////////////////////////////////////
-
-            if (sourceLines[lineNumber].contains(":")) // If getLabel found a label
+        if (sourceLines[lineNumber].contains(":")) // If getLabel found a label
             {
                 QString labelName = sourceLines[lineNumber].section(":", 0, 0);
 
@@ -446,7 +449,27 @@ void Machine::assemble(QString sourceCode)
                 if (labelPCMap.contains(labelName.toLower()))
                     throw duplicateLabel;
 
-                labelPCMap.insert(labelName.toLower(), PC->getValue()); // Add to map
+                // Add the label as a new key to the map. The assigned value is not final, being defined during
+                // the second pass
+                labelPCMap.insert(labelName.toLower(), 0);
+            }
+    }
+
+    //////////////////////////////////////////////////
+    // SECOND PASS: Reserve memory, update label values
+    //////////////////////////////////////////////////
+
+    PC->setValue(0);
+
+    for (int lineNumber = 0; lineNumber < sourceLines.size(); lineNumber++)
+    {
+        try
+        {
+            // Found a label definition; update its value
+            if (sourceLines[lineNumber].contains(":"))
+            {
+                QString labelName = sourceLines[lineNumber].section(":", 0, 0);
+                labelPCMap[labelName.toLower()] = PC->getValue();
                 addressCorrespondingLabel[PC->getValue()] = labelName;
                 sourceLines[lineNumber] = sourceLines[lineNumber].replace(labelName + ":", "").trimmed(); // Remove label from sourceLines
             }
@@ -462,14 +485,8 @@ void Machine::assemble(QString sourceCode)
                 const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    int numBytes = instruction->getNumBytes();
-
-                    if (numBytes == 0) // If instruction has variable number of bytes
-                    {
-                        QString addressArgument = sourceLines[lineNumber].section(whitespace, -1); // Last argument
-                        numBytes = calculateBytesToReserve(addressArgument);
-                    }
-
+                    QStringList arguments = sourceLines[lineNumber].section(whitespace, 1).split(whitespace, Qt::SkipEmptyParts);
+                    int numBytes = calculateBytesToReserve(instruction, arguments);
                     reserveAssemblerMemory(numBytes, lineNumber);
                 }
                 else // Directive
@@ -493,7 +510,7 @@ void Machine::assemble(QString sourceCode)
 
 
     //////////////////////////////////////////////////
-    // SECOND PASS: Build instructions/defines
+    // THIRD PASS: Build instructions/defines
     //////////////////////////////////////////////////
 
     sourceLineCorrespondingAddress.fill(-1, sourceLines.size());
@@ -510,10 +527,11 @@ void Machine::assemble(QString sourceCode)
                 QString mnemonic  = sourceLines[lineNumber].section(whitespace, 0, 0).toLower();
                 QString arguments = sourceLines[lineNumber].section(whitespace, 1); // Everything after mnemonic
 
-                const Instruction *instruction = getInstructionFromMnemonic(mnemonic);
+                Instruction *instruction = getInstructionFromMnemonic(mnemonic);
                 if (instruction != NULL)
                 {
-                    buildInstruction(mnemonic, arguments);
+                    QStringList argumentList = splitInstructionArguments(arguments, *instruction);
+                    buildInstruction(instruction, argumentList);
                 }
                 else // Directive
                 {
@@ -543,16 +561,38 @@ void Machine::assemble(QString sourceCode)
 // Mnemonic must be lowercase
 void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnly, int sourceLine)
 {
-    static QRegExp whitespace("\\s+");
+    static QRegExp whitespace("(\\s|,)+");
 
-    if (mnemonic == "org")
+    if (mnemonic == "equ"){
+        // Special mnemonic "equ" sets a label to represent a constant value.
+        QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
+        int numberOfArguments = argumentList.size();
+        if (numberOfArguments != 1)
+            throw wrongNumberOfArguments;
+        int value = argumentToValue(argumentList.first(), true, fetchByteSize);
+        // Override assigned label value
+        QString label = addressCorrespondingLabel[PC->getValue()].toLower();
+        
+        // EQU must be preceded by label
+        // TO-DO: We need a better way of sending error messages!
+        if (label == ""){
+            throw invalidLabel;
+        }
+        
+        labelPCMap[label] = value;
+
+    }
+    else if (mnemonic == "org")
     {
         QStringList argumentList = arguments.split(whitespace, QString::SkipEmptyParts);
         int numberOfArguments = argumentList.size();
 
         if (numberOfArguments != 1)
             throw wrongNumberOfArguments;
-        if (!isValidOrg(argumentList.first()))
+            
+        QString first_arg = argumentList.first();
+        translateLabelToValue(first_arg);
+        if (!isValidOrg(first_arg))
             throw invalidAddress;
 
         PC->setValue(stringToInt(argumentList.first()));
@@ -630,11 +670,8 @@ void Machine::obeyDirective(QString mnemonic, QString arguments, bool reserveOnl
     }
 }
 
-void Machine::buildInstruction(QString mnemonic, QString arguments)
+void Machine::buildInstruction(Instruction* instruction, QStringList argumentList)
 {
-    Instruction *instruction = getInstructionFromMnemonic(mnemonic);
-    QStringList argumentList = splitInstructionArguments(arguments, *instruction);
-
     AddressingMode::AddressingModeCode addressingModeCode = AddressingMode::DIRECT; // Default mode
     QStringList instructionArguments = instruction->getArguments();
     bool isImmediate = false;
@@ -686,62 +723,34 @@ void Machine::buildInstruction(QString mnemonic, QString arguments)
 QStringList Machine::splitInstructionArguments(QString const& arguments, Instruction const& instruction)
 {
     // Regex to split.
-    static QRegExp separator("\\s*(\\s|,)\\s*");
-    // Regex to detect if two arguments in final position are actually two arguments or an address.
-    static QRegExp whitespace("\\s");
+    // Daedalus treats both commas and whitespaces as interchangeable separators
+    static QRegExp separator("(\\s|,)+");
+    QStringList argumentList = arguments.split(separator, Qt::SkipEmptyParts);
 
-    // To be returned.
-    QStringList argumentList;
-    // Specification of the instruction's arguments.
-    QStringList instructionArgs = instruction.getArguments();
-    // To keep track of the last separator, so we can combine two final arguments in one address,
-    // if the instruction can take addressing mode, and we exceed the number of arguments.
-    QString lastSeparator;
-    // To keep track if we actually have a last separator.
-    bool hasLastSep = false;
-    // To keep track on where we are in the arguments' string.
-    int index = 0;
-
-    // The split loop.
-    while (index < arguments.size() && argumentList.length() <= instruction.getNumberOfArguments())
+    // Detecting if found less arguments than expected or more than one extra argument
+    int n_found_args = argumentList.length();
+    int n_expected_args = instruction.getNumberOfArguments();
+    if((n_found_args < n_expected_args) || (n_found_args > n_expected_args + 1))
     {
-        QString argument;
-        // Find where there is a separator.
-        int newIndex = arguments.indexOf(separator, index);
-        if (newIndex >= 0)
+        throw wrongNumberOfArguments;
+    }
+    // If an additional argument was found, check if the instruction allows it
+    // if it does, it's treated as an addressing mode symbol
+    if(n_found_args == n_expected_args + 1)
+    {
+        if(!instruction.getArguments().contains("a"))
         {
-            // Then there is a separator.
-            hasLastSep = true;
-            // Save this separator.
-            lastSeparator = arguments.mid(newIndex, separator.matchedLength());
-            // Take the argument part.
-            argument = arguments.mid(index, newIndex - index);;
-            // Update index beyond the separator.s
-            index = newIndex + separator.matchedLength();
+            throw wrongNumberOfArguments;    
         }
         else
         {
-            // The last argument.
-            argument = arguments.right(arguments.size() - index);
-            index = arguments.size();
-        }
-        argumentList.push_back(argument);
-    }
-
-    // Detecting if found < expected or found > expected + 1.
-    if (index < arguments.size() || argumentList.length() < instruction.getNumberOfArguments())
-        throw wrongNumberOfArguments;
-
-    if (argumentList.length() == instruction.getNumberOfArguments() + 1)
-    {
-        // Found == expected + 1 only allowed if addressing mode is allowed, and we have a last
-        // separator. Also, it must not contain whitespace.
-        if (!instructionArgs.contains("a") || !hasLastSep || lastSeparator.contains(whitespace))
-            throw wrongNumberOfArguments;
-        // Joining two last arguments with separator, probably an addressing mode.
-        QString last = argumentList.takeLast();
-        argumentList.back() += lastSeparator;
-        argumentList.back() += last;
+            // The "third argument" is actually an addressing mode symbol
+            // (that contains a separator such as ,/\\s), so
+            // it is actually part of the second parameter.
+            QString last_arg = argumentList.takeLast();
+            argumentList.back() += ","; //The separator doesn't matter, but we use , for the regexes (RAMSES)
+            argumentList.back() += last_arg;
+        } 
     }
 
     return argumentList;
@@ -794,6 +803,28 @@ void Machine::setAssemblerMemoryNext(int value)
     incrementPCValue();
 }
 
+void Machine::setAssemblerMemoryNextTwoByte(int value)
+{
+    int first_byte, second_byte;
+    if(littleEndian)
+    {
+        first_byte = value & 0b11111111;
+        second_byte = (value & 0b1111111100000000) >> 8; 
+    }
+    else
+    {
+        first_byte = (value & 0b1111111100000000) >> 8;
+        second_byte = value & 0b11111111;         
+    }
+
+    assemblerMemory[PC->getValue()]->setValue(first_byte);
+    assemblerMemory[PC->getValue() + 1]->setValue(second_byte);
+
+    incrementPCValue(2);
+
+}
+
+
 // Copies assemblerMemory to machine's memory
 void Machine::copyAssemblerMemoryToMemory()
 {
@@ -822,10 +853,15 @@ void Machine::reserveAssemblerMemory(int sizeToReserve, int associatedSourceLine
     }
 }
 
-// Method for machines that require the addressing mode to reserve memory.
-int Machine::calculateBytesToReserve(QString)
+bool Machine::isAssemblerMemoryReserved(int address)
 {
-    return 0;
+    return reserved[address];
+}
+
+// Calculates the amount of bytes an instruction should reserve.
+int Machine::calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments)
+{
+    return instruction->getNumBytes();
 }
 
 bool Machine::isValidValue(QString valueString, int min, int max)
@@ -950,9 +986,8 @@ void Machine::extractArgumentAddressingModeCode(QString &argument, AddressingMod
     }
 }
 
-int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNumBytes)
+void Machine::translateLabelToValue(QString& argument)
 {
-    static QRegExp matchChar("'.'");
     static QRegExp labelOffset("(.+)(\\+|\\-)(.+)"); // (label) (+|-) (offset)
 
     // Convert label with +/- offset to number
@@ -970,8 +1005,17 @@ int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNu
     }
 
     // Convert label to number string
-    if (labelPCMap.contains(argument.toLower()))
+    if (labelPCMap.contains(argument.toLower())){
         argument = QString::number(labelPCMap.value(argument.toLower()));
+    }
+
+}
+
+int Machine::argumentToValue(QString argument, bool isImmediate, int immediateNumBytes)
+{
+    static QRegExp matchChar("'.'");
+
+    translateLabelToValue(argument);
 
     if (isImmediate)
     {
@@ -1019,6 +1063,25 @@ void Machine::memoryWrite(int address, int value)
     setMemoryValue(address, value);
 }
 
+void Machine::memoryWriteTwoByte(int address, int value)
+{
+    accessCount += 2;
+    int first_byte, second_byte;
+    if(littleEndian)
+    {
+        first_byte = value & 0b11111111;
+        second_byte = (value & 0b1111111100000000) >> 8; 
+    }
+    else
+    {
+        first_byte = (value & 0b1111111100000000) >> 8;
+        second_byte = value & 0b11111111;         
+    }
+
+    setMemoryValue(address, first_byte);
+    setMemoryValue(address+1, second_byte);
+}
+
 int Machine::memoryReadNext()
 {
     int value = memoryRead(getPCValue());
@@ -1026,11 +1089,27 @@ int Machine::memoryReadNext()
     return value;
 }
 
+int Machine::memoryReadTwoByteAddress(int address)
+{
+    if (littleEndian){
+        return memoryRead(address) + (memoryRead(address + 1) << 8);
+    }
+    else{
+        return (memoryRead(address) << 8) + memoryRead(address + 1);
+    }
+}
+
+int Machine::getMemoryTwoByteAddress(int address)
+{
+    return getMemoryValue(address) + (getMemoryValue(address + 1) << 8);
+}
+
+
 int Machine::GetCurrentOperandAddress()
 {
 
     int immediateAddress = decodedImmediateAddress; 
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
 
     switch (addressingModeCode)
     {
@@ -1076,15 +1155,17 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, 
     if(start < 0 || end > memory.size()){
         return FileErrorCode::invalidAddress;
     }
-    
     char byte;
     QFile memFile(filename); // Implicitly closed
+
+    // Machines that fetch bytes should skip every second byte
+    int byte_step_size = fetchByteSize > 1 ? 1 : 2;
 
     // Open file
     memFile.open(QFile::ReadOnly);
 
     // The file must contain the identifier's length, the machine's identifier and twice the amount of memory
-    if (memFile.size() != 1 + identifier.length() + memory.size() * 2)
+    if (memFile.size() != 1 + identifier.length() + memory.size() * byte_step_size)
         return FileErrorCode::incorrectSize;
 
     // Read identifier length
@@ -1102,14 +1183,17 @@ FileErrorCode::FileErrorCode Machine::importMemory(QString filename, int start, 
     }
 
     // Read memory
-    memFile.seek(1 + identifier.length() + (2 * start)); //Set loaded file read starting point
+    memFile.seek(1 + identifier.length() + (byte_step_size * start)); //Set loaded file read starting point
     int read_size = qMin<int>(end - start, getMemorySize() - dest); //Put the maximum amount of bytes read possible
 
     for (int address = dest; address < (dest + read_size); address++)
     {
-        memFile.getChar(&byte);
+        memFile.getChar(&byte); 
         setMemoryValue(address, byte);
-        memFile.getChar(&byte); // Skip byte
+        
+        if(byte_step_size > 1){ //Skip byte
+            memFile.getChar(&byte);
+        }
     }
 
     // Return error status
@@ -1158,9 +1242,14 @@ FileErrorCode::FileErrorCode Machine::exportMemory(QString filename)
 
 void Machine::updateInstructionStrings()
 {
+    // Bruh... (Find better solution?)
+    int og_address = getPCValue();
+    int og_acessCount = accessCount;
+    
     int address = 0, pendingArgumentBytes = 0;
     bool pcReached = false;
 
+    // TO-DO: Reduce this loop (so it doesn't iterate over large empty areas)
     while (address < getMemorySize())
     {
         // Realign interpretation to PC when PC is reached
@@ -1173,7 +1262,11 @@ void Machine::updateInstructionStrings()
 
         if (pendingArgumentBytes == 0) // Used to skip argument lines
         {
-            setInstructionString(address, generateInstructionString(address, pendingArgumentBytes));
+            // Fetch and decode instruction
+            setPCValue(address);
+            fetchInstruction();
+            decodeInstruction();
+            setInstructionString(address, getCurrentInstructionString(pendingArgumentBytes));
         }
         else // Skip instruction's arguments (leave empty strings)
         {
@@ -1183,21 +1276,22 @@ void Machine::updateInstructionStrings()
 
         address += 1;
     }
+    // Returns to previous state
+    setPCValue(og_address);
+    accessCount = og_acessCount;
 }
 
-QString Machine::generateInstructionString(int address, int &argumentsSize)
+// 
+QString Machine::getCurrentInstructionString(int &argumentBytes)
 {
     QString memoryString;
-    argumentsSize = 0;
+    int address = getPCValue();
+    argumentBytes = 0;
 
     // Fetch and decode instruction
-    int fetchedValue = getMemoryValue(address);
-    Instruction *instruction = getInstructionFromValue(getMemoryValue(address));
-    AddressingMode::AddressingModeCode addressingModeCode = extractAddressingModeCode(fetchedValue);
-    QString registerName = extractRegisterName(fetchedValue);
-
-    if (instruction == nullptr || instruction->getInstructionCode() == Instruction::NOP || instruction->getInstructionCode() == Instruction::VOLTA_NOP)
-        return "";
+    Instruction *instruction = currentInstruction;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
+    QString registerName = decodedRegisterName1;
 
     // Instruction name
     memoryString = instruction->getMnemonic().toUpper();
@@ -1210,7 +1304,7 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     // Size can be 0 (variable number of bytes)
     if (instruction->getNumBytes() != 1)
     {
-        QString argumentString = generateArgumentsString(address, instruction, addressingModeCode, argumentsSize);
+        QString argumentString = generateArgumentsString(address, instruction, addressingModeCode, argumentBytes);
         if (argumentString.length() > 0) {
             memoryString += " " + argumentString;
         }
@@ -1219,6 +1313,7 @@ QString Machine::generateInstructionString(int address, int &argumentsSize)
     return memoryString;
 }
 
+// TO-DO: Move to getCurrentInstructionString?
 QString Machine::generateArgumentsString(int address, Instruction *instruction, AddressingMode::AddressingModeCode addressingModeCode, int &argumentsSize)
 {
     QString argument;

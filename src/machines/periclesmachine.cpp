@@ -71,16 +71,23 @@ PericlesMachine::PericlesMachine()
 }
 
 // Returns number of bytes reserved
-int PericlesMachine::calculateBytesToReserve(QString addressArgument)
+int PericlesMachine::calculateBytesToReserve(const Instruction* instruction, QStringList const& arguments)
 {
-    AddressingMode::AddressingModeCode addressingModeCode;
-    extractArgumentAddressingModeCode(addressArgument, addressingModeCode);
-    return (addressingModeCode == AddressingMode::IMMEDIATE) ? 2 : 3; // Immediate requires only 2 bytes
+    int numBytes = instruction->getNumBytes();
+    if(numBytes == 0){    
+        QString addressArgument = arguments.last();
+        AddressingMode::AddressingModeCode addressingModeCode;
+        extractArgumentAddressingModeCode(addressArgument, addressingModeCode);
+        return (addressingModeCode == AddressingMode::IMMEDIATE) ? 2 : 3; // Immediate requires only 2 bytes
+    }
+    else{
+        return numBytes;
+    }
 }
 
 void PericlesMachine::decodeInstruction(){
     
-    decodedAdressingModeCode1 = extractAddressingModeCode(fetchedValue);
+    decodedAddressingModeCode1 = extractAddressingModeCode(fetchedValue);
     decodedRegisterName1 = extractRegisterName(fetchedValue);
 
     if (currentInstruction && currentInstruction->getNumBytes() == 0) // If instruction has variable number of bytes
@@ -89,7 +96,7 @@ void PericlesMachine::decodeInstruction(){
 
         // Skip argument bytes
         incrementPCValue();
-        if (decodedAdressingModeCode1 != AddressingMode::IMMEDIATE) // Immediate argument has only 1 byte
+        if (decodedAddressingModeCode1 != AddressingMode::IMMEDIATE) // Immediate argument has only 1 byte
             incrementPCValue();
     }
 }
@@ -97,7 +104,7 @@ void PericlesMachine::decodeInstruction(){
 int PericlesMachine::GetCurrentOperandAddress()
 {
     int immediateAddress = decodedImmediateAddress;
-    AddressingMode::AddressingModeCode addressingModeCode = decodedAdressingModeCode1;
+    AddressingMode::AddressingModeCode addressingModeCode = decodedAddressingModeCode1;
 
     
     switch (addressingModeCode)
@@ -179,14 +186,4 @@ QString PericlesMachine::generateArgumentsString(int address, Instruction *instr
         argument = addressingModePattern.replace("(.*)", "").toUpper();
 
     return argument;
-}
-
-int PericlesMachine::memoryReadTwoByteAddress(int address)
-{
-    return memoryRead(address) + (memoryRead(address + 1) << 8);
-}
-
-int PericlesMachine::getMemoryTwoByteAddress(int address)
-{
-    return getMemoryValue(address) + (getMemoryValue(address + 1) << 8);
 }

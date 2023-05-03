@@ -133,6 +133,8 @@ void HidraGui::selectMachine(QString machineName)
             machine = new RegMachine();
         else if (machineName == "Volta")
             machine = new VoltaMachine();
+        else if (machineName == "Cesar")
+            machine = new CesarMachine();
         else
             return; // Error
 
@@ -1197,7 +1199,7 @@ void HidraGui::closeEvent(QCloseEvent *event)
         event->ignore();
 }
 
-
+ 
 
 //////////////////////////////////////////////////
 // Machine menu
@@ -1463,6 +1465,7 @@ void HidraGui::on_actionFastExecuteMode_toggled(bool checked)
 
 void HidraGui::on_actionFollowPCMode_toggled(bool checked)
 {
+    
     settings.setValue("followPC", checked);
 
     followPC = checked;
@@ -1568,8 +1571,8 @@ void HidraGui::on_actionDefaultValues_triggered()
     showSignedData = false;
     settings.setValue("showCharacters", false);
     showCharacters = false;
-    settings.setValue("fastExecute", false);
-    fastExecute = false;
+    settings.setValue("fastExecute", true);
+    fastExecute = true;
     settings.setValue("followPC", true);
     followPC = true;
 

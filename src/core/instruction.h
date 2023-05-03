@@ -10,8 +10,19 @@ class Instruction
 public:
     enum InstructionCode
     {
-        NOP,
-        STR, LDR,
+        NOP,  CESAR_NOP, CESAR_HLT,
+        /*cesar TWO OPERANDS*/ 
+        CESAR_ADD,CESAR_SUB,CESAR_AND,CESAR_OR,CESAR_CMP,
+        /*cesar ONE OPERAND*/
+        CESAR_CLR,CESAR_NOT,CESAR_INC,CESAR_DEC,CESAR_NEG,CESAR_TST,
+        CESAR_ROR,CESAR_ROL,CESAR_ASR,CESAR_ASL,CESAR_ADC,CESAR_SBC,
+        /*cesar FLOW CONTROL*/
+        CESAR_JMP,CESAR_BR,CESAR_BNE,CESAR_BEQ,CESAR_BPL,CESAR_BMI,CESAR_BVC,CESAR_BVS,CESAR_BCC,CESAR_BCS,CESAR_BGE,
+        CESAR_BLT,CESAR_BGT,CESAR_BLE,CESAR_BHI,CESAR_BLS,CESAR_JSR,CESAR_RTS,
+        /*cesar SPECIAL INSTRUCTIONS*/
+        CESAR_CCC,CESAR_SCC,CESAR_SOB,
+
+        STR, LDR, MOV,
         ADD, OR, AND, NOT, SUB, INC, DEC,
         JMP, JN, JP, JV, JNV, JZ, JNZ, JC, JNC, JB, JNB, JSR,
         NEG, SHR, SHL, ROR, ROL,
@@ -27,8 +38,25 @@ public:
         VOLTA_RTS, VOLTA_PSH, VOLTA_POP, VOLTA_JMP, VOLTA_JSR, VOLTA_HLT
     };
 
+    enum InstructionGroup
+    {
+        NO_GROUP,
+        //Cesar
+        GROUP_NOP, 
+        GROUP_CONDITIONAL_CODES, 
+        GROUP_CONDITIONAL_BRANCHES,
+        GROUP_JUMP,
+        GROUP_LOOP_CONTROL,
+        GROUP_JUMP_SUBROUTINE,
+        GROUP_RETURN_SUBROUTINE,
+        GROUP_ONE_OPERAND,
+        GROUP_TWO_OPERAND,
+        GROUP_HLT
+
+    };
+ 
     Instruction();
-    Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat);
+    Instruction(int numBytes, QString bitPattern, InstructionCode instructionCode, QString assemblyFormat, InstructionGroup instructionGroup = InstructionGroup::NO_GROUP);
     bool matchByte(int byte);
 
     QString getMnemonic() const;
@@ -40,6 +68,7 @@ public:
 
     InstructionCode getInstructionCode() const;
     QString getBitPattern() const;
+    InstructionGroup getInstructionGroup() const;
 
 private:
     int numBytes;
@@ -49,6 +78,7 @@ private:
     QString mnemonic;
     QString assemblyFormat;
     QStringList arguments;
+    InstructionGroup instructionGroup;
 
     InstructionCode instructionCode;
 };
