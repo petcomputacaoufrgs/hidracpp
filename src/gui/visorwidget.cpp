@@ -5,6 +5,9 @@
 #include <QChar>
 #include <iostream>
 
+#define MIN_CHAR_VALUE 32
+#define MAX_CHAR_VALUE 126
+
 
 VisorWidget::VisorWidget(QWidget *parent) :
     QWidget(parent),
@@ -39,40 +42,25 @@ void  VisorWidget::mouseMoveEvent(QMouseEvent *evt)
 
 void VisorWidget::setValue(int position, int value)
 {   
-    char toPrint = char(value);
+    QChar qchar;
+
+    if (value >= MIN_CHAR_VALUE and value <= MAX_CHAR_VALUE)
+    {        
+        qchar = QChar(value);
+    }
+    else
+    {        
+        qchar = QChar(' ');
+    }
     
-    QChar qchar = QChar(toPrint);
-
-// Update the text of the QLabel widgets as needed
     labels[position]->setText(qchar);
-        
-
-    QChar seila = QChar('L');
-    labels[1]->setText(seila);
-    seila = QChar('o');
-    labels[2]->setText(seila);
-    seila = QChar('b');
-    labels[3]->setText(seila);
-    seila = QChar('o');
-    labels[4]->setText(seila);
-    seila = QChar(' ');
-    labels[5]->setText(seila);
-    seila = QChar('P');
-    labels[6]->setText(seila);
-    seila = QChar('i');
-    labels[7]->setText(seila);
-    seila = QChar('d');
-    labels[8]->setText(seila);
-    seila = QChar('a');
-    labels[9]->setText(seila);
-    seila = QChar('o');
-    labels[10]->setText(seila);
 }
 
 
 void VisorWidget::initializeVisorArray()
 {
     // Get custom font
+    // TODO: change font path
     int font_id = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
     QFont font_char = QFontDatabase::applicationFontFamilies(font_id).at(0);
     QFont font_position = QFontDatabase::applicationFontFamilies(font_id).at(0);
