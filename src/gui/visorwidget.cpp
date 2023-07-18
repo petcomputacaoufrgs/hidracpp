@@ -8,6 +8,10 @@
 #define MIN_CHAR_VALUE 32
 #define MAX_CHAR_VALUE 126
 
+#define FONT_SIZE_CHAR 40
+#define FONT_SIZE_POSITION 12
+#define VISOR_SIZE 36
+
 
 VisorWidget::VisorWidget(QWidget *parent) :
     QWidget(parent),
@@ -52,7 +56,7 @@ void VisorWidget::setValue(int position, int value)
     {        
         qchar = QChar(' ');
     }
-    
+
     labels[position]->setText(qchar);
 }
 
@@ -64,10 +68,10 @@ void VisorWidget::initializeVisorArray()
     int font_id = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
     QFont font_char = QFontDatabase::applicationFontFamilies(font_id).at(0);
     QFont font_position = QFontDatabase::applicationFontFamilies(font_id).at(0);
-    font_char.setPointSize(40);
-    font_position.setPointSize(12);
+    font_char.setPointSize(FONT_SIZE_CHAR);
+    font_position.setPointSize(FONT_SIZE_POSITION);
 
-    char_width = width()/36;
+    char_width = width()/ VISOR_SIZE;
 
     int x = 10; // Starting X position
     int y = 10; // Starting Y position
@@ -75,7 +79,7 @@ void VisorWidget::initializeVisorArray()
     // Create vectors of QLabels
     // Each visor position has its own Qlabel
     // Position in visor is accessed by its respective position in QLabels vector (example: nth position in visor = label[nth])
-    for (int i = 0; i < 36; i++) 
+    for (int i = 0; i < VISOR_SIZE; i++) 
     {
         QLabel *label = new QLabel(" ", this); // Set initial text to a space character
         label->setFont(font_char);
@@ -91,8 +95,8 @@ void VisorWidget::initializeVisorArray()
      
     for (int i = 0; i < labels.size(); i++)
     {
-        labels[i]->setGeometry((i*width())/36, 0, char_width + 1, 70);
-        labels_number[i]->setGeometry(i*width()/36 + 7, 60, char_width + 1, 30); 
+        labels[i]->setGeometry((i*width())/VISOR_SIZE, 0, char_width + 1, 70);
+        labels_number[i]->setGeometry(i*width()/VISOR_SIZE + 7, 60, char_width + 1, 30); 
 
         QString qchar = QString::number(i);
         labels_number[i]->setText(qchar);
