@@ -15,6 +15,9 @@
 #include "ui_hidragui.h"
 #include <QSizeGrip>
 #include <QInputDialog>
+#include <QApplication>
+#include <QStyle>
+#include <QDesktopWidget>
 
 #define DEBUG_INT(value) qDebug(QString::number(value).toStdString().c_str());
 #define DEBUG_STRING(value) qDebug(value.toStdString().c_str());
@@ -26,6 +29,16 @@ HidraGui::HidraGui(QWidget *parent) :
 {
     ui->setupUi(this);
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    
+    // 0 if found font, -1 if not found
+   /*  int font_status = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
+    QString family = QFontDatabase::applicationFontFamilies(font_status).at(0);
+    QFont seila ("LEDCalculator", 16); */
+
+    /* int font_id = QFontDatabase::addApplicationFont("C:/Users/joaov/Documents/GitHub/hidracpp/src/gui/fonts/LEDCalculator.ttf");
+    QString family = QFontDatabase::applicationFontFamilies(font_id).at(0);
+    QFont monospace(family); */
+
 
     // Change global font
     QFontDatabase fontDatabase;
@@ -36,6 +49,7 @@ HidraGui::HidraGui(QWidget *parent) :
         font.setPointSize(9);
         this->setFont(font);
     }
+
 
     codeEditor  = new HidraCodeEditor();
     highlighter = new HidraHighlighter(codeEditor->document());
@@ -94,6 +108,11 @@ HidraGui::HidraGui(QWidget *parent) :
     backupTimer.setInterval(3*60000); // Save backup every N minutes
     connect(&backupTimer, SIGNAL(timeout()), this, SLOT(saveBackup()));
     backupTimer.start(); */ // TODO: Only open recovery once
+    
+    screenGeometry = QApplication::desktop()->screenGeometry();
+    QPoint centralizedWindowPos((screenGeometry.width()-width()) / 2,(screenGeometry.height()-height()) / 2 );
+    move(centralizedWindowPos);
+
 }
 
 HidraGui::~HidraGui()
@@ -114,6 +133,7 @@ void HidraGui::selectMachine(QString machineName)
     if (currentMachineName != machineName)
     {
         Machine *previousMachine = machine;
+        visorWidget.hide();
 
         if (machineName == "Neander")
             machine = new NeanderMachine();
@@ -134,7 +154,20 @@ void HidraGui::selectMachine(QString machineName)
         else if (machineName == "Volta")
             machine = new VoltaMachine();
         else if (machineName == "Cesar")
+        {
             machine = new CesarMachine();
+            // this->adjustSize();
+            int appQwidth = this->width(); 
+            this->adjustSize();
+            int appQheight = this->height();    
+            resize(appQwidth,appQheight);
+            QPoint centralizedWindowPos((screenGeometry.width()-width()) / 2,(screenGeometry.height()-(height() + visorWidget.height())) / 2);
+            move(centralizedWindowPos);
+            visorWidget.show();
+            visorWidget.move(mapToGlobal(QPoint(0,height())));
+            
+
+        }
         else
             return; // Error
 
@@ -367,6 +400,7 @@ void HidraGui::initializeRegisterWidgets()
         else
             ui->layoutRegisters->addWidget(newRegister, i/2, i%2); // Two per line, alternates left and right columns with i%2
     }
+    
 }
 
 void HidraGui::initializeHighlighter()
@@ -497,6 +531,7 @@ void HidraGui::updateMachineInterfaceComponents(bool force, bool updateInstructi
     updateCodeEditor();
     updateButtons();
     updateInformation();
+    updateVisorWidget();
 }
 
 void HidraGui::updateMemoryTable(bool force, bool updateInstructionStrings)
@@ -739,6 +774,23 @@ void HidraGui::updateInformation()
     }
 
     ui->textInformation->setText(informationString);
+}
+
+void HidraGui::updateVisorWidget()
+{
+    int visor_index = 0;
+    int visor_limit = 36;
+    int visor_range = 65500;
+    
+    for (visor_index = 0; visor_index < visor_limit; visor_index++)
+    {
+        int address = visor_range + visor_index;
+        int value = machine->getMemoryValue(address);
+
+        visorWidget.setValue(visor_index, value);
+        
+    }
+
 }
 
 void HidraGui::setInformationTrackedAddress(QString addressString)
@@ -1558,3 +1610,4 @@ void HidraGui::on_actionFindReplace_triggered()
 {
     findReplaceDialog->show();
 }
+

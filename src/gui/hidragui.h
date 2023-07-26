@@ -12,12 +12,14 @@
 #include <QVector>
 #include <QColor>
 #include <QSettings>
+#include <QSharedPointer>
 
 #include "hidracodeeditor.h"
 #include "hidrahighlighter.h"
 #include "baseconversordialog.h"
 #include "pointconversordialog.h"
 #include "registerwidget.h"
+#include "visorwidget.h"
 #include "findreplacedialog.h"
 #include "flagwidget.h"
 #include "about.h"
@@ -170,6 +172,7 @@ private:
     void updateButtons();
     void updateWindowTitle();
     void updateInformation(); // Update counters or tracked value
+    void updateVisorWidget();
 
     void setInformationTrackedAddress(QString addressString); // Address tracked by information box
 
@@ -218,10 +221,16 @@ private:
     bool advanceToNextCell = false;
     const QBrush colorGrayedOut;
 
+    // Cesar Visor
+    VisorWidget visorWidget;
+
     // View options
     bool showHexValues, showSignedData, showCharacters; // Value display modes
-    bool fastExecute; // Don't update memory table on every instruction
+    bool fastExecute; // Don't update memory table on every instruction   IMPORTANT ISSUE
     bool followPC;
+
+    // Screen height and width
+    QRect screenGeometry;
 };
 
 #endif // HIDRAGUI_H

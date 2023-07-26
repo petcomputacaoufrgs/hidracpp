@@ -21,8 +21,8 @@ class CesarMachine : public Machine
     void decodeInstruction();
     void executeInstruction();
     
-    void PutOnStack(int registerValue);
-    void GetOffStack(int registerId);
+    void putOnStack(int registerValue);
+    void getOffStack(int registerId);
     
     // Calculates the address and returns the value it holds
     int GetCurrentOperandValue(int operand = 1);

@@ -700,7 +700,7 @@ void CesarMachine::executeInstruction(){
         int subroutine_address = GetCurrentOperandAddress(2);
 
         int returnPC = getPCValue();
-        PutOnStack(decodedRegisterCode1);
+        putOnStack(decodedRegisterCode1);
         setRegisterValue(decodedRegisterCode1, returnPC);
         
         setPCValue(subroutine_address);
@@ -709,7 +709,7 @@ void CesarMachine::executeInstruction(){
 
     case Instruction:: CESAR_RTS:
         setRegisterValue("R7", getRegisterValue(decodedRegisterCode1));
-        GetOffStack(decodedRegisterCode1);
+        getOffStack(decodedRegisterCode1);
         break;
 
     case Instruction:: CESAR_HLT:
@@ -725,7 +725,7 @@ void CesarMachine::executeInstruction(){
     instructionCount++;
 }
 
-void CesarMachine::PutOnStack (int registerId)
+void CesarMachine::putOnStack (int registerId)
 {
     int stackValue = getRegisterValue("R6");
     int registerValueOffStack = getRegisterValue(registerId);
@@ -735,7 +735,7 @@ void CesarMachine::PutOnStack (int registerId)
     setRegisterValue("R6",stackValue - 2);
 }
 
-void CesarMachine::GetOffStack(int registerId)
+void CesarMachine::getOffStack(int registerId)
 {
     int stackValue = getRegisterValue("R6");
     // Stack writes backwards, so it must also read backwards

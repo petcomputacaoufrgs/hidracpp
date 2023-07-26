@@ -12,6 +12,11 @@ aux_source_directory(./core core)
 aux_source_directory(./gui gui)
 aux_source_directory(./machines machines)
 
+# Includes relevant files
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gui/fonts
+     DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/gui)
+
 add_library(hidracore STATIC ${core})
 add_library(hidramachines STATIC ${machines})
 add_library(hidragui STATIC ${gui})
