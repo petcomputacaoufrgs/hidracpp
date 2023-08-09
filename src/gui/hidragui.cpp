@@ -82,6 +82,7 @@ HidraGui::HidraGui(QWidget *parent) :
 
     baseConversor = new BaseConversorDialog();
     pointConversor = new PointConversorDialog();
+    
 
     // Open recovery file (if existing)
     /*if (QFile::exists("__Recovery__.txt"))
@@ -103,6 +104,13 @@ HidraGui::~HidraGui()
     delete findReplaceDialog;
 }
 
+void HidraGui::keyPressEvent (QKeyEvent *event)
+{
+    if (machine->isRunning())
+    {
+        machine->handleKeyPress(event->key());
+    }
+}
 
 
 //////////////////////////////////////////////////
@@ -133,8 +141,11 @@ void HidraGui::selectMachine(QString machineName)
             machine = new RegMachine();
         else if (machineName == "Volta")
             machine = new VoltaMachine();
-        else if (machineName == "Cesar")
+        else if (machineName == "Cesar"){
             machine = new CesarMachine();
+            
+        }
+            // Liga os eventos de timer e teclado
         else
             return; // Error
 
@@ -219,10 +230,10 @@ void HidraGui::initializeMemoryTable()
     memoryModel.setRowCount(memorySize);
     memoryModel.setColumnCount(NumColumns);
 
-    previousRowColor = QVector<QColor>(memorySize);
+    previousRowColor = QVector<QColor>(memorySize); // IMPORTANT : *THIS THING MESSES UP THE MEMORY TABLE WHEN CHANGING MACHINES*
 
     // Initialize all cells
-    for (int row = 0; row < memorySize; row++)
+    for (int row = 0; row < memorySize; row++)      //IMPORTANT : *THIS THING MESSES UP THE MEMORY TABLE WHEN CHANGING MACHINES*
     {
         for (int column = 0; column < memoryModel.columnCount(); column++)
         {
@@ -267,10 +278,10 @@ void HidraGui::initializeMemoryTable()
     ui->tableViewMemoryData->setColumnHidden(ColumnCharacter, !showCharacters);
 
     // Resize
-    ui->tableViewMemoryInstructions->resizeRowsToContents();
+    ui->tableViewMemoryInstructions->resizeRowsToContents(); //IMPORTANT : *THIS THING MESSES UP THE MEMORY TABLE WHEN CHANGING MACHINES*
     ui->tableViewMemoryInstructions->resizeColumnsToContents();
-    ui->tableViewMemoryData->resizeRowsToContents();
-    ui->tableViewMemoryData->resizeColumnsToContents();
+    ui->tableViewMemoryData->resizeRowsToContents();    
+    ui->tableViewMemoryData->resizeColumnsToContents();     //IMPORTANT : *THIS THING MESSES UP THE MEMORY TABLE WHEN CHANGING MACHINES*
 
     // Scroll to appropriate position
     ui->tableViewMemoryInstructions->scrollTo(memoryModel.index(0, ColumnAddress), QAbstractItemView::PositionAtTop);
@@ -967,6 +978,7 @@ bool HidraGui::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress)
     {
+        
         // Move to next cell when enter is pressed
         QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
         if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)

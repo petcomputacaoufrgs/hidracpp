@@ -47,7 +47,7 @@ void Machine::step()
 {
 
     fetchInstruction(); // Fetches values from memory
-    decodeInstruction (); // Fetches addressing mode, register, immediate address and any other relevant data
+    decodeInstruction(); // Fetches addressing mode, register, immediate address and any other relevant data
     executeInstruction(); // Uses the values above to execute an instruction
 
     if (getPCValue() == getBreakpoint())
@@ -71,6 +71,11 @@ void Machine::decodeInstruction()
         decodedImmediateAddress = getPCValue(); // Address that contains first argument byte
         incrementPCValue(currentInstruction->getNumBytes() - 1); // Skip argument bytes
     }
+}
+
+void Machine:: handleKeyPress (int key)
+{
+    return;
 }
 
 void Machine::executeInstruction()
@@ -1201,7 +1206,7 @@ void Machine::updateInstructionStrings()
     int address = 0, pendingArgumentBytes = 0;
     bool pcReached = false;
 
-    while (address < getMemorySize())
+    while (address < getMemorySize())   ////IMPORTANT : *THIS THING MESSES UP THE MEMORY TABLE WHEN CHANGING MACHINES*
     {
         // Realign interpretation to PC when PC is reached
         if (!pcReached && address >= getPCValue())
@@ -1225,7 +1230,7 @@ void Machine::updateInstructionStrings()
     }
 }
 
-QString Machine::generateInstructionString(int address, int &argumentsSize)
+QString Machine::generateInstructionString(int address, int &argumentsSize)     //IMPORTANT : *THIS THING MESSES UP THE MEMORY TABLE WHEN CHANGING MACHINES*
 {
     QString memoryString;
     argumentsSize = 0;

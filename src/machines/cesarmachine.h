@@ -14,12 +14,29 @@
 
 class CesarMachine : public Machine
 {
+
+    private:
+    // Internal class repre
+
+    bool timerInterrupted;
+    bool keyboardInterrupted;
+    char keyboardInterruptionChar;
+
+    // Wheter there was an 
+    bool hasBeenInterrupted();
+    // Updates
+
     public:
     CesarMachine();
+    
+
+    void step();
 
     void fetchInstruction();
     void decodeInstruction();
     void executeInstruction();
+
+    void handleKeyPress(int key);
     
     int GetCurrentOperandValue(int operand = 1);
     int toSigned(int unsignedByte);

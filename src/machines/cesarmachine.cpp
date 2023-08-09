@@ -1,5 +1,6 @@
 #include "cesarmachine.h"
-
+#define INTE_THREESHOLD  0b100000010
+#define INTS_THREESHOLD 0b100000000
 
 
 CesarMachine::CesarMachine()
@@ -8,7 +9,7 @@ CesarMachine::CesarMachine()
     fetchByteSize = 2;
 
     littleEndian = false;
-
+    
     //////////////////////////////////////////////////
     // Initialize registers
     //////////////////////////////////////////////////
@@ -126,6 +127,21 @@ bool CesarMachine::IsOneByteInstruction()
 {
 
 }*/
+
+
+bool CesarMachine::hasBeenInterrupted(){
+    return keyboardInterrupted or timerInterrupted;
+}
+
+void CesarMachine::step(){
+    Machine::step();
+
+    // Checks if there were any unhandled interruptions
+    // if(hasBeenInterrupted()){
+    //     handleInterruption();
+    // }
+}
+
 
 AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddressingMode(int extract_am)
 {
@@ -813,4 +829,25 @@ int CesarMachine::GetCurrentOperandValue(int operand)
     }
 }
 
+void CesarMachine::handleKeyPress(int key)
+{
+    if ((getMemoryValue(0xFFD9) & INTE_THREESHOLD == INTE_THREESHOLD) && (getMemoryValue(0x0FFD8) & INTS_THREESHOLD == 0))
+        {
+            setMemoryValue(0xFFD8, getMemoryValue(0xFFD8) | 0b10000010);
+        }
+}
+
+/*
+...../ )
+.....' /
+---' (_____
+......... ((__)
+..... _ ((___)
+....... -'((__)
+--.___((_)
+
+ok
+boa sorte
+BOA NOITE PESSOAL
+*/
 
