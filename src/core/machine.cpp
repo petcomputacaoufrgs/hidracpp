@@ -47,7 +47,7 @@ void Machine::step()
 {
 
     fetchInstruction(); // Fetches values from memory
-    decodeInstruction (); // Fetches addressing mode, register, immediate address and any other relevant data
+    decodeInstruction(); // Fetches addressing mode, register, immediate address and any other relevant data
     executeInstruction(); // Uses the values above to execute an instruction
 
     if (getPCValue() == getBreakpoint())
@@ -71,6 +71,15 @@ void Machine::decodeInstruction()
         decodedImmediateAddress = getPCValue(); // Address that contains first argument byte
         incrementPCValue(currentInstruction->getNumBytes() - 1); // Skip argument bytes
     }
+}
+
+void Machine:: handleKeyPress (int key)
+{
+    return;
+}
+
+void Machine::handleTimerEvent(){
+    return;
 }
 
 void Machine::executeInstruction()

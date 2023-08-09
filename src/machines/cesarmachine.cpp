@@ -1,6 +1,16 @@
 #include "cesarmachine.h"
+#define INTE_THRESHOLD  0b10000010
+#define INTS_THRESHOLD 0b10000000
+#define IVET_LOCALE 65470
+#define INTE 0xFFD9
+#define INTS 0xFFD8
 
+#define GEN_INT 0b10000000
+#define TEC_INT 0b00000010
+#define TIMER_INT 0b00000001
 
+#define TEC_ENABLED 0b10000010
+#define TIMER_ENABLED 0b10000001
 
 CesarMachine::CesarMachine()
 {
@@ -8,7 +18,7 @@ CesarMachine::CesarMachine()
     fetchByteSize = 2;
 
     littleEndian = false;
-
+    
     //////////////////////////////////////////////////
     // Initialize registers
     //////////////////////////////////////////////////
@@ -127,6 +137,21 @@ Cesar's way to fetch, decode and execute instructions
 -- Always fetches 2 bytes, even if the instruction only uses one
 
 */        
+
+
+
+bool CesarMachine::hasBeenInterrupted(){
+    return keyboardInterrupted or timerInterrupted;
+}
+
+void CesarMachine::step(){
+    Machine::step();
+
+    // Checks if there were any unhandled interruptions
+    // if(hasBeenInterrupted()){
+    //     handleInterruption();
+    // }
+}
 
 
 AddressingMode::AddressingModeCode CesarMachine::convertInstructionStringAddressingMode(int extract_am)
@@ -937,6 +962,39 @@ int CesarMachine::GetCurrentOperandAddress(int operand)
     }
 }
 
+void CesarMachine::handleKeyPress(int key)
+{
+    if ((getMemoryValue(INTE) & (GEN_INT | TEC_INT) == TEC_ENABLED) && !(getMemoryValue(INTS) & (GEN_INT)))
+        {
+            setMemoryValue(INTS, getMemoryValue(INTS) | TEC_INT | GEN_INT);
+            setPCValue(getMemoryTwoByteAddress(IVET_LOCALE));
+        }
+}
+
+void CesarMachine::handleTimerEvent()
+{
+    if ((getMemoryValue(INTE) & (GEN_INT | TIMER_INT) == TIMER_ENABLED) && !(getMemoryValue(INTS) & TIMER_INT))
+        {
+            setMemoryValue(INTS, getMemoryValue(INTS) | TIMER_INT | GEN_INT);
+            setPCValue(getMemoryTwoByteAddress(IVET_LOCALE));
+        }
+}
+
+
+
+/*
+...../ )
+.....' /
+---' (_____
+......... ((__)
+..... _ ((___)
+....... -'((__)
+--.___((_)
+
+ok
+boa sorte
+BOA NOITE PESSOAL
+*/
 
 /*
 

@@ -74,6 +74,8 @@ public:
 
     void step(bool refresh, bool updateInstructionStrings);
     bool eventFilter(QObject *obj, QEvent *event);
+    void keyPressEvent(QKeyEvent *event);
+    void timerHitEvent (QTimerEvent *event);
 
     void enableDataChangedSignal();
     void disableDataChangedSignal();

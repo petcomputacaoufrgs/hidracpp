@@ -70,6 +70,9 @@ public:
     virtual void decodeInstruction();
     ///Execute the instruction
     virtual void executeInstruction();
+    //Event handlers   
+    virtual void handleKeyPress(int key);
+    virtual void handleTimerEvent();
 
     ///Get the adressing mode code from a memory value
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
