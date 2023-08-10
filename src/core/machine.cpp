@@ -48,6 +48,7 @@ void Machine::step()
 
     fetchInstruction(); // Fetches values from memory
     decodeInstruction(); // Fetches addressing mode, register, immediate address and any other relevant data
+    decodeInstruction(); // Fetches addressing mode, register, immediate address and any other relevant data
     executeInstruction(); // Uses the values above to execute an instruction
 
     if (getPCValue() == getBreakpoint())

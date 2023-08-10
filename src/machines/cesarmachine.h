@@ -26,6 +26,18 @@ class CesarMachine : public Machine
     bool hasBeenInterrupted();
     // Updates
 
+
+    private:
+    // Internal class repre
+
+    bool timerInterrupted;
+    bool keyboardInterrupted;
+    char keyboardInterruptionChar;
+
+    // Wheter there was an 
+    bool hasBeenInterrupted();
+    // Updates
+
     public:
     CesarMachine();
     
