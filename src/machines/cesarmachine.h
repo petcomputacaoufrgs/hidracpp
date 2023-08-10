@@ -26,6 +26,9 @@ class CesarMachine : public Machine
     bool hasBeenInterrupted();
     // Updates
 
+
+  
+
     public:
     CesarMachine();
     

@@ -84,6 +84,8 @@ HidraGui::HidraGui(QWidget *parent) :
     pointConversor = new PointConversorDialog();
     
 
+    
+
     // Open recovery file (if existing)
     /*if (QFile::exists("__Recovery__.txt"))
     {
