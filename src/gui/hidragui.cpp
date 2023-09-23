@@ -18,6 +18,7 @@
 
 #define DEBUG_INT(value) qDebug(QString::number(value).toStdString().c_str());
 #define DEBUG_STRING(value) qDebug(value.toStdString().c_str());
+#define DEFAULT_TIMER_VALUE 100
 
 HidraGui::HidraGui(QWidget *parent) :
     QMainWindow(parent),
@@ -97,6 +98,12 @@ HidraGui::HidraGui(QWidget *parent) :
     backupTimer.setInterval(3*60000); // Save backup every N minutes
     connect(&backupTimer, SIGNAL(timeout()), this, SLOT(saveBackup()));
     backupTimer.start(); */ // TODO: Only open recovery once
+
+    timer = new QTimer(this);
+    timer->setInterval(100); // Set the interval to 1000 ms (1 second)
+
+    // Connect the timer's timeout() signal to a slot
+    connect(timer, &QTimer::timeout, this, &HidraGui::timerHitEvent);
 }
 
 HidraGui::~HidraGui()
@@ -114,11 +121,24 @@ void HidraGui::keyPressEvent (QKeyEvent *event)
     }
 }
 
-void HidraGui::timerHitEvent (QTimerEvent *event){
-    if (machine->isRunning()){
+void HidraGui::timerHitEvent (){
+    if (machine->isRunning())
+    {
         machine->handleTimerEvent();
     }
+    updateTimerInterval();
+    timer->start();
 }
+
+void HidraGui::updateTimerInterval(){
+    int interval = machine->getTimerValue();
+    if (interval == 0){
+        interval = DEFAULT_TIMER_VALUE;
+    }
+    timer->setInterval(interval);
+}
+
+
 
 
 //////////////////////////////////////////////////
@@ -151,7 +171,8 @@ void HidraGui::selectMachine(QString machineName)
             machine = new VoltaMachine();
         else if (machineName == "Cesar"){
             machine = new CesarMachine();
-            
+            updateTimerInterval();
+            timer->start();
         }
             // Liga os eventos de timer e teclado
         else

@@ -75,12 +75,13 @@ public:
     void step(bool refresh, bool updateInstructionStrings);
     bool eventFilter(QObject *obj, QEvent *event);
     void keyPressEvent(QKeyEvent *event);
-    void timerHitEvent (QTimerEvent *event);
+    void timerHitEvent();
 
     void enableDataChangedSignal();
     void disableDataChangedSignal();
     void enableStatusBarSignal();
     void disableStatusBarSignal();
+    void updateTimerInterval();
 
 public slots:
     void selectMachine(QString machineName);
@@ -224,6 +225,9 @@ private:
     bool showHexValues, showSignedData, showCharacters; // Value display modes
     bool fastExecute; // Don't update memory table on every instruction
     bool followPC;
+
+    //timer
+    QTimer *timer;
 };
 
 #endif // HIDRAGUI_H
