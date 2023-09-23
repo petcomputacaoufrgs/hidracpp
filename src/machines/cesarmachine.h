@@ -60,6 +60,7 @@ class CesarMachine : public Machine
     AddressingMode::AddressingModeCode convertInstructionStringAddressingMode(int extract_am);
     void extractInstructionRegisterParameter(QString& param, int& reg_code, int& am_code, int& am_offset);
 
+    int getTimerValue();
 };
 
 #endif

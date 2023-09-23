@@ -12,6 +12,8 @@
 #define TEC_ENABLED 0b10000010
 #define TIMER_ENABLED 0b10000001
 
+#define TECDT 65495
+
 CesarMachine::CesarMachine()
 {
     identifier = "C16";
@@ -978,6 +980,11 @@ void CesarMachine::handleTimerEvent()
             setMemoryValue(INTS, getMemoryValue(INTS) | TIMER_INT | GEN_INT);
             setPCValue(getMemoryTwoByteAddress(IVET_LOCALE));
         }
+}
+
+int CesarMachine::getTimerValue()
+{
+    return getMemoryValue(TECDT);
 }
 
 
