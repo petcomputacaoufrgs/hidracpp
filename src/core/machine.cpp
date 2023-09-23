@@ -83,6 +83,10 @@ void Machine::handleTimerEvent(){
     return;
 }
 
+int Machine::getTimerValue(){
+    return 0;
+}
+
 void Machine::executeInstruction()
 {
     int value1, value2, result;

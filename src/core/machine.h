@@ -73,6 +73,7 @@ public:
     //Event handlers   
     virtual void handleKeyPress(int key);
     virtual void handleTimerEvent();
+    virtual int getTimerValue();
 
     ///Get the adressing mode code from a memory value
     AddressingMode::AddressingModeCode extractAddressingModeCode(int fetchedValue);
